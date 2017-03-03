@@ -1,0 +1,18 @@
+{
+  "name": "jexia-sdk-js",
+  "version": "0.0.0",
+  "description": "jexia javascript sdk",
+  "main": "index.js",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jexia-com/jexia-sdk-js.git"
+  },
+  "author": "Mihai Coman",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jexia-com/jexia-sdk-js/issues"
+  },
+  "homepage": "https://github.com/jexia-com/jexia-sdk-js#readme"
+}
