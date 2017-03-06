@@ -3,6 +3,12 @@ logs
 *.log
 npm-debug.log*
 
+#Transpiled/bundled code
+dist
+
+#Typescript typedef files
+typings
+
 # Runtime data
 pids
 *.pid

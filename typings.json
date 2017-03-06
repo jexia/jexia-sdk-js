@@ -1,0 +1,7 @@
+{
+  "name": "jexia-sdk-js",
+  "dependencies": {},
+  "globalDependencies": {
+    "jasmine": "registry:dt/jasmine#2.5.0+20170207112528"
+  }
+}
