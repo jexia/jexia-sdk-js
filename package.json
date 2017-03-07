@@ -27,6 +27,7 @@
     "typings": "^2.1.0"
   },
   "dependencies": {
+    "bluebird": "^3.5.0",
     "node-fetch": "^1.6.3"
   }
 }

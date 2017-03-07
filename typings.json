@@ -1,6 +1,7 @@
 {
   "name": "jexia-sdk-js",
   "dependencies": {
+    "bluebird": "registry:dt/bluebird#3.0.0+20161229155504",
     "node-fetch": "registry:dt/node-fetch#1.6.0+20161224095027"
   },
   "globalDependencies": {
