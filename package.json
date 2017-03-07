@@ -20,9 +20,13 @@
   "homepage": "https://github.com/jexia-com/jexia-sdk-js#readme",
   "devDependencies": {
     "jasmine": "^2.5.3",
+    "node-fetch": "^1.6.3",
     "ts-node": "^2.1.0",
     "tslint": "^4.5.1",
     "typescript": "^2.2.1",
     "typings": "^2.1.0"
+  },
+  "dependencies": {
+    "node-fetch": "^1.6.3"
   }
 }
