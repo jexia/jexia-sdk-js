@@ -101,7 +101,6 @@ describe("getAuthenticationRequestPromise function", () => {
 
   describe("when receiving an error from the server", () => {
     let fetchResponseMock;
-    let tokenResponseMock;
     let authOptionsMock: IAuthOptions;
     let fetchSpy: jasmine.Spy;
 
