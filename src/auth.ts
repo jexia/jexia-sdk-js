@@ -12,7 +12,7 @@ interface IAuthCredentials {
   readonly password;
 }
 
-interface IAuthToken {
+export interface IAuthToken {
   readonly token: string;
   readonly refreshToken: string;
 }
