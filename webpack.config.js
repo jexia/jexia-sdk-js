@@ -1,38 +1,38 @@
+const path = require('path');
+
 // common SDK config
 const common = {
   // TODO: set valid entry point
   entry: './src/index',
-  output: {
-    path: __dirname + "/dist",
-    filename: "anemo-sdk.js"
-  },
   module: {
     rules: [
       {
         test: /\.tsx?$/,
         loader: 'ts-loader',
-        exclude: /node_modules/,
+        include: [
+          path.resolve(__dirname, "src")
+        ]
       }
     ]
   },
   resolve: {
-    extensions: [".tsx", ".ts", ".js"]
+    extensions: [".ts", ".js"]
   }
 };
 
 // browser SDK config
 const browser = {
   output: {
-    path: __dirname + "/dist",
-    filename: "browser-sdk.js"
+    path: path.resolve(__dirname, "dist"),
+    filename: "jexia-browser-sdk.js"
   },
 };
 
 // node SDK config
 const node = {
   output: {
-    path: __dirname + "/dist",
-    filename: "node-sdk.js"
+    path: path.resolve(__dirname, "dist"),
+    filename: "jexia-node-sdk.js"
   },
   target: 'node',
 };
