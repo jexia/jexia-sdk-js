@@ -8,6 +8,20 @@ const common = {
   module: {
     rules: [
       {
+        enforce: "pre",
+        test: /\.ts$/,
+        loader: "tslint-loader",
+        include: [
+          path.resolve(__dirname, "src")
+        ],
+        options: {
+          failOnHint: false,
+          typeCheck: false,
+          emitErrors: false,
+          fix: false
+        }
+      },
+      {
         test: /\.ts?$/,
         loader: 'ts-loader',
         include: [
