@@ -1,9 +1,11 @@
+const ugly = require('webpack-uglify-js-plugin');
 const path = require('path');
 
 // common SDK config
 const common = {
   entry: {
-    "jexia-sdk": path.resolve(__dirname, 'src','index')
+    "jexia-sdk": path.resolve(__dirname, 'src','index'),
+    "jexia-sdk.min": path.resolve(__dirname, 'src','index')
   },
   module: {
     rules: [
@@ -32,7 +34,22 @@ const common = {
   },
   resolve: {
     extensions: [".ts", ".js"]
-  }
+  },
+  plugins: [
+    new ugly({
+      cacheFolder: path.resolve(__dirname, 'dist'),
+      debug: true,
+      minimize: true,
+      sourceMap: false,
+      output: {
+        comments: false
+      },
+      compressor: {
+        warnings: false
+      },
+      include: /\.min\.js$/
+    })
+  ]
 };
 
 // browser SDK config
