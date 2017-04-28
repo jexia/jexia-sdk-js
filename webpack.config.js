@@ -2,12 +2,13 @@ const path = require('path');
 
 // common SDK config
 const common = {
-  // TODO: set valid entry point
-  entry: './src/index',
+  entry: {
+    "jexia-sdk": path.resolve(__dirname, 'src','index')
+  },
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
+        test: /\.ts?$/,
         loader: 'ts-loader',
         include: [
           path.resolve(__dirname, "src")
@@ -24,20 +25,23 @@ const common = {
 const browser = {
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "jexia-browser-sdk.js"
-  },
+    filename: "browser-[name].js",
+    libraryTarget: 'umd',
+    library: "jexia"
+  }
 };
 
 // node SDK config
 const node = {
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "jexia-node-sdk.js"
+    filename: "node-[name].js",
+    libraryTarget: 'commonjs'
   },
-  target: 'node',
+  target: 'node'
 };
 
 module.exports = [
-  Object.assign({} , common, browser),
-  Object.assign({} , common, node)
+  Object.assign({}, common, browser),
+  Object.assign({}, common, node)
 ];
