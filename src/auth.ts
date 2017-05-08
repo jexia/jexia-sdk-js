@@ -1,5 +1,5 @@
 import * as Promise from "bluebird";
-import {Response} from "node-fetch";
+import {IHTTPResponse} from "./queryRequestAdapter";
 
 export interface IAuthOptions {
   readonly appUrl: string;
@@ -8,13 +8,17 @@ export interface IAuthOptions {
 }
 
 interface IAuthCredentials {
-  readonly email;
-  readonly password;
+  readonly email: string;
+  readonly password: string;
 }
 
 export interface IAuthToken {
   readonly token: string;
   readonly refreshToken: string;
+}
+
+export interface IAuthorizationHeader {
+  readonly authorization: string;
 }
 
 export function getAuthenticationRequestPromise(fetch: Function, authOptions: IAuthOptions): Promise<IAuthToken> {
@@ -35,7 +39,7 @@ function makeAuthenticationRequest(fetch: Function, url: string, credentials: IA
     });
   }
 
-  return fetch(`${url}/auth`, {method: "POST", body: JSON.stringify(credentials)}).then( (res: Response) => {
+  return fetch(`${url}/auth`, {method: "POST", body: JSON.stringify(credentials)}).then( (res: IHTTPResponse) => {
     if (!res.ok) {
       // the fetch request went through but we received an error from the server
       return res.json().then( (body) => {
