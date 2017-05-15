@@ -7,5 +7,8 @@
   "globalDependencies": {
     "jasmine": "registry:dt/jasmine#2.5.0+20170207112528",
     "node": "registry:dt/node#7.0.0+20170204020307"
+  },
+  "globalDevDependencies": {
+    "node": "registry:dt/node#7.0.0+20170322231424"
   }
 }

@@ -1,5 +1,5 @@
-import { getAuthenticationRequestPromise } from "./auth";
+import Client from "./client";
 
 export {
-  getAuthenticationRequestPromise,
+  Client,
 }

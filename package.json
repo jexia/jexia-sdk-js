@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/jexia-com/jexia-sdk-js#readme",
   "devDependencies": {
+    "@types/node": "^7.0.18",
     "jasmine": "^2.5.3",
     "node-fetch": "^1.6.3",
     "ts-loader": "^2.0.3",
