@@ -4,9 +4,12 @@
   "description": "jexia javascript sdk",
   "main": "index.js",
   "scripts": {
+    "setup": "npm install && npm run typings -- install && npm run test",
+    "cleanup": "rimraf dist && rimraf typings",
+    "typings": "typings",
     "lint": "tslint \"src/**/*.ts\" \"spec/**/*.ts\"",
-    "transpile": "tsc",
-    "test": "tsc && jasmine"
+    "transpile": "rimraf dist && tsc",
+    "test": "npm run transpile && jasmine"
   },
   "repository": {
     "type": "git",
@@ -22,6 +25,7 @@
     "@types/node": "^7.0.18",
     "jasmine": "^2.5.3",
     "node-fetch": "^1.6.3",
+    "rimraf": "^2.6.1",
     "ts-loader": "^2.0.3",
     "ts-node": "^2.1.0",
     "tslint": "^4.5.1",
