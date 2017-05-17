@@ -4,9 +4,7 @@
   "description": "jexia javascript sdk",
   "main": "index.js",
   "scripts": {
-    "setup": "npm install && npm run typings -- install && npm run test",
-    "cleanup": "rimraf dist && rimraf typings",
-    "typings": "typings",
+    "cleanup": "rimraf dist && rimraf node_modules",
     "lint": "tslint \"src/**/*.ts\" \"spec/**/*.ts\"",
     "transpile": "rimraf dist && tsc",
     "test": "npm run transpile && jasmine"
@@ -23,15 +21,17 @@
   "homepage": "https://github.com/jexia-com/jexia-sdk-js#readme",
   "devDependencies": {
     "@types/node": "^7.0.18",
-    "jasmine": "^2.5.3",
-    "node-fetch": "^1.6.3",
+    "@types/bluebird": "3.5.3",
+    "@types/jasmine": "2.5.47",
+    "@types/node-fetch": "1.6.7",
+    "jasmine": "2.6.0",
+    "node-fetch": "1.6.3",
     "rimraf": "^2.6.1",
     "ts-loader": "^2.0.3",
     "ts-node": "^2.1.0",
     "tslint": "^4.5.1",
     "tslint-loader": "^3.5.3",
     "typescript": "^2.2.1",
-    "typings": "^2.1.0",
     "webpack": "^2.4.1",
     "webpack-uglify-js-plugin": "^1.1.9"
   },

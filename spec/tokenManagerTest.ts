@@ -3,7 +3,7 @@ import { IRequestAdapter, IRequestOptions, Methods } from "../src/requestAdapter
 import { TokenManager } from "../src/tokenManager";
 
 /* Mock request adapter */
-let mockRequestAdapter: IRequestAdapter = {
+const mockRequestAdapter: IRequestAdapter = {
   execute: (uri: string, opt: IRequestOptions): Promise<any> => {
     /* check URL validity */
     if (uri === "validUrl/auth") {
@@ -13,14 +13,14 @@ let mockRequestAdapter: IRequestAdapter = {
         if ((opt.body as any).email === "validKey" && (opt.body as any).password === "validSecret") {
           return Promise.resolve({token: "validToken", refresh_token: "validRefreshToken"});
         }
-        return Promise.reject(new Error("Auth error."))
+        return Promise.reject(new Error("Auth error."));
       /* refresh token */
       case Methods.PATCH:
         if ((opt.headers as any).Authorization === "validToken"
           && (opt.body as any).refresh_token === "validRefreshToken") {
           return Promise.resolve({token: "updatedToken", refresh_token: "updatedRefreshToken"});
         }
-        return Promise.reject(new Error("Auth error."))
+        return Promise.reject(new Error("Auth error."));
       /* do not allow to use other methods */
       default:
         /* not implemented */
@@ -30,7 +30,7 @@ let mockRequestAdapter: IRequestAdapter = {
     /* not found error */
     return Promise.reject(new Error("Not found."));
   },
-}
+};
 
 describe("Class: TokenManager", () => {
   describe("when authenticating", () => {

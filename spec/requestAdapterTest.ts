@@ -2,18 +2,18 @@ import * as Promise from "bluebird";
 import { IHTTPResponse, IRequestOptions, RequestAdapter } from "../src/requestAdapter";
 
 /* mock server successful response */
-let respData = [{id: 1}, {id: 2}, {id: 3}];
+const respData = [{id: 1}, {id: 2}, {id: 3}];
 /* mock server error response */
-let errUnauthorized = {errors: ["Unauthorized."]};
+const errUnauthorized = {errors: ["Unauthorized."]};
 
-let mockFetch = (uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
+const mockFetch = (uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
   if (uri === "validURL") {
     if (opts.headers) {
       /* success */
-      return Promise.resolve(<IHTTPResponse> {ok: true, status: 200, json: () => Promise.resolve(respData)});
+      return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve(respData)} as IHTTPResponse);
     }
     /* unauthorized (returns "not ok" status) */
-    return Promise.resolve(<IHTTPResponse> {ok: false, status: 401, json: () => Promise.resolve(errUnauthorized)});
+    return Promise.resolve({ok: false, status: 401, json: () => Promise.resolve(errUnauthorized)} as IHTTPResponse);
   }
   /* fetch error */
   return Promise.reject(new Error("Fetch error."));
@@ -68,4 +68,3 @@ describe("Class: RequestAdapter", () => {
     });
   });
 });
-

@@ -77,7 +77,7 @@ export class TokenManager {
     return this.requestAdapter
       .execute(`${opts.appUrl}${authURL}`, {body: {email: opts.key, password: opts.secret}, method: Methods.POST})
       /* convert response to IAuthToken interface */
-      .then((tokens: Tokens) => (<IAuthToken> {token: tokens.token, refreshToken: tokens.refresh_token}))
+      .then((tokens: Tokens) => ({token: tokens.token, refreshToken: tokens.refresh_token} as IAuthToken))
       /* catch login error */
       .catch((err: Error) => {
         /* add specific information to error */
@@ -91,7 +91,7 @@ export class TokenManager {
         body: {refresh_token: this.refreshToken}, headers: {Authorization: this.token}, method: Methods.PATCH,
       })
       /* convert response to IAuthToken interface */
-      .then((newTokens: Tokens) => (<IAuthToken> {token: newTokens.token, refreshToken: newTokens.refresh_token}))
+      .then((newTokens: Tokens) => ({token: newTokens.token, refreshToken: newTokens.refresh_token} as IAuthToken))
       /* catch refresh token error */
       .catch((err: Error) => {
         /* add specific information to error */
