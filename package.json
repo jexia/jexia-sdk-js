@@ -4,10 +4,11 @@
   "description": "jexia javascript sdk",
   "main": "index.js",
   "scripts": {
-    "cleanup": "rimraf dist && rimraf node_modules",
+    "cleanup": "rimraf dist coverage node_modules",
     "lint": "tslint \"src/**/*.ts\" \"spec/**/*.ts\"",
-    "transpile": "rimraf dist && tsc",
-    "test": "npm run transpile && jasmine"
+    "transpile": "rimraf dist coverage && tsc",
+    "test": "npm run transpile && nyc jasmine",
+    "test:coverage": "npm run transpile && nyc report --reporter=html && opn coverage/index.html"
   },
   "repository": {
     "type": "git",
@@ -20,12 +21,14 @@
   },
   "homepage": "https://github.com/jexia-com/jexia-sdk-js#readme",
   "devDependencies": {
-    "@types/node": "^7.0.18",
     "@types/bluebird": "3.5.3",
     "@types/jasmine": "2.5.47",
+    "@types/node": "^7.0.18",
     "@types/node-fetch": "1.6.7",
     "jasmine": "2.6.0",
     "node-fetch": "1.6.3",
+    "nyc": "^10.3.2",
+    "opn-cli": "^3.1.0",
     "rimraf": "^2.6.1",
     "ts-loader": "^2.0.3",
     "ts-node": "^2.1.0",

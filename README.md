@@ -20,6 +20,9 @@ Transpile TS code to JS code:
 Run unit tests (no need to run the transpile manually before this):
 - `npm run test`
 
+HTML coverage report (will be opened with default browser):
+- `npm run test:coverage`
+
 Remove all previously installed packages and compiled bundles:
 - `npm run cleanup`
 
