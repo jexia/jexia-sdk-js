@@ -1,21 +1,23 @@
 {
-    "compilerOptions": {
-        "types": ["jasmine"],
-        "module": "commonjs",
-        "target": "es5",
-        "sourceMap": true,
-        "outDir": "./dist/js",
-        "typeRoots": [
-          "./typings/globals",
-          "./typings/modules"
-        ],
-        "alwaysStrict": true,
-        "noImplicitReturns": true,
-        "noUnusedLocals": true,
-        "pretty": true
-    },
-    "include": [
-        "src/**/*",
-        "spec/**/*"
-    ]
+  "compilerOptions": {
+    "strict": true,
+    "types": ["jasmine"],
+    "module": "commonjs",
+    "target": "es5",
+    "sourceMap": true,
+    "outDir": "./dist/js",
+    "typeRoots": [
+      "./typings/globals",
+      "./typings/modules"
+    ],
+    "alwaysStrict": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "pretty": true,
+    "removeComments": true
+  },
+  "include": [
+    "src/**/*",
+    "spec/**/*"
+  ]
 }
