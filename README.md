@@ -28,3 +28,6 @@ Remove all previously installed packages and compiled bundles:
 
 Install typedef files (use `--save-dev` flag to be added to `package.json`):
 - `npm i @types/<library_name>`
+
+Generate HTML documentation/API reference for the project:
+- `npm run docs`

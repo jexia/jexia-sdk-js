@@ -9,6 +9,9 @@ dist
 #Typescript typedef files
 typings
 
+#Generated documentation
+docs
+
 # Runtime data
 pids
 *.pid
