@@ -4,9 +4,10 @@
   "description": "jexia javascript sdk",
   "main": "index.js",
   "scripts": {
-    "cleanup": "rimraf dist coverage node_modules docs",
+    "cleanup": "rimraf dist coverage docs .nyc_output",
+    "cleanup:full": "npm run cleanup && rimraf node_modules",
     "lint": "tslint \"src/**/*.ts\" \"spec/**/*.ts\"",
-    "transpile": "rimraf dist coverage && tsc",
+    "transpile": "npm run cleanup && tsc",
     "test": "npm run transpile && nyc jasmine",
     "test:coverage": "npm run transpile && nyc report --reporter=html && opn coverage/index.html",
     "typedoc": "typedoc",

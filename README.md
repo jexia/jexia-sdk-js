@@ -7,11 +7,11 @@ Run the following command:
 
 Additional steps (optional):
 
-Install `rimraf` globally in order to use `cleanup` command
+Install `rimraf` globally in order to use the `cleanup:full` command
 - `sudo npm i rimraf -g`
 
 ## Development commands
-Lint Typescript code (although I advise installing a tslint plugin for your IDE):
+Lint Typescript code (install a tslint plugin for your favourite IDE for real-time linting while coding):
 - `npm run lint`
 
 Transpile TS code to JS code:
@@ -23,8 +23,11 @@ Run unit tests (no need to run the transpile manually before this):
 HTML coverage report (will be opened with default browser):
 - `npm run test:coverage`
 
-Remove all previously installed packages and compiled bundles:
+Remove all transpiled code, webpack bundles, documentation, test coverage info, etc.:
 - `npm run cleanup`
+
+Remove all of the above **and** installed node modules (needs rimraf installed globally in order to finish without errors):
+- `npm run cleanup:full`
 
 Install typedef files (use `--save-dev` flag to be added to `package.json`):
 - `npm i @types/<library_name>`
