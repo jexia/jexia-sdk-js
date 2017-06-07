@@ -1,4 +1,3 @@
-import * as Promise from "bluebird";
 import { IRequestAdapter, Methods } from "./requestAdapter";
 /* AUTH module URL */
 const authURL = "/auth";

@@ -1,4 +1,3 @@
-import * as Promise from "bluebird";
 import fetch from "node-fetch";
 import { IRequestAdapter, RequestAdapter } from "./requestAdapter";
 import { IAuthOptions, TokenManager } from "./tokenManager";

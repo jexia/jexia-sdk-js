@@ -23,7 +23,6 @@
   },
   "homepage": "https://github.com/jexia-com/jexia-sdk-js#readme",
   "devDependencies": {
-    "@types/bluebird": "3.5.3",
     "@types/jasmine": "2.5.47",
     "@types/node": "^7.0.18",
     "@types/node-fetch": "1.6.7",
@@ -42,7 +41,6 @@
     "webpack-uglify-js-plugin": "^1.1.9"
   },
   "dependencies": {
-    "bluebird": "^3.5.0",
     "node-fetch": "^1.6.3"
   }
 }

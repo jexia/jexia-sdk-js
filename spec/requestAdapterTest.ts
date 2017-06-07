@@ -1,4 +1,3 @@
-import * as Promise from "bluebird";
 import { IHTTPResponse, IRequestOptions, RequestAdapter } from "../src/requestAdapter";
 
 /* mock server successful response */

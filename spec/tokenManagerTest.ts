@@ -1,4 +1,3 @@
-import * as Promise from "bluebird";
 import { IRequestAdapter, IRequestOptions, Methods } from "../src/requestAdapter";
 import { TokenManager } from "../src/tokenManager";
 

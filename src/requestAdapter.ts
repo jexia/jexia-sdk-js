@@ -1,4 +1,3 @@
-import * as Promise from "bluebird";
 import { strEnum } from "./utils";
 
 /* List of allowed methods */
