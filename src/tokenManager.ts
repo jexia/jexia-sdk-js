@@ -25,16 +25,12 @@ export interface IAuthToken {
 }
 
 export class TokenManager {
-  /* authentication state */
-  private authenticated: Boolean = false;
   /* JWT and refresh tokens */
-  private tokens: IAuthToken;
+  private tokens: Promise<IAuthToken>;
   /* do not store key and secret */
   constructor(private requestAdapter: IRequestAdapter) {}
 
   public init(opts: IAuthOptions): Promise<TokenManager> {
-    /* reset flag (in case of reinitialization) */
-    this.authenticated = false;
     /* check if email/password were provided */
     if (!opts.key || !opts.secret) {
       return Promise.reject(new Error("Please provide valid application credentials."));
@@ -44,31 +40,19 @@ export class TokenManager {
       return Promise.reject(new Error("Please supply a valid Jexia App URL."));
     }
     /* authenticate */
-    return this.login(opts)
-      .then((tokens: IAuthToken) => {
-        /* change state */
-        this.authenticated = true;
-        /* save tokens */
-        this.tokens = tokens;
-        /* run auto refresh loop */
-        let refreshInterval = setInterval(() => {
-          this.refresh(opts)
-            .then((newTokens: IAuthToken) => {
-              /* update authentication status */
-              this.authenticated = true;
-              /* replace existing tokens with new ones */
-              this.tokens = newTokens;
-            })
-            .catch((err: Error) => {
-              /* failed */
-              this.authenticated = false;
-              /* exit refresh loop */
-              clearInterval(refreshInterval);
-            });
+    this.tokens = this.login(opts);
+    /* make sure that tokens have been successfully received */
+    return this.tokens
+      .then(() => {
+        /* start refresh loop */
+        const refreshInterval = setInterval(() => {
+          /* replace existing tokens with new ones */
+          this.tokens = this.refresh(opts);
+          /* exit refresh loop on failure */
+          this.tokens.catch((err: Error) => clearInterval(refreshInterval));
         }, opts.refreshInterval || delay);
-        /* return Promise of TokenManager */
-        return this;
-      });
+      })
+      .then(() => this);
   }
 
   private login(opts: IAuthOptions): Promise<IAuthToken> {
@@ -86,9 +70,12 @@ export class TokenManager {
 
   private refresh(opts: IAuthOptions): Promise<IAuthToken> {
     /* wait for tokens */
-    return this.requestAdapter.execute(`${opts.appUrl}${authURL}`, {
-        body: {refresh_token: this.refreshToken}, headers: {Authorization: this.token}, method: Methods.PATCH,
-      })
+    return this.tokens
+      /* wait for tokens */
+      .then((tokens: IAuthToken) => this.requestAdapter.execute(`${opts.appUrl}${authURL}`, {
+          body: {refresh_token: tokens.refreshToken}, headers: {Authorization: tokens.token}, method: Methods.PATCH,
+        }),
+      )
       /* convert response to IAuthToken interface */
       .then((newTokens: Tokens) => ({token: newTokens.token, refreshToken: newTokens.refresh_token} as IAuthToken))
       /* catch refresh token error */
@@ -98,17 +85,8 @@ export class TokenManager {
       });
   }
 
-  public get token(): string {
-    if (!this.authenticated) {
-      throw new Error("TokenManager does not contain a valid token.");
-    }
-    return this.tokens.token;
-  }
-
-  private get refreshToken(): string {
-    if (!this.authenticated) {
-      throw new Error("TokenManager does not contain a valid token.");
-    }
-    return this.tokens.refreshToken;
+  public get token(): Promise<string> {
+    /* only actual token should be exposed (refresh_token should be hidden) */
+    return this.tokens.then((tokens: IAuthToken) => tokens.token);
   }
 }

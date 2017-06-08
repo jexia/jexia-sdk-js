@@ -1,5 +1,5 @@
 import { IRequestAdapter, IRequestOptions, Methods } from "../src/requestAdapter";
-import { TokenManager } from "../src/tokenManager";
+import {IAuthToken, TokenManager} from "../src/tokenManager";
 
 /* Mock request adapter */
 const mockRequestAdapter: IRequestAdapter = {
@@ -37,7 +37,7 @@ describe("Class: TokenManager", () => {
       (new TokenManager(mockRequestAdapter))
         .init({appUrl: "", key: "validKey", secret: "validSecret"})
         .then(() => done.fail("should throw app URL error"))
-        .catch((err) => {
+        .catch((err: Error) => {
           expect(err).toEqual(new Error("Please supply a valid Jexia App URL."));
           done();
         });
@@ -47,7 +47,7 @@ describe("Class: TokenManager", () => {
       (new TokenManager(mockRequestAdapter))
         .init({appUrl: "validUrl", key: "", secret: ""})
         .then(() => done.fail("should throw credentials error"))
-        .catch((err) => {
+        .catch((err: Error) => {
           expect(err).toEqual(new Error("Please provide valid application credentials."));
           done();
         });
@@ -57,7 +57,7 @@ describe("Class: TokenManager", () => {
       (new TokenManager(mockRequestAdapter))
         .init({appUrl: "invalidUrl", key: "validKey", secret: "validSecret"})
         .then(() => done.fail("should throw not found error"))
-        .catch((err) => {
+        .catch((err: Error) => {
           expect(err).toEqual(new Error("Unable to authenticate: Not found."));
           done();
         });
@@ -67,7 +67,7 @@ describe("Class: TokenManager", () => {
       (new TokenManager(mockRequestAdapter))
         .init({appUrl: "validUrl", key: "invalidKey", secret: "invalidSecret"})
         .then(() => done.fail("should throw not found error"))
-        .catch((err) => {
+        .catch((err: Error) => {
           expect(err).toEqual(new Error("Unable to authenticate: Auth error."));
           done();
         });
@@ -78,43 +78,60 @@ describe("Class: TokenManager", () => {
         .init({appUrl: "validUrl", key: "validKey", secret: "validSecret"})
         .then((output: TokenManager) => {
           expect(output instanceof TokenManager).toBe(true);
-          expect(output.token).toBe("validToken");
-          expect((output as any).refreshToken).toBe("validRefreshToken");
+          return (output as any).tokens;
+        })
+        .then((tokens: IAuthToken) => {
+          expect(tokens.token).toBe("validToken");
+          expect(tokens.refreshToken).toBe("validRefreshToken");
           done();
         })
-        .catch((err: Error) => {
-          done.fail("should not have failed");
-        });
+        .catch((err: Error) => done.fail("should not have failed"));
     });
 
-    it("should throw an error if on refresh token failure", (done) => {
+    it("should throw an error on refresh token failure", (done) => {
       (new TokenManager(mockRequestAdapter))
         .init({appUrl: "validUrl", key: "validKey", refreshInterval: 500, secret: "validSecret"})
         .then((output: TokenManager) => {
-          (output as any).tokens = {token: "validToken", refreshToken: "invalidRefreshToken"};
+          (output as any).tokens = Promise.resolve({token: "validToken", refreshToken: "invalidRefreshToken"});
           setTimeout(() => {
-            expect(() => output.token).toThrow(new Error("TokenManager does not contain a valid token."));
-            done();
-          }, 1000);
+            (output as any).tokens
+              .then(() => done.fail("refresh should have failed"))
+              .catch(() => done());
+          }, 700);
         })
-        .catch((err) => {
-          done.fail("should not have failed");
-        });
+        .catch(() => done.fail("init should not have failed"));
     });
 
-    it("should have updated token and refresh token after successful auto refresh", (done) => {
+    it("should have updated token after successful auto refresh", (done) => {
       (new TokenManager(mockRequestAdapter))
         .init({appUrl: "validUrl", key: "validKey", refreshInterval: 500, secret: "validSecret"})
         .then((output: TokenManager) => {
           setTimeout(() => {
-            expect(output.token).toBe("updatedToken");
-            expect((output as any).refreshToken).toBe("updatedRefreshToken");
-            done();
-          }, 1000);
+            output.token
+              .then((token: string) => {
+                expect(token).toBe("updatedToken");
+                done();
+              })
+              .catch(() => done.fail("refresh should not have failed"));
+          }, 700);
         })
-        .catch((err) => {
-          done.fail("should not have failed");
-        });
+        .catch(() => done.fail("init should not have failed"));
+    });
+
+    it("should have updated refresh token after successful auto refresh", (done) => {
+      (new TokenManager(mockRequestAdapter))
+        .init({appUrl: "validUrl", key: "validKey", refreshInterval: 500, secret: "validSecret"})
+        .then((output: TokenManager) => {
+          setTimeout(() => {
+            (output as any).tokens
+              .then((tokens: IAuthToken) => {
+                expect(tokens.refreshToken).toBe("updatedRefreshToken");
+                done();
+              })
+              .catch(() => done.fail("refresh should not have failed"));
+          }, 700);
+        })
+        .catch(() => done.fail("init should not have failed"));
     });
   });
 });

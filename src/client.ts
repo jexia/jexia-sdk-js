@@ -4,11 +4,11 @@ import { IAuthOptions, TokenManager } from "./tokenManager";
 
 export default class Client {
   /* token manager (responsible for getting fresh and valid token), should be injected to plugins/modules (if needed) */
-  private tokenManager: TokenManager;
+  public tokenManager: TokenManager;
+  /* request adapter */
+  public requestAdapter: IRequestAdapter = new RequestAdapter(fetch);
   /* application URL */
   private appUrl: string;
-  /* request adapter */
-  private requestAdapter: IRequestAdapter = new RequestAdapter(fetch);
 
   public init(opts: IAuthOptions): Promise<Client> {
     /* save only appUrl (do not store key and secret) */
@@ -16,9 +16,6 @@ export default class Client {
     /* init TokenManager to have token auto refresh */
     this.tokenManager = new TokenManager(this.requestAdapter);
     /* return Promise */
-    return this.tokenManager.init(opts)
-      .then((tm: TokenManager) => {
-        return this;
-      });
+    return this.tokenManager.init(opts).then(() => this);
   }
 }
