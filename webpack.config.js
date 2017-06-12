@@ -3,10 +3,6 @@ const path = require('path');
 
 // common SDK config
 const common = {
-  entry: {
-    "jexia-sdk": path.resolve(__dirname, 'src','index'),
-    "jexia-sdk.min": path.resolve(__dirname, 'src','index')
-  },
   module: {
     rules: [
       {
@@ -54,6 +50,10 @@ const common = {
 
 // browser SDK config
 const browser = {
+  entry: {
+    "jexia-sdk": path.resolve(__dirname, 'src','indexBrowser'),
+    "jexia-sdk.min": path.resolve(__dirname, 'src','indexBrowser')
+  },
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "browser-[name].js",
@@ -64,6 +64,10 @@ const browser = {
 
 // node SDK config
 const node = {
+  entry: {
+    "jexia-sdk": path.resolve(__dirname, 'src','indexNode'),
+    "jexia-sdk.min": path.resolve(__dirname, 'src','indexNode')
+  },
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "node-[name].js",
