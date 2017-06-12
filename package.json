@@ -9,7 +9,7 @@
     "lint": "tslint \"src/**/*.ts\" \"spec/**/*.ts\"",
     "transpile": "npm run cleanup && tsc",
     "test": "npm run transpile && nyc jasmine",
-    "test:coverage": "npm run transpile && nyc report --reporter=html && opn coverage/index.html",
+    "test:coverage": "npm run test && nyc report --reporter=html && opn coverage/index.html",
     "typedoc": "typedoc",
     "docs": "rimraf docs && npm run typedoc -- --out ./docs --exclude \"**/*Test.ts\""
   },
