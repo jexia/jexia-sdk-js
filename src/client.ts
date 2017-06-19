@@ -1,3 +1,4 @@
+import { QueryExecuterFactory } from "./queryExecuterFactory";
 import { IRequestAdapter, RequestAdapter } from "./requestAdapter";
 import { IAuthOptions, TokenManager } from "./tokenManager";
 
@@ -8,13 +9,15 @@ export default class Client {
   public requestAdapter: IRequestAdapter = new RequestAdapter(fetch);
   /* application URL */
   private appUrl: string;
+  private queryExecuter: QueryExecuterFactory;
 
   public init(opts: IAuthOptions): Promise<Client> {
     /* save only appUrl (do not store key and secret) */
     this.appUrl = opts.appUrl;
-    /* init TokenManager to have token auto refresh */
     this.tokenManager = new TokenManager(this.requestAdapter);
-    /* return Promise */
-    return this.tokenManager.init(opts).then(() => this);
+    return this.tokenManager.init(opts).then(( tokenManager: TokenManager ) => {
+      this.queryExecuter = new QueryExecuterFactory(this.appUrl, this.requestAdapter, tokenManager);
+      return this;
+    });
   }
 }
