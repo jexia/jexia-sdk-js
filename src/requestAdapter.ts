@@ -27,7 +27,7 @@ export interface IHTTPResponse {
 
 function status(response: IHTTPResponse): Promise<IHTTPResponse> {
   if (!response.ok) {
-    // the fetch request went through but we received an error from the server
+    /* the fetch request went through but we received an error from the server */
     return response.json().then((errList: IServerErrors) => {
       throw new Error(errList.errors[0]);
     });

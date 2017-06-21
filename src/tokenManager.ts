@@ -25,6 +25,8 @@ export interface IAuthToken {
 }
 
 export class TokenManager {
+  /* store interval to be able to end refresh loop from outside */
+  private refreshInterval: number;
   /* JWT and refresh tokens */
   private tokens: Promise<IAuthToken>;
   /* do not store key and secret */
@@ -45,14 +47,18 @@ export class TokenManager {
     return this.tokens
       .then(() => {
         /* start refresh loop */
-        const refreshInterval = setInterval(() => {
+        this.refreshInterval = setInterval(() => {
           /* replace existing tokens with new ones */
           this.tokens = this.refresh(opts);
           /* exit refresh loop on failure */
-          this.tokens.catch((err: Error) => clearInterval(refreshInterval));
+          this.tokens.catch((err: Error) => this.terminate());
         }, opts.refreshInterval || delay);
       })
       .then(() => this);
+  }
+
+  public terminate() {
+    clearInterval(this.refreshInterval);
   }
 
   private login(opts: IAuthOptions): Promise<IAuthToken> {

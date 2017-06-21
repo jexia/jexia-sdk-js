@@ -1,5 +1,5 @@
-import { QueryExecuterFactory } from "../src/queryExecuterFactory";
 import { QueryExecuter } from "../src/queryExecuter";
+import { QueryExecuterFactory } from "../src/queryExecuterFactory";
 import { IRequestAdapter, IRequestOptions } from "../src/requestAdapter";
 import { TokenManager } from "../src/tokenManager";
 
@@ -7,9 +7,9 @@ describe("QueryExecuterFactory class", () => {
   let reqAdapterMock: IRequestAdapter;
   let tokenManagerMock: TokenManager;
 
-  beforeAll( () => {
+  beforeAll(() => {
     reqAdapterMock = {
-      execute(uri: string, opt: IRequestOptions): Promise<any>{
+      execute(uri: string, opt: IRequestOptions): Promise<any> {
         return Promise.resolve();
       },
     };
