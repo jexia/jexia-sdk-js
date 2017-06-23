@@ -7,16 +7,19 @@ export default class Client {
   /* token manager (responsible for getting fresh and valid token), should be injected to plugins/modules (if needed) */
   public tokenManager: TokenManager;
   /* request adapter */
-  public requestAdapter: IRequestAdapter = new RequestAdapter(fetch);
+  public requestAdapter: IRequestAdapter;
   /* application URL */
   private appUrl: string;
   private queryExecuter: QueryExecuterFactory;
 
+  public constructor(private fetch: Function) {
+    this.requestAdapter = new RequestAdapter(this.fetch);
+    this.tokenManager = new TokenManager(this.requestAdapter);
+  }
+
   public init(opts: IAuthOptions, ...modules: IModule[]): Promise<Client> {
     /* save only appUrl (do not store key and secret) */
     this.appUrl = opts.appUrl;
-
-    this.tokenManager = new TokenManager(this.requestAdapter);
 
     this.queryExecuter = new QueryExecuterFactory(this.appUrl, this.requestAdapter, this.tokenManager);
 

@@ -2,10 +2,7 @@ import Client from "../src/client";
 import { IModule } from "../src/module";
 import { IRequestAdapter } from "../src/requestAdapter";
 import { TokenManager } from "../src/tokenManager";
-import {mockFetch, mockRequestAdapter} from "./requestAdapterTest";
-
-/* required for successful client initialization */
-(global as any).fetch = mockFetch;
+import { mockFetch, mockRequestAdapter } from "./requestAdapterTest";
 
 const errFailedToInitModule = new Error("failed to init module");
 
@@ -23,14 +20,19 @@ const mockModuleSuccess: IModule = {
 
 describe("Class: Client", () => {
   describe("on init", () => {
-    it("should fail if one of the modules failed to init", (done) => {
-      let client = new Client();
+    it("should fail when passed a single module that failed to init", (done) => {
+      let client = new Client(mockFetch);
       /* replace request adapter with mock */
-      client.requestAdapter = mockRequestAdapter;
+      client.tokenManager = new TokenManager(mockRequestAdapter);
+
       client
         .init({appUrl: "validUrl", key: "validKey", refreshInterval: 500, secret: "validSecret"}, mockModuleFailure)
         .then((cli: Client) => done.fail("init should have failed"))
         .catch((err: Error) => {
+          if (!(client.tokenManager as any).refreshInterval) {
+            done.fail("Refresh Interval on TokenManager is undefined, so login failed; maybe mock logic is broken?");
+            return;
+          }
           expect(err).toEqual(errFailedToInitModule);
           /* check if refresh loop has been stopped and interval is clean */
           expect((client.tokenManager as any).refreshInterval._repeat).toBeNull();
@@ -38,14 +40,24 @@ describe("Class: Client", () => {
         });
     });
 
-    it("should not fail if all of the modules were loaded successfully", (done) => {
-      let client = new Client();
+    it("should not fail when passed a single module that was loaded successfully", (done) => {
+      let client = new Client(mockFetch);
       /* replace request adapter with mock */
-      client.requestAdapter = mockRequestAdapter;
+      client.tokenManager = new TokenManager(mockRequestAdapter);
+
       client
         .init({appUrl: "validUrl", key: "validKey", refreshInterval: 500, secret: "validSecret"}, mockModuleSuccess)
         .then((cli: Client) => done())
-        .catch((err: Error) => done.fail("init should have failed"));
+        .catch((err: Error) => done.fail("init should not have failed"));
     });
+
+    it("should fail if passed multiple modules and at least one fails to init", (done) => {
+      done.fail("Write this logic");
+    });
+
+    it("should not fail if passed multiple modules and all are loaded succesfully", (done) => {
+      done.fail("Write this logic");
+    });
+
   });
 });
