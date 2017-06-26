@@ -1,3 +1,4 @@
+import { Dataset } from "./dataset";
 import { IModule } from "./module";
 import { QueryExecuterFactory } from "./queryExecuterFactory";
 import { IRequestAdapter, RequestAdapter } from "./requestAdapter";
@@ -35,5 +36,13 @@ export default class Client {
         /* throw error up (to global catch)*/
         throw err;
       });
+  }
+
+  public dataset(schema: string, dataset: string): Dataset {
+    if (this.queryExecuter == null) {
+      throw new Error("Client has not been initialised properly. Please instantiate \
+                      client for invoking this method");
+    }
+    return new Dataset(schema, dataset, this.queryExecuter);
   }
 }
