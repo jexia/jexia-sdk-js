@@ -1,23 +1,5 @@
 import { IHTTPResponse, IRequestAdapter, IRequestOptions, Methods, RequestAdapter } from "../src/requestAdapter";
 
-/* mock server successful response */
-const respData = [{id: 1}, {id: 2}, {id: 3}];
-/* mock server error response */
-const errUnauthorized = {errors: ["Unauthorized."]};
-
-export const mockFetch = (uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
-  if (uri === "validURL") {
-    if (opts.headers) {
-      /* success */
-      return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve(respData)} as IHTTPResponse);
-    }
-    /* unauthorized (returns "not ok" status) */
-    return Promise.resolve({ok: false, status: 401, json: () => Promise.resolve(errUnauthorized)} as IHTTPResponse);
-  }
-  /* fetch error */
-  return Promise.reject(new Error("Fetch error."));
-};
-
 /* Mock request adapter */
 export const mockRequestAdapter: IRequestAdapter = {
   execute: (uri: string, opt: IRequestOptions): Promise<any> => {
@@ -51,13 +33,18 @@ export const mockRequestAdapter: IRequestAdapter = {
 describe("Class: RequestAdapter", () => {
   describe("when creating the RequestAdapter", () => {
     it("should create a valid object", () => {
-      expect(new RequestAdapter(mockFetch)).toBeDefined();
+      expect(new RequestAdapter((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
+        return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve()} as IHTTPResponse);
+      })).toBeDefined();
     });
   });
 
   describe("when executing a succesful query", () => {
+    const respData = [{id: 1}, {id: 2}, {id: 3}];
     it("should not throw an exception and should return the data", (done) => {
-      (new RequestAdapter(mockFetch))
+      (new RequestAdapter((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
+        return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve(respData)} as IHTTPResponse);
+      }))
         .execute("validURL", {headers: {}})
         .then((data: any) => {
           expect(data).toEqual(respData);
@@ -69,28 +56,34 @@ describe("Class: RequestAdapter", () => {
     });
 
     describe("when calling fetch fails", () => {
+      const error = {errors: ["unauthorized"]};
       it("should cause fetch error", (done) => {
-        (new RequestAdapter(mockFetch))
+        (new RequestAdapter((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
+          return Promise.resolve({ok: false, status: 401, json: () => Promise.resolve(error)} as IHTTPResponse);
+        }))
           .execute("invalidURL", {})
           .then((data: any) => {
             done.fail("should throw an error");
           })
           .catch((err: Error) => {
-            expect(err).toEqual(new Error("Fetch error."));
+            expect(err).toEqual(new Error("unauthorized"));
             done();
           });
       });
     });
 
     describe("when executing query with not ok status", () => {
+      const error = new Error("error");
       it("should throw an exception", (done) => {
-        (new RequestAdapter(mockFetch))
+        (new RequestAdapter((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
+          return Promise.reject(error);
+        }))
           .execute("validURL", {})
           .then((data: any) => {
             done.fail("should throw an error");
           })
           .catch((err: Error) => {
-            expect(err).toEqual(new Error("Unauthorized."));
+            expect(err).toEqual(error);
             done();
           });
       });
