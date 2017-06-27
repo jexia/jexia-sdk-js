@@ -1,4 +1,3 @@
-import Client from "../src/client";
 import { Dataset } from "../src/dataset";
 import { QueryExecuterFactory } from "../src/queryExecuterFactory";
 import { IRequestAdapter, IRequestOptions } from "../src/requestAdapter";
@@ -7,7 +6,6 @@ import { TokenManager } from "../src/tokenManager";
 describe("Dataset class", () => {
   let reqAdapterMock: IRequestAdapter;
   let tokenManagerMock: TokenManager;
-  let client = new Client();
 
   beforeAll( () => {
     reqAdapterMock = {
@@ -16,8 +14,6 @@ describe("Dataset class", () => {
       },
     };
     tokenManagerMock = new TokenManager(reqAdapterMock);
-    /* replace request adapter with mock */
-    client.requestAdapter = reqAdapterMock;
   });
 
   describe("when instantiating a select object from dataset", () => {
@@ -54,7 +50,7 @@ describe("Dataset class", () => {
                             "field": "id",
                             "operator": "<",
                             "values": [5]
-                        }          
+                        }
                         ]
                     }
                     ]);
