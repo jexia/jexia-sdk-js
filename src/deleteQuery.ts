@@ -1,16 +1,14 @@
+import { QuerySet } from "./querySet";
 import { QueryExecuter } from "./queryExecuter";
 import { IExecute, IFields, IFilter, ILimit, IOffset } from "./queryInterfaces";
-import { QuerySet } from "./querySet";
 
-
-
-export class SelectQuery implements IFields, ILimit, IOffset, IFilter, IExecute {
+export class DeleteQuery implements IFields, ILimit, IOffset, IFilter, IExecute {
     private query: QuerySet;
     private queryExecuter: QueryExecuter;
     public constructor(queryExecuter: QueryExecuter) {
         this.query = new QuerySet();
         this.queryExecuter = queryExecuter;
-        this.query.Action = "select";
+        this.query.Action = "delete";
     }
     public fields(...fields: string[]) {
         this.query.Fields = fields;

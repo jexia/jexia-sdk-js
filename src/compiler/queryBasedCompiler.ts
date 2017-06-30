@@ -1,16 +1,17 @@
-import { Query } from "../query";
+import { QuerySet } from "../querySet";
 interface IfinalQueryObject {
     [key: string]: any;
 }
-const excludeCopying = ["limit", "offset"];
-export class QueryCompiler {
+/* These are parameters from query object which will not be copied to
+ params of finaly query object directly*/
+const excludeCopying = ["limit", "offset", "action"];
+export class QueryBasedCompiler {
     private finalQueryObject: IfinalQueryObject;
     private queryObject: any;
-    private queryType: string;
-    public constructor(queryObject: Query, queryType: string) {
+
+    public constructor(queryObject: QuerySet) {
         this.queryObject = queryObject;
         this.finalQueryObject = {};
-        this.queryType = queryType;
     };
     public compile() {
         this.makefinalQueryObject();
@@ -40,7 +41,8 @@ export class QueryCompiler {
                 tempQueryObj[k] = this.queryObject[k];
             }
         }
-        this.finalQueryObject.action = this.queryType;
         this.finalQueryObject.params = tempQueryObj;
+        this.finalQueryObject.action = this.queryObject.action;
     }
+
 }

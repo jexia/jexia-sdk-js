@@ -1,5 +1,5 @@
 export interface IFields {
-    fields(fields: string[]): object;
+    fields(...fields: string[]): object;
 }
 
 export interface ILimit {
@@ -12,6 +12,10 @@ export interface IOffset {
 
 export interface IFilter {
     offset(offset: number): object;
+}
+
+export interface ISort {
+    sort(fields: string[], direction: string): object;
 }
 
 export interface IExecute {

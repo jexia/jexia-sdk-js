@@ -1,20 +1,15 @@
 import { QueryExecuter } from "./queryExecuter";
-import { IExecute, IFields, IFilter, ILimit, IOffset } from "./queryInterfaces";
+import { IExecute, IFilter, ILimit, IOffset } from "./queryInterfaces";
 import { QuerySet } from "./querySet";
 
-
-
-export class SelectQuery implements IFields, ILimit, IOffset, IFilter, IExecute {
+export class UpdateQuery implements ILimit, IOffset, IFilter, IExecute {
     private query: QuerySet;
     private queryExecuter: QueryExecuter;
-    public constructor(queryExecuter: QueryExecuter) {
+    public constructor(queryExecuter: QueryExecuter, data: object) {
         this.query = new QuerySet();
         this.queryExecuter = queryExecuter;
-        this.query.Action = "select";
-    }
-    public fields(...fields: string[]) {
-        this.query.Fields = fields;
-        return this;
+        this.query.Action = "update";
+        this.query.Data = data;
     }
     public limit(limit: number) {
         this.query.Limit = limit;

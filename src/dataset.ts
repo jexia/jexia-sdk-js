@@ -1,6 +1,9 @@
+import { DeleteQuery} from "./deleteQuery";
+import { InsertQuery} from "./insertQuery";
 import { QueryExecuter } from "./queryExecuter";
 import { QueryExecuterFactory } from "./queryExecuterFactory";
-import { SelectQuery } from "./selectQuery";
+import { SelectQuery} from "./selectQuery";
+import { UpdateQuery} from "./updateQuery";
 
 export class Dataset {
     private schema: string;
@@ -13,5 +16,14 @@ export class Dataset {
     }
     public select() {
         return new SelectQuery(this.queryExecuter);
+    }
+    public update(data: object) {
+        return new UpdateQuery(this.queryExecuter, data);
+    }
+    public insert(records: Array<object>) {
+        return new InsertQuery(this.queryExecuter, records);
+    }
+    public delete() {
+        return new DeleteQuery(this.queryExecuter);
     }
 }
