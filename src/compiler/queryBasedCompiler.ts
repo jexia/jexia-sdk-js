@@ -1,10 +1,11 @@
+import { ICondition } from "../filteringCondition";
 import { QuerySet } from "../querySet";
 interface IfinalQueryObject {
     [key: string]: any;
 }
 /* These are parameters from query object which will not be copied to
  params of finaly query object directly*/
-const excludeCopying = ["limit", "offset", "action"];
+const excludeCopying = ["limit", "offset", "action", "filteringConditions"];
 export class QueryBasedCompiler {
     private finalQueryObject: IfinalQueryObject;
     private queryObject: any;
@@ -12,11 +13,13 @@ export class QueryBasedCompiler {
     public constructor(queryObject: QuerySet) {
         this.queryObject = queryObject;
         this.finalQueryObject = {};
-    };
+    }
+
     public compile() {
         this.makefinalQueryObject();
         return this.finalQueryObject;
     }
+
     private limitOffsetToRange(queryObj: any) {
     /*  This method creates the range object containing offset and limit
         fields required by backend service.
@@ -31,10 +34,17 @@ export class QueryBasedCompiler {
         if (Object.keys(range).length > 0) {
            queryObj.range = range;
         }
-    };
+    }
+
+    private getCompiledFilteringConditions(condition: ICondition): object {
+      return [condition.compile()];
+    }
 
     private makefinalQueryObject() {
         let tempQueryObj: any = {};
+        if (this.queryObject.Filter) {
+          tempQueryObj.conditions = this.getCompiledFilteringConditions(this.queryObject.Filter);
+        }
         this.limitOffsetToRange(tempQueryObj);
         for ( let k in this.queryObject) {
             if (excludeCopying.indexOf(k) < 0 && this.queryObject.hasOwnProperty(k)) {

@@ -1,10 +1,10 @@
-import { Dataset } from "../src/dataset";
+import { FilteringCondition } from "../src/filteringCondition";
 import { QueryExecuterFactory } from "../src/queryExecuterFactory";
 import { IRequestAdapter, IRequestOptions } from "../src/requestAdapter";
-import { TokenManager } from "../src/tokenManager";
 import { SelectQuery } from "../src/selectQuery";
+import { TokenManager } from "../src/tokenManager";
 
-describe("Dataset class", () => {
+describe("SelectQuery class", () => {
   let reqAdapterMock: IRequestAdapter;
   let tokenManagerMock: TokenManager;
   let qefMock: QueryExecuterFactory;
@@ -19,62 +19,34 @@ describe("Dataset class", () => {
     qefMock = new QueryExecuterFactory("appUrl", reqAdapterMock, tokenManagerMock);
   });
 
-  describe("when instantiating a select object from dataset", () => {
-    it("should be able to get the select query object", (done) => {
-        let ds = new Dataset("rishabh", "test", qefMock);
-        let query = ds.select();
+  describe("when instantiating a select object", () => {
+    it("should be able to get the select query object", () => {
+        let query: SelectQuery = new SelectQuery(qefMock.createQueryExecuter("schema", "dataSet"));
         expect(query).toBeDefined();
-        done();
     });
   });
 
-  describe("when instantiating a select object from dataset", () => {
-    it("should be able to invoke the methods exposed in query", (done) => {
-        let ds = new Dataset("rishabh", "test", qefMock);
-        let query = ds.select();
-        let queryMethod = query.fields("rishabh", "jha").limit(8).offset(10).filter([
-                    {
-                        "field": "category_id",
-                        "operator": "is_null"
-                    },
-                    {
-                        "type": "and",
-                        "conditions": [
-                        {
-                            "field": "id",
-                            "operator": ">",
-                            "values": [2]
-                        },
-                        {
-                            "field": "id",
-                            "operator": "<",
-                            "values": [5]
-                        }
-                        ]
-                    }
-                    ]);
-        expect(query).toEqual(queryMethod);
-        done();
+  describe("when instantiating a select query object", () => {
+    it("should expose the proper methods", () => {
+        let query: SelectQuery = new SelectQuery(qefMock.createQueryExecuter("schema", "dataSet"));
+        expect(typeof(query.execute)).toBe("function");
+        expect(typeof(query.fields)).toBe("function");
+        expect(typeof(query.filter)).toBe("function");
+        expect(typeof(query.limit)).toBe("function");
+        expect(typeof(query.offset)).toBe("function");
+        expect(typeof(query.sortAsc)).toBe("function");
+        expect(typeof(query.sortDesc)).toBe("function");
     });
   });
 
-  describe("when instantiating a selectQuery object from client", () => {
-    it("its query object should have desired properties", (done) => {
+  describe("when configuring a select query object", () => {
+    it("it should have the correct query options set", () => {
         let qe = qefMock.createQueryExecuter("public", "posts");
-        let queryObj: any = new SelectQuery(qe).filter([{
-                        field: "id",
-                        operator: "in",
-                        values:[3, 4, 7, 1]
-                    }]).limit(2).sortAsc("updated_at");
-        expect(queryObj.query.conditions).toEqual([{
-                        field: "id",
-                        operator: "in",
-                        values:[3, 4, 7, 1]
-                    }]);
+        let cond = new FilteringCondition("field", "operator", "value");
+        let queryObj: any = new SelectQuery(qe).filter(cond).limit(2).sortAsc("updated_at");
+        expect(queryObj.query.filteringConditions).toEqual(cond);
         expect(queryObj.query.limit).toEqual(2);
         expect(queryObj.query.orders).toEqual([{fields: ["updated_at"], direction: "asc"}]);
-        done();
     });
   });
-
 });

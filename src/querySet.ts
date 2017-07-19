@@ -1,5 +1,7 @@
 import { QueryBasedCompiler } from "./compiler/queryBasedCompiler";
+import { ICondition } from "./filteringCondition";
 import { QueryExecuter } from "./queryExecuter";
+
 interface ISort {
     fields: string[];
     direction: string;
@@ -9,7 +11,7 @@ export class QuerySet {
     private fields: string[];
     private limit: number;
     private offset: number;
-    private conditions: object;
+    private filteringConditions: ICondition;
     private orders: Array<object>;
     private data: object;
     public set Action(action: string){
@@ -33,17 +35,18 @@ export class QuerySet {
     public get Offset(){
         return this.offset;
     }
-    public set Filter(filter: object){
-        this.conditions = filter;
+    public set Filter(filter: ICondition){
+        this.filteringConditions = filter;
     }
+    public get Filter() {
+        return this.filteringConditions;
+    }
+
     public AddSortCondition(direction: string, ...fields: string[]) {
         if (this.orders == null) {
             this.orders = [];
         }
-        let sortObj: ISort = {
-           fields: fields,
-           direction: direction 
-        };
+        let sortObj: ISort = { fields, direction };
         this.orders.push(sortObj);
     }
     public execute(queryExecuter: QueryExecuter) {

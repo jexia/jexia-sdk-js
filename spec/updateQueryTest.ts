@@ -1,7 +1,8 @@
-import { UpdateQuery } from "../src/UpdateQuery";
+import { FilteringCondition } from "../src/filteringCondition";
 import { QueryExecuterFactory } from "../src/queryExecuterFactory";
 import { IRequestAdapter, IRequestOptions } from "../src/requestAdapter";
 import { TokenManager } from "../src/tokenManager";
+import { UpdateQuery } from "../src/UpdateQuery";
 
 describe("UpdateQuery class", () => {
   let reqAdapterMock: IRequestAdapter;
@@ -28,7 +29,7 @@ describe("UpdateQuery class", () => {
   });
 
   describe("when instantiating a updateQuery object from client", () => {
-    it("should be able to invoke methods exposed by it", (done) => {
+    it("should expose the proper methods", (done) => {
         let qe = qefMock.createQueryExecuter("public", "posts");
         let query = new UpdateQuery(qe, { title: "changed first field"});
         expect(typeof query.filter).toBe("function");
@@ -43,11 +44,8 @@ describe("UpdateQuery class", () => {
   describe("when instantiating a updateQuery object from client", () => {
     it("its query object should have desired properties", (done) => {
         let qe = qefMock.createQueryExecuter("public", "posts");
-        let queryObj: any = new UpdateQuery(qe, {title: "changed first field"}).filter([{
-                        field: "id",
-                        operator: "in",
-                        values:[3, 4, 7, 1]
-                    }]).limit(2);
+        let queryObj: any = new UpdateQuery(qe, {title: "changed first field"})
+        .filter(new FilteringCondition("field", "operator", "value")).limit(2);
         expect(queryObj.query.data).toEqual({ title: "changed first field" });
         expect(queryObj.query.limit).toEqual(2);
         done();

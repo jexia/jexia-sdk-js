@@ -1,3 +1,4 @@
+import { ICondition } from "./filteringCondition";
 import { QueryExecuter } from "./queryExecuter";
 import { IExecute, IFilter, ILimit, IOffset } from "./queryInterfaces";
 import { QuerySet } from "./querySet";
@@ -19,7 +20,7 @@ export class UpdateQuery implements ILimit, IOffset, IFilter, IExecute {
         this.query.Offset = offset;
         return this;
     }
-    public filter(filter: any) {
+    public filter(filter: ICondition) {
         this.query.Filter = filter;
         return this;
     }

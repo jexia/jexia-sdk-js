@@ -1,6 +1,7 @@
-import { QuerySet } from "./querySet";
+import { ICondition } from "./filteringCondition";
 import { QueryExecuter } from "./queryExecuter";
 import { IExecute, IFields, IFilter, ILimit, IOffset } from "./queryInterfaces";
+import { QuerySet } from "./querySet";
 
 export class DeleteQuery implements IFields, ILimit, IOffset, IFilter, IExecute {
     private query: QuerySet;
@@ -22,7 +23,7 @@ export class DeleteQuery implements IFields, ILimit, IOffset, IFilter, IExecute 
         this.query.Offset = offset;
         return this;
     }
-    public filter(filter: any) {
+    public filter(filter: ICondition) {
         this.query.Filter = filter;
         return this;
     }
