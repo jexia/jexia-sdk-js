@@ -66,7 +66,7 @@ describe("Class: RequestAdapter", () => {
             done.fail("should throw an error");
           })
           .catch((err: Error) => {
-            expect(err).toEqual(new Error("unauthorized"));
+            expect(err).toEqual(new Error("Server didn't like it: unauthorized"));
             done();
           });
       });
