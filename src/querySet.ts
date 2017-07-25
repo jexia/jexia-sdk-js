@@ -15,9 +15,22 @@ export class QuerySet {
     private orders: Array<object>;
     private data: object;
     private relations: QuerySet[];
+    private records: Array<object>;
 
     public set Action(action: string){
         this.action = action;
+    }
+
+    public get Action(): string {
+        return this.action;
+    }
+
+    public set Records(records: Array<object>){
+        this.records = records;
+    }
+
+    public get Records(): Array<object> {
+        return this.records;
     }
 
     public set Data(data: object){
@@ -26,6 +39,10 @@ export class QuerySet {
 
     public set Fields(fields: string[]){
         this.fields = fields;
+    }
+
+    public get Fields(): string[] {
+        return this.fields;
     }
 
     public set Limit(limit: number){
@@ -62,6 +79,10 @@ export class QuerySet {
         }
         let sortObj: ISort = { fields, direction };
         this.orders.push(sortObj);
+    }
+
+    public get SortOrders(): Array<object> {
+      return this.orders;
     }
 
     public AddRelation(relation: QuerySet): void {

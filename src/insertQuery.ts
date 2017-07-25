@@ -1,12 +1,12 @@
 import { QueryExecuter } from "./queryExecuter";
 import { IExecute} from "./queryInterfaces";
-import { RecordSet } from "./recordSet";
+import { QuerySet } from "./querySet";
 
 export class InsertQuery implements  IExecute {
-    private query: RecordSet;
+    private query: QuerySet;
     private queryExecuter: QueryExecuter;
     public constructor(queryExecuter: QueryExecuter, records: Array<object>) {
-        this.query = new RecordSet();
+        this.query = new QuerySet();
         this.queryExecuter = queryExecuter;
         this.query.Action = "insert";
         this.query.Records = records;

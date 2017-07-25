@@ -1,58 +1,81 @@
 import { ICondition } from "../filteringCondition";
 import { QuerySet } from "../querySet";
-interface IfinalQueryObject {
-    [key: string]: any;
+
+interface ICompiledQueryObject {
+    action: string;
+    records?: Array<object>;
+    params?: object;
 }
-/* These are parameters from query object which will not be copied to
- params of finaly query object directly*/
-const excludeCopying = ["limit", "offset", "action", "filteringConditions"];
+
 export class QueryBasedCompiler {
-    private finalQueryObject: IfinalQueryObject;
-    private queryObject: any;
+    private queryObject: QuerySet;
 
     public constructor(queryObject: QuerySet) {
         this.queryObject = queryObject;
-        this.finalQueryObject = {};
     }
 
-    public compile() {
-        this.makefinalQueryObject();
-        return this.finalQueryObject;
+    public compile(): ICompiledQueryObject {
+        return this.compileQueryObject();
     }
 
-    private limitOffsetToRange(queryObj: any) {
+    private compileLimitOffset(queryOptions: any, query: QuerySet): object {
     /*  This method creates the range object containing offset and limit
         fields required by backend service.
     */
         let range: any = {};
-        if (this.queryObject.Limit) {
-            range.limit = this.queryObject.Limit;
+        if (query.Limit) {
+            range.limit = query.Limit;
         }
-        if (this.queryObject.Offset) {
-            range.offset = this.queryObject.Offset;
+        if (query.Offset) {
+            range.offset = query.Offset;
         }
-        if (Object.keys(range).length > 0) {
-           queryObj.range = range;
-        }
+        return range;
     }
 
-    private getCompiledFilteringConditions(condition: ICondition): object {
+    private compileFilteringConditions(condition: ICondition): object {
       return [condition.compile()];
     }
 
-    private makefinalQueryObject() {
-        let tempQueryObj: any = {};
-        if (this.queryObject.Filter) {
-          tempQueryObj.conditions = this.getCompiledFilteringConditions(this.queryObject.Filter);
+    private compileQueryOptions(query: QuerySet): object {
+      let compiledQueryOptions: any = {};
+      if (query.Filter) {
+        compiledQueryOptions.conditions = this.compileFilteringConditions(query.Filter);
+      }
+
+      let range = this.compileLimitOffset(compiledQueryOptions, this.queryObject);
+      if (Object.keys(range).length > 0) {
+        compiledQueryOptions.range = range;
+      }
+
+      if (query.Fields) {
+        compiledQueryOptions.fields = query.Fields;
+      }
+
+      if (query.SortOrders) {
+        compiledQueryOptions.orders = query.SortOrders;
+      }
+
+      return compiledQueryOptions;
+    }
+
+    private compileQueryObject(): ICompiledQueryObject {
+        if (!this.queryObject.Action) {
+          throw new Error("You need to set an Action before compiling the Query.");
         }
-        this.limitOffsetToRange(tempQueryObj);
-        for ( let k in this.queryObject) {
-            if (excludeCopying.indexOf(k) < 0 && this.queryObject.hasOwnProperty(k)) {
-                tempQueryObj[k] = this.queryObject[k];
-            }
+
+        let compiledQuery: ICompiledQueryObject = {action: this.queryObject.Action};
+
+        let compiledQueryOptions = this.compileQueryOptions(this.queryObject);
+
+        if (compiledQueryOptions && Object.keys(compiledQueryOptions).length !== 0 ) {
+          compiledQuery.params = compiledQueryOptions;
         }
-        this.finalQueryObject.params = tempQueryObj;
-        this.finalQueryObject.action = this.queryObject.action;
+
+        if (this.queryObject.Records) {
+          compiledQuery.records = this.queryObject.Records;
+        }
+
+        return compiledQuery;
     }
 
 }
