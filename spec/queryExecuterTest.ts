@@ -40,7 +40,7 @@ describe("QueryExecuter class", () => {
           return Promise.resolve();
         },
       };
-      const mockBody = {params: "params"};
+      const mockBody = {action: "action"};
       spyOn(reqAdapterMock, "execute");
       let qe = new QueryExecuter(url, dataset, schema, reqAdapterMock, tokenManagerMock);
       qe.executeQuery(mockBody).then( () => {

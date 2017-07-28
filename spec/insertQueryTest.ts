@@ -7,8 +7,10 @@ describe("InsertQuery class", () => {
   let reqAdapterMock: IRequestAdapter;
   let tokenManagerMock: TokenManager;
   let qefMock: QueryExecuterFactory;
+  let dataset: string;
 
   beforeAll( () => {
+    dataset = "dataset";
     reqAdapterMock = {
       execute(uri: string, opt: IRequestOptions): Promise<any> {
         return Promise.resolve();
@@ -21,7 +23,7 @@ describe("InsertQuery class", () => {
   describe("when instantiating a insertQuery object directly", () => {
     it("should be able to return required object", (done) => {
         let qe = qefMock.createQueryExecuter("public", "posts");
-        let query = new InsertQuery(qe, [{title: "Another first post", user_id: 1}]);
+        let query = new InsertQuery(qe, [{title: "Another first post", user_id: 1}], dataset);
         expect(query).toBeDefined();
         done();
     });
@@ -31,7 +33,7 @@ describe("InsertQuery class", () => {
     it("should be able to invoke methods exposed by it", (done) => {
         tokenManagerMock = new TokenManager(reqAdapterMock);
         let qe = qefMock.createQueryExecuter("public", "posts");
-        let query = new InsertQuery(qe, [{title: "Another first post", user_id: 1}]);
+        let query = new InsertQuery(qe, [{title: "Another first post", user_id: 1}], dataset);
         expect(typeof query.execute).toBe("function");
         done();
     });
@@ -41,10 +43,11 @@ describe("InsertQuery class", () => {
     it("its query object should have desired properties", (done) => {
         tokenManagerMock = new TokenManager(reqAdapterMock);
         let qe = qefMock.createQueryExecuter("public", "posts");
-        let queryObj: any = new InsertQuery(qe, [{title: "Another first post", user_id: 1}]);
-        expect(queryObj.query.records).toEqual([{title: "Another first post", user_id: 1}]);
+        let queryObj: any = new InsertQuery(qe, [{title: "Another first post", user_id: 1}], dataset);
+        expect(queryObj).toBeDefined();
+        expect(queryObj.request).toBeDefined();
+        expect(queryObj.request.records).toEqual([{title: "Another first post", user_id: 1}]);
         done();
     });
   });
-
 });

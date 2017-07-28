@@ -8,8 +8,10 @@ describe("UpdateQuery class", () => {
   let reqAdapterMock: IRequestAdapter;
   let tokenManagerMock: TokenManager;
   let qefMock: QueryExecuterFactory;
+  let dataset: string;
 
   beforeAll( () => {
+    dataset = "dataset";
     reqAdapterMock = {
       execute(uri: string, opt: IRequestOptions): Promise<any> {
         return Promise.resolve();
@@ -22,7 +24,7 @@ describe("UpdateQuery class", () => {
   describe("when instantiating a updateQuery object directly", () => {
     it("should be able to return required object", (done) => {
         let qe = qefMock.createQueryExecuter("public", "posts");
-        let query = new UpdateQuery(qe, {title: "changed first field"});
+        let query = new UpdateQuery(qe, {title: "changed first field"}, dataset);
         expect(query).toBeDefined();
         done();
     });
@@ -31,7 +33,7 @@ describe("UpdateQuery class", () => {
   describe("when instantiating a updateQuery object from client", () => {
     it("should expose the proper methods", (done) => {
         let qe = qefMock.createQueryExecuter("public", "posts");
-        let query = new UpdateQuery(qe, { title: "changed first field"});
+        let query = new UpdateQuery(qe, { title: "changed first field"}, dataset);
         expect(typeof query.filter).toBe("function");
         expect(typeof query.limit).toBe("function");
         expect(typeof query.offset).toBe("function");
@@ -44,10 +46,13 @@ describe("UpdateQuery class", () => {
   describe("when instantiating a updateQuery object from client", () => {
     it("its query object should have desired properties", (done) => {
         let qe = qefMock.createQueryExecuter("public", "posts");
-        let queryObj: any = new UpdateQuery(qe, {title: "changed first field"})
+        let queryObj: any = new UpdateQuery(qe, {title: "changed first field"}, dataset)
         .filter(new FilteringCondition("field", "operator", "value")).limit(2);
-        expect(queryObj.query.data).toEqual({ title: "changed first field" });
-        expect(queryObj.query.limit).toEqual(2);
+        expect(queryObj).toBeDefined();
+        expect(queryObj.request).toBeDefined();
+        expect(queryObj.request.Query).toBeDefined();
+        expect(queryObj.request.Query.data).toEqual({ title: "changed first field" });
+        expect(queryObj.request.Query.limit).toEqual(2);
         done();
     });
   });

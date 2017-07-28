@@ -15,15 +15,15 @@ export class Dataset {
         this.queryExecuter = queryExecutorFactory.createQueryExecuter(this.schema, this.dataset);
     }
     public select() {
-        return new SelectQuery(this.queryExecuter);
+        return new SelectQuery(this.queryExecuter, this.dataset);
     }
     public update(data: object) {
-        return new UpdateQuery(this.queryExecuter, data);
+        return new UpdateQuery(this.queryExecuter, data, this.dataset);
     }
     public insert(records: Array<object>) {
-        return new InsertQuery(this.queryExecuter, records);
+        return new InsertQuery(this.queryExecuter, records, this.dataset);
     }
     public delete() {
-        return new DeleteQuery(this.queryExecuter);
+        return new DeleteQuery(this.queryExecuter, this.dataset);
     }
 }

@@ -8,8 +8,10 @@ describe("DeleteQuery class", () => {
   let reqAdapterMock: IRequestAdapter;
   let tokenManagerMock: TokenManager;
   let qefMock: QueryExecuterFactory;
+  let dataset: string;
 
   beforeAll( () => {
+    dataset = "dataset";
     reqAdapterMock = {
       execute(uri: string, opt: IRequestOptions): Promise<any> {
         return Promise.resolve();
@@ -22,7 +24,7 @@ describe("DeleteQuery class", () => {
   describe("when instantiating a deleteQuery object directly", () => {
     it("should be able to return required object", () => {
         let qe = qefMock.createQueryExecuter("public", "posts");
-        let query = new DeleteQuery(qe);
+        let query = new DeleteQuery(qe, dataset);
         expect(query).toBeDefined();
     });
   });
@@ -30,7 +32,7 @@ describe("DeleteQuery class", () => {
   describe("when instantiating a deleteQuery object", () => {
     it("should expose the proper methods", () => {
         let qe = qefMock.createQueryExecuter("public", "posts");
-        let query = new DeleteQuery(qe);
+        let query = new DeleteQuery(qe, dataset);
         expect(typeof query.filter).toBe("function");
         expect(typeof query.limit).toBe("function");
         expect(typeof query.offset).toBe("function");
@@ -43,8 +45,11 @@ describe("DeleteQuery class", () => {
     it("its query object should have the correct query options set", () => {
         let qe = qefMock.createQueryExecuter("public", "posts");
         let cond = new FilteringCondition("field", "operator", "value");
-        let queryObj: any = new DeleteQuery(qe).filter(cond);
-        expect(queryObj.query.filteringConditions).toEqual(cond);
+        let queryObj: any = new DeleteQuery(qe, dataset).filter(cond);
+        expect(queryObj).toBeDefined();
+        expect(queryObj.request).toBeDefined();
+        expect(queryObj.request.Query).toBeDefined();
+        expect(queryObj.request.Query.filteringConditions).toEqual(cond);
     });
   });
 

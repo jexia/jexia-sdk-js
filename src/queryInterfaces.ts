@@ -26,5 +26,5 @@ export interface IExecute {
 }
 
 export interface IRelational {
-  relation( dataSet: Dataset, callback: (query: IRelational) => IRelational ): IRelational;
+  relation( dataSet: Dataset, callback?: (query: IRelational) => IRelational ): IRelational;
 }

@@ -1,40 +1,36 @@
-import { QueryBasedCompiler } from "./compiler/queryBasedCompiler";
 import { ICondition } from "./filteringCondition";
-import { QueryExecuter } from "./queryExecuter";
 
 interface ISort {
     fields: string[];
     direction: string;
 }
+
 export class QuerySet {
-    private action: string;
+    private dataSet: string;
     private fields: string[];
     private limit: number;
     private offset: number;
     private filteringConditions: ICondition;
-    private orders: Array<object>;
-    private data: object;
+    private orders: ISort[];
     private relations: QuerySet[];
-    private records: Array<object>;
+    private data: object;
 
-    public set Action(action: string){
-        this.action = action;
-    }
-
-    public get Action(): string {
-        return this.action;
-    }
-
-    public set Records(records: Array<object>){
-        this.records = records;
-    }
-
-    public get Records(): Array<object> {
-        return this.records;
+    constructor(dataSet: string) {
+      this.dataSet = dataSet;
+      this.orders = [];
+      this.relations = [];
     }
 
     public set Data(data: object){
-        this.data = data;
+      this.data = data;
+    }
+
+    public get Data(): object {
+      return this.data;
+    }
+
+    public get Dataset(): string {
+      return this.dataSet;
     }
 
     public set Fields(fields: string[]){
@@ -74,11 +70,7 @@ export class QuerySet {
     }
 
     public AddSortCondition(direction: string, ...fields: string[]) {
-        if (this.orders == null) {
-            this.orders = [];
-        }
-        let sortObj: ISort = { fields, direction };
-        this.orders.push(sortObj);
+        this.orders.push({ fields, direction });
     }
 
     public get SortOrders(): Array<object> {
@@ -87,12 +79,5 @@ export class QuerySet {
 
     public AddRelation(relation: QuerySet): void {
       this.relations.push(relation);
-    }
-
-    public execute(queryExecuter: QueryExecuter) {
-        let compiler: QueryBasedCompiler = new QueryBasedCompiler(this);
-        let queryParams: object;
-        queryParams = compiler.compile();
-        return queryExecuter.executeQuery(queryParams);
     }
 }

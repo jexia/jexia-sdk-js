@@ -1,41 +1,41 @@
+import { DataRequest } from "./dataRequest";
 import { ICondition } from "./filteringCondition";
 import { QueryExecuter } from "./queryExecuter";
 import { IExecute, IFields, IFilter, ILimit, IOffset } from "./queryInterfaces";
-import { QuerySet } from "./querySet";
 
 export class DeleteQuery implements IFields, ILimit, IOffset, IFilter, IExecute {
-    private query: QuerySet;
+    private request: DataRequest;
     private queryExecuter: QueryExecuter;
-    public constructor(queryExecuter: QueryExecuter) {
-        this.query = new QuerySet();
+    public constructor(queryExecuter: QueryExecuter, dataset: string) {
+        this.request = new DataRequest("delete", dataset);
         this.queryExecuter = queryExecuter;
-        this.query.Action = "delete";
+        this.request.Action = "delete";
     }
     public fields(...fields: string[]) {
-        this.query.Fields = fields;
+        this.request.Query.Fields = fields;
         return this;
     }
     public limit(limit: number) {
-        this.query.Limit = limit;
+        this.request.Query.Limit = limit;
         return this;
     }
     public offset(offset: number) {
-        this.query.Offset = offset;
+        this.request.Query.Offset = offset;
         return this;
     }
     public filter(filter: ICondition): DeleteQuery {
-        this.query.Filter = filter;
+        this.request.Query.Filter = filter;
         return this;
     }
     public sortAsc(...fields: string[]) {
-        this.query.AddSortCondition("asc", ...fields);
+        this.request.Query.AddSortCondition("asc", ...fields);
         return this;
     }
     public sortDesc(...fields: string[]) {
-        this.query.AddSortCondition("desc", ...fields);
+        this.request.Query.AddSortCondition("desc", ...fields);
         return this;
     }
     public execute() {
-        return this.query.execute(this.queryExecuter);
+        return this.request.execute(this.queryExecuter);
     }
 }

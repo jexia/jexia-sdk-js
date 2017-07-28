@@ -1,38 +1,38 @@
+import { DataRequest } from "./dataRequest";
 import { ICondition } from "./filteringCondition";
 import { QueryExecuter } from "./queryExecuter";
 import { IExecute, IFilter, ILimit, IOffset } from "./queryInterfaces";
-import { QuerySet } from "./querySet";
 
 export class UpdateQuery implements ILimit, IOffset, IFilter, IExecute {
-    private query: QuerySet;
+    private request: DataRequest;
     private queryExecuter: QueryExecuter;
-    public constructor(queryExecuter: QueryExecuter, data: object) {
-        this.query = new QuerySet();
+
+    public constructor(queryExecuter: QueryExecuter, data: object, dataset: string) {
+        this.request = new DataRequest("update", dataset);
         this.queryExecuter = queryExecuter;
-        this.query.Action = "update";
-        this.query.Data = data;
+        this.request.Query.Data = data;
     }
     public limit(limit: number) {
-        this.query.Limit = limit;
+        this.request.Query.Limit = limit;
         return this;
     }
     public offset(offset: number) {
-        this.query.Offset = offset;
+        this.request.Query.Offset = offset;
         return this;
     }
     public filter(filter: ICondition): UpdateQuery {
-        this.query.Filter = filter;
+        this.request.Query.Filter = filter;
         return this;
     }
     public sortAsc(...fields: string[]) {
-        this.query.AddSortCondition("asc", ...fields);
+        this.request.Query.AddSortCondition("asc", ...fields);
         return this;
     }
     public sortDesc(...fields: string[]) {
-        this.query.AddSortCondition("desc", ...fields);
+        this.request.Query.AddSortCondition("desc", ...fields);
         return this;
     }
     public execute() {
-        return this.query.execute(this.queryExecuter);
+        return this.request.execute(this.queryExecuter);
     }
 }

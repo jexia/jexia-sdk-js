@@ -1,3 +1,4 @@
+import { ICompiledQuery } from "./compiler/queryBasedCompiler";
 import { IRequestAdapter, IRequestOptions, Methods } from "./requestAdapter";
 import { TokenManager } from "./tokenManager";
 
@@ -10,7 +11,7 @@ export class QueryExecuter {
               private requestAdapter: IRequestAdapter,
               private tokenManager: TokenManager) {}
 
-  public executeQuery(queryOptions: any): Promise<any> {
+  public executeQuery(queryOptions: ICompiledQuery): Promise<any> {
     let requestUrl: string = this.getRequestUrl();
     return this.tokenManager.token.then( (token: string) => {
       let reqOpt: IRequestOptions = {headers: { Authorization: token}, body: queryOptions, method: Methods.POST };
