@@ -4,7 +4,7 @@ import { IHTTPResponse, IRequestAdapter, IRequestOptions, Methods, RequestAdapte
 export const mockRequestAdapter: IRequestAdapter = {
   execute: (uri: string, opt: IRequestOptions): Promise<any> => {
     /* check URL validity */
-    if (uri === "validUrl/auth") {
+    if (uri === "http://validUrl:8080/auth") {
       switch (opt.method) {
         /* log in */
         case Methods.POST:
@@ -26,7 +26,7 @@ export const mockRequestAdapter: IRequestAdapter = {
       }
     }
     /* not found error */
-    return Promise.reject(new Error("Not found."));
+    return Promise.reject(new Error("Mocking logic for supplied URI not found."));
   },
 };
 

@@ -11,6 +11,7 @@ export default class Client {
   public requestAdapter: IRequestAdapter;
   /* application URL */
   private appUrl: string;
+  private appIp: string;
   private queryExecuter: QueryExecuterFactory;
 
   public constructor(private fetch: Function) {
@@ -20,13 +21,19 @@ export default class Client {
 
   public init(opts: IAuthOptions, ...modules: IModule[]): Promise<Client> {
     /* save only appUrl (do not store key and secret) */
-    this.appUrl = opts.appUrl;
+    this.appIp = opts.appUrl;
+    // band-aid - the information on how the API access URL is formatted
+    // belongs in the classes using the URL directly. Client should only
+    // pass/store the IP; also more inteligent URL/IP formatting methods
+    // should be used than a string literal
+    this.appUrl = `http://${opts.appUrl}:8080`;
+    opts = {appUrl: this.appUrl, key: opts.key, secret: opts.secret};
 
     this.queryExecuter = new QueryExecuterFactory(this.appUrl, this.requestAdapter, this.tokenManager);
 
     return this.tokenManager.init(opts)
       /* init all modules */
-      .then(() => Promise.all(modules.map((curr) => curr.init(this.tokenManager, this.requestAdapter))))
+      .then(() => Promise.all(modules.map((curr) => curr.init(this.appIp, this.tokenManager, this.requestAdapter))))
       /* make the Client available only after all modules have been successfully initialized */
       .then(() => this)
       /* if token manager failed to init or at least one of core modules failed to load */

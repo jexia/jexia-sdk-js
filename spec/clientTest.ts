@@ -7,13 +7,13 @@ import { mockRequestAdapter } from "./requestAdapterTest";
 const errFailedToInitModule = new Error("failed to init module");
 
 const mockModuleFailure: IModule = {
-  init: (tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<IModule> => {
+  init: (appUrl: string, tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<IModule> => {
     return Promise.reject(errFailedToInitModule);
   },
 };
 
 const mockModuleSuccess: IModule = {
-  init: (tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<IModule> => {
+  init: (appUrl: string, tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<IModule> => {
     return Promise.resolve(mockModuleSuccess);
   },
 };
@@ -32,7 +32,8 @@ describe("Class: Client", () => {
         .then((cli: Client) => done.fail("init should have failed"))
         .catch((err: Error) => {
           if (!(client.tokenManager as any).refreshInterval) {
-            done.fail("Refresh Interval on TokenManager is undefined, so login failed; maybe mock logic is broken?");
+            done.fail(`Refresh Interval on TokenManager is undefined, so login failed; maybe mock logic is broken?
+              ${err}`);
             return;
           }
           expect(err).toEqual(errFailedToInitModule);
@@ -72,7 +73,8 @@ describe("Class: Client", () => {
         .then((cli: Client) => done.fail("init should have failed"))
         .catch((err: Error) => {
           if (!(client.tokenManager as any).refreshInterval) {
-            done.fail("Refresh Interval on TokenManager is undefined, so login failed; maybe mock logic is broken?");
+            done.fail(`Refresh Interval on TokenManager is undefined, so login failed; maybe mock logic is broken?
+              ${err}`);
             return;
           }
           expect(err).toEqual(errFailedToInitModule);

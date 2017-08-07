@@ -28,6 +28,7 @@
     "@types/jasmine": "2.5.47",
     "@types/node": "^7.0.18",
     "@types/node-fetch": "1.6.7",
+    "@types/ws": "^3.0.2",
     "jasmine": "2.6.0",
     "node-fetch": "1.6.3",
     "nyc": "^10.3.2",
@@ -37,10 +38,11 @@
     "ts-node": "^2.1.0",
     "tslint": "^4.5.1",
     "tslint-loader": "^3.5.3",
-    "typescript": "^2.3.0",
     "typedoc": "^0.7.1",
+    "typescript": "^2.3.0",
     "webpack": "^2.4.1",
-    "webpack-uglify-js-plugin": "^1.1.9"
+    "webpack-uglify-js-plugin": "^1.1.9",
+    "ws": "^3.1.0"
   },
   "dependencies": {
     "node-fetch": "^1.6.3"
