@@ -1,4 +1,5 @@
 import { Dataset } from "./dataset";
+import { CompositeFilteringCondition, FilteringCondition, ICondition } from "./filteringCondition";
 import { IModule } from "./module";
 import { QueryExecuterFactory } from "./queryExecuterFactory";
 import { IRequestAdapter, RequestAdapter } from "./requestAdapter";
@@ -45,11 +46,24 @@ export default class Client {
       });
   }
 
-  public dataset(schema: string, dataset: string): Dataset {
+  public dataset(dataset: string, schema: string = "public"): Dataset {
     if (this.queryExecuter == null) {
       throw new Error("Client has not been initialised properly. Please instantiate \
                       client for invoking this method");
     }
     return new Dataset(schema, dataset, this.queryExecuter);
   }
+}
+
+export function authenticate(appUrl: string, key: string, secret: string): IAuthOptions {
+  return {appUrl, key, secret};
+}
+
+export function condition(field: string, operator: string, value: string): FilteringCondition {
+  return new FilteringCondition(field, operator, value);
+}
+
+export function complexCondition(filteringCondition: ICondition,
+                                 logicalOperatorType: string): CompositeFilteringCondition {
+    return new CompositeFilteringCondition(filteringCondition, logicalOperatorType);
 }

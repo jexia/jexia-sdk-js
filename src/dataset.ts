@@ -6,17 +6,21 @@ import { SelectQuery} from "./selectQuery";
 import { UpdateQuery} from "./updateQuery";
 
 export class Dataset {
-    private schema: string;
+    private dataSchema: string;
     private dataset: string;
     private queryExecuter: QueryExecuter;
     public constructor(schema: string, dataset: string, queryExecutorFactory: QueryExecuterFactory) {
-        this.schema = schema;
+        this.dataSchema = schema;
         this.dataset = dataset;
-        this.queryExecuter = queryExecutorFactory.createQueryExecuter(this.schema, this.dataset);
+        this.queryExecuter = queryExecutorFactory.createQueryExecuter(this.dataSchema, this.dataset);
     }
 
     public get name(): string {
       return this.dataset;
+    }
+
+    public get schema(): string {
+      return this.dataSchema;
     }
 
     public select() {

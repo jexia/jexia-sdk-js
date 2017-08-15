@@ -48,13 +48,16 @@ describe("RTCModule class", () => {
     it("should send the proper JSON message to Sharky", (done) => {
       let rtcm: any = new RTCModule(() => { return; }, (url: string) => new WebSocketMock(url) );
       let datasetName: string = "datasetName";
+      let dataSchemaName: string = "dataSchemaName";
       let actionName: string = "select";
       let qef: QueryExecuterFactory = new QueryExecuterFactory(testurl, reqAdapterMock, tokenManagerMock);
-      let ds: Dataset = new Dataset("public", datasetName, qef);
+      let ds: Dataset = new Dataset(dataSchemaName, datasetName, qef);
       rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
         spyOn(rtcm, "send");
         rtcm.subscribe(actionName, ds);
-        expect(rtcm.send).toHaveBeenCalledWith({ type: "subscribe", nsp: `rest.${actionName}.${datasetName}`});
+        expect(rtcm.send).toHaveBeenCalledWith({ nsp: `rest.${actionName}.${dataSchemaName}.${datasetName}`,
+          type: "subscribe",
+        });
         done();
       }).catch( (error: Error) => {
         done.fail("Initializing the RTCModule should not have failed.");
@@ -65,10 +68,11 @@ describe("RTCModule class", () => {
   describe("when receiving a message from Sharky", () => {
     it("should forward the message to the client defined callback", (done) => {
       let testCallback: Function = jasmine.createSpy("callback");
+      let result: object = { data: "result" }
       let rtcm: any = new RTCModule(testCallback, (url: string) => new WebSocketMock(url) );
       rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
-        rtcm.websocket.onmessage("test");
-        expect(testCallback).toHaveBeenCalledWith("test");
+        rtcm.websocket.onmessage(result);
+        expect(testCallback).toHaveBeenCalledWith("result");
         done();
       }).catch( (error: Error) => {
         console.log(error);
