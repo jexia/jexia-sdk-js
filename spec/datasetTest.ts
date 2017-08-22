@@ -1,5 +1,5 @@
 import { Dataset } from "../src/dataset";
-import { QueryExecuterFactory } from "../src/queryExecuterFactory";
+import { QueryExecuterBuilder } from "../src/queryExecuterBuilder";
 import { IRequestAdapter, IRequestOptions } from "../src/requestAdapter";
 import { TokenManager } from "../src/tokenManager";
 
@@ -20,7 +20,7 @@ describe("Dataset class", () => {
   describe("when instantiating a dataset object directly", () => {
     it("should create a valid object", (done) => {
         tokenManagerMock = new TokenManager(reqAdapterMock);
-        let qef: QueryExecuterFactory = new QueryExecuterFactory("appUrl", reqAdapterMock, tokenManagerMock);
+        let qef: QueryExecuterBuilder = new QueryExecuterBuilder("appUrl", reqAdapterMock, tokenManagerMock);
         let ds = new Dataset("rishabh", "test", qef);
         expect(ds).toBeDefined();
         done();
@@ -30,7 +30,7 @@ describe("Dataset class", () => {
   describe("when instantiating a dataset object directly", () => {
     it("should be able to call required methods on dataset", (done) => {
         tokenManagerMock = new TokenManager(reqAdapterMock);
-        let qef: QueryExecuterFactory = new QueryExecuterFactory("appUrl", reqAdapterMock, tokenManagerMock);
+        let qef: QueryExecuterBuilder = new QueryExecuterBuilder("appUrl", reqAdapterMock, tokenManagerMock);
         let ds = new Dataset("rishabh", "test", qef);
         let query = ds.select();
         expect(query).toBeDefined();

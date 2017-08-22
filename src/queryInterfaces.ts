@@ -2,27 +2,28 @@ import { Dataset } from "./dataset";
 import { ICondition } from "./filteringCondition";
 
 export interface IFields {
-    fields(...fields: string[]): object;
+  fields(...fields: string[]): IFields;
 }
 
 export interface ILimit {
-    limit(limit: number): object;
+  limit(limit: number): ILimit;
 }
 
 export interface IOffset {
-    offset(offset: number): object;
+  offset(offset: number): IOffset;
 }
 
-export interface IFilter {
-    filter(filter: ICondition): IFilter;
+export interface IFilterable {
+  filter(filter: ICondition): IFilterable;
 }
 
-export interface ISort {
-    sort(fields: string[], direction: string): object;
+export interface ISortable {
+  sortAsc(...fields: string[]): ISortable;
+  sortDesc(...fields: string[]): ISortable;
 }
 
-export interface IExecute {
-    execute(): Promise<any>;
+export interface IExecutable {
+  execute(): Promise<any>;
 }
 
 export interface IRelational {

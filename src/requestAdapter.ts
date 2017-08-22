@@ -48,7 +48,6 @@ export class RequestAdapter implements IRequestAdapter {
   constructor(private fetch: Function) {}
 
   public execute(uri: string, opt: IRequestOptions): Promise<any> {
-    console.log(`${opt.method} to ${uri} with body ${JSON.stringify(opt.body)}`);
     return this.fetch(uri, {body: JSON.stringify(opt.body), headers: opt.headers, method: opt.method})
       /* check response status */
       .then(status)

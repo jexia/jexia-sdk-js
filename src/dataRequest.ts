@@ -1,15 +1,15 @@
 import { compileDataRequest } from "./compiler/queryBasedCompiler";
-import { QueryExecuter } from "./queryExecuter";
-import { QuerySet } from "./querySet";
+import { RequestExecuter } from "./executer";
+import { Query } from "./query";
 
 export class DataRequest {
   private action: string;
-  private query: QuerySet;
+  private query: Query;
   private records: Array<object>;
 
   constructor(action: string, dataset: string) {
     this.action = action;
-    this.query = new QuerySet(dataset);
+    this.query = new Query(dataset);
   }
 
   public set Action(action: string){
@@ -20,7 +20,7 @@ export class DataRequest {
     return this.action;
   }
 
-  public get Query(): QuerySet {
+  public get Query(): Query {
     return this.query;
   }
 
@@ -32,7 +32,7 @@ export class DataRequest {
     return this.records;
   }
 
-  public execute(queryExecuter: QueryExecuter): Promise<any> {
-    return queryExecuter.executeQuery(compileDataRequest(this));
+  public execute(queryExecuter: RequestExecuter): Promise<any> {
+    return queryExecuter.executeRequest(compileDataRequest(this));
   }
 }

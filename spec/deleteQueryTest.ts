@@ -1,13 +1,13 @@
 import { DeleteQuery } from "../src/DeleteQuery";
 import { FilteringCondition } from "../src/filteringCondition";
-import { QueryExecuterFactory } from "../src/queryExecuterFactory";
+import { QueryExecuterBuilder } from "../src/queryExecuterBuilder";
 import { IRequestAdapter, IRequestOptions } from "../src/requestAdapter";
 import { TokenManager } from "../src/tokenManager";
 
 describe("DeleteQuery class", () => {
   let reqAdapterMock: IRequestAdapter;
   let tokenManagerMock: TokenManager;
-  let qefMock: QueryExecuterFactory;
+  let qefMock: QueryExecuterBuilder;
   let dataset: string;
 
   beforeAll( () => {
@@ -18,7 +18,7 @@ describe("DeleteQuery class", () => {
       },
     };
     tokenManagerMock = new TokenManager(reqAdapterMock);
-    qefMock = new QueryExecuterFactory("appUrl", reqAdapterMock, tokenManagerMock);
+    qefMock = new QueryExecuterBuilder("appUrl", reqAdapterMock, tokenManagerMock);
   });
 
   describe("when instantiating a deleteQuery object directly", () => {

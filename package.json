@@ -12,7 +12,8 @@
     "test:coverage": "npm run test && nyc report --reporter=html && opn coverage/index.html",
     "typedoc": "typedoc",
     "tsnode": "ts-node",
-    "docs": "rimraf docs && npm run typedoc -- --out ./docs --exclude \"**/*Test.ts\""
+    "docs": "rimraf docs && npm run typedoc -- --out ./docs --exclude \"**/*Test.ts\"",
+    "bundle": "webpack"
   },
   "repository": {
     "type": "git",

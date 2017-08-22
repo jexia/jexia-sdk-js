@@ -32,7 +32,7 @@ export class RTCModule implements IModule {
         this.websocket.onerror = (err) => {
           reject(err);
         };
-      });
+      }).then( () => this);
     });
   }
 

@@ -1,6 +1,6 @@
 import { DataRequest } from "../dataRequest";
 import { ICondition } from "../filteringCondition";
-import { QuerySet } from "../querySet";
+import { Query } from "../query";
 
 export interface ICompiledRequest {
     action: string;
@@ -36,9 +36,9 @@ export function compileDataRequest(dataRequest: DataRequest): ICompiledRequest {
 }
 
 export class QueryBasedCompiler {
-    private queryObject: QuerySet;
+    private queryObject: Query;
 
-    public constructor(queryObject: QuerySet) {
+    public constructor(queryObject: Query) {
         this.queryObject = queryObject;
     }
 
@@ -46,7 +46,7 @@ export class QueryBasedCompiler {
         return this.compileQueryOptions(this.queryObject);
     }
 
-    private compileLimitOffset(queryOptions: any, query: QuerySet): object {
+    private compileLimitOffset(queryOptions: any, query: Query): object {
         let range: any = {};
         if (query.Limit) {
             range.limit = query.Limit;
@@ -61,7 +61,7 @@ export class QueryBasedCompiler {
       return [condition.compile()];
     }
 
-    private compileQueryOptions(query: QuerySet): ICompiledQuery {
+    private compileQueryOptions(query: Query): ICompiledQuery {
       let compiledQueryOptions: any = {};
       if (query.Filter) {
         compiledQueryOptions.conditions = this.compileFilteringConditions(query.Filter);

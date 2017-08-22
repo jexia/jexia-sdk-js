@@ -1,7 +1,7 @@
 import { compileDataRequest, QueryBasedCompiler } from "../src/compiler/queryBasedCompiler";
 import { DataRequest } from "../src/dataRequest";
 import { FilteringCondition } from "../src/filteringCondition";
-import { QuerySet } from "../src/querySet";
+import { Query } from "../src/query";
 
 describe("compileDataRequest function", () => {
   let request: DataRequest;
@@ -50,7 +50,7 @@ describe("QueryBasedCompiler class", () => {
 
   describe("when receiving a Query with a limit set", () => {
     it("it compiles the Query to the expected object literal", () => {
-      let query = new QuerySet(dataset);
+      let query = new Query(dataset);
       query.Limit = 10;
       let compiler = new QueryBasedCompiler(query);
       expect(compiler.compile()).toEqual({range: {limit: 10}});
@@ -59,7 +59,7 @@ describe("QueryBasedCompiler class", () => {
 
   describe("when receiving a Query with an offset set", () => {
     it("it compiles the Query to the expected object literal", () => {
-      let query = new QuerySet(dataset);
+      let query = new Query(dataset);
       query.Offset = 10;
       let compiler = new QueryBasedCompiler(query);
       expect(compiler.compile()).toEqual({range: {offset: 10}});
@@ -68,7 +68,7 @@ describe("QueryBasedCompiler class", () => {
 
   describe("when receiving a Query with fields set", () => {
     it("it compiles the Query to the expected object literal", () => {
-      let query = new QuerySet(dataset);
+      let query = new Query(dataset);
       query.Fields = fields;
       let compiler = new QueryBasedCompiler(query);
       expect(compiler.compile()).toEqual({fields});
@@ -77,7 +77,7 @@ describe("QueryBasedCompiler class", () => {
 
   describe("when receiving a Query with a filter set", () => {
     it("it compiles the Query to the expected object literal", () => {
-      let query = new QuerySet(dataset);
+      let query = new Query(dataset);
       query.Filter = new FilteringCondition("field", "operator", "value");
       let compiler = new QueryBasedCompiler(query);
       expect(compiler.compile()).toEqual({
@@ -88,7 +88,7 @@ describe("QueryBasedCompiler class", () => {
 
   describe("when receiving a Query with a sorting condition set", () => {
     it("it compiles the Query to the expected object literal", () => {
-      let query = new QuerySet(dataset);
+      let query = new Query(dataset);
       query.AddSortCondition("ASC", "field1", "field2");
       let compiler = new QueryBasedCompiler(query);
       expect(compiler.compile()).toEqual({
@@ -99,7 +99,7 @@ describe("QueryBasedCompiler class", () => {
 
   describe("when receiving a Query with Data set", () => {
     it("compiles the query to the expected object literal", () => {
-      let query = new QuerySet(dataset);
+      let query = new Query(dataset);
       query.Data = data;
       let compiler = new QueryBasedCompiler(query);
       expect(compiler.compile()).toEqual({data});
@@ -108,7 +108,7 @@ describe("QueryBasedCompiler class", () => {
 
   describe("when receiving a Query with all options set", () => {
     it("it compiles the Query to the expected object literal", () => {
-      let query = new QuerySet(dataset);
+      let query = new Query(dataset);
       query.Offset = 10;
       query.Limit = 10;
       query.Fields = fields;
@@ -157,8 +157,8 @@ describe("Request - Query compiling integration tests", () => {
   describe("when setting up a request with one level of relations nesting", () => {
     it("gets compiled to an object literal as expected by the back-end", () => {
       let fields = ["field1", "field2"];
-      let relation1 = new QuerySet("relation1");
-      let relation2 = new QuerySet("relation2");
+      let relation1 = new Query("relation1");
+      let relation2 = new Query("relation2");
       relation1.Fields = fields;
       relation2.Fields = fields;
       request.Query.Fields = fields;
@@ -181,10 +181,10 @@ describe("Request - Query compiling integration tests", () => {
   describe("when setting up a request with two levels of relations nesting", () => {
     it("gets compiled to an object literal as expected by the back-end", () => {
       let fields = ["field1", "field2"];
-      let relation1 = new QuerySet("relation1");
-      let relation2 = new QuerySet("relation2");
-      let relation3 = new QuerySet("relation3");
-      let relation4 = new QuerySet("relation4");
+      let relation1 = new Query("relation1");
+      let relation2 = new Query("relation2");
+      let relation3 = new Query("relation3");
+      let relation4 = new Query("relation4");
       relation1.Fields = fields;
       relation2.Fields = fields;
       relation3.Fields = fields;

@@ -1,17 +1,17 @@
 import { DataRequest } from "./dataRequest";
-import { QueryExecuter } from "./queryExecuter";
-import { IExecute} from "./queryInterfaces";
+import { RequestExecuter } from "./executer";
+import { IExecutable} from "./queryInterfaces";
 
-export class InsertQuery implements  IExecute {
-    private request: DataRequest;
-    private queryExecuter: QueryExecuter;
+export class InsertQuery implements  IExecutable {
+  private request: DataRequest;
+  private queryExecuter: RequestExecuter;
 
-    public constructor(queryExecuter: QueryExecuter, records: Array<object>, dataset: string) {
-        this.request = new DataRequest("insert", dataset);
-        this.queryExecuter = queryExecuter;
-        this.request.Records = records;
-    }
-    public execute() {
-        return this.request.execute(this.queryExecuter);
-    }
+  public constructor(queryExecuter: RequestExecuter, records: Array<object>, dataset: string) {
+    this.request = new DataRequest("insert", dataset);
+    this.queryExecuter = queryExecuter;
+    this.request.Records = records;
+  }
+  public execute() {
+    return this.request.execute(this.queryExecuter);
+  }
 }

@@ -1,18 +1,18 @@
 import { DeleteQuery} from "./deleteQuery";
+import { RequestExecuter } from "./executer";
 import { InsertQuery} from "./insertQuery";
-import { QueryExecuter } from "./queryExecuter";
-import { QueryExecuterFactory } from "./queryExecuterFactory";
+import { QueryExecuterBuilder } from "./queryExecuterBuilder";
 import { SelectQuery} from "./selectQuery";
 import { UpdateQuery} from "./updateQuery";
 
 export class Dataset {
     private dataSchema: string;
     private dataset: string;
-    private queryExecuter: QueryExecuter;
-    public constructor(schema: string, dataset: string, queryExecutorFactory: QueryExecuterFactory) {
+    private queryExecuterBuilder: RequestExecuter;
+    public constructor(schema: string, dataset: string, queryExecuterBuilder: QueryExecuterBuilder) {
         this.dataSchema = schema;
         this.dataset = dataset;
-        this.queryExecuter = queryExecutorFactory.createQueryExecuter(this.dataSchema, this.dataset);
+        this.queryExecuterBuilder = queryExecuterBuilder.createQueryExecuter(this.dataSchema, this.dataset);
     }
 
     public get name(): string {
@@ -24,15 +24,15 @@ export class Dataset {
     }
 
     public select() {
-        return new SelectQuery(this.queryExecuter, this.dataset);
+        return new SelectQuery(this.queryExecuterBuilder, this.dataset);
     }
     public update(data: object) {
-        return new UpdateQuery(this.queryExecuter, data, this.dataset);
+        return new UpdateQuery(this.queryExecuterBuilder, data, this.dataset);
     }
     public insert(records: Array<object>) {
-        return new InsertQuery(this.queryExecuter, records, this.dataset);
+        return new InsertQuery(this.queryExecuterBuilder, records, this.dataset);
     }
     public delete() {
-        return new DeleteQuery(this.queryExecuter, this.dataset);
+        return new DeleteQuery(this.queryExecuterBuilder, this.dataset);
     }
 }

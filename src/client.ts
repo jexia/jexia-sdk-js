@@ -1,7 +1,7 @@
 import { Dataset } from "./dataset";
 import { CompositeFilteringCondition, FilteringCondition, ICondition } from "./filteringCondition";
 import { IModule } from "./module";
-import { QueryExecuterFactory } from "./queryExecuterFactory";
+import { QueryExecuterBuilder } from "./queryExecuterBuilder";
 import { IRequestAdapter, RequestAdapter } from "./requestAdapter";
 import { IAuthOptions, TokenManager } from "./tokenManager";
 
@@ -13,7 +13,7 @@ export default class Client {
   /* application URL */
   private appUrl: string;
   private appIp: string;
-  private queryExecuter: QueryExecuterFactory;
+  private queryExecuterBuilder: QueryExecuterBuilder;
 
   public constructor(private fetch: Function) {
     this.requestAdapter = new RequestAdapter(this.fetch);
@@ -30,7 +30,7 @@ export default class Client {
     this.appUrl = `http://${opts.appUrl}:8080`;
     opts = {appUrl: this.appUrl, key: opts.key, secret: opts.secret};
 
-    this.queryExecuter = new QueryExecuterFactory(this.appUrl, this.requestAdapter, this.tokenManager);
+    this.queryExecuterBuilder = new QueryExecuterBuilder(this.appUrl, this.requestAdapter, this.tokenManager);
 
     return this.tokenManager.init(opts)
       /* init all modules */
@@ -47,11 +47,11 @@ export default class Client {
   }
 
   public dataset(dataset: string, schema: string = "public"): Dataset {
-    if (this.queryExecuter == null) {
+    if (this.queryExecuterBuilder == null) {
       throw new Error("Client has not been initialised properly. Please instantiate \
                       client for invoking this method");
     }
-    return new Dataset(schema, dataset, this.queryExecuter);
+    return new Dataset(schema, dataset, this.queryExecuterBuilder);
   }
 }
 
@@ -65,5 +65,5 @@ export function condition(field: string, operator: string, value: string): Filte
 
 export function complexCondition(filteringCondition: ICondition,
                                  logicalOperatorType: string): CompositeFilteringCondition {
-    return new CompositeFilteringCondition(filteringCondition, logicalOperatorType);
+  return new CompositeFilteringCondition(filteringCondition, logicalOperatorType);
 }

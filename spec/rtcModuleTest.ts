@@ -1,5 +1,5 @@
 import { Dataset } from "../src/dataset";
-import { QueryExecuterFactory } from "../src/queryExecuterFactory";
+import { QueryExecuterBuilder } from "../src/queryExecuterBuilder";
 import { IRequestAdapter, IRequestOptions } from "../src/requestAdapter";
 import { RTCModule } from "../src/rtcModule";
 
@@ -50,7 +50,7 @@ describe("RTCModule class", () => {
       let datasetName: string = "datasetName";
       let dataSchemaName: string = "dataSchemaName";
       let actionName: string = "select";
-      let qef: QueryExecuterFactory = new QueryExecuterFactory(testurl, reqAdapterMock, tokenManagerMock);
+      let qef: QueryExecuterBuilder = new QueryExecuterBuilder(testurl, reqAdapterMock, tokenManagerMock);
       let ds: Dataset = new Dataset(dataSchemaName, datasetName, qef);
       rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
         spyOn(rtcm, "send");
@@ -68,14 +68,13 @@ describe("RTCModule class", () => {
   describe("when receiving a message from Sharky", () => {
     it("should forward the message to the client defined callback", (done) => {
       let testCallback: Function = jasmine.createSpy("callback");
-      let result: object = { data: "result" }
+      let result: object = { data: "result" };
       let rtcm: any = new RTCModule(testCallback, (url: string) => new WebSocketMock(url) );
       rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
         rtcm.websocket.onmessage(result);
         expect(testCallback).toHaveBeenCalledWith("result");
         done();
       }).catch( (error: Error) => {
-        console.log(error);
         done.fail("Initializing the RTCModule should not have failed.");
       });
     });
