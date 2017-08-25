@@ -1,6 +1,9 @@
 import { IRequestAdapter, Methods } from "./requestAdapter";
-/* AUTH module URL */
-const authURL = "/auth";
+
+const authURL = "auth";
+const protocol = "http";
+const httpPort = "8080";
+
 /* default refresh token interval: 1 hour and 50 minutes; JEXIA tokens expire in 2 hours */
 const delay = 1000 * 60 * 110;
 
@@ -49,7 +52,7 @@ export class TokenManager {
         /* start refresh loop */
         this.refreshInterval = setInterval(() => {
           /* replace existing tokens with new ones */
-          this.tokens = this.refresh(opts);
+          this.tokens = this.refresh(opts.appUrl);
           /* exit refresh loop on failure */
           this.tokens.catch((err: Error) => this.terminate());
         }, opts.refreshInterval || delay);
@@ -64,7 +67,7 @@ export class TokenManager {
   private login(opts: IAuthOptions): Promise<IAuthToken> {
     /* no need to wait for tokens */
     return this.requestAdapter
-      .execute(`${opts.appUrl}${authURL}`, {body: {email: opts.key, password: opts.secret}, method: Methods.POST})
+      .execute(this.buildLoginUrl(opts.appUrl), {body: {email: opts.key, password: opts.secret}, method: Methods.POST})
       /* convert response to IAuthToken interface */
       .then((tokens: Tokens) => ({token: tokens.token, refreshToken: tokens.refresh_token} as IAuthToken))
       /* catch login error */
@@ -74,11 +77,15 @@ export class TokenManager {
       });
   }
 
-  private refresh(opts: IAuthOptions): Promise<IAuthToken> {
+  private buildLoginUrl(appUrl: string): string {
+    return `${protocol}://${appUrl}:${httpPort}/${authURL}`;
+  }
+
+  private refresh(appUrl: string): Promise<IAuthToken> {
     /* wait for tokens */
     return this.tokens
       /* wait for tokens */
-      .then((tokens: IAuthToken) => this.requestAdapter.execute(`${opts.appUrl}${authURL}`, {
+      .then((tokens: IAuthToken) => this.requestAdapter.execute(this.buildLoginUrl(appUrl), {
           body: {refresh_token: tokens.refreshToken}, headers: {Authorization: tokens.token}, method: Methods.PATCH,
         }),
       )

@@ -8,7 +8,7 @@ describe("QueryExecuter class", () => {
   const dataset = "dataset";
   const schema = "schema";
   const url = "appurl";
-  const queryUrl = `${url}/sdk-api/${schema}/${dataset}`;
+  const queryUrl = `http://${url}:8080/sdk-api/${schema}/${dataset}`;
 
   beforeAll( () => {
     tokenManagerMock = {

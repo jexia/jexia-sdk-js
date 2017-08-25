@@ -3,6 +3,8 @@ import { IRequestAdapter, IRequestOptions, Methods } from "./requestAdapter";
 import { TokenManager } from "./tokenManager";
 
 const apiEndpoint = "sdk-api";
+const protocol = "http";
+const httpPort = "8080";
 
 export class RequestExecuter {
   constructor(private appUrl: string,
@@ -20,6 +22,6 @@ export class RequestExecuter {
   }
 
   private getRequestUrl(): string {
-    return `${this.appUrl}/${apiEndpoint}/${this.schemaName}/${this.dataSetName}`;
+    return `${protocol}://${this.appUrl}:${httpPort}/${apiEndpoint}/${this.schemaName}/${this.dataSetName}`;
   }
 }
