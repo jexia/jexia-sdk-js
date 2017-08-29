@@ -1,7 +1,4 @@
-import { Dataset } from "./dataset";
-import { CompositeFilteringCondition, FilteringCondition, ICondition } from "./filteringCondition";
 import { IModule } from "./module";
-import { QueryExecuterBuilder } from "./queryExecuterBuilder";
 import { IRequestAdapter, RequestAdapter } from "./requestAdapter";
 import { IAuthOptions, TokenManager } from "./tokenManager";
 
@@ -12,7 +9,6 @@ export default class Client {
   public requestAdapter: IRequestAdapter;
   /* application URL */
   private appUrl: string;
-  private queryExecuterBuilder: QueryExecuterBuilder;
 
   public constructor(private fetch: Function) {
     this.requestAdapter = new RequestAdapter(this.fetch);
@@ -21,8 +17,7 @@ export default class Client {
 
   public init(opts: IAuthOptions, ...modules: IModule[]): Promise<Client> {
     /* save only appUrl (do not store key and secret) */
-
-    this.queryExecuterBuilder = new QueryExecuterBuilder(this.appUrl, this.requestAdapter, this.tokenManager);
+    this.appUrl = opts.appUrl;
 
     return this.tokenManager.init(opts)
       /* init all modules */
@@ -37,25 +32,8 @@ export default class Client {
         throw err;
       });
   }
-
-  public dataset(dataset: string, schema: string = "public"): Dataset {
-    if (this.queryExecuterBuilder == null) {
-      throw new Error("Client has not been initialised properly. Please instantiate \
-                      client for invoking this method");
-    }
-    return new Dataset(schema, dataset, this.queryExecuterBuilder);
-  }
 }
 
 export function authenticate(appUrl: string, key: string, secret: string): IAuthOptions {
   return {appUrl, key, secret};
-}
-
-export function condition(field: string, operator: string, value: string): FilteringCondition {
-  return new FilteringCondition(field, operator, value);
-}
-
-export function complexCondition(filteringCondition: ICondition,
-                                 logicalOperatorType: string): CompositeFilteringCondition {
-  return new CompositeFilteringCondition(filteringCondition, logicalOperatorType);
 }

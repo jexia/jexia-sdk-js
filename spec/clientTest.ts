@@ -3,6 +3,7 @@ import { IModule } from "../src/module";
 import { IHTTPResponse, IRequestAdapter, IRequestOptions } from "../src/requestAdapter";
 import { TokenManager } from "../src/tokenManager";
 import { mockRequestAdapter } from "./requestAdapterTest";
+import { requestAdapterMockFactory } from "./testUtils";
 
 const errFailedToInitModule = new Error("failed to init module");
 
@@ -82,6 +83,24 @@ describe("Class: Client", () => {
           expect((client.tokenManager as any).refreshInterval._repeat).toBeNull();
           done();
         });
+    });
+
+    it("should pass the correct parameters to the modules", (done) => {
+      spyOn(mockModuleSuccess, "init");
+      let adapterMock = requestAdapterMockFactory().genericSuccesfulExecution();
+      let tokenManagerMock = new TokenManager(adapterMock);
+      let validUrl = "validUrl";
+      let client = new Client((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
+        return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve()} as IHTTPResponse);
+      });
+      (client as any).tokenManager = tokenManagerMock;
+      (client as any).requestAdapter = adapterMock;
+      client.init({appUrl: validUrl, key: "validKey", secret: "validSecret"}, mockModuleSuccess).then( () => {
+        expect(mockModuleSuccess.init).toHaveBeenCalledWith(validUrl, tokenManagerMock, adapterMock);
+        done();
+      }).catch( (err) => {
+        done.fail(`init should not have failed: ${err.message}`);
+      });
     });
 
     it("should not fail if passed multiple modules and all are loaded successfully", (done) => {
