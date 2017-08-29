@@ -10,9 +10,9 @@
     "transpile": "npm run cleanup && tsc",
     "test": "npm run transpile && nyc jasmine",
     "test:coverage": "npm run test && nyc report --reporter=html && opn coverage/index.html",
-    "typedoc": "typedoc",
     "tsnode": "ts-node",
-    "docs": "rimraf docs && npm run typedoc -- --out ./docs --exclude \"**/*Test.ts\"",
+    "compodoc": "compodoc",
+    "docs": "rimraf docs && npm run compodoc -- src -p tsconfig.json --disablePrivateOrInternalSupport --disableCoverage --disableSourceCode --output docs",
     "bundle": "webpack"
   },
   "repository": {
@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/jexia-com/jexia-sdk-js#readme",
   "devDependencies": {
+    "@compodoc/compodoc": "^1.0.0-beta.14",
     "@types/jasmine": "2.5.47",
     "@types/node": "^7.0.18",
     "@types/node-fetch": "1.6.7",
@@ -39,7 +40,6 @@
     "ts-node": "^2.1.0",
     "tslint": "^4.5.1",
     "tslint-loader": "^3.5.3",
-    "typedoc": "^0.7.1",
     "typescript": "^2.3.0",
     "webpack": "^2.4.1",
     "webpack-uglify-js-plugin": "^1.1.9",
