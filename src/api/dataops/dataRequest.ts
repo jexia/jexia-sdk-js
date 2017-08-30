@@ -20,6 +20,9 @@ export class DataRequest {
     return this.action;
   }
 
+  /**
+   * @internal
+   */
   public get Query(): Query {
     return this.query;
   }

@@ -6,7 +6,7 @@ export default class Client {
   /* token manager (responsible for getting fresh and valid token), should be injected to plugins/modules (if needed) */
   public tokenManager: TokenManager;
   /* request adapter */
-  public requestAdapter: IRequestAdapter;
+  private requestAdapter: IRequestAdapter;
   /* application URL */
   private appUrl: string;
 

@@ -12,7 +12,7 @@
     "test:coverage": "npm run test && nyc report --reporter=html && opn coverage/index.html",
     "tsnode": "ts-node",
     "compodoc": "compodoc",
-    "docs": "rimraf docs && npm run compodoc -- src -p tsconfig.json --disablePrivateOrInternalSupport --disableCoverage --disableSourceCode --output docs",
+    "docs": "rimraf docs && npm run compodoc -- src/api -p tsconfig.json --disablePrivateOrInternalSupport --disableCoverage --disableSourceCode --name \"Jexia Javascript SDK\" --output docs --includes extra_docs",
     "bundle": "webpack"
   },
   "repository": {
