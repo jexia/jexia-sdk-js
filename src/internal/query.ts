@@ -1,4 +1,4 @@
-import { ICondition } from "./filteringCondition";
+import { ICondition } from "../api/dataops/filteringCondition";
 
 interface ISort {
   fields: string[];

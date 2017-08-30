@@ -1,7 +1,7 @@
-import Client from "../src/client";
-import { IModule } from "../src/module";
-import { IHTTPResponse, IRequestAdapter, IRequestOptions } from "../src/requestAdapter";
-import { TokenManager } from "../src/tokenManager";
+import Client from "../src/api/core/client";
+import { IModule } from "../src/api/core/module";
+import { TokenManager } from "../src/api/core/tokenManager";
+import { IHTTPResponse, IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
 import { mockRequestAdapter } from "./requestAdapterTest";
 import { requestAdapterMockFactory } from "./testUtils";
 

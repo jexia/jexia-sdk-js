@@ -1,6 +1,6 @@
-import { ICompiledRequest } from "./compiler/queryBasedCompiler";
+import { TokenManager } from "../api/core/tokenManager";
+import { ICompiledRequest } from "./queryBasedCompiler";
 import { IRequestAdapter, IRequestOptions, Methods } from "./requestAdapter";
-import { TokenManager } from "./tokenManager";
 
 const apiEndpoint = "sdk-api";
 const protocol = "http";

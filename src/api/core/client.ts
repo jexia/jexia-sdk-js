@@ -1,5 +1,5 @@
+import { IRequestAdapter, RequestAdapter } from "../../internal/requestAdapter";
 import { IModule } from "./module";
-import { IRequestAdapter, RequestAdapter } from "./requestAdapter";
 import { IAuthOptions, TokenManager } from "./tokenManager";
 
 export default class Client {

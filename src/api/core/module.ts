@@ -1,4 +1,4 @@
-import { IRequestAdapter } from "./requestAdapter";
+import { IRequestAdapter } from "../../internal/requestAdapter";
 import { TokenManager } from "./tokenManager";
 
 export interface IModule {

@@ -1,6 +1,6 @@
-import { compileDataRequest } from "./compiler/queryBasedCompiler";
-import { RequestExecuter } from "./executer";
-import { Query } from "./query";
+import { RequestExecuter } from "../../internal/executer";
+import { Query } from "../../internal/query";
+import { compileDataRequest } from "../../internal/queryBasedCompiler";
 
 export class DataRequest {
   private action: string;

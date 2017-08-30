@@ -1,6 +1,6 @@
+import { TokenManager } from "../api/core/tokenManager";
 import { RequestExecuter } from "./executer";
 import { IRequestAdapter } from "./requestAdapter";
-import { TokenManager } from "./tokenManager";
 
 export class QueryExecuterBuilder {
   constructor(private appUrl: string, private requestAdapter: IRequestAdapter, private tokenManager: TokenManager) {  }

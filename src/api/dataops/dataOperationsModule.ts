@@ -1,9 +1,9 @@
+import { QueryExecuterBuilder } from "../../internal/queryExecuterBuilder";
+import { IRequestAdapter } from "../../internal/requestAdapter";
+import { IModule } from "../core/module";
+import { TokenManager } from "../core/tokenManager";
 import { Dataset } from "./dataset";
 import { CompositeFilteringCondition, FilteringCondition, ICondition } from "./filteringCondition";
-import { IModule } from "./module";
-import { QueryExecuterBuilder } from "./queryExecuterBuilder";
-import { IRequestAdapter } from "./requestAdapter";
-import { TokenManager } from "./tokenManager";
 
 export default class DataOperationsModule implements IModule {
   private queryExecuterBuilder: QueryExecuterBuilder;

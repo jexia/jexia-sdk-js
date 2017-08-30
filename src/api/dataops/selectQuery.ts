@@ -1,6 +1,6 @@
+import { RequestExecuter } from "../../internal/executer";
 import { DataRequest } from "./dataRequest";
 import { Dataset } from "./dataset";
-import { RequestExecuter } from "./executer";
 import { ICondition } from "./filteringCondition";
 import { IExecutable, IFields, IFilterable, ILimit, IOffset, IRelational, ISortable } from "./queryInterfaces";
 

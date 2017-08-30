@@ -1,5 +1,5 @@
 // tslint:disable:max-line-length
-import { IAuthToken, TokenManager } from "../src/tokenManager";
+import { IAuthToken, TokenManager } from "../src/api/core/tokenManager";
 import { requestAdapterMockFactory } from "./testUtils";
 const validURL = "validUrl";
 

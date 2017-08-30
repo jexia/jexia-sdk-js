@@ -1,7 +1,7 @@
-import { Dataset } from "./dataset";
-import { IModule } from "./module";
-import { IRequestAdapter } from "./requestAdapter";
-import { TokenManager } from "./tokenManager";
+import { IRequestAdapter } from "../../internal/requestAdapter";
+import { IModule } from "../core/module";
+import { TokenManager } from "../core/tokenManager";
+import { Dataset } from "../dataops/dataset";
 
 export class RTCModule implements IModule {
   private websocket: WebSocket;

@@ -1,7 +1,7 @@
-import { compileDataRequest, QueryBasedCompiler } from "../src/compiler/queryBasedCompiler";
-import { DataRequest } from "../src/dataRequest";
-import { FilteringCondition } from "../src/filteringCondition";
-import { Query } from "../src/query";
+import { DataRequest } from "../src/api/dataops/dataRequest";
+import { FilteringCondition } from "../src/api/dataops/filteringCondition";
+import { Query } from "../src/internal/query";
+import { compileDataRequest, QueryBasedCompiler } from "../src/internal/queryBasedCompiler";
 
 describe("compileDataRequest function", () => {
   let request: DataRequest;

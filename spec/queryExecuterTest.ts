@@ -1,5 +1,5 @@
-import { RequestExecuter } from "../src/executer";
-import { IRequestAdapter, IRequestOptions, Methods } from "../src/requestAdapter";
+import { RequestExecuter } from "../src/internal/executer";
+import { IRequestAdapter, IRequestOptions, Methods } from "../src/internal/requestAdapter";
 
 describe("QueryExecuter class", () => {
   let reqAdapterMock: IRequestAdapter;

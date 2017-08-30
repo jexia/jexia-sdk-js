@@ -1,7 +1,7 @@
-import { Dataset } from "../src/dataset";
-import { QueryExecuterBuilder } from "../src/queryExecuterBuilder";
-import { IRequestAdapter, IRequestOptions } from "../src/requestAdapter";
-import { TokenManager } from "../src/tokenManager";
+import { TokenManager } from "../src/api/core/tokenManager";
+import { Dataset } from "../src/api/dataops/dataset";
+import { QueryExecuterBuilder } from "../src/internal/queryExecuterBuilder";
+import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
 
 describe("Dataset class", () => {
   let reqAdapterMock: IRequestAdapter;

@@ -1,4 +1,4 @@
-import { IRequestAdapter, IRequestOptions } from "../src/requestAdapter";
+import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
 
 class RequestAdapterMockFactory {
   public genericSuccesfulExecution(): IRequestAdapter {

@@ -1,5 +1,5 @@
+import { RequestExecuter } from "../../internal/executer";
 import { DataRequest } from "./dataRequest";
-import { RequestExecuter } from "./executer";
 import { ICondition } from "./filteringCondition";
 import { IExecutable, IFilterable, ILimit, IOffset, ISortable } from "./queryInterfaces";
 

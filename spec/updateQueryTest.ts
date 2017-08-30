@@ -1,8 +1,8 @@
-import { FilteringCondition } from "../src/filteringCondition";
-import { QueryExecuterBuilder } from "../src/queryExecuterBuilder";
-import { IRequestAdapter, IRequestOptions } from "../src/requestAdapter";
-import { TokenManager } from "../src/tokenManager";
-import { UpdateQuery } from "../src/UpdateQuery";
+import { TokenManager } from "../src/api/core/tokenManager";
+import { FilteringCondition } from "../src/api/dataops/filteringCondition";
+import { UpdateQuery } from "../src/api/dataops/UpdateQuery";
+import { QueryExecuterBuilder } from "../src/internal/queryExecuterBuilder";
+import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
 
 describe("UpdateQuery class", () => {
   let reqAdapterMock: IRequestAdapter;

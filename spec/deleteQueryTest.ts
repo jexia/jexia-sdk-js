@@ -1,8 +1,8 @@
-import { DeleteQuery } from "../src/DeleteQuery";
-import { FilteringCondition } from "../src/filteringCondition";
-import { QueryExecuterBuilder } from "../src/queryExecuterBuilder";
-import { IRequestAdapter, IRequestOptions } from "../src/requestAdapter";
-import { TokenManager } from "../src/tokenManager";
+import { TokenManager } from "../src/api/core/tokenManager";
+import { DeleteQuery } from "../src/api/dataops/DeleteQuery";
+import { FilteringCondition } from "../src/api/dataops/filteringCondition";
+import { QueryExecuterBuilder } from "../src/internal/queryExecuterBuilder";
+import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
 
 describe("DeleteQuery class", () => {
   let reqAdapterMock: IRequestAdapter;

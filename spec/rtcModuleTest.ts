@@ -1,7 +1,7 @@
-import { Dataset } from "../src/dataset";
-import { QueryExecuterBuilder } from "../src/queryExecuterBuilder";
-import { IRequestAdapter, IRequestOptions } from "../src/requestAdapter";
-import { RTCModule } from "../src/rtcModule";
+import { Dataset } from "../src/api/dataops/dataset";
+import { RTCModule } from "../src/api/realtime/rtcModule";
+import { QueryExecuterBuilder } from "../src/internal/queryExecuterBuilder";
+import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
 
 class WebSocketMock {
   public url: string;

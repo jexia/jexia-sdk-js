@@ -1,4 +1,4 @@
-import { IRequestAdapter, Methods } from "./requestAdapter";
+import { IRequestAdapter, Methods } from "../../internal/requestAdapter";
 
 const authURL = "auth";
 const protocol = "http";

@@ -1,7 +1,7 @@
-import { InsertQuery } from "../src/insertQuery";
-import { QueryExecuterBuilder } from "../src/queryExecuterBuilder";
-import { IRequestAdapter, IRequestOptions } from "../src/requestAdapter";
-import { TokenManager } from "../src/tokenManager";
+import { TokenManager } from "../src/api/core/tokenManager";
+import { InsertQuery } from "../src/api/dataops/insertQuery";
+import { QueryExecuterBuilder } from "../src/internal/queryExecuterBuilder";
+import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
 
 describe("InsertQuery class", () => {
   let reqAdapterMock: IRequestAdapter;

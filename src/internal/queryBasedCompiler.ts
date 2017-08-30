@@ -1,6 +1,6 @@
-import { DataRequest } from "../dataRequest";
-import { ICondition } from "../filteringCondition";
-import { Query } from "../query";
+import { DataRequest } from "../api/dataops/dataRequest";
+import { ICondition } from "../api/dataops/filteringCondition";
+import { Query } from "./query";
 
 export interface ICompiledRequest {
     action: string;

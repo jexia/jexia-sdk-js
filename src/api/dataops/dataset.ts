@@ -1,7 +1,7 @@
+import { RequestExecuter } from "../../internal/executer";
+import { QueryExecuterBuilder } from "../../internal/queryExecuterBuilder";
 import { DeleteQuery} from "./deleteQuery";
-import { RequestExecuter } from "./executer";
 import { InsertQuery} from "./insertQuery";
-import { QueryExecuterBuilder } from "./queryExecuterBuilder";
 import { SelectQuery} from "./selectQuery";
 import { UpdateQuery} from "./updateQuery";
 

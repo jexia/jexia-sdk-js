@@ -1,5 +1,5 @@
+import { RequestExecuter } from "../../internal/executer";
 import { DataRequest } from "./dataRequest";
-import { RequestExecuter } from "./executer";
 import { IExecutable} from "./queryInterfaces";
 
 export class InsertQuery implements  IExecutable {
