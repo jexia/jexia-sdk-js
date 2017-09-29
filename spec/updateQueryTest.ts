@@ -1,6 +1,6 @@
 import { TokenManager } from "../src/api/core/tokenManager";
 import { FilteringCondition } from "../src/api/dataops/filteringCondition";
-import { UpdateQuery } from "../src/api/dataops/UpdateQuery";
+import { UpdateQuery } from "../src/api/dataops/updateQuery";
 import { QueryExecuterBuilder } from "../src/internal/queryExecuterBuilder";
 import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
 

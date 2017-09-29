@@ -1,5 +1,5 @@
 import { TokenManager } from "../src/api/core/tokenManager";
-import { DeleteQuery } from "../src/api/dataops/DeleteQuery";
+import { DeleteQuery } from "../src/api/dataops/deleteQuery";
 import { FilteringCondition } from "../src/api/dataops/filteringCondition";
 import { QueryExecuterBuilder } from "../src/internal/queryExecuterBuilder";
 import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
