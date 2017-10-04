@@ -62,6 +62,8 @@ export class TokenManager {
 
   public terminate() {
     clearInterval(this.refreshInterval);
+    delete this.tokens;
+    return
   }
 
   private login(opts: IAuthOptions): Promise<IAuthToken> {

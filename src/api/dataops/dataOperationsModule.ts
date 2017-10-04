@@ -22,6 +22,11 @@ export default class DataOperationsModule implements IModule {
     }
     return new Dataset(schema, dataset, this.queryExecuterBuilder);
   }
+
+  public terminate(): Promise<any> {
+    delete this.queryExecuterBuilder;
+    return Promise.resolve(this);
+  }
 }
 
 export function condition(field: string, operator: string, value: string): FilteringCondition {
