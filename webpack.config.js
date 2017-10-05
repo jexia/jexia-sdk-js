@@ -1,4 +1,5 @@
 const ugly = require('webpack-uglify-js-plugin');
+const webpack = require('webpack');
 const path = require('path');
 
 // common SDK config
@@ -29,7 +30,7 @@ const common = {
     ]
   },
   resolve: {
-    extensions: [".ts", ".js"]
+    extensions: [".ts", ".js"],
   },
   plugins: [
     new ugly({
@@ -44,7 +45,11 @@ const common = {
         warnings: false
       },
       include: /\.min\.js$/
-    })
+    }),
+    new webpack.NormalModuleReplacementPlugin(
+      /src\/config\/config.ts/,
+      './config.prod.ts'
+    ),
   ]
 };
 

@@ -1,10 +1,7 @@
 import { TokenManager } from "../api/core/tokenManager";
 import { ICompiledRequest } from "./queryBasedCompiler";
 import { IRequestAdapter, IRequestOptions, Methods } from "./requestAdapter";
-
-const apiEndpoint = "sdk-api";
-const protocol = "http";
-const httpPort = "8080";
+import { API } from '../config/config';
 
 export class RequestExecuter {
   constructor(private appUrl: string,
@@ -22,6 +19,6 @@ export class RequestExecuter {
   }
 
   private getRequestUrl(): string {
-    return `${protocol}://${this.appUrl}:${httpPort}/${apiEndpoint}/${this.schemaName}/${this.dataSetName}`;
+    return `${API.PROTOCOL}://${this.appUrl}:${API.PORT}/${API.SDKAPI}/${this.schemaName}/${this.dataSetName}`;
   }
 }

@@ -13,7 +13,7 @@
     "tsnode": "ts-node",
     "compodoc": "compodoc",
     "docs": "rimraf docs && npm run compodoc -- src/api -p tsconfig.json --disablePrivateOrInternalSupport --disableCoverage --disableSourceCode --name \"Jexia Javascript SDK\" --output docs --includes extra_docs",
-    "bundle": "webpack"
+    "bundle": "webpack -p"
   },
   "repository": {
     "type": "git",

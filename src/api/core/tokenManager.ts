@@ -1,11 +1,5 @@
+import { API, DELAY } from "../../config/config";
 import { IRequestAdapter, Methods } from "../../internal/requestAdapter";
-
-const authURL = "auth";
-const protocol = "http";
-const httpPort = "8080";
-
-/* default refresh token interval: 1 hour and 50 minutes; JEXIA tokens expire in 2 hours */
-const delay = 1000 * 60 * 110;
 
 type Tokens = {token: string, refresh_token: string};
 
@@ -55,7 +49,7 @@ export class TokenManager {
           this.tokens = this.refresh(opts.appUrl);
           /* exit refresh loop on failure */
           this.tokens.catch((err: Error) => this.terminate());
-        }, opts.refreshInterval || delay);
+        }, opts.refreshInterval || DELAY);
       })
       .then(() => this);
   }
@@ -80,7 +74,7 @@ export class TokenManager {
   }
 
   private buildLoginUrl(appUrl: string): string {
-    return `${protocol}://${appUrl}:${httpPort}/${authURL}`;
+    return `${API.PROTOCOL}://${appUrl}:${API.PORT}/${API.AUTHURL}`;
   }
 
   private refresh(appUrl: string): Promise<IAuthToken> {

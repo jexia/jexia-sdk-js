@@ -2,15 +2,8 @@ import { IRequestAdapter } from "../../internal/requestAdapter";
 import { IModule } from "../core/module";
 import { TokenManager } from "../core/tokenManager";
 import { Dataset } from "../dataops/dataset";
-
-const NOT_OPEN_ERROR = "not opened";
-// tslint:disable-next-line:max-line-length
-const NOT_OPEN_MESSAGE = "The connection seems to be closed. Did you properly initialize the RTC Module by calling the init method? Or maybe you terminated the RTC Module early?";
-const NO_WESBSOCKET_PRESENT = "The RTC Module seems to be missing a valid websocket object. Did you properly initialize the RTC Module by calling the init method?";
-// tslint:disable-next-line:max-line-length
-const BAD_WEBSOCKET_CREATION_CALLBACK = "The websocket creation function you supplied did not return a valid websocket object.";
-// tslint:disable-next-line:max-line-length
-const ERROR_CREATING_WEBSOCKET = "The callback you supplied for websocket creation threw an error. You might want to call it yourself and debug it to see what's wrong.";
+import { MESSAGE } from "../../config/message";
+import { API } from "../../config/config";
 
 export class RTCModule implements IModule {
   private websocket: WebSocket;
@@ -33,11 +26,11 @@ export class RTCModule implements IModule {
       try {
         this.websocket = this.websocketCreateCallback(this.buildSocketOpenUri(appUrl, token));
       } catch (error) {
-        throw new Error(`${ERROR_CREATING_WEBSOCKET} Original error: ${error.message}`);
+        throw new Error(`${MESSAGE.RTC.ERROR_CREATING_WEBSOCKET} Original error: ${error.message}`);
       }
 
       if (!this.websocket) {
-        return Promise.reject(BAD_WEBSOCKET_CREATION_CALLBACK);
+        return Promise.reject(MESSAGE.RTC.BAD_WEBSOCKET_CREATION_CALLBACK);
       }
 
       this.websocket.onmessage = (message: MessageEvent) => {
@@ -74,13 +67,13 @@ export class RTCModule implements IModule {
 
   private send(message: object) {
     if (!this.websocket) {
-      throw new Error(NO_WESBSOCKET_PRESENT);
+      throw new Error(MESSAGE.RTC.NO_WESBSOCKET_PRESENT);
     }
     try {
       this.websocket.send(JSON.stringify(message));
     } catch (error) {
-      if  (error.message === NOT_OPEN_ERROR) {
-        throw new Error(NOT_OPEN_MESSAGE);
+      if  (error.message === MESSAGE.RTC.NOT_OPEN_ERROR) {
+        throw new Error(MESSAGE.RTC.NOT_OPEN_MESSAGE);
       }
       throw new Error(error);
     }
@@ -91,6 +84,6 @@ export class RTCModule implements IModule {
   }
 
   private buildSocketOpenUri(appUrl: string, token: string) {
-    return `ws://${appUrl}:8082/${token}`;
+    return `ws://${appUrl}:${API.SOCKETPORT}/${token}`;
   }
 }
