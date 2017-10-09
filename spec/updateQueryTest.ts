@@ -47,7 +47,7 @@ describe("UpdateQuery class", () => {
     it("its query object should have desired properties", (done) => {
         let qe = qefMock.createQueryExecuter("public", "posts");
         let queryObj: any = new UpdateQuery(qe, {title: "changed first field"}, dataset)
-        .filter(new FilteringCondition("field", "operator", "value")).limit(2);
+        .filter(new FilteringCondition("field", "operator", ["value"])).limit(2);
         expect(queryObj).toBeDefined();
         expect(queryObj.request).toBeDefined();
         expect(queryObj.request.Query).toBeDefined();

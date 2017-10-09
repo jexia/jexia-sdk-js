@@ -1,6 +1,6 @@
 import { TokenManager } from "../src/api/core/tokenManager";
-import { DeleteQuery } from "../src/api/dataops/deleteQuery";
-import { FilteringCondition } from "../src/api/dataops/filteringCondition";
+import { DeleteQuery } from "../src/api/dataops/DeleteQuery";
+import { field } from "../src/api/dataops/filteringApi";
 import { QueryExecuterBuilder } from "../src/internal/queryExecuterBuilder";
 import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
 
@@ -44,12 +44,13 @@ describe("DeleteQuery class", () => {
   describe("when configuring a deleteQuery object", () => {
     it("its query object should have the correct query options set", () => {
         let qe = qefMock.createQueryExecuter("public", "posts");
-        let cond = new FilteringCondition("field", "operator", "value");
+        let cond = field("field").isMoreThan("value");
         let queryObj: any = new DeleteQuery(qe, dataset).filter(cond);
         expect(queryObj).toBeDefined();
         expect(queryObj.request).toBeDefined();
         expect(queryObj.request.Query).toBeDefined();
-        expect(queryObj.request.Query.filteringConditions).toEqual(cond);
+        expect(queryObj.request.Query.Filter.compile())
+          .toEqual({ type: "and", field: "field", operator: ">", values: [ "value" ] });
     });
   });
 

@@ -78,7 +78,7 @@ describe("QueryBasedCompiler class", () => {
   describe("when receiving a Query with a filter set", () => {
     it("it compiles the Query to the expected object literal", () => {
       let query = new Query(dataset);
-      query.Filter = new FilteringCondition("field", "operator", "value");
+      query.Filter = new FilteringCondition("field", "operator", ["value"]);
       let compiler = new QueryBasedCompiler(query);
       expect(compiler.compile()).toEqual({
           conditions: [{ field: "field", operator: "operator", values: [ "value" ], type: "and" }],
@@ -112,7 +112,7 @@ describe("QueryBasedCompiler class", () => {
       query.Offset = 10;
       query.Limit = 10;
       query.Fields = fields;
-      query.Filter = new FilteringCondition("field", "operator", "value");
+      query.Filter = new FilteringCondition("field", "operator", ["value"]);
       query.AddSortCondition("ASC", "field1", "field2");
       let compiler = new QueryBasedCompiler(query);
       expect(compiler.compile()).toEqual({
@@ -143,7 +143,7 @@ describe("Request - Query compiling integration tests", () => {
       request.Query.Offset = 10;
       request.Query.Limit = 10;
       request.Query.Fields = ["field1", "field2"];
-      request.Query.Filter = new FilteringCondition("field", "operator", "value");
+      request.Query.Filter = new FilteringCondition("field", "operator", ["value"]);
       request.Query.AddSortCondition("ASC", "field1", "field2");
       expect(compileDataRequest(request)).toEqual({action: "select", params: {
         conditions: [{ field: "field", operator: "operator", values: [ "value" ], type: "and" }],

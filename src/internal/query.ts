@@ -1,3 +1,4 @@
+import { IFilteringCriterion } from "../api/dataops/filteringApi";
 import { ICondition } from "../api/dataops/filteringCondition";
 
 interface ISort {
@@ -57,11 +58,20 @@ export class Query {
     return this.offset;
   }
 
-  public set Filter(filter: ICondition){
-    this.filteringConditions = filter;
+  /*
+   * This method is here to encapsulate the translation of filter settings
+   * between the API layer of the SDK (IFilteringCriterion) and the internal
+   * logic for compiling filters into JSON (ICondition).
+   */
+  public setFilterCriteria(filter: IFilteringCriterion) {
+    this.filteringConditions = (filter as any).lowLevelCondition;
   }
 
-  public get Filter() {
+  public set Filter(condition: ICondition) {
+    this.filteringConditions = condition;
+  }
+
+  public get Filter(): ICondition {
     return this.filteringConditions;
   }
 

@@ -8,7 +8,7 @@ describe("FilteringCondition class", () => {
     let value = "value";
 
     beforeEach( () => {
-      condition = new FilteringCondition( field, operator, value);
+      condition = new FilteringCondition( field, operator, [value]);
     });
 
     it("compiles to a JSON object as expected by the Anemo API", () => {
@@ -23,11 +23,11 @@ describe("FilteringCondition class", () => {
     let value = "value";
 
     beforeEach( () => {
-      condition = new FilteringCondition( field, operator, value);
+      condition = new FilteringCondition( field, operator, [value]);
     });
 
     it("creates the proper CompositeFilteringCondition object", () => {
-      let compCondition = condition.or(new FilteringCondition(field, operator, "value2"));
+      let compCondition = condition.or(new FilteringCondition(field, operator, ["value2"]));
       expect(compCondition.compile()).toEqual({
         conditions: [
           {field, operator, values: [value], type: "and"},
@@ -45,14 +45,14 @@ describe("CompositeFilteringCondition class", () => {
     let value = "value";
 
     it("compiles to a JSON object as expected by the Anemo API", () => {
-      compCondition = new CompositeFilteringCondition(new FilteringCondition( field, operator, value), "and");
+      compCondition = new CompositeFilteringCondition(new FilteringCondition( field, operator, [value]), "and");
       expect(compCondition.compile())
       .toEqual({ conditions: [{field, operator, values: [value], type: "and"}], type: "and"});
     });
 
     it("compiles to a JSON object as expected by the Anemo API when using the OR operator", () => {
-      compCondition = new CompositeFilteringCondition(new FilteringCondition( field, operator, value), "and")
-        .or(new FilteringCondition(field, operator, "value2"));
+      compCondition = new CompositeFilteringCondition(new FilteringCondition( field, operator, [value]), "and")
+        .or(new FilteringCondition(field, operator, ["value2"]));
       expect(compCondition.compile() as any)
       .toEqual({
         conditions: [
@@ -62,8 +62,8 @@ describe("CompositeFilteringCondition class", () => {
     });
 
     it("compiles to a JSON object as expected by the Anemo API when using the AND operator", () => {
-      compCondition = new CompositeFilteringCondition(new FilteringCondition( field, operator, value), "and")
-        .and(new FilteringCondition(field, operator, "value2"));
+      compCondition = new CompositeFilteringCondition(new FilteringCondition( field, operator, [value]), "and")
+        .and(new FilteringCondition(field, operator, ["value2"]));
       expect(compCondition.compile() as any)
       .toEqual({
         conditions: [
@@ -73,10 +73,10 @@ describe("CompositeFilteringCondition class", () => {
     });
 
     it("compiles to a JSON object as expected by the Anemo API when using the OR and the AND operator", () => {
-      compCondition = new CompositeFilteringCondition(new FilteringCondition( field, operator, value), "and")
-        .or(new FilteringCondition(field, operator, "value2"))
-        .or(new FilteringCondition(field, operator, "value3"))
-        .and(new FilteringCondition(field, operator, "value4"));
+      compCondition = new CompositeFilteringCondition(new FilteringCondition( field, operator, [value]), "and")
+        .or(new FilteringCondition(field, operator, ["value2"]))
+        .or(new FilteringCondition(field, operator, ["value3"]))
+        .and(new FilteringCondition(field, operator, ["value4"]));
       expect(compCondition.compile() as any)
       .toEqual({
         conditions: [

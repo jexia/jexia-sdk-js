@@ -1,5 +1,5 @@
 import { Dataset } from "./dataset";
-import { ICondition } from "./filteringCondition";
+import { IFilteringCriterion } from "./filteringApi";
 
 export interface IFields {
   fields(...fields: string[]): IFields;
@@ -14,7 +14,7 @@ export interface IOffset {
 }
 
 export interface IFilterable {
-  filter(filter: ICondition): IFilterable;
+  filter(filter: IFilteringCriterion): IFilterable;
 }
 
 export interface ISortable {

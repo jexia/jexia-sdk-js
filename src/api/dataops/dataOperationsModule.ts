@@ -3,7 +3,6 @@ import { IRequestAdapter } from "../../internal/requestAdapter";
 import { IModule } from "../core/module";
 import { TokenManager } from "../core/tokenManager";
 import { Dataset } from "./dataset";
-import { CompositeFilteringCondition, FilteringCondition, ICondition } from "./filteringCondition";
 
 export default class DataOperationsModule implements IModule {
   private queryExecuterBuilder: QueryExecuterBuilder;
@@ -27,13 +26,4 @@ export default class DataOperationsModule implements IModule {
     delete this.queryExecuterBuilder;
     return Promise.resolve(this);
   }
-}
-
-export function condition(field: string, operator: string, value: string): FilteringCondition {
-  return new FilteringCondition(field, operator, value);
-}
-
-export function complexCondition(filteringCondition: ICondition,
-                                 logicalOperatorType: string): CompositeFilteringCondition {
-  return new CompositeFilteringCondition(filteringCondition, logicalOperatorType);
 }

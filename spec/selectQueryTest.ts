@@ -1,5 +1,5 @@
 import { TokenManager } from "../src/api/core/tokenManager";
-import { FilteringCondition } from "../src/api/dataops/filteringCondition";
+import { field } from "../src/api/dataops/filteringApi";
 import { SelectQuery } from "../src/api/dataops/selectQuery";
 import { QueryExecuterBuilder } from "../src/internal/queryExecuterBuilder";
 import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
@@ -44,12 +44,13 @@ describe("SelectQuery class", () => {
   describe("when configuring a select query object", () => {
     it("it should have the correct query options set", () => {
         let qe = qefMock.createQueryExecuter("public", "posts");
-        let cond = new FilteringCondition("field", "operator", "value");
+        let cond = field("field").isMoreThan("value");
         let queryObj: any = new SelectQuery(qe, "dataset").filter(cond).limit(2).sortAsc("updated_at");
         expect(queryObj).toBeDefined();
         expect(queryObj.request).toBeDefined();
         expect(queryObj.request.Query).toBeDefined();
-        expect(queryObj.request.Query.filteringConditions).toEqual(cond);
+        expect(queryObj.request.Query.Filter.compile())
+          .toEqual({ type: "and", field: "field", operator: ">", values: [ "value" ] });
         expect(queryObj.request.Query.limit).toEqual(2);
         expect(queryObj.request.Query.orders).toEqual([{fields: ["updated_at"], direction: "asc"}]);
     });

@@ -12,11 +12,11 @@ export class FilteringCondition implements ICondition {
   private values: string[];
   private logicalOperatorType: string;
 
-  constructor(field: string, operator: string, value: string) {
+  constructor(field: string, operator: string, values: string[]) {
     this.logicalOperatorType = "and";
     this.field = field;
     this.operator = operator;
-    this.values = [value];
+    this.values = values;
   }
 
   public get Type(): string {
@@ -53,6 +53,10 @@ export class CompositeFilteringCondition implements ICondition {
 
   public get Type(): string{
     return this.logicalOperatorType;
+  }
+
+  public set Type(type: string) {
+    this.logicalOperatorType = type;
   }
 
   public or(condition: ICondition): CompositeFilteringCondition {

@@ -1,7 +1,7 @@
 import { RequestExecuter } from "../../internal/executer";
 import { DataRequest } from "./dataRequest";
 import { Dataset } from "./dataset";
-import { ICondition } from "./filteringCondition";
+import { IFilteringCriterion } from "./filteringApi";
 import { IExecutable, IFields, IFilterable, ILimit, IOffset, IRelational, ISortable } from "./queryInterfaces";
 
 export class SelectQuery implements IFields, ILimit, IOffset, IFilterable, IExecutable, IRelational, ISortable {
@@ -28,8 +28,8 @@ export class SelectQuery implements IFields, ILimit, IOffset, IFilterable, IExec
     return this;
   }
 
-  public filter(filter: ICondition): SelectQuery {
-    this.request.Query.Filter = filter;
+  public filter(filter: IFilteringCriterion): SelectQuery {
+    this.request.Query.setFilterCriteria(filter);
     return this;
   }
 

@@ -1,6 +1,6 @@
 import { RequestExecuter } from "../../internal/executer";
 import { DataRequest } from "./dataRequest";
-import { ICondition } from "./filteringCondition";
+import { IFilteringCriterion } from "./filteringApi";
 import { IExecutable, IFilterable, ILimit, IOffset, ISortable } from "./queryInterfaces";
 
 export class UpdateQuery implements ILimit, IOffset, IFilterable, IExecutable, ISortable {
@@ -20,8 +20,8 @@ export class UpdateQuery implements ILimit, IOffset, IFilterable, IExecutable, I
     this.request.Query.Offset = offset;
     return this;
   }
-  public filter(filter: ICondition): UpdateQuery {
-    this.request.Query.Filter = filter;
+  public filter(filter: IFilteringCriterion): UpdateQuery {
+    this.request.Query.setFilterCriteria(filter);
     return this;
   }
   public sortAsc(...fields: string[]): UpdateQuery {

@@ -1,6 +1,6 @@
 import { RequestExecuter } from "../../internal/executer";
 import { DataRequest } from "./dataRequest";
-import { ICondition } from "./filteringCondition";
+import { IFilteringCriterion } from "./filteringApi";
 import { IExecutable, IFields, IFilterable, ILimit, IOffset, ISortable } from "./queryInterfaces";
 
 export class DeleteQuery implements IFields, ILimit, IOffset, IFilterable, IExecutable, ISortable {
@@ -23,8 +23,8 @@ export class DeleteQuery implements IFields, ILimit, IOffset, IFilterable, IExec
     this.request.Query.Offset = offset;
     return this;
   }
-  public filter(filter: ICondition): DeleteQuery {
-    this.request.Query.Filter = filter;
+  public filter(filter: IFilteringCriterion): DeleteQuery {
+    this.request.Query.setFilterCriteria(filter);
     return this;
   }
   public sortAsc(...fields: string[]): DeleteQuery {
