@@ -45,12 +45,38 @@ import Client from "Anemo SDK location";
 The `Client` class expects to receive a `fetch` standard compliant library on initialization. On browser you can use the global `fetch` object. On node, you will need to add a compatible dependency to your project. For development of the SDK we've used `node-fetch` and can recommend it.
 
 ``` Javascript
+import Client from "Anemo SDK location";
 import fetch from "node-fetch";
 
 let initializedClientPromise = new Client(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "password"});
 initializedClientPromise.then( (initializedClient) => {
   // you have been succesfully logged in!
-  // you can start using the initializedClient variable to operate on records here
+  // you can start using the initializedClient variable here
+}).catch( (error) => {
+  // uh-oh, there was a problem logging in, check the error.message for more info
+});
+```
+
+### The Module system
+
+The Jexia SDK is built as a set of modules (or plugins) structured around a core entity (the `Client` class used above).
+In order to use a module you need to: 
+- initialize it
+- pass it to the `Client` when calling the `.init()` method
+
+Probably the most useful module is the Data Operation Module. The example below will show how to initialize the SDK using this module. Follow the `dataModule` variable to see how this mechanism works.
+
+``` Javascript
+import Client from "Anemo SDK location";
+import { DataOperationsModule } from "Anemo SDK Location".
+import fetch from "node-fetch";
+
+let dataModule = new DataOperationsModule();
+
+let initializedClientPromise = new Client(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "password"}, dataModule);
+initializedClientPromise.then( (initializedClient) => {
+  // you have been succesfully logged in!
+  // you can start using the dataModule variable to operate on records here
 }).catch( (error) => {
   // uh-oh, there was a problem logging in, check the error.message for more info
 });
@@ -58,19 +84,23 @@ initializedClientPromise.then( (initializedClient) => {
 
 ### Dataset objects and Query objects
 
-Using an initialized `Client` object, you can instantiate `Dataset` objects like so:
+Using an initialized `DataOperationsModule` object, you can instantiate `Dataset` objects like so:
 
 ``` Javascript
-let postsDataset = client.dataset("posts");
+[..]
+let postsDataset = dataModule.dataset("posts");
+[..]
 ```
 
 Using a `Datase` object, you can instantiate a `Query` object, depending on the type of query you want to execute
 
 ``` Javascript
+[..]
 let selectQuery = postsDataset.select();
 let insertQuery = postsDataset.insert( [ post1, post2 ] );
 let updateQuery = postsDataset.update( [ title: "Updated title" ] );
 let deleteQuery = postsDataset.delete();
+[..]
 ```
 
 Any `Query` can be executed by calling `.execute()` on it. This results in a `Promise` resolving to a set of records, regardless of the type of `Query` executed. For select queries, the records returned are the records that the user wants to retrieve. For the other queries, the records returned are the actual records that have been operated on (modified, added or deleted).
@@ -82,8 +112,9 @@ Each different `Query` type has different support for the query options (filteri
 Using all the temporary variables in this example is for demonstration purposes, mostly to point out the different objects and functionality involved when working with records.
 
 ``` Javascript
-new Client(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "password"}).then( (initializedClient) => {
-  let postsDataset = initializedClient.dataset("posts");
+[..]
+new Client(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "password"}, dataModule).then( (initializedClient) => {
+  let postsDataset = dataModule.dataset("posts");
   let unexecutedQuery = postsDataset.select();
   let executedQueryPromise = unexecutedQuery.execute();
   executedQueryPromise.then( (records) => {
@@ -92,18 +123,21 @@ new Client(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "
     // there was a problem retrieving the records
   });
 });
+[..]
 ```
 
 If you watch closely, the API is chainable, so you can rewrite the query in a much less verbose way:
 
 ``` Javascript
-new Client(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "password"}).then( (initializedClient) => {
-  initializedClient.dataset("posts").select().execute().then( (records) => {
+[..]
+new Client(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "password"}, dataModule).then( (initializedClient) => {
+  dataModule.dataset("posts").select().execute().then( (records) => {
     // you can start iterating through the posts here
   }).catch( (error) => {
     // there was a problem retrieving the records
   });
 });
+[..]
 ```
 
 But at the very least, defining dataset variables could come in handy when executing multiple different queries on the same dataset.
@@ -113,10 +147,11 @@ But at the very least, defining dataset variables could come in handy when execu
 To activate sorting, you need to call `.sortAsc` or `.sortDesc` on a `Query` object and pass as string the name of the field you want to sort by.
 
 ``` Javascript
-...
+[..]
 posts.select().sortAsc("id").execute().then( (records) => {
   // operate on your sorted records here
 });
+[..]
 ```
 
 ### Limit and offset
@@ -124,10 +159,11 @@ posts.select().sortAsc("id").execute().then( (records) => {
 You can use `.limit` and `.offset` on a `Query` object for these options. They can be used separately or together. Only setting the limit (to a value X) will make the query operate on the first X records. Only setting the offset will make the query operate on the last Y records, starting from the offset value. 
 
 ``` Javascript
-...
+[..]
 posts.select().limit(2).offset(5).execute().then( (records) => {
   // records will be an array of 2 records, starting from position 5 in the Dataset
 });
+[..]
 ```
 
 ### Only retrieving certain fields
@@ -135,44 +171,58 @@ posts.select().limit(2).offset(5).execute().then( (records) => {
 You can use the `.fields` method to define what fields you want to retrieve.
 
 ``` Javascript
-...
+[..]
 posts.select().fields("id", "title").execute().then( (records) => {
   // the individual record objects will only have the two properties defined above
 });
+[..]
 ```
 
 ### Filtering records
 
 You can use the filtering feature to select what records a certain query will operate on.
 
-In order to define a filter, you need to use the `FilterConditon` or `CompositeFilteringCondition` objects. They can be created using the exposed methods `condition` and `complexCondition`.
+In order to define a filter, you need to use the appropriate filtering objects. They can be created using the exposed methods `field` and `combineCriteria`. `combineCriteria` is something very specific that provides another way to create nested logical conditions. You're probably not going to use that much, but it's useful to know that it exists.
 
 ``` Javascript
-import { condition, complexCondition } from "Anemo SDK location";
+import { field } from "Anemo SDK location";
 
-let simpleCondition = condition("field", "operator", "value");
-let compositeCondition = simpleCondition.or("anotherField", "operator", "anotherValue");
-let nestedCondition = complexCondition(compositeCondition).and("aThirdField", "operator", "value");
+let simpleCriterion = field("username").isEqualTo("Tom");
+let combinedCriteria = simpleCriterion.or(field("username").isEqualTo("Dick"));
 ```
 
 In order to use these conditions, they need to be added to a query using the `.filter` method
 
 ``` Javascript
-...
-posts.select().filter(condition("id", "=", "1"));
+[..]
+posts.select().filter(field("username").isEqualTo("Harry"));
+[..]
 ```
 
 Multiple `.filter` calls can be chained, but only the last call will be taken into account. If a complex condition needs to be set for filtering, it has to be created in one go (in-line or not) and passed as an argument to the `.filter` method.
 
+Filtering conditions can be nested at any level.
+
 ``` Javascript
-...
-let theCondition = complexCondition( condition("id",">","1").and("id","<", "9") ).
-                    or("user_id", "=", "22");
-dataset.select().filter(theCondition);
+[..]
+let flatFilter = field("first_name").isEqualTo("Tom")
+                 .or( field("first_name").isEqualTo("Dick"))
+                 .or( field("first_name").isEqualTo("Harry"));
+
+let nestedFilter = field("first_name").isEqualTo("Tom")
+                   .or( field("first_name").isEqualTo("Dick")
+                        .and( field("middle_name").isEqualTo("Harry")));
+
+let nestedFilter = field("first_name").isEqualTo("Tom")
+                   .or( field("first_name").isEqualTo("Dick")
+                        .and( field("middle_name").isEqualTo("Harry")
+                              .or( field("middle_name").isEqualTo("Larry"))));
+[..]
 ```
+
 ### Filtering operator list and examples
 
-[Work in Progress]
+You can find a complete list of the operators supported for filtering in the API reference document.
 
 ### Defining relations
 
@@ -181,20 +231,21 @@ Relations can be added to a query in order to have the query apply not only to t
 Retrieving relations:
 
 ``` Javascript
-...
-let posts = client.dataset("posts");
-let comments = client.dataset("comments");
+[..]
+let posts = dataModule.dataset("posts");
+let comments = dataModule.dataset("comments");
 posts.select().relation(comments).execute().then( (records) => {
   // objects in the records array will now contain a property called "comments"
   // which will be an array holding the comments related to a particular post.
 });
+[..]
 ```
 
 ### Inserting records
 
 ``` Javascript
-...
-let posts = client.dataset("posts");
+[..]
+let posts = dataModule.dataset("posts");
 posts.insert([ {title: "New Post", content:"content here"}, 
                {title: "Another Post", content:"some more content"} 
 ]).execute().then( (records) => {
@@ -203,6 +254,7 @@ posts.insert([ {title: "New Post", content:"content here"},
 }).catch( (error) => {
   // you can see the error info here, if something goes wrong
 });
+[..]
 ```
 
 ### Modifying records
@@ -212,8 +264,8 @@ posts.insert([ {title: "New Post", content:"content here"},
 ### Deleting records
 
 ``` Javascript
-...
-let posts = client.dataset("posts");
+[..]
+let posts = dataModule.dataset("posts");
 posts.delete().filter(condition("title", "like", "test")).execute().then( (records) => {
   // you will be able to access the deleted records here
   // they won't be stored in the DB anymore, but maybe you
@@ -221,6 +273,7 @@ posts.delete().filter(condition("title", "like", "test")).execute().then( (recor
 }).catch( (error) => {
   // you can see the error info here, if something goes wrong
 });
+[..]
 ```
 
 ## Real-time communication code samples
@@ -240,6 +293,8 @@ The real-time module needs a websocket client in order to function.
 When running the app in the browser, this dependency can be ignored, as the SDK will load the native browser implementation:
 
 ``` Javascript
+import { RTCModule } from "Anemo SDK location";
+
 let rtcmod = new RTCModule(
   (message) => { // do stuff with your real time notification here }
 );
@@ -254,7 +309,6 @@ let rtcmod = new RTCModule(
   (message) => { // do stuff with your real time notification here },
   (appUrl) => new WebSocket(appUrl)
 );
-
 ```
 
 ### Initializing:
@@ -262,13 +316,14 @@ let rtcmod = new RTCModule(
 The real-time module needs to be passed to the `Client` when initializing the latter. The `Client` accepts a spread parameter to define the modules that need to be initialized. 
 
 ``` Javascript
-...
+[..]
 new Client(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "password"}, rtcmod).then( (initializedClient) => {
   // you have been succesfully logged in
   // you can start using the initialized rtcmod here
 }).catch( (error) => {
   // there was a problem logging in or initializing the real-time module
 });
+[..]
 ```
 
 ### Subscribing to events:
@@ -276,7 +331,22 @@ new Client(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "
 After a succesful module initialization, the user can start subscribing to events. When a real-time message is pushed from the server, the callback defined when instantiating the real-time module will be called.
 
 ``` Javascript
-...
-let posts = client.dataset("posts");
+[..]
+let posts = dataModule.dataset("posts");
 rtcmod.subscribe("insert", posts);
+[..]
+```
+
+## Logging off and cleanup
+
+The `Client` class exposes a method called `.terminate()` which returns a `Promise` with the terminated `Client` instance. Use this to clear up resources used by the `Client` class and any modules you initialized along with it (you don't have to pass the modules along, the `Client` will terminate any modules you supplied on initialization.)
+
+``` Javascript
+[..]
+client.terminate().then( (terminatedClient) => {
+  // everything has been cleared
+}).catch( (err)=>{
+  // something went wrong when cleaning up
+});
+[..]
 ```
