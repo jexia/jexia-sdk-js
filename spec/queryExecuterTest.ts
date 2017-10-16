@@ -6,9 +6,8 @@ describe("QueryExecuter class", () => {
   let tokenManagerMock: any;
   const validToken = "valid_token";
   const dataset = "dataset";
-  const schema = "schema";
   const url = "appurl";
-  const queryUrl = `http://${url}:8080/sdk-api/${schema}/${dataset}`;
+  const queryUrl = `http://${url}:8080/sdk-api/${dataset}`;
 
   beforeAll( () => {
     tokenManagerMock = {
@@ -28,7 +27,7 @@ describe("QueryExecuter class", () => {
     });
 
     it("should create a valid object", () => {
-      let qe = new RequestExecuter(url, dataset, schema, reqAdapterMock, tokenManagerMock);
+      let qe = new RequestExecuter(url, dataset, reqAdapterMock, tokenManagerMock);
       expect(qe).toBeTruthy();
     });
   });
@@ -42,7 +41,7 @@ describe("QueryExecuter class", () => {
       };
       const mockBody = {action: "action"};
       spyOn(reqAdapterMock, "execute");
-      let qe = new RequestExecuter(url, dataset, schema, reqAdapterMock, tokenManagerMock);
+      let qe = new RequestExecuter(url, dataset, reqAdapterMock, tokenManagerMock);
       qe.executeRequest(mockBody).then( () => {
         expect(reqAdapterMock.execute).toHaveBeenCalledWith(queryUrl,
         {headers: { Authorization: validToken}, body: mockBody, method: Methods.POST });
@@ -58,7 +57,7 @@ describe("QueryExecuter class", () => {
         },
       };
       const mockBody = {action: "select", params: {} };
-      let qe = new RequestExecuter(url, dataset, schema, reqAdapterMock, tokenManagerMock);
+      let qe = new RequestExecuter(url, dataset, reqAdapterMock, tokenManagerMock);
       qe.executeRequest(mockBody).then( () => {
         done.fail("request should have failed");
       }).catch( (err: Error) => {

@@ -21,7 +21,7 @@ describe("Dataset class", () => {
     it("should create a valid object", (done) => {
         tokenManagerMock = new TokenManager(reqAdapterMock);
         let qef: QueryExecuterBuilder = new QueryExecuterBuilder("appUrl", reqAdapterMock, tokenManagerMock);
-        let ds = new Dataset("rishabh", "test", qef);
+        let ds = new Dataset("test", qef);
         expect(ds).toBeDefined();
         done();
     });
@@ -31,7 +31,7 @@ describe("Dataset class", () => {
     it("should be able to call required methods on dataset", (done) => {
         tokenManagerMock = new TokenManager(reqAdapterMock);
         let qef: QueryExecuterBuilder = new QueryExecuterBuilder("appUrl", reqAdapterMock, tokenManagerMock);
-        let ds = new Dataset("rishabh", "test", qef);
+        let ds = new Dataset("test", qef);
         let query = ds.select();
         expect(query).toBeDefined();
         done();

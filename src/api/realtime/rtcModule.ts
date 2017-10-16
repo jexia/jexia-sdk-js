@@ -48,11 +48,11 @@ export class RTCModule implements IModule {
   }
 
   public subscribe(method: string, dataset: Dataset) {
-    this.send({type: "subscribe", nsp: this.buildSubscriptionUri(method, dataset.schema, dataset.name)});
+    this.send({type: "subscribe", nsp: this.buildSubscriptionUri(method, dataset.name)});
   }
 
   public unsubscribe(method: string, dataset: Dataset) {
-    this.send({type: "unsubscribe", nsp: this.buildSubscriptionUri(method, dataset.schema, dataset.name)});
+    this.send({type: "unsubscribe", nsp: this.buildSubscriptionUri(method, dataset.name)});
   }
 
   public terminate() {
@@ -79,8 +79,8 @@ export class RTCModule implements IModule {
     }
   }
 
-  private buildSubscriptionUri(method: string, schema: string, datasetName: string) {
-    return `rest.${method}.${schema}.${datasetName}`;
+  private buildSubscriptionUri(method: string, datasetName: string) {
+    return `rest.${method}.${datasetName}`;
   }
 
   private buildSocketOpenUri(appUrl: string, token: string) {

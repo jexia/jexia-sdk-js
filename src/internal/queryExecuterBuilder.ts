@@ -5,7 +5,7 @@ import { IRequestAdapter } from "./requestAdapter";
 export class QueryExecuterBuilder {
   constructor(private appUrl: string, private requestAdapter: IRequestAdapter, private tokenManager: TokenManager) {  }
 
-  public createQueryExecuter(schemaName: string, dataSetName: string): RequestExecuter {
-    return new RequestExecuter(this.appUrl, dataSetName, schemaName, this.requestAdapter, this.tokenManager);
+  public createQueryExecuter(dataSetName: string): RequestExecuter {
+    return new RequestExecuter(this.appUrl, dataSetName, this.requestAdapter, this.tokenManager);
   }
 }

@@ -14,12 +14,12 @@ export default class DataOperationsModule implements IModule {
     return Promise.resolve(this);
   }
 
-  public dataset(dataset: string, schema: string = "public"): Dataset {
+  public dataset(dataset: string): Dataset {
     if (this.queryExecuterBuilder == null) {
       throw new Error("Client has not been initialised properly. Please instantiate \
                       client for invoking this method");
     }
-    return new Dataset(schema, dataset, this.queryExecuterBuilder);
+    return new Dataset(dataset, this.queryExecuterBuilder);
   }
 
   public terminate(): Promise<any> {

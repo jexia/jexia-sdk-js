@@ -1,56 +1,46 @@
-import { TokenManager } from "../src/api/core/tokenManager";
+import { createRequestExecuterMock } from "../spec/testUtils";
 import { DeleteQuery } from "../src/api/dataops/DeleteQuery";
 import { field } from "../src/api/dataops/filteringApi";
-import { QueryExecuterBuilder } from "../src/internal/queryExecuterBuilder";
-import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
 
 describe("DeleteQuery class", () => {
-  let reqAdapterMock: IRequestAdapter;
-  let tokenManagerMock: TokenManager;
-  let qefMock: QueryExecuterBuilder;
+  let appUrl: string;
   let dataset: string;
 
   beforeAll( () => {
     dataset = "dataset";
-    reqAdapterMock = {
-      execute(uri: string, opt: IRequestOptions): Promise<any> {
-        return Promise.resolve();
-      },
-    };
-    tokenManagerMock = new TokenManager(reqAdapterMock);
-    qefMock = new QueryExecuterBuilder("appUrl", reqAdapterMock, tokenManagerMock);
+    appUrl = "appUrl";
   });
 
   describe("when instantiating a deleteQuery object directly", () => {
     it("should be able to return required object", () => {
-        let qe = qefMock.createQueryExecuter("public", "posts");
-        let query = new DeleteQuery(qe, dataset);
-        expect(query).toBeDefined();
+      let qe = createRequestExecuterMock(appUrl, dataset);
+      let query = new DeleteQuery(qe, dataset);
+      expect(query).toBeDefined();
     });
   });
 
   describe("when instantiating a deleteQuery object", () => {
     it("should expose the proper methods", () => {
-        let qe = qefMock.createQueryExecuter("public", "posts");
-        let query = new DeleteQuery(qe, dataset);
-        expect(typeof query.filter).toBe("function");
-        expect(typeof query.limit).toBe("function");
-        expect(typeof query.offset).toBe("function");
-        expect(typeof query.sortAsc).toBe("function");
-        expect(typeof query.execute).toBe("function");
+      let qe = createRequestExecuterMock(appUrl, dataset);
+      let query = new DeleteQuery(qe, dataset);
+      expect(typeof query.filter).toBe("function");
+      expect(typeof query.limit).toBe("function");
+      expect(typeof query.offset).toBe("function");
+      expect(typeof query.sortAsc).toBe("function");
+      expect(typeof query.execute).toBe("function");
     });
   });
 
   describe("when configuring a deleteQuery object", () => {
     it("its query object should have the correct query options set", () => {
-        let qe = qefMock.createQueryExecuter("public", "posts");
-        let cond = field("field").isMoreThan("value");
-        let queryObj: any = new DeleteQuery(qe, dataset).filter(cond);
-        expect(queryObj).toBeDefined();
-        expect(queryObj.request).toBeDefined();
-        expect(queryObj.request.Query).toBeDefined();
-        expect(queryObj.request.Query.Filter.compile())
-          .toEqual({ type: "and", field: "field", operator: ">", values: [ "value" ] });
+      let qe = createRequestExecuterMock(appUrl, dataset);
+      let cond = field("field").isMoreThan("value");
+      let queryObj: any = new DeleteQuery(qe, dataset).filter(cond);
+      expect(queryObj).toBeDefined();
+      expect(queryObj.request).toBeDefined();
+      expect(queryObj.request.Query).toBeDefined();
+      expect(queryObj.request.Query.Filter.compile())
+        .toEqual({ type: "and", field: "field", operator: ">", values: [ "value" ] });
     });
   });
 

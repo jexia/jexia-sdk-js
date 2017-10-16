@@ -60,14 +60,13 @@ describe("RTCModule class", () => {
     it("should send the proper JSON message to Sharky", (done) => {
       let rtcm: any = new RTCModule(() => { return; }, (url: string) => new WebSocketMock(url) );
       let datasetName: string = "datasetName";
-      let dataSchemaName: string = "dataSchemaName";
       let actionName: string = "select";
       let qef: QueryExecuterBuilder = new QueryExecuterBuilder(testurl, reqAdapterMock, tokenManagerMock);
-      let ds: Dataset = new Dataset(dataSchemaName, datasetName, qef);
+      let ds: Dataset = new Dataset(datasetName, qef);
       rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
         spyOn(rtcm, "send");
         rtcm.subscribe(actionName, ds);
-        expect(rtcm.send).toHaveBeenCalledWith({ nsp: `rest.${actionName}.${dataSchemaName}.${datasetName}`,
+        expect(rtcm.send).toHaveBeenCalledWith({ nsp: `rest.${actionName}.${datasetName}`,
           type: "subscribe",
         });
         done();
@@ -81,14 +80,13 @@ describe("RTCModule class", () => {
     it("should send the proper JSON message to Sharky", (done) => {
       let rtcm: any = new RTCModule(() => { return; }, (url: string) => new WebSocketMock(url) );
       let datasetName: string = "datasetName";
-      let dataSchemaName: string = "dataSchemaName";
       let actionName: string = "select";
       let qef: QueryExecuterBuilder = new QueryExecuterBuilder(testurl, reqAdapterMock, tokenManagerMock);
-      let ds: Dataset = new Dataset(dataSchemaName, datasetName, qef);
+      let ds: Dataset = new Dataset(datasetName, qef);
       rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
         spyOn(rtcm, "send");
         rtcm.unsubscribe(actionName, ds);
-        expect(rtcm.send).toHaveBeenCalledWith({ nsp: `rest.${actionName}.${dataSchemaName}.${datasetName}`,
+        expect(rtcm.send).toHaveBeenCalledWith({ nsp: `rest.${actionName}.${datasetName}`,
           type: "unsubscribe",
         });
         done();

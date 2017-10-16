@@ -6,7 +6,6 @@ import { API } from '../config/config';
 export class RequestExecuter {
   constructor(private appUrl: string,
               private dataSetName: string,
-              private schemaName: string,
               private requestAdapter: IRequestAdapter,
               private tokenManager: TokenManager) {}
 
@@ -19,6 +18,6 @@ export class RequestExecuter {
   }
 
   private getRequestUrl(): string {
-    return `${API.PROTOCOL}://${this.appUrl}:${API.PORT}/${API.SDKAPI}/${this.schemaName}/${this.dataSetName}`;
+    return `${API.PROTOCOL}://${this.appUrl}:${API.PORT}/${API.SDKAPI}/${this.dataSetName}`;
   }
 }

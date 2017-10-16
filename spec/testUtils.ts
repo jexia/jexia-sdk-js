@@ -1,4 +1,7 @@
+import { RequestExecuter } from "../src/internal/executer";
 import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
+import { TokenManager } from "../src/api/core/tokenManager";
+import { QueryExecuterBuilder } from "../src/internal/queryExecuterBuilder";
 
 class RequestAdapterMockFactory {
   public genericSuccesfulExecution(): IRequestAdapter {
@@ -46,4 +49,11 @@ export function createGenericSuccesfulResponse(): Promise<any> {
   return new Promise<any>( (resolve, reject) => {
     resolve({ Status: "OK" });
   });
+}
+
+export function createRequestExecuterMock(appUrl: string, datasetName: string): RequestExecuter {
+  let reqAdapterMock = requestAdapterMockFactory().genericSuccesfulExecution();
+  let tokenManagerMock = new TokenManager(reqAdapterMock);
+  let qefMock = new QueryExecuterBuilder(appUrl, reqAdapterMock, tokenManagerMock);
+  return qefMock.createQueryExecuter(datasetName);
 }

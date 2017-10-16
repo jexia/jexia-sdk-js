@@ -26,7 +26,7 @@ describe("QueryExecuterFactory class", () => {
   describe("when calling the createQueryExecuter() method", () => {
     it("should create a valid object", () => {
       let qef: QueryExecuterBuilder = new QueryExecuterBuilder("appUrl", reqAdapterMock, tokenManagerMock);
-      let executer: RequestExecuter = qef.createQueryExecuter("schemaName", "dataSetName");
+      let executer: RequestExecuter = qef.createQueryExecuter("dataSetName");
       expect(executer).toBeTruthy();
     });
   });
