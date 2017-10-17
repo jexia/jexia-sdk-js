@@ -1,6 +1,7 @@
 import { createRequestExecuterMock } from "../spec/testUtils";
 import { field } from "../src/api/dataops/filteringApi";
 import { SelectQuery } from "../src/api/dataops/selectQuery";
+import { MESSAGE } from "../src/config/message";
 
 describe("SelectQuery class", () => {
   let appUrl: string;
@@ -45,6 +46,21 @@ describe("SelectQuery class", () => {
         .toEqual({ type: "and", field: "field", operator: ">", values: [ "value" ] });
       expect(queryObj.request.Query.limit).toEqual(2);
       expect(queryObj.request.Query.orders).toEqual([{fields: ["updated_at"], direction: "asc"}]);
+    });
+  });
+
+  describe("sortAsc and sortDesc default param", () => {
+    let qe = createRequestExecuterMock(appUrl, dataset);
+    let queryObj: any;
+
+    beforeAll(() => {
+      queryObj = new SelectQuery(qe, "dataset");
+    });
+
+    ["sortAsc", "sortDesc"].forEach((method) => {
+      it(`it should throws and error when ${method} is called`, () => {
+        expect(() => queryObj[method]()).toThrowError(Error, MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
+      });
     });
   });
 });

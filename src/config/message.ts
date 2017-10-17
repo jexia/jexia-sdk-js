@@ -6,4 +6,7 @@ export const MESSAGE = {
     NOT_OPEN_ERROR: "not opened",
     NOT_OPEN_MESSAGE: "The connection seems to be closed. Did you properly initialize the RTC Module by calling the init method? Or maybe you terminated the RTC Module early?",
   },
+  QUERY: {
+    MUST_PROVIDE_SORTING_FIELD: "A sorting field must be provided."
+  }
 };
