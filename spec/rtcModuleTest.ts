@@ -74,7 +74,7 @@ describe("RTCModule class", () => {
       rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
         spyOn(rtcm, "send");
         rtcm.subscribe(actionName, ds);
-        expect(rtcm.send).toHaveBeenCalledWith({ nsp: `${actionName}.${datasetName}`,
+        expect(rtcm.send).toHaveBeenCalledWith({ nsp: `${datasetName}.${actionName}`,
           type: "subscribe",
         });
         done();
@@ -94,7 +94,7 @@ describe("RTCModule class", () => {
       rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
         spyOn(rtcm, "send");
         rtcm.unsubscribe(actionName, ds);
-        expect(rtcm.send).toHaveBeenCalledWith({ nsp: `${actionName}.${datasetName}`,
+        expect(rtcm.send).toHaveBeenCalledWith({ nsp: `${datasetName}.${actionName}`,
           type: "unsubscribe",
         });
         done();
