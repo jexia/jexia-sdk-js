@@ -34,7 +34,10 @@ export class RTCModule implements IModule {
       }
 
       this.websocket.onmessage = (message: MessageEvent) => {
-        this.messageReceivedCallback(message.data);
+        const messageData = JSON.parse(message.data);
+        if (messageData.type === "event") {
+          this.messageReceivedCallback(messageData.data);
+        }
       };
       return new Promise((resolve, reject) => {
         this.websocket.onopen = () => {
@@ -45,6 +48,18 @@ export class RTCModule implements IModule {
         };
       }).then( () => this);
     });
+  }
+
+  private associateMethod(method: string) {
+    switch(method) {
+      case 'insert':
+        return 'post';
+      case 'select':
+        return 'get';
+      case 'update':
+        return 'put';
+    }
+    return method;
   }
 
   public subscribe(method: string, dataset: Dataset) {
@@ -80,7 +95,7 @@ export class RTCModule implements IModule {
   }
 
   private buildSubscriptionUri(method: string, datasetName: string) {
-    return `rest.${method}.${datasetName}`;
+    return `${datasetName}.${this.associateMethod(method)}`;
   }
 
   private buildSocketOpenUri(appUrl: string, token: string) {

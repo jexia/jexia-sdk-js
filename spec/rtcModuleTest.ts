@@ -25,6 +25,21 @@ class WebSocketMock {
   }
 }
 
+const createMocks:any = function(validToken: string) {
+  return {
+    tokenManagerMock: {
+      get token(): Promise<string> {
+        return Promise.resolve(validToken);
+      },
+    },
+    reqAdapterMock: {
+      execute(uri: string, opt: IRequestOptions): Promise<any> {
+        return Promise.resolve();
+      },
+    },
+  };
+}
+
 describe("RTCModule class", () => {
   let reqAdapterMock: IRequestAdapter;
   let tokenManagerMock: any;
@@ -32,16 +47,9 @@ describe("RTCModule class", () => {
   let testurl = "www.test.url";
 
   beforeEach(() => {
-    tokenManagerMock = {
-      get token(): Promise<string> {
-        return Promise.resolve(validToken);
-      },
-    };
-    reqAdapterMock = {
-      execute(uri: string, opt: IRequestOptions): Promise<any> {
-        return Promise.resolve();
-      },
-    };
+    const mocks = createMocks(validToken);
+    tokenManagerMock = mocks.tokenManagerMock;
+    reqAdapterMock = mocks.reqAdapterMock;
   });
 
   describe("when initializing the RTCModule", () => {
@@ -60,13 +68,13 @@ describe("RTCModule class", () => {
     it("should send the proper JSON message to Sharky", (done) => {
       let rtcm: any = new RTCModule(() => { return; }, (url: string) => new WebSocketMock(url) );
       let datasetName: string = "datasetName";
-      let actionName: string = "select";
+      let actionName: string = "get";
       let qef: QueryExecuterBuilder = new QueryExecuterBuilder(testurl, reqAdapterMock, tokenManagerMock);
       let ds: Dataset = new Dataset(datasetName, qef);
       rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
         spyOn(rtcm, "send");
         rtcm.subscribe(actionName, ds);
-        expect(rtcm.send).toHaveBeenCalledWith({ nsp: `rest.${actionName}.${datasetName}`,
+        expect(rtcm.send).toHaveBeenCalledWith({ nsp: `${actionName}.${datasetName}`,
           type: "subscribe",
         });
         done();
@@ -80,13 +88,13 @@ describe("RTCModule class", () => {
     it("should send the proper JSON message to Sharky", (done) => {
       let rtcm: any = new RTCModule(() => { return; }, (url: string) => new WebSocketMock(url) );
       let datasetName: string = "datasetName";
-      let actionName: string = "select";
+      let actionName: string = "get";
       let qef: QueryExecuterBuilder = new QueryExecuterBuilder(testurl, reqAdapterMock, tokenManagerMock);
       let ds: Dataset = new Dataset(datasetName, qef);
       rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
         spyOn(rtcm, "send");
         rtcm.unsubscribe(actionName, ds);
-        expect(rtcm.send).toHaveBeenCalledWith({ nsp: `rest.${actionName}.${datasetName}`,
+        expect(rtcm.send).toHaveBeenCalledWith({ nsp: `${actionName}.${datasetName}`,
           type: "unsubscribe",
         });
         done();
@@ -97,11 +105,33 @@ describe("RTCModule class", () => {
   });
 
   describe("when receiving a message from Sharky", () => {
+    let rtcm: any;
+    let testCallback: Function;
+    let initializeRTC: Promise<any>;
+
+    beforeAll(() => {
+      const mocks = createMocks(validToken);
+      testCallback = jasmine.createSpy("testCallback");
+      tokenManagerMock = mocks.tokenManagerMock;
+      reqAdapterMock = mocks.reqAdapterMock;
+      rtcm = new RTCModule(testCallback, (url: string) => new WebSocketMock(url) );
+      initializeRTC = rtcm.init(testurl, tokenManagerMock, reqAdapterMock);
+    });
+
+    it("should not forward the message when type is not 'event'", (done) => {
+      const result: object = { data: '{"type": "success", "data": "result"}' };
+      initializeRTC.then( () => {
+        rtcm.websocket.onmessage(result);
+        expect(testCallback).not.toHaveBeenCalled();
+        done();
+      }).catch( (error: Error) => {
+        done.fail("Initializing the RTCModule should not have failed.");
+      });
+    });
+
     it("should forward the message to the client defined callback", (done) => {
-      let testCallback: Function = jasmine.createSpy("callback");
-      let result: object = { data: "result" };
-      let rtcm: any = new RTCModule(testCallback, (url: string) => new WebSocketMock(url) );
-      rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
+      const result: object = { data: '{"type": "event", "data": "result"}' };
+      initializeRTC.then( () => {
         rtcm.websocket.onmessage(result);
         expect(testCallback).toHaveBeenCalledWith("result");
         done();
