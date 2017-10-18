@@ -1,10 +1,18 @@
 // tslint:disable:max-line-length
 import { IAuthToken, TokenManager } from "../src/api/core/tokenManager";
+import { MESSAGE } from "../src/config/message";
 import { requestAdapterMockFactory } from "./testUtils";
+
 const validURL = "validUrl";
 
 describe("Class: TokenManager", () => {
   describe("when authenticating", () => {
+    let tm: TokenManager;
+
+    beforeEach( () => {
+      tm = new TokenManager(requestAdapterMockFactory().succesfulExecution({token: "validToken", refresh_token: "validRefreshToken"}));
+    });
+
     it("should throw an error if application URL is not provided", (done) => {
       (new TokenManager(requestAdapterMockFactory().genericSuccesfulExecution()))
         .init({appUrl: "", key: "validKey", secret: "validSecret"})
@@ -36,8 +44,7 @@ describe("Class: TokenManager", () => {
     });
 
     it("should have valid token and refresh token if authorization succeeded", (done) => {
-      (new TokenManager(requestAdapterMockFactory().succesfulExecution({token: "validToken", refresh_token: "validRefreshToken"})))
-        .init({appUrl: validURL, key: "validKey", secret: "validSecret"})
+      tm.init({appUrl: validURL, key: "validKey", secret: "validSecret"})
         .then((output: TokenManager) => {
           expect(output instanceof TokenManager).toBe(true);
           return (output as any).tokens;
@@ -48,6 +55,26 @@ describe("Class: TokenManager", () => {
           done();
         })
         .catch((err: Error) => done.fail(`init should not have failed: ${err.message}`));
+    });
+
+    it("should throw an error if the token is accessed before login", (done) => {
+      tm.token.then( () => {
+        done.fail("Token promise should reject.");
+      }).catch( (err: Error) => {
+        expect(err.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
+        done();
+      });
+    });
+
+    it("should throw an error if the token is accessed after terminate", (done) => {
+      tm.init({appUrl: validURL, key: "validKey", secret: "validSecret"})
+      .then(() => tm.terminate())
+      .then(() => tm.token)
+      .then( () => done.fail("Token access should have failed"))
+      .catch((err: Error) => {
+        expect(err.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
+        done();
+      });
     });
   });
 

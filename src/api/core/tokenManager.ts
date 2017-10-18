@@ -1,4 +1,5 @@
 import { API, DELAY } from "../../config/config";
+import { MESSAGE } from "../../config/message";
 import { IRequestAdapter, Methods } from "../../internal/requestAdapter";
 
 type Tokens = {token: string, refresh_token: string};
@@ -27,7 +28,7 @@ export class TokenManager {
   /* JWT and refresh tokens */
   private tokens: Promise<IAuthToken>;
   /* do not store key and secret */
-  constructor(private requestAdapter: IRequestAdapter) {}
+  constructor(private requestAdapter: IRequestAdapter) { }
 
   public init(opts: IAuthOptions): Promise<TokenManager> {
     /* check if email/password were provided */
@@ -54,10 +55,9 @@ export class TokenManager {
       .then(() => this);
   }
 
-  public terminate() {
+  public terminate(): void {
     clearInterval(this.refreshInterval);
     delete this.tokens;
-    return
   }
 
   private login(opts: IAuthOptions): Promise<IAuthToken> {
@@ -96,6 +96,9 @@ export class TokenManager {
 
   public get token(): Promise<string> {
     /* only actual token should be exposed (refresh_token should be hidden) */
+    if (!this.tokens) {
+      return Promise.reject(new Error(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE));
+    }
     return this.tokens.then((tokens: IAuthToken) => tokens.token);
   }
 }

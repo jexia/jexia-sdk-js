@@ -8,5 +8,8 @@ export const MESSAGE = {
   },
   QUERY: {
     MUST_PROVIDE_SORTING_FIELD: "A sorting field must be provided."
-  }
+  },
+  TokenManager: {
+    TOKEN_NOT_AVAILABLE: "You need to log in before you can access the token.",
+  },
 };
