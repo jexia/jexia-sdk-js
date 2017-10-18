@@ -8,6 +8,7 @@ class WebSocketMock {
   public url: string;
   public onopen: Function;
   public onclose: Function;
+  public onmessage: Function;
   private sendCallback: Function;
 
   constructor(url: string, sendCallback?: Function) {
@@ -22,6 +23,10 @@ class WebSocketMock {
 
   public send(message: String) {
     this.sendCallback(message);
+  }
+
+  public message(message: MessageEvent) {
+    this.onmessage(message);
   }
 }
 
@@ -65,12 +70,22 @@ describe("RTCModule class", () => {
   });
 
   describe("when subscribing to events for a dataset", () => {
-    it("should send the proper JSON message to Sharky", (done) => {
-      let rtcm: any = new RTCModule(() => { return; }, (url: string) => new WebSocketMock(url) );
-      let datasetName: string = "datasetName";
-      let actionName: string = "get";
+    const datasetName: string = "datasetName";
+    const actionName: string = "get";
+    let rtcm: any;
+    let ds: Dataset;
+    let webSockerMock: WebSocketMock;
+
+    beforeAll(() => {
+      rtcm = new RTCModule(() => { return; }, (url: string) => {
+        webSockerMock = new WebSocketMock(url);
+        return webSockerMock;
+      });
       let qef: QueryExecuterBuilder = new QueryExecuterBuilder(testurl, reqAdapterMock, tokenManagerMock);
-      let ds: Dataset = new Dataset(datasetName, qef);
+      ds = new Dataset(datasetName, qef);
+    });
+
+    it("should send the proper JSON message to Sharky", (done) => {
       rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
         spyOn(rtcm, "send");
         rtcm.subscribe(actionName, ds);
@@ -78,6 +93,47 @@ describe("RTCModule class", () => {
           type: "subscribe",
         });
         done();
+      }).catch( (error: Error) => {
+        done.fail("Initializing the RTCModule should not have failed.");
+      });
+    });
+
+    it("should delete the right dictionary function", (done) => {
+      const alternateAction = "post";
+      const errorMessage = (type: string) => `Subscription promise should not been ${type} triggered yet`;
+      const subscribeMessage = <MessageEvent>{
+        data: `{"type":"subscribe","status":"success","nsp":"${rtcm.buildSubscriptionUri(alternateAction, datasetName)}"}`
+      };
+      rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
+        rtcm
+          .subscribe(actionName, ds)
+          .then(() => done.fail(errorMessage("resolved")))
+          .catch(() => done.fail(errorMessage("rejected")));
+        rtcm
+          .subscribe(alternateAction, ds)
+          .then((message: Object) => {
+            expect(message).toEqual(subscribeMessage);
+            expect(rtcm.pendingSubscriptionRequests()).toEqual([rtcm.buildSubscriptionUri(actionName, datasetName)])
+            done();
+          })
+          .catch(() => done.fail("Subscription should not have failed"));
+
+        webSockerMock.message(subscribeMessage);
+
+      }).catch( (error: Error) => {
+        done.fail("Initializing the RTCModule should not have failed.");
+      });
+    });
+
+    it("should get rejected promise when subscription is not successful", (done) => {
+      rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
+        rtcm
+          .subscribe(actionName, ds)
+          .then(() => done.fail("Subscription should not have succeded"))
+          .catch(() => done());
+        webSockerMock.message(<MessageEvent>{
+          data: `{"type":"subscribe","status":"failure","nsp":"${rtcm.buildSubscriptionUri(actionName, datasetName)}"}`
+        });
       }).catch( (error: Error) => {
         done.fail("Initializing the RTCModule should not have failed.");
       });

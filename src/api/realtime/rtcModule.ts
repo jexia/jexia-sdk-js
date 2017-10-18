@@ -10,6 +10,7 @@ export class RTCModule implements IModule {
   private appUrl: string;
   private websocketCreateCallback: Function;
   private messageReceivedCallback: Function;
+  private callStack: any = {};
 
   constructor(messageReceivedCallback: Function, websocketCreateCallback?: Function) {
     this.messageReceivedCallback = messageReceivedCallback;
@@ -37,6 +38,10 @@ export class RTCModule implements IModule {
         const messageData = JSON.parse(message.data);
         if (messageData.type === "event") {
           this.messageReceivedCallback(messageData.data);
+        } else if(messageData.type === "subscribe") {
+          this.pendingSubscriptionRequests().forEach((functionMessage) => {
+            this.callStack[functionMessage](message);
+          });
         }
       };
       return new Promise((resolve, reject) => {
@@ -62,12 +67,33 @@ export class RTCModule implements IModule {
     return method;
   }
 
+  private subscription(type: string, method: string, datasetName: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      let nsp = this.buildSubscriptionUri(method, datasetName);
+      this.callStack[nsp] = (message: MessageEvent) => {
+        const response = JSON.parse(message.data);
+        if(response.type === type && response.status === "success" && response.nsp === nsp) {
+          delete this.callStack[nsp];
+          resolve(message);
+        } else if(response.type === type && response.status === "failure" && response.nsp === nsp) {
+          delete this.callStack[nsp];
+          reject(new Error("Error trying to ${type}"));
+        }
+      };
+      this.send({type: type, nsp});
+    });
+  }
+
+  public pendingSubscriptionRequests(): string[] {
+    return Object.getOwnPropertyNames(this.callStack);
+  }
+
   public subscribe(method: string, dataset: Dataset) {
-    this.send({type: "subscribe", nsp: this.buildSubscriptionUri(method, dataset.name)});
+    return this.subscription("subscribe", method, dataset.name);
   }
 
   public unsubscribe(method: string, dataset: Dataset) {
-    this.send({type: "unsubscribe", nsp: this.buildSubscriptionUri(method, dataset.name)});
+    return this.subscription("unsubscribe", method, dataset.name);
   }
 
   public terminate() {
