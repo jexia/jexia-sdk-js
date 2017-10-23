@@ -2,6 +2,7 @@
 import { IAuthToken, TokenManager } from "../src/api/core/tokenManager";
 import { MESSAGE } from "../src/config/message";
 import { requestAdapterMockFactory } from "./testUtils";
+import { TokenStorage } from "../src/api/core/componentStorage";
 
 const validURL = "validUrl";
 
@@ -10,6 +11,7 @@ describe("Class: TokenManager", () => {
     let tm: TokenManager;
 
     beforeEach( () => {
+      TokenStorage.cleanStorage();
       tm = new TokenManager(requestAdapterMockFactory().succesfulExecution({token: "validToken", refresh_token: "validRefreshToken"}));
     });
 

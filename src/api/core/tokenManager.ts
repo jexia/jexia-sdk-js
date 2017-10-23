@@ -1,6 +1,7 @@
 import { API, DELAY } from "../../config/config";
 import { MESSAGE } from "../../config/message";
 import { IRequestAdapter, Methods } from "../../internal/requestAdapter";
+import { IStorageComponent, TokenStorage } from "./componentStorage";
 
 type Tokens = {token: string, refresh_token: string};
 
@@ -13,6 +14,8 @@ export interface IAuthOptions {
   readonly secret: string;
   /* token refresh interval (optional) */
   readonly refreshInterval?: Number;
+  /* remember user (optional) */
+  readonly remember?: boolean;
 }
 
 export interface IAuthToken {
@@ -27,8 +30,26 @@ export class TokenManager {
   private refreshInterval: number;
   /* JWT and refresh tokens */
   private tokens: Promise<IAuthToken>;
+
+  private storage: IStorageComponent;
+
+  private requestAdapter: IRequestAdapter;
   /* do not store key and secret */
-  constructor(private requestAdapter: IRequestAdapter) { }
+  constructor(requestAdapter: IRequestAdapter) {
+    this.requestAdapter = requestAdapter;
+    this.storage = TokenStorage.getStorageAPI();
+  }
+
+  private refreshToken(opts: IAuthOptions) {
+    return () => {
+      this.refreshInterval = setInterval(() => {
+        /* replace existing tokens with new ones */
+        this.tokens = this.refresh(opts.appUrl);
+        /* exit refresh loop on failure */
+        this.tokens.catch((err: Error) => this.terminate());
+      }, opts.refreshInterval || DELAY);
+    };
+  }
 
   public init(opts: IAuthOptions): Promise<TokenManager> {
     /* check if email/password were provided */
@@ -39,19 +60,12 @@ export class TokenManager {
     if (!opts.appUrl) {
       return Promise.reject(new Error("Please supply a valid Jexia App URL."));
     }
-    /* authenticate */
-    this.tokens = this.login(opts);
+
+    this.tokens = this.storage.isEmpty() === true ? this.login(opts) : this.storage.getTokens();
+
     /* make sure that tokens have been successfully received */
     return this.tokens
-      .then(() => {
-        /* start refresh loop */
-        this.refreshInterval = setInterval(() => {
-          /* replace existing tokens with new ones */
-          this.tokens = this.refresh(opts.appUrl);
-          /* exit refresh loop on failure */
-          this.tokens.catch((err: Error) => this.terminate());
-        }, opts.refreshInterval || DELAY);
-      })
+      .then(this.refreshToken(opts))
       .then(() => this);
   }
 
@@ -64,8 +78,12 @@ export class TokenManager {
     /* no need to wait for tokens */
     return this.requestAdapter
       .execute(this.buildLoginUrl(opts.appUrl), {body: {email: opts.key, password: opts.secret}, method: Methods.POST})
+      .then((newTokens: Tokens) => {
+        return ({token: newTokens.token, refreshToken: newTokens.refresh_token} as IAuthToken);
+      })
+      .then((tokens) => this.storage.setTokens(tokens))
       /* convert response to IAuthToken interface */
-      .then((tokens: Tokens) => ({token: tokens.token, refreshToken: tokens.refresh_token} as IAuthToken))
+      
       /* catch login error */
       .catch((err: Error) => {
         /* add specific information to error */
@@ -87,6 +105,8 @@ export class TokenManager {
       )
       /* convert response to IAuthToken interface */
       .then((newTokens: Tokens) => ({token: newTokens.token, refreshToken: newTokens.refresh_token} as IAuthToken))
+      .then((tokens) => this.storage.setTokens(tokens))
+      
       /* catch refresh token error */
       .catch((err: Error) => {
         /* add specific information to error */
