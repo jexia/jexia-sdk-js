@@ -8,7 +8,7 @@ function jexiaClient(fetchFunc: Function): Client {
   return new Client(fetchFunc);
 }
 
-function realTimeModule(messageReceivedCallback: Function, webSocketCreateCallback: Function): RTCModule {
+function realTime(messageReceivedCallback: Function, webSocketCreateCallback: Function): RTCModule {
   return new RTCModule(messageReceivedCallback, webSocketCreateCallback);
 }
 
@@ -22,5 +22,5 @@ export {
   field,
   jexiaClient,
   IModule,
-  realTimeModule,
+  realTime,
 };

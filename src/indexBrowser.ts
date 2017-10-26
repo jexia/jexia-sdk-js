@@ -44,7 +44,7 @@ function jexiaClient(): Client {
   return new Client(window.fetch.bind(window));
 }
 
-function realTimeModule(messageReceivedCallback: Function): RTCModule {
+function realTime(messageReceivedCallback: Function): RTCModule {
   return new RTCModule(messageReceivedCallback, (appUrl: string) => {
     return new WebSocket(appUrl);
   });
@@ -60,5 +60,5 @@ export {
   field,
   jexiaClient,
   IModule,
-  realTimeModule,
+  realTime,
 };
