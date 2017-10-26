@@ -42,13 +42,13 @@ import Client from "Anemo SDK location";
 
 ### Initialization and Authentication
 
-The `Client` class expects to receive a `fetch` standard compliant library on initialization. On browser you can use the global `fetch` object. On node, you will need to add a compatible dependency to your project. For development of the SDK we've used `node-fetch` and can recommend it.
+The `jexiaClient()` function will return an instance of the `Client` class. On Node.JS, you will need to provide a `fetch` standard compliant function as a parameter. You will need to add a compatible dependency to your project. For development of the SDK we've used `node-fetch` and can recommend it. The browser SDK will use the native `fetch` implementation.
 
 ``` Javascript
-import Client from "Anemo SDK location";
+import { jexiaClient } from "Anemo SDK location";
 import fetch from "node-fetch";
 
-let initializedClientPromise = new Client(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "password"});
+let initializedClientPromise = jexiaClient(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "password"});
 initializedClientPromise.then( (initializedClient) => {
   // you have been succesfully logged in!
   // you can start using the initializedClient variable here
@@ -64,16 +64,15 @@ In order to use a module you need to:
 - initialize it
 - pass it to the `Client` when calling the `.init()` method
 
-Probably the most useful module is the Data Operation Module. The example below will show how to initialize the SDK using this module. Follow the `dataModule` variable to see how this mechanism works.
+Probably the most useful module is the Data Operation Module (`DataOperationsModule` class). The example below will show how to initialize the SDK using this module. Follow the `dataModule` variable to see how this mechanism works.
 
 ``` Javascript
-import Client from "Anemo SDK location";
-import { DataOperationsModule } from "Anemo SDK Location".
+import { jexiaClient, dataOperations } from "Anemo SDK Location";
 import fetch from "node-fetch";
 
-let dataModule = new DataOperationsModule();
+let dataModule = dataOperations();
 
-let initializedClientPromise = new Client(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "password"}, dataModule);
+let initializedClientPromise = jexiaClient(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "password"}, dataModule);
 initializedClientPromise.then( (initializedClient) => {
   // you have been succesfully logged in!
   // you can start using the dataModule variable to operate on records here
@@ -113,7 +112,7 @@ Using all the temporary variables in this example is for demonstration purposes,
 
 ``` Javascript
 [..]
-new Client(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "password"}, dataModule).then( (initializedClient) => {
+jexiaClient(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "password"}, dataModule).then( (initializedClient) => {
   let postsDataset = dataModule.dataset("posts");
   let unexecutedQuery = postsDataset.select();
   let executedQueryPromise = unexecutedQuery.execute();
@@ -130,7 +129,7 @@ If you watch closely, the API is chainable, so you can rewrite the query in a mu
 
 ``` Javascript
 [..]
-new Client(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "password"}, dataModule).then( (initializedClient) => {
+jexiaClient(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "password"}, dataModule).then( (initializedClient) => {
   dataModule.dataset("posts").select().execute().then( (records) => {
     // you can start iterating through the posts here
   }).catch( (error) => {
@@ -213,7 +212,7 @@ let nestedFilter = field("first_name").isEqualTo("Tom")
                    .or( field("first_name").isEqualTo("Dick")
                         .and( field("middle_name").isEqualTo("Harry")));
 
-let nestedFilter = field("first_name").isEqualTo("Tom")
+let anotherNestedFilter = field("first_name").isEqualTo("Tom")
                    .or( field("first_name").isEqualTo("Dick")
                         .and( field("middle_name").isEqualTo("Harry")
                               .or( field("middle_name").isEqualTo("Larry"))));
@@ -266,7 +265,7 @@ posts.insert([ {title: "New Post", content:"content here"},
 ``` Javascript
 [..]
 let posts = dataModule.dataset("posts");
-posts.delete().filter(condition("title", "like", "test")).execute().then( (records) => {
+posts.delete().filter(field("title").isLike("test")).execute().then( (records) => {
   // you will be able to access the deleted records here
   // they won't be stored in the DB anymore, but maybe you
   // want to display a visual confirmation of what got deleted
@@ -295,7 +294,7 @@ When running the app in the browser, this dependency can be ignored, as the SDK 
 ``` Javascript
 import { RTCModule } from "Anemo SDK location";
 
-let rtcmod = new RTCModule(
+let rtcmod = realTime(
   (message) => { // do stuff with your real time notification here }
 );
 ```
@@ -305,7 +304,7 @@ For Node.JS apps, a websocket client needs to be imported and a callback instant
 ``` Javascript
 import WebSocket from "your favorite Node.JS WebSocket implementation";
 
-let rtcmod = new RTCModule(
+let rtcmod = realTime(
   (message) => { // do stuff with your real time notification here },
   (appUrl) => new WebSocket(appUrl)
 );
@@ -317,7 +316,7 @@ The real-time module needs to be passed to the `Client` when initializing the la
 
 ``` Javascript
 [..]
-new Client(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "password"}, rtcmod).then( (initializedClient) => {
+jexiaClient(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "password"}, rtcmod).then( (initializedClient) => {
   // you have been succesfully logged in
   // you can start using the initialized rtcmod here
 }).catch( (error) => {

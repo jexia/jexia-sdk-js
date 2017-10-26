@@ -1,15 +1,18 @@
-Client = require("../../../dist/node-jexia-sdk.min.js").Client;
-DataOperationsModule = require("../../../dist/node-jexia-sdk.min.js").DataOperationsModule;
+jexiaClient = require("../../../dist/node-jexia-sdk.min.js").jexiaClient;
+dataOperations = require("../../../dist/node-jexia-sdk.min.js").dataOperations;
 fetch = require("node-fetch");
+field = require("../../../dist/node-jexia-sdk.min.js").field;
+
 //Initialize DataOperationsModule
-let dom = new DataOperationsModule()
+let dom = dataOperations();
 //Initialize Client and pass DataOperationsModule to it.
-new Client(fetch).init({appUrl: "localhost", key: "anna@example.com", secret: "annie123"}, dom).then( (initializedClient) => {
-  dom.dataset("posts").select().execute().then( (records) => {
-    console.log(records)
-    // you can start iterating through the posts here
+jexiaClient(fetch).init({appUrl: "localhost", key: "anna@example.com", secret: "annie123"}, dom).then( (initializedClient) => {
+  dom.dataset("posts").select().filter(field("title").isEqualTo("My first post")).execute().then( (records) => {
+    console.log(records);
+    process.exit();
   }).catch( (error) => {
     // there was a problem retrieving the records
-    console.log(error)
+    console.log(error);
+    process.exit();
   });
 });
