@@ -37,7 +37,11 @@ export class RTCModule implements IModule {
       this.websocket.onmessage = (message: MessageEvent) => {
         const messageData = JSON.parse(message.data);
         if (messageData.type === "event") {
-          this.messageReceivedCallback(messageData.data);
+          try {
+            this.messageReceivedCallback(messageData.data);
+          } catch (err) {
+            throw new Error(`${MESSAGE.RTC.EXCEPTION_IN_CLIENT_CALLBACK}${err.stack}`);
+          }
         } else if(messageData.type === "subscribe") {
           this.pendingSubscriptionRequests().forEach((functionMessage) => {
             this.callStack[functionMessage](message);

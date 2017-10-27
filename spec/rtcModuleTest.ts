@@ -1,6 +1,7 @@
 // tslint:disable:max-line-length
 import { Dataset } from "../src/api/dataops/dataset";
 import { RTCModule } from "../src/api/realtime/rtcModule";
+import { MESSAGE } from "../src/config/message";
 import { QueryExecuterBuilder } from "../src/internal/queryExecuterBuilder";
 import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
 
@@ -171,6 +172,9 @@ describe("RTCModule class", () => {
       tokenManagerMock = mocks.tokenManagerMock;
       reqAdapterMock = mocks.reqAdapterMock;
       rtcm = new RTCModule(testCallback, (url: string) => new WebSocketMock(url) );
+    });
+
+    beforeEach(() => {
       initializeRTC = rtcm.init(testurl, tokenManagerMock, reqAdapterMock);
     });
 
@@ -193,6 +197,28 @@ describe("RTCModule class", () => {
         done();
       }).catch( (error: Error) => {
         done.fail("Initializing the RTCModule should not have failed.");
+      });
+    });
+
+    it("should not crash when the messageReceivedCallback supplied by the client code throws an error", (done) => {
+      const result: object = { data: '{"type": "event", "data": "result"}' };
+      const genericError: string = "some client code error";
+      const expectedErrorMessage: string = `${MESSAGE.RTC.EXCEPTION_IN_CLIENT_CALLBACK}${new Error(genericError)}`;
+      const errorLengthToCompare = 120;
+      rtcm = new RTCModule( () => { throw new Error(genericError); }, (url: string) => new WebSocketMock(url) );
+      rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
+        try {
+          rtcm.websocket.onmessage(result);
+        } catch (err) {
+          // only comparing the first part of the error, as the latter part includes the original callstack, before the
+          // SDK rethrows. That part isn't reproducible for comparison so the test would never pass if we tested it.
+          expect(err.message.substring(0, errorLengthToCompare)).toEqual(expectedErrorMessage.substring(0, errorLengthToCompare));
+          done();
+          return;
+        }
+        done.fail("The call should have failed.");
+      }).catch( () => {
+        done.fail("Initialization shouldn't have failed.");
       });
     });
   });
