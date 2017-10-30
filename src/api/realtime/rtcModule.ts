@@ -52,8 +52,11 @@ export class RTCModule implements IModule {
         this.websocket.onopen = () => {
           resolve();
         };
-        this.websocket.onerror = (err) => {
-          reject(err);
+        this.websocket.onerror = (err: Event) => {
+          reject(new Error(`${MESSAGE.RTC.CONNECTION_FAILED}`));
+        };
+        this.websocket.onclose = (event: CloseEvent) => {
+          reject(new Error(`${MESSAGE.RTC.CONNECTION_CLOSED}${event.code}`));
         };
       }).then( () => this);
     });

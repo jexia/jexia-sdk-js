@@ -1,21 +1,23 @@
 // tslint:disable:max-line-length
+// tslint:disable:max-classes-per-file
 import { Dataset } from "../src/api/dataops/dataset";
 import { RTCModule } from "../src/api/realtime/rtcModule";
 import { MESSAGE } from "../src/config/message";
 import { QueryExecuterBuilder } from "../src/internal/queryExecuterBuilder";
 import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
 
-class WebSocketMock {
+class BaseWebSocketMock {
   public url: string;
   public onopen: Function;
   public onclose: Function;
   public onmessage: Function;
+  public onerror: Function;
   private sendCallback: Function;
 
-  constructor(url: string, sendCallback?: Function) {
+  constructor(url: string, constructTimeCallback: Function, sendCallback?: Function) {
     this.url = url;
     this.sendCallback = sendCallback ? sendCallback : (message: String) => message;
-    setTimeout(() => this.onopen(), 100);
+    setTimeout(constructTimeCallback, 100);
   }
 
   public close() {
@@ -28,6 +30,24 @@ class WebSocketMock {
 
   public message(message: MessageEvent) {
     this.onmessage(message);
+  }
+}
+
+class WebSocketMock extends BaseWebSocketMock {
+  constructor(url: string, sendCallback?: Function) {
+    super(url, () => this.onopen(), sendCallback);
+  }
+}
+
+class ConnectionCloseWebSocketMock extends BaseWebSocketMock {
+  constructor(url: string, sendCallback?: Function) {
+    super(url, () => this.onclose({code: 1}), sendCallback);
+  }
+}
+
+class ConnectionErrorWebSocketMock extends BaseWebSocketMock {
+  constructor(url: string, sendCallback?: Function) {
+    super(url, () => this.onerror(), sendCallback);
   }
 }
 
@@ -67,6 +87,32 @@ describe("RTCModule class", () => {
       }).catch( (error: Error) => {
         done.fail("Initializing the RTCModule should not have failed.");
       });
+    });
+
+    function testInitialisationErrors(mockCreationCallback: Function, expectedError: String, done: any) {
+      let rtcm: any = new RTCModule(() => { return; }, mockCreationCallback );
+      rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
+        done.fail("Initialization should have failed");
+      }).catch( (error: Error) => {
+        expect(error.message).toEqual(expectedError);
+        done();
+      });
+    }
+
+    it("should gracefully notify the user if the connection could not be established and the onclose websocket event is raised", (done) => {
+      testInitialisationErrors(
+        (url: string) => new ConnectionCloseWebSocketMock(url), // use this mock for init
+        `${MESSAGE.RTC.CONNECTION_CLOSED}1`, // expect this error; 1 is the error code thrown by our mocking logic
+        done,
+      );
+    });
+
+    it("should gracefully notify the user if the connection could not be established and the onerror websocket event is raised", (done) => {
+      testInitialisationErrors(
+        (url: string) => new ConnectionErrorWebSocketMock(url), // use this mock for init
+        `${MESSAGE.RTC.CONNECTION_FAILED}`, // expect this error
+        done,
+      );
     });
   });
 

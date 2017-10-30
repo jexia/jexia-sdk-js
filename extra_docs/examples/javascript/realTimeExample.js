@@ -2,7 +2,7 @@ jexiaClient = require("../../../dist/node-jexia-sdk.min.js").jexiaClient;
 dataOperations = require("../../../dist/node-jexia-sdk.min.js").dataOperations;
 fetch = require("node-fetch");
 field = require("../../../dist/node-jexia-sdk.min.js").field;
-realTime = require("../../../dist/node-jexia-sdk.min.js").realTimeModule;
+realTime = require("../../../dist/node-jexia-sdk.min.js").realTime;
 ws = require("ws");
 
 let dom = dataOperations();
