@@ -1,5 +1,5 @@
 import { createRequestExecuterMock } from "../spec/testUtils";
-import { DeleteQuery } from "../src/api/dataops/DeleteQuery";
+import { DeleteQuery } from "../src/api/dataops/deleteQuery";
 import { field } from "../src/api/dataops/filteringApi";
 
 describe("DeleteQuery class", () => {
