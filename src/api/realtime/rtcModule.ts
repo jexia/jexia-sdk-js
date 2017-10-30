@@ -1,9 +1,9 @@
+import { API } from "../../config/config";
+import { MESSAGE } from "../../config/message";
 import { IRequestAdapter } from "../../internal/requestAdapter";
 import { IModule } from "../core/module";
 import { TokenManager } from "../core/tokenManager";
 import { Dataset } from "../dataops/dataset";
-import { MESSAGE } from "../../config/message";
-import { API } from "../../config/config";
 
 export class RTCModule implements IModule {
   private websocket: WebSocket;
@@ -42,7 +42,7 @@ export class RTCModule implements IModule {
           } catch (err) {
             throw new Error(`${MESSAGE.RTC.EXCEPTION_IN_CLIENT_CALLBACK}${err.stack}`);
           }
-        } else if(messageData.type === "subscribe") {
+        } else if (messageData.type === "subscribe") {
           this.pendingSubscriptionRequests().forEach((functionMessage) => {
             this.callStack[functionMessage](message);
           });
@@ -56,35 +56,6 @@ export class RTCModule implements IModule {
           reject(err);
         };
       }).then( () => this);
-    });
-  }
-
-  private associateMethod(method: string) {
-    switch(method) {
-      case 'insert':
-        return 'post';
-      case 'select':
-        return 'get';
-      case 'update':
-        return 'put';
-    }
-    return method;
-  }
-
-  private subscription(type: string, method: string, datasetName: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      let nsp = this.buildSubscriptionUri(method, datasetName);
-      this.callStack[nsp] = (message: MessageEvent) => {
-        const response = JSON.parse(message.data);
-        if(response.type === type && response.status === "success" && response.nsp === nsp) {
-          delete this.callStack[nsp];
-          resolve(message);
-        } else if(response.type === type && response.status === "failure" && response.nsp === nsp) {
-          delete this.callStack[nsp];
-          reject(new Error("Error trying to ${type}"));
-        }
-      };
-      this.send({type: type, nsp});
     });
   }
 
@@ -107,6 +78,36 @@ export class RTCModule implements IModule {
         reject(err);
       };
       this.websocket.close();
+    });
+  }
+
+  private associateMethod(method: string) {
+    switch (method) {
+      case "insert":
+        return "post";
+      case "select":
+        return "get";
+      case "update":
+        return "put";
+      default:
+        return method;
+    }
+  }
+
+  private subscription(type: string, method: string, datasetName: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      let nsp = this.buildSubscriptionUri(method, datasetName);
+      this.callStack[nsp] = (message: MessageEvent) => {
+        const response = JSON.parse(message.data);
+        if (response.type === type && response.status === "success" && response.nsp === nsp) {
+          delete this.callStack[nsp];
+          resolve(message);
+        } else if (response.type === type && response.status === "failure" && response.nsp === nsp) {
+          delete this.callStack[nsp];
+          reject(new Error("Error trying to ${type}"));
+        }
+      };
+      this.send({type, nsp});
     });
   }
 

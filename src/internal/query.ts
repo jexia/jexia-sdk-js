@@ -1,6 +1,6 @@
 import { IFilteringCriterion } from "../api/dataops/filteringApi";
 import { ICondition } from "../api/dataops/filteringCondition";
-import { MESSAGE } from '../config/message';
+import { MESSAGE } from "../config/message";
 
 interface ISort {
   fields: string[];
@@ -81,7 +81,7 @@ export class Query {
   }
 
   public AddSortCondition(direction: string, ...fields: string[]) {
-    if(fields.length == 0) {
+    if (fields.length === 0) {
       throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
     }
     this.orders.push({ fields, direction });

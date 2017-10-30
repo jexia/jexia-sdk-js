@@ -40,15 +40,12 @@ export class TokenManager {
     this.storage = TokenStorage.getStorageAPI();
   }
 
-  private refreshToken(opts: IAuthOptions) {
-    return () => {
-      this.refreshInterval = setInterval(() => {
-        /* replace existing tokens with new ones */
-        this.tokens = this.refresh(opts.appUrl);
-        /* exit refresh loop on failure */
-        this.tokens.catch((err: Error) => this.terminate());
-      }, opts.refreshInterval || DELAY);
-    };
+  public get token(): Promise<string> {
+    /* only actual token should be exposed (refresh_token should be hidden) */
+    if (!this.tokens) {
+      return Promise.reject(new Error(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE));
+    }
+    return this.tokens.then((tokens: IAuthToken) => tokens.token);
   }
 
   public init(opts: IAuthOptions): Promise<TokenManager> {
@@ -74,6 +71,17 @@ export class TokenManager {
     delete this.tokens;
   }
 
+  private refreshToken(opts: IAuthOptions) {
+    return () => {
+      this.refreshInterval = setInterval(() => {
+        /* replace existing tokens with new ones */
+        this.tokens = this.refresh(opts.appUrl);
+        /* exit refresh loop on failure */
+        this.tokens.catch((err: Error) => this.terminate());
+      }, opts.refreshInterval || DELAY);
+    };
+  }
+
   private login(opts: IAuthOptions): Promise<IAuthToken> {
     /* no need to wait for tokens */
     return this.requestAdapter
@@ -83,7 +91,7 @@ export class TokenManager {
       })
       .then((tokens) => this.storage.setTokens(tokens))
       /* convert response to IAuthToken interface */
-      
+
       /* catch login error */
       .catch((err: Error) => {
         /* add specific information to error */
@@ -106,19 +114,11 @@ export class TokenManager {
       /* convert response to IAuthToken interface */
       .then((newTokens: Tokens) => ({token: newTokens.token, refreshToken: newTokens.refresh_token} as IAuthToken))
       .then((tokens) => this.storage.setTokens(tokens))
-      
+
       /* catch refresh token error */
       .catch((err: Error) => {
         /* add specific information to error */
         throw new Error(`Unable to refresh token: ${err.message}`);
       });
-  }
-
-  public get token(): Promise<string> {
-    /* only actual token should be exposed (refresh_token should be hidden) */
-    if (!this.tokens) {
-      return Promise.reject(new Error(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE));
-    }
-    return this.tokens.then((tokens: IAuthToken) => tokens.token);
   }
 }

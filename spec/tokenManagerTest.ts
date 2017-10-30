@@ -1,8 +1,8 @@
 // tslint:disable:max-line-length
+import { TokenStorage } from "../src/api/core/componentStorage";
 import { IAuthToken, TokenManager } from "../src/api/core/tokenManager";
 import { MESSAGE } from "../src/config/message";
 import { requestAdapterMockFactory } from "./testUtils";
-import { TokenStorage } from "../src/api/core/componentStorage";
 
 const validURL = "validUrl";
 

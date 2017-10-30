@@ -1,13 +1,13 @@
+import Client from "./api/core/client";
+import { TokenStorage, WebStorageComponent } from "./api/core/componentStorage";
 import { IModule } from "./api/core/module";
 import DataOperationsModule from "./api/dataops/dataOperationsModule";
 import { combineCriteria, field } from "./api/dataops/filteringApi";
 import { RTCModule } from "./api/realtime/rtcModule";
-import Client from "./api/core/client";
-import { TokenStorage, WebStorageComponent } from "./api/core/componentStorage";
 
 /**
  * It checks if the browser is capable of using the Web Storage API
- * */
+ */
 function storageAvailable(type: string) {
   const storage = type === "localStorage" ? window.localStorage : window.sessionStorage;
   const testString = "test";
@@ -16,8 +16,7 @@ function storageAvailable(type: string) {
     storage.getItem(testString);
     storage.removeItem(testString);
     return true;
-  }
-  catch(e) {
+  } catch (e) {
     return e instanceof DOMException && (
       // everything except Firefox
       e.code === 22 ||
@@ -35,7 +34,7 @@ function storageAvailable(type: string) {
 
 /**
  * If Web Storage is available then uses the Client with local storage component
- * */
+ */
 if (storageAvailable("localStorage") && storageAvailable("sessionStorage")) {
   TokenStorage.setStorageAPI(new WebStorageComponent(true, window));
 }

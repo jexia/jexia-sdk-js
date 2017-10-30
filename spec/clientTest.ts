@@ -13,7 +13,7 @@ const mockModuleFailure: IModule = {
   },
   terminate: () => {
     return Promise.resolve();
-  }
+  },
 };
 
 const mockModuleSuccess: IModule = {
@@ -22,7 +22,7 @@ const mockModuleSuccess: IModule = {
   },
   terminate: () => {
     return Promise.resolve();
-  }
+  },
 };
 
 const moduleVoidTerminating: IModule = {
@@ -31,8 +31,8 @@ const moduleVoidTerminating: IModule = {
   },
   terminate: () => {
     return Promise.resolve();
-  }
-}
+  },
+};
 
 const moduleVoidTerminatingError: IModule = {
   init: (appUrl: string, tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<IModule> => {
@@ -41,12 +41,12 @@ const moduleVoidTerminatingError: IModule = {
   terminate: () => {
     let errorPromise = new Promise((resolve, error) => {
       setTimeout(() => {
-        error('some error');
+        error("some error");
       }, 1);
     });
     return errorPromise;
-  }
-}
+  },
+};
 
 describe("Class: Client", () => {
   describe("on init", () => {
@@ -151,7 +151,7 @@ describe("Class: Client", () => {
     });
   });
 
-  describe('on terminate', () => {
+  describe("on terminate", () => {
     it("should not fail when terminates all modules", (done) => {
       let client = new Client((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
         return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve()} as IHTTPResponse);
@@ -180,12 +180,15 @@ describe("Class: Client", () => {
       client.tokenManager = new TokenManager(mockRequestAdapter);
 
       client
-        .init({appUrl: "validUrl", key: "validKey", refreshInterval: 500, secret: "validSecret"}, moduleVoidTerminatingError)
+        .init({ appUrl: "validUrl",
+                key: "validKey",
+                refreshInterval: 500,
+                secret: "validSecret"}, moduleVoidTerminatingError)
         .then((cli: Client) => {
           cli
             .terminate()
             .then(() => {
-              done.fail('init should not have done it well');
+              done.fail("init should not have done it well");
             })
             .catch((err: Error) => done());
         })

@@ -1,7 +1,7 @@
 import { TokenManager } from "../api/core/tokenManager";
+import { API } from "../config/config";
 import { ICompiledRequest } from "./queryBasedCompiler";
 import { IRequestAdapter, IRequestOptions, Methods } from "./requestAdapter";
-import { API } from '../config/config';
 
 export class RequestExecuter {
   constructor(private appUrl: string,

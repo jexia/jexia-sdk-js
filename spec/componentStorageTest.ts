@@ -132,7 +132,7 @@ describe("ComponentStorage", ()  => {
           expect(newTokens).toEqual(token);
           done();
         })
-        .catch(() => done.fail('setting new tokens should now fail'));
+        .catch(() => done.fail("setting new tokens should now fail"));
     });
 
     it("should throw an error when trying to use a new instance", () => {

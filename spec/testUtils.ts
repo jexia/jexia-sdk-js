@@ -1,7 +1,7 @@
-import { RequestExecuter } from "../src/internal/executer";
-import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
 import { TokenManager } from "../src/api/core/tokenManager";
+import { RequestExecuter } from "../src/internal/executer";
 import { QueryExecuterBuilder } from "../src/internal/queryExecuterBuilder";
+import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
 
 class RequestAdapterMockFactory {
   public genericSuccesfulExecution(): IRequestAdapter {

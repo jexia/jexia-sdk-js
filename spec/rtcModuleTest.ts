@@ -31,20 +31,20 @@ class WebSocketMock {
   }
 }
 
-const createMocks:any = function(validToken: string) {
+const createMocks: any = (validToken: string) => {
   return {
-    tokenManagerMock: {
-      get token(): Promise<string> {
-        return Promise.resolve(validToken);
-      },
-    },
     reqAdapterMock: {
       execute(uri: string, opt: IRequestOptions): Promise<any> {
         return Promise.resolve();
       },
     },
+    tokenManagerMock: {
+      get token(): Promise<string> {
+        return Promise.resolve(validToken);
+      },
+    },
   };
-}
+};
 
 describe("RTCModule class", () => {
   let reqAdapterMock: IRequestAdapter;
@@ -102,8 +102,8 @@ describe("RTCModule class", () => {
     it("should delete the right dictionary function", (done) => {
       const alternateAction = "post";
       const errorMessage = (type: string) => `Subscription promise should not been ${type} triggered yet`;
-      const subscribeMessage = <MessageEvent>{
-        data: `{"type":"subscribe","status":"success","nsp":"${rtcm.buildSubscriptionUri(alternateAction, datasetName)}"}`
+      const subscribeMessage = <MessageEvent> {
+        data: `{"type":"subscribe","status":"success","nsp":"${rtcm.buildSubscriptionUri(alternateAction, datasetName)}"}`,
       };
       rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
         rtcm
@@ -114,7 +114,7 @@ describe("RTCModule class", () => {
           .subscribe(alternateAction, ds)
           .then((message: Object) => {
             expect(message).toEqual(subscribeMessage);
-            expect(rtcm.pendingSubscriptionRequests()).toEqual([rtcm.buildSubscriptionUri(actionName, datasetName)])
+            expect(rtcm.pendingSubscriptionRequests()).toEqual([rtcm.buildSubscriptionUri(actionName, datasetName)]);
             done();
           })
           .catch(() => done.fail("Subscription should not have failed"));
@@ -132,8 +132,8 @@ describe("RTCModule class", () => {
           .subscribe(actionName, ds)
           .then(() => done.fail("Subscription should not have succeded"))
           .catch(() => done());
-        webSockerMock.message(<MessageEvent>{
-          data: `{"type":"subscribe","status":"failure","nsp":"${rtcm.buildSubscriptionUri(actionName, datasetName)}"}`
+        webSockerMock.message(<MessageEvent> {
+          data: `{"type":"subscribe","status":"failure","nsp":"${rtcm.buildSubscriptionUri(actionName, datasetName)}"}`,
         });
       }).catch( (error: Error) => {
         done.fail("Initializing the RTCModule should not have failed.");

@@ -10,7 +10,7 @@ export default class Client {
   /* application URL */
   private appUrl: string;
   /* modules to be initilized */
-  private modules: Array<IModule>;
+  private modules: IModule[];
 
   public constructor(private fetch: Function) {
     this.requestAdapter = new RequestAdapter(this.fetch);
@@ -42,7 +42,7 @@ export default class Client {
     /* creates an array of promises to store the resulting promises when calling the terminate method of each module */
     let promises: Array<Promise<any>> = [];
 
-    this.modules.forEach(module => {
+    this.modules.forEach( (module) => {
       /* the promise is stored in an array to catch if some on the promises throws an error */
       promises.push(module.terminate());
     });
