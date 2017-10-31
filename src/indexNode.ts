@@ -1,5 +1,4 @@
 import Client from "./api/core/client";
-import { IModule } from "./api/core/module";
 import DataOperationsModule from "./api/dataops/dataOperationsModule";
 import { combineCriteria, field } from "./api/dataops/filteringApi";
 import { RTCModule } from "./api/realtime/rtcModule";
@@ -21,6 +20,5 @@ export {
   dataOperations,
   field,
   jexiaClient,
-  IModule,
   realTime,
 };

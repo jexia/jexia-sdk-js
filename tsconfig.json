@@ -15,5 +15,11 @@
   "include": [
     "src/**/*",
     "spec/**/*"
+  ],
+  "exclude": [
+    "src/api/core/componentStorage.ts",
+    "src/api/core/module.ts",
+    "src/api/core/tokenManager.ts",
+    "src/api/dataops/filteringCondition.ts"
   ]
 }
