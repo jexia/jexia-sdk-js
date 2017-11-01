@@ -18,16 +18,40 @@ export class Dataset implements IResource {
       return this.datasetName;
     }
 
-    public select() {
+    /**
+     * Creates a Select query.
+     * With no filters set, returns all records in the selected dataset.
+     */
+    public select(): SelectQuery {
         return new SelectQuery(this.queryExecuterBuilder, this.datasetName);
     }
-    public update(data: object) {
+
+    /**
+     * Creates an Update query.
+     * Data is a dictionary that contains the key:value pairs
+     * for the fields that you want to modify. Don't forget to apply
+     * a filter to specify the fields that will be modified.
+     */
+    public update(data: object): UpdateQuery {
         return new UpdateQuery(this.queryExecuterBuilder, data, this.datasetName);
     }
-    public insert(records: Array<object>) {
+
+    /**
+     * Creates an Insert query.
+     * Records is an array of objects that you want to store in the backend.
+     * If saving into a strict schema dataset, you need to provide values for the
+     * required fields for that particular dataset.
+     */
+    public insert(records: Array<object>): InsertQuery {
         return new InsertQuery(this.queryExecuterBuilder, records, this.datasetName);
     }
-    public delete() {
+
+    /**
+     * Creates a Delete query.
+     * You need to specify a filter to narrow down the records that you want deleted
+     * from the backend.
+     */
+    public delete(): DeleteQuery {
         return new DeleteQuery(this.queryExecuterBuilder, this.datasetName);
     }
 }
