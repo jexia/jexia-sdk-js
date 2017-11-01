@@ -236,10 +236,12 @@ describe("RTCModule class", () => {
     });
 
     it("should forward the message to the client defined callback", (done) => {
-      const result: object = { data: '{"type": "event", "data": "result"}' };
+      const eventType = "anEvent";
+      const eventValue = "result";
+      const result: object = { data: `{"type": "event", "nsp": "${eventType}", "data": "${eventValue}"}` };
       initializeRTC.then( () => {
         rtcm.websocket.onmessage(result);
-        expect(testCallback).toHaveBeenCalledWith("result");
+        expect(testCallback).toHaveBeenCalledWith({data: eventValue, event: eventType});
         done();
       }).catch( (error: Error) => {
         done.fail("Initializing the RTCModule should not have failed.");

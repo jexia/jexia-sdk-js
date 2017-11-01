@@ -38,7 +38,7 @@ export class RTCModule implements IModule {
         const messageData = JSON.parse(message.data);
         if (messageData.type === "event") {
           try {
-            this.messageReceivedCallback(messageData.data);
+            this.messageReceivedCallback({ data: messageData.data, event: messageData.nsp });
           } catch (err) {
             throw new Error(`${MESSAGE.RTC.EXCEPTION_IN_CLIENT_CALLBACK}${err.stack}`);
           }
