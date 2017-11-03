@@ -1,0 +1,25 @@
+<html>
+    <head>
+        <script src="yourpath/dist/js/browser-jexia-sdk.min.js"></script>
+    </head>
+       <body>
+           <a href="#" id="authorize">Authorize</a>
+           <script type="text/javascript">
+                document.getElementById("authorize").onclick = function(){
+                    //Initialize dataOperationsModule
+                    let dom = jexia.dataOperations();
+                    let jexiaClient = jexia.jexiaClient().init({appUrl: "localhost", key: "anna@example.com", secret: "annie123"}, dom).then((initializedClient) => {
+                        dom.dataset("posts").select().execute().then((records) => {
+                            let data = records;
+                            for(let i=0; i < data.length; i++){
+                                document.write("<ul><li>" + data[i].title + "</li></ul>") 
+                            }
+                            console.log(JSON.stringify(data))
+                        }).catch((error) => {      
+                            console.log(error)
+                        })
+                    })
+                }
+           </script>
+        </body>
+</html>
