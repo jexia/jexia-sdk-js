@@ -1,3 +1,4 @@
+import { MESSAGE } from "../config/message";
 import { strEnum } from "./utils";
 
 /* List of allowed methods */
@@ -29,7 +30,7 @@ function status(response: IHTTPResponse): Promise<IHTTPResponse> {
   if (!response.ok) {
     /* the fetch request went through but we received an error from the server */
     return response.json().then((errList: IServerErrors) => {
-      throw new Error(`Server didn't like it: ${errList.errors[0]}`);
+      throw new Error(`${MESSAGE.CORE.BACKEND_ERROR}${errList.errors[0]}`);
     });
   }
   return Promise.resolve(response);

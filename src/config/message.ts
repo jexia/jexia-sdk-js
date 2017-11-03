@@ -1,5 +1,8 @@
 // tslint:disable:max-line-length
 export const MESSAGE = {
+  CORE: {
+    BACKEND_ERROR: "There was an error on the back-end as a result of your request: ",
+  },
   QUERY: {
     MUST_PROVIDE_SORTING_FIELD: "A sorting field must be provided.",
   },

@@ -1,4 +1,5 @@
 // tslint:disable:max-line-length
+import { MESSAGE } from "../src/config/message";
 import { IHTTPResponse, IRequestAdapter, IRequestOptions, Methods, RequestAdapter } from "../src/internal/requestAdapter";
 
 /* Mock request adapter */
@@ -67,7 +68,7 @@ describe("Class: RequestAdapter", () => {
             done.fail("should throw an error");
           })
           .catch((err: Error) => {
-            expect(err).toEqual(new Error("Server didn't like it: unauthorized"));
+            expect(err).toEqual(new Error(`${MESSAGE.CORE.BACKEND_ERROR}unauthorized`));
             done();
           });
       });
