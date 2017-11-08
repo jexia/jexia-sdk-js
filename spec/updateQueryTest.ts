@@ -3,17 +3,17 @@ import { FilteringCondition } from "../src/api/dataops/filteringCondition";
 import { UpdateQuery } from "../src/api/dataops/updateQuery";
 
 describe("UpdateQuery class", () => {
-  let appUrl: string;
+  let projectID: string;
   let dataset: string;
 
   beforeAll( () => {
     dataset = "dataset";
-    appUrl = "appUrl";
+    projectID = "projectID";
   });
 
   describe("when instantiating a updateQuery object directly", () => {
     it("should be able to return required object", (done) => {
-        let qe = createRequestExecuterMock(appUrl, dataset);
+        let qe = createRequestExecuterMock(projectID, dataset);
         let query = new UpdateQuery(qe, {title: "changed first field"}, dataset);
         expect(query).toBeDefined();
         done();
@@ -22,7 +22,7 @@ describe("UpdateQuery class", () => {
 
   describe("when instantiating a updateQuery object from client", () => {
     it("should expose the proper methods", (done) => {
-        let qe = createRequestExecuterMock(appUrl, dataset);
+        let qe = createRequestExecuterMock(projectID, dataset);
         let query = new UpdateQuery(qe, { title: "changed first field"}, dataset);
         expect(typeof query.filter).toBe("function");
         expect(typeof query.limit).toBe("function");
@@ -35,7 +35,7 @@ describe("UpdateQuery class", () => {
 
   describe("when instantiating a updateQuery object from client", () => {
     it("its query object should have desired properties", (done) => {
-        let qe = createRequestExecuterMock(appUrl, dataset);
+        let qe = createRequestExecuterMock(projectID, dataset);
         let queryObj: any = new UpdateQuery(qe, {title: "changed first field"}, dataset)
         .filter(new FilteringCondition("field", "operator", ["value"])).limit(2);
         expect(queryObj).toBeDefined();

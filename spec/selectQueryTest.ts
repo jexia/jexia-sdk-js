@@ -4,17 +4,17 @@ import { SelectQuery } from "../src/api/dataops/selectQuery";
 import { MESSAGE } from "../src/config/message";
 
 describe("SelectQuery class", () => {
-  let appUrl: string;
+  let projectID: string;
   let dataset: string;
 
   beforeAll( () => {
     dataset = "dataset";
-    appUrl = "appUrl";
+    projectID = "projectID";
   });
 
   describe("when instantiating a select object", () => {
     it("should be able to get the select query object", () => {
-      let qe = createRequestExecuterMock(appUrl, dataset);
+      let qe = createRequestExecuterMock(projectID, dataset);
       let query: SelectQuery = new SelectQuery(qe, dataset);
       expect(query).toBeDefined();
     });
@@ -22,7 +22,7 @@ describe("SelectQuery class", () => {
 
   describe("when instantiating a select query object", () => {
     it("should expose the proper methods", () => {
-      let qe = createRequestExecuterMock(appUrl, dataset);
+      let qe = createRequestExecuterMock(projectID, dataset);
       let query: SelectQuery = new SelectQuery(qe, dataset);
       expect(typeof(query.execute)).toBe("function");
       expect(typeof(query.fields)).toBe("function");
@@ -36,7 +36,7 @@ describe("SelectQuery class", () => {
 
   describe("when configuring a select query object", () => {
     it("it should have the correct query options set", () => {
-      let qe = createRequestExecuterMock(appUrl, dataset);
+      let qe = createRequestExecuterMock(projectID, dataset);
       let cond = field("field").isMoreThan("value");
       let queryObj: any = new SelectQuery(qe, "dataset").filter(cond).limit(2).sortAsc("updated_at");
       expect(queryObj).toBeDefined();
@@ -50,7 +50,7 @@ describe("SelectQuery class", () => {
   });
 
   describe("sortAsc and sortDesc default param", () => {
-    let qe = createRequestExecuterMock(appUrl, dataset);
+    let qe = createRequestExecuterMock(projectID, dataset);
     let queryObj: any;
 
     beforeAll(() => {

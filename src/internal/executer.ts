@@ -4,7 +4,7 @@ import { ICompiledRequest } from "./queryBasedCompiler";
 import { IRequestAdapter, IRequestOptions, Methods } from "./requestAdapter";
 
 export class RequestExecuter {
-  constructor(private appUrl: string,
+  constructor(private projectID: string,
               private dataSetName: string,
               private requestAdapter: IRequestAdapter,
               private tokenManager: TokenManager) {}
@@ -18,6 +18,7 @@ export class RequestExecuter {
   }
 
   private getRequestUrl(): string {
-    return `${API.PROTOCOL}://${this.appUrl}:${API.PORT}/${API.SDKAPI}/${this.dataSetName}`;
+    return `${API.PROTOCOL}://${this.projectID}.${API.HOST}.` +
+      `${API.DOMAIN}:${API.PORT}/${API.DATA.ENDPOINT}/${this.dataSetName}`;
   }
 }

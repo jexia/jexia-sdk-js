@@ -51,9 +51,9 @@ export function createGenericSuccesfulResponse(): Promise<any> {
   });
 }
 
-export function createRequestExecuterMock(appUrl: string, datasetName: string): RequestExecuter {
+export function createRequestExecuterMock(projectID: string, datasetName: string): RequestExecuter {
   let reqAdapterMock = requestAdapterMockFactory().genericSuccesfulExecution();
   let tokenManagerMock = new TokenManager(reqAdapterMock);
-  let qefMock = new QueryExecuterBuilder(appUrl, reqAdapterMock, tokenManagerMock);
+  let qefMock = new QueryExecuterBuilder(projectID, reqAdapterMock, tokenManagerMock);
   return qefMock.createQueryExecuter(datasetName);
 }

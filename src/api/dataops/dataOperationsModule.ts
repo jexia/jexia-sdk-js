@@ -7,10 +7,10 @@ import { Dataset } from "./dataset";
 export default class DataOperationsModule implements IModule {
   private queryExecuterBuilder: QueryExecuterBuilder;
 
-  public init(appUrl: string,
+  public init(projectID: string,
               tokenManager: TokenManager,
               requestAdapter: IRequestAdapter): Promise<DataOperationsModule> {
-    this.queryExecuterBuilder = new QueryExecuterBuilder(appUrl, requestAdapter, tokenManager);
+    this.queryExecuterBuilder = new QueryExecuterBuilder(projectID, requestAdapter, tokenManager);
     return Promise.resolve(this);
   }
 

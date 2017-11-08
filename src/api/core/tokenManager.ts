@@ -7,7 +7,7 @@ type Tokens = {token: string, refresh_token: string};
 
 export interface IAuthOptions {
   /* application URL */
-  readonly appUrl: string;
+  readonly projectID: string;
   /* email */
   readonly key: string;
   /* password */
@@ -54,8 +54,8 @@ export class TokenManager {
       return Promise.reject(new Error("Please provide valid application credentials."));
     }
     /* check application URL */
-    if (!opts.appUrl) {
-      return Promise.reject(new Error("Please supply a valid Jexia App URL."));
+    if (!opts.projectID) {
+      return Promise.reject(new Error("Please supply a valid Jexia project ID."));
     }
 
     this.tokens = this.storage.isEmpty() === true ? this.login(opts) : this.storage.getTokens();
@@ -75,7 +75,7 @@ export class TokenManager {
     return () => {
       this.refreshInterval = setInterval(() => {
         /* replace existing tokens with new ones */
-        this.tokens = this.refresh(opts.appUrl);
+        this.tokens = this.refresh(opts.projectID);
         /* exit refresh loop on failure */
         this.tokens.catch((err: Error) => this.terminate());
       }, opts.refreshInterval || DELAY);
@@ -85,7 +85,13 @@ export class TokenManager {
   private login(opts: IAuthOptions): Promise<IAuthToken> {
     /* no need to wait for tokens */
     return this.requestAdapter
-      .execute(this.buildLoginUrl(opts.appUrl), {body: {email: opts.key, password: opts.secret}, method: Methods.POST})
+      .execute(this.buildLoginUrl(opts.projectID), {
+        body: {
+          email: opts.key,
+          password: opts.secret,
+        },
+        method: Methods.POST,
+      })
       .then((newTokens: Tokens) => {
         return ({token: newTokens.token, refreshToken: newTokens.refresh_token} as IAuthToken);
       })
@@ -99,15 +105,15 @@ export class TokenManager {
       });
   }
 
-  private buildLoginUrl(appUrl: string): string {
-    return `${API.PROTOCOL}://${appUrl}:${API.PORT}/${API.AUTHURL}`;
+  private buildLoginUrl(projectID: string): string {
+    return `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.AUTHURL}`;
   }
 
-  private refresh(appUrl: string): Promise<IAuthToken> {
+  private refresh(projectID: string): Promise<IAuthToken> {
     /* wait for tokens */
     return this.tokens
       /* wait for tokens */
-      .then((tokens: IAuthToken) => this.requestAdapter.execute(this.buildLoginUrl(appUrl), {
+      .then((tokens: IAuthToken) => this.requestAdapter.execute(this.buildLoginUrl(projectID), {
           body: {refresh_token: tokens.refreshToken}, headers: {Authorization: tokens.token}, method: Methods.PATCH,
         }),
       )

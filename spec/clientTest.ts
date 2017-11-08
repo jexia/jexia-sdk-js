@@ -8,7 +8,7 @@ import { requestAdapterMockFactory } from "./testUtils";
 const errFailedToInitModule = new Error("failed to init module");
 
 const mockModuleFailure: IModule = {
-  init: (appUrl: string, tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<IModule> => {
+  init: (projectID: string, tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<IModule> => {
     return Promise.reject(errFailedToInitModule);
   },
   terminate: () => {
@@ -17,7 +17,7 @@ const mockModuleFailure: IModule = {
 };
 
 const mockModuleSuccess: IModule = {
-  init: (appUrl: string, tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<IModule> => {
+  init: (projectID: string, tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<IModule> => {
     return Promise.resolve(mockModuleSuccess);
   },
   terminate: () => {
@@ -26,7 +26,7 @@ const mockModuleSuccess: IModule = {
 };
 
 const moduleVoidTerminating: IModule = {
-  init: (appUrl: string, tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<IModule> => {
+  init: (projectID: string, tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<IModule> => {
     return Promise.resolve(moduleVoidTerminating);
   },
   terminate: () => {
@@ -35,7 +35,7 @@ const moduleVoidTerminating: IModule = {
 };
 
 const moduleVoidTerminatingError: IModule = {
-  init: (appUrl: string, tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<IModule> => {
+  init: (projectID: string, tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<IModule> => {
     return Promise.resolve(moduleVoidTerminatingError);
   },
   terminate: () => {
@@ -58,7 +58,12 @@ describe("Class: Client", () => {
       client.tokenManager = new TokenManager(mockRequestAdapter);
 
       client
-        .init({appUrl: "validUrl", key: "validKey", refreshInterval: 500, secret: "validSecret"}, mockModuleFailure)
+        .init({
+          key: "validKey",
+          projectID: "validProjectID",
+          refreshInterval: 500,
+          secret: "validSecret",
+        }, mockModuleFailure)
         .then((cli: Client) => done.fail("init should have failed"))
         .catch((err: Error) => {
           if (!(client.tokenManager as any).refreshInterval) {
@@ -81,7 +86,12 @@ describe("Class: Client", () => {
       client.tokenManager = new TokenManager(mockRequestAdapter);
 
       client
-        .init({appUrl: "validUrl", key: "validKey", refreshInterval: 500, secret: "validSecret"}, mockModuleSuccess)
+        .init({
+          key: "validKey",
+          projectID: "validProjectID",
+          refreshInterval: 500,
+          secret: "validSecret",
+         }, mockModuleSuccess)
         .then((cli: Client) => done())
         .catch((err: Error) => done.fail("init should not have failed"));
     });
@@ -95,7 +105,7 @@ describe("Class: Client", () => {
 
       client
         .init(
-          {appUrl: "validUrl", key: "validKey", refreshInterval: 500, secret: "validSecret"},
+          {projectID: "validProjectID", key: "validKey", refreshInterval: 500, secret: "validSecret"},
           mockModuleSuccess,
           mockModuleSuccess,
           mockModuleFailure,
@@ -118,14 +128,14 @@ describe("Class: Client", () => {
       spyOn(mockModuleSuccess, "init");
       let adapterMock = requestAdapterMockFactory().genericSuccesfulExecution();
       let tokenManagerMock = new TokenManager(adapterMock);
-      let validUrl = "validUrl";
+      let validProjectID = "validProjectID";
       let client = new Client((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
         return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve()} as IHTTPResponse);
       });
       (client as any).tokenManager = tokenManagerMock;
       (client as any).requestAdapter = adapterMock;
-      client.init({appUrl: validUrl, key: "validKey", secret: "validSecret"}, mockModuleSuccess).then( () => {
-        expect(mockModuleSuccess.init).toHaveBeenCalledWith(validUrl, tokenManagerMock, adapterMock);
+      client.init({projectID: validProjectID, key: "validKey", secret: "validSecret"}, mockModuleSuccess).then( () => {
+        expect(mockModuleSuccess.init).toHaveBeenCalledWith(validProjectID, tokenManagerMock, adapterMock);
         done();
       }).catch( (err) => {
         done.fail(`init should not have failed: ${err.message}`);
@@ -141,7 +151,7 @@ describe("Class: Client", () => {
 
       client
         .init(
-          {appUrl: "validUrl", key: "validKey", refreshInterval: 500, secret: "validSecret"},
+          {projectID: "validProjectID", key: "validKey", refreshInterval: 500, secret: "validSecret"},
           mockModuleSuccess,
           mockModuleSuccess,
           mockModuleSuccess,
@@ -160,7 +170,12 @@ describe("Class: Client", () => {
       client.tokenManager = new TokenManager(mockRequestAdapter);
 
       client
-        .init({appUrl: "validUrl", key: "validKey", refreshInterval: 500, secret: "validSecret"}, mockModuleSuccess)
+        .init({
+          key: "validKey",
+          projectID: "validProjectID",
+          refreshInterval: 500,
+          secret: "validSecret",
+        }, mockModuleSuccess)
         .then((cli: Client) => {
           cli
             .terminate()
@@ -180,10 +195,12 @@ describe("Class: Client", () => {
       client.tokenManager = new TokenManager(mockRequestAdapter);
 
       client
-        .init({ appUrl: "validUrl",
-                key: "validKey",
-                refreshInterval: 500,
-                secret: "validSecret"}, moduleVoidTerminatingError)
+        .init({
+          key: "validKey",
+          projectID: "validProjectID",
+          refreshInterval: 500,
+          secret: "validSecret",
+        }, moduleVoidTerminatingError)
         .then((cli: Client) => {
           cli
             .terminate()

@@ -1,12 +1,13 @@
 // tslint:disable:max-line-length
-import { MESSAGE } from "../src/config/message";
+import { API } from "../src/config/config";
 import { IHTTPResponse, IRequestAdapter, IRequestOptions, Methods, RequestAdapter } from "../src/internal/requestAdapter";
+import { MESSAGE } from "../src/config/message";
 
 /* Mock request adapter */
 export const mockRequestAdapter: IRequestAdapter = {
   execute: (uri: string, opt: IRequestOptions): Promise<any> => {
     /* check URL validity */
-    if (uri === "http://validUrl:8080/auth") {
+    if (uri === `${API.PROTOCOL}://validProjectID.${API.HOST}.${API.DOMAIN}:${API.PORT}/auth`) {
       switch (opt.method) {
         /* log in */
         case Methods.POST:
@@ -47,7 +48,7 @@ describe("Class: RequestAdapter", () => {
       (new RequestAdapter((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
         return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve(respData)} as IHTTPResponse);
       }))
-        .execute("validURL", {headers: {}})
+        .execute("validProjectID", {headers: {}})
         .then((data: any) => {
           expect(data).toEqual(respData);
           done();
@@ -63,7 +64,7 @@ describe("Class: RequestAdapter", () => {
         (new RequestAdapter((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
           return Promise.resolve({ok: false, status: 401, json: () => Promise.resolve(error)} as IHTTPResponse);
         }))
-          .execute("invalidURL", {})
+          .execute("invalidProjectID", {})
           .then((data: any) => {
             done.fail("should throw an error");
           })
@@ -80,7 +81,7 @@ describe("Class: RequestAdapter", () => {
         (new RequestAdapter((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
           return Promise.reject(error);
         }))
-          .execute("validURL", {})
+          .execute("validProjectID", {})
           .then((data: any) => {
             done.fail("should throw an error");
           })

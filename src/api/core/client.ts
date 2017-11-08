@@ -8,7 +8,7 @@ export default class Client {
   /* request adapter */
   private requestAdapter: IRequestAdapter;
   /* application URL */
-  private appUrl: string;
+  private projectID: string;
   /* modules to be initilized */
   private modules: IModule[];
 
@@ -18,13 +18,13 @@ export default class Client {
   }
 
   public init(opts: IAuthOptions, ...modules: IModule[]): Promise<Client> {
-    /* save only appUrl (do not store key and secret) */
-    this.appUrl = opts.appUrl;
+    /* save only projectID (do not store key and secret) */
+    this.projectID = opts.projectID;
     this.modules = modules;
 
     return this.tokenManager.init(opts)
       /* init all modules */
-      .then(() => Promise.all(modules.map((curr) => curr.init(this.appUrl, this.tokenManager, this.requestAdapter))))
+      .then(() => Promise.all(modules.map((curr) => curr.init(this.projectID, this.tokenManager, this.requestAdapter))))
       /* make the Client available only after all modules have been successfully initialized */
       .then(() => this)
       /* if token manager failed to init or at least one of core modules failed to load */
@@ -56,6 +56,6 @@ export default class Client {
   }
 }
 
-export function authenticate(appUrl: string, key: string, secret: string): IAuthOptions {
-  return {appUrl, key, secret};
+export function authenticate(projectID: string, key: string, secret: string): IAuthOptions {
+  return {projectID, key, secret};
 }

@@ -7,7 +7,6 @@ import { Dataset } from "../dataops/dataset";
 
 export class RTCModule implements IModule {
   private websocket: WebSocket;
-  private appUrl: string;
   private websocketCreateCallback: Function;
   private messageReceivedCallback: Function;
   private callStack: any = {};
@@ -21,11 +20,10 @@ export class RTCModule implements IModule {
     }
   }
 
-  public init(appUrl: string, tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<RTCModule> {
-    this.appUrl = appUrl;
+  public init(projectID: string, tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<RTCModule> {
     return tokenManager.token.then( (token) => {
       try {
-        this.websocket = this.websocketCreateCallback(this.buildSocketOpenUri(appUrl, token));
+        this.websocket = this.websocketCreateCallback(this.buildSocketOpenUri(projectID, token));
       } catch (error) {
         throw new Error(`${MESSAGE.RTC.ERROR_CREATING_WEBSOCKET} Original error: ${error.message}`);
       }
@@ -132,7 +130,15 @@ export class RTCModule implements IModule {
     return `${datasetName}.${this.associateMethod(method)}`;
   }
 
-  private buildSocketOpenUri(appUrl: string, token: string) {
-    return `ws://${appUrl}:${API.SOCKETPORT}/${token}`;
+  private buildSocketOpenUri(projectID: string, token: string) {
+    // the realtime port and endpoint are not always needed in all environments
+    // where the SDK can run (local dev vs. cloud dev vs. production), so to avoid
+    // complicated logic we can simply define them as empty string when they are not
+    // needed and include : or / along with the actual values, when they are needed.
+    // See /config/config.ts vs. /config/config.prod.ts for actual values.
+    let result = `${API.REAL_TIME.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}` +
+      `${API.REAL_TIME.PORT}${API.REAL_TIME.ENDPOINT}/${token}`;
+    // temporary variable used for devenv debugging purposes
+    return result;
   }
 }

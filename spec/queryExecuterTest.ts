@@ -1,13 +1,14 @@
-import { RequestExecuter } from "../src/internal/executer";
+import { API } from "../src/config/config";
 import { IRequestAdapter, IRequestOptions, Methods } from "../src/internal/requestAdapter";
+import { RequestExecuter } from "../src/internal/executer";
 
 describe("QueryExecuter class", () => {
   let reqAdapterMock: IRequestAdapter;
   let tokenManagerMock: any;
   const validToken = "valid_token";
   const dataset = "dataset";
-  const url = "appurl";
-  const queryUrl = `http://${url}:8080/sdk-api/${dataset}`;
+  const url = "projectID";
+  const queryUrl = `${API.PROTOCOL}://${url}.${API.HOST}.${API.DOMAIN}:${API.PORT}/sdk-api/${dataset}`;
 
   beforeAll( () => {
     tokenManagerMock = {

@@ -1,8 +1,8 @@
-jexiaClient = require("../../../dist/node-jexia-sdk.min.js").jexiaClient;
-dataOperations = require("../../../dist/node-jexia-sdk.min.js").dataOperations;
+jexiaClient = require("../../../../dist/node-jexia-sdk.min.js").jexiaClient;
+dataOperations = require("../../../../dist/node-jexia-sdk.min.js").dataOperations;
 fetch = require("node-fetch");
-field = require("../../../dist/node-jexia-sdk.min.js").field;
-realTime = require("../../../dist/node-jexia-sdk.min.js").realTime;
+field = require("../../../../dist/node-jexia-sdk.min.js").field;
+realTime = require("../../../../dist/node-jexia-sdk.min.js").realTime;
 ws = require("ws");
 
 let dom = dataOperations();
@@ -14,7 +14,7 @@ let rtc = realTime((messageObject) => {
 });
 let jexiaClientInstance = jexiaClient(fetch);
 
-jexiaClientInstance.init({appUrl: "localhost", key: "anna@example.com", secret: "annie123"}, dom, rtc).then( () => {
+jexiaClientInstance.init({projectID: "anemo002", key: "anna@example.com", secret: "annie123"}, dom, rtc).then( () => {
   return rtc.subscribe("insert", dom.dataset("keywords")).then( () => {
     console.log("Succesfully subscribed to dataset changes");
     return dom.dataset("keywords").insert([{keyword: "aNewKeyword"}, {keyword: "anotherKeyword"}]).execute();

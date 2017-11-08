@@ -6,7 +6,7 @@ field = require("../../../../dist/node-jexia-sdk.min.js").field;
 //Initialize DataOperationsModule
 let dom = dataOperations();
 //Initialize Client and pass DataOperationsModule to it.
-jexiaClient(fetch).init({appUrl: "localhost", key: "anna@example.com", secret: "annie123"}, dom).then( (initializedClient) => {
+jexiaClient(fetch).init({projectID: "anemo002", key: "anna@example.com", secret: "annie123"}, dom).then( (initializedClient) => {
   dom.dataset("posts").select().filter(field("title").isEqualTo("My first post")).execute().then( (records) => {
     console.log(records);
     process.exit();

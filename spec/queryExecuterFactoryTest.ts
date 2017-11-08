@@ -18,14 +18,14 @@ describe("QueryExecuterFactory class", () => {
 
   describe("when creating the QueryExecuterFactory", () => {
     it("should create a valid object", () => {
-      let qef = new QueryExecuterBuilder("appUrl", reqAdapterMock, tokenManagerMock);
+      let qef = new QueryExecuterBuilder("projectID", reqAdapterMock, tokenManagerMock);
       expect(qef).toBeTruthy();
     });
   });
 
   describe("when calling the createQueryExecuter() method", () => {
     it("should create a valid object", () => {
-      let qef: QueryExecuterBuilder = new QueryExecuterBuilder("appUrl", reqAdapterMock, tokenManagerMock);
+      let qef: QueryExecuterBuilder = new QueryExecuterBuilder("projectID", reqAdapterMock, tokenManagerMock);
       let executer: RequestExecuter = qef.createQueryExecuter("dataSetName");
       expect(executer).toBeTruthy();
     });

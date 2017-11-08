@@ -5,6 +5,7 @@ import { RTCModule } from "../src/api/realtime/rtcModule";
 import { MESSAGE } from "../src/config/message";
 import { QueryExecuterBuilder } from "../src/internal/queryExecuterBuilder";
 import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
+import { API } from "../src/config/config";
 
 class BaseWebSocketMock {
   public url: string;
@@ -70,7 +71,7 @@ describe("RTCModule class", () => {
   let reqAdapterMock: IRequestAdapter;
   let tokenManagerMock: any;
   let validToken: string = "validtoken";
-  let testurl = "www.test.url";
+  let testProjectID = "testproject";
 
   beforeEach(() => {
     const mocks = createMocks(validToken);
@@ -81,8 +82,10 @@ describe("RTCModule class", () => {
   describe("when initializing the RTCModule", () => {
     it("should pass the proper URL to the websocket client library", (done) => {
       let rtcm: any = new RTCModule(() => { return; }, (url: string) => new WebSocketMock(url) );
-      rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
-        expect(rtcm.websocket.url).toEqual(`ws://${testurl}:8082/${validToken}`);
+      rtcm.init(testProjectID, tokenManagerMock, reqAdapterMock).then( () => {
+        const wsURL = `${API.REAL_TIME.PROTOCOL}://${testProjectID}.${API.HOST}.${API.DOMAIN}` +
+          `${API.REAL_TIME.PORT}${API.REAL_TIME.ENDPOINT}/${validToken}`;
+        expect(rtcm.websocket.url).toEqual(wsURL);
         done();
       }).catch( (error: Error) => {
         done.fail("Initializing the RTCModule should not have failed.");
@@ -91,7 +94,7 @@ describe("RTCModule class", () => {
 
     function testInitialisationErrors(mockCreationCallback: Function, expectedError: String, done: any) {
       let rtcm: any = new RTCModule(() => { return; }, mockCreationCallback );
-      rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
+      rtcm.init(testProjectID, tokenManagerMock, reqAdapterMock).then( () => {
         done.fail("Initialization should have failed");
       }).catch( (error: Error) => {
         expect(error.message).toEqual(expectedError);
@@ -128,12 +131,12 @@ describe("RTCModule class", () => {
         webSockerMock = new WebSocketMock(url);
         return webSockerMock;
       });
-      let qef: QueryExecuterBuilder = new QueryExecuterBuilder(testurl, reqAdapterMock, tokenManagerMock);
+      let qef: QueryExecuterBuilder = new QueryExecuterBuilder(testProjectID, reqAdapterMock, tokenManagerMock);
       ds = new Dataset(datasetName, qef);
     });
 
     it("should send the proper JSON message to Sharky", (done) => {
-      rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
+      rtcm.init(testProjectID, tokenManagerMock, reqAdapterMock).then( () => {
         spyOn(rtcm, "send");
         rtcm.subscribe(actionName, ds);
         expect(rtcm.send).toHaveBeenCalledWith({ nsp: `${datasetName}.${actionName}`,
@@ -151,7 +154,7 @@ describe("RTCModule class", () => {
       const subscribeMessage = <MessageEvent> {
         data: `{"type":"subscribe","status":"success","nsp":"${rtcm.buildSubscriptionUri(alternateAction, datasetName)}"}`,
       };
-      rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
+      rtcm.init(testProjectID, tokenManagerMock, reqAdapterMock).then( () => {
         rtcm
           .subscribe(actionName, ds)
           .then(() => done.fail(errorMessage("resolved")))
@@ -173,7 +176,7 @@ describe("RTCModule class", () => {
     });
 
     it("should get rejected promise when subscription is not successful", (done) => {
-      rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
+      rtcm.init(testProjectID, tokenManagerMock, reqAdapterMock).then( () => {
         rtcm
           .subscribe(actionName, ds)
           .then(() => done.fail("Subscription should not have succeded"))
@@ -192,9 +195,9 @@ describe("RTCModule class", () => {
       let rtcm: any = new RTCModule(() => { return; }, (url: string) => new WebSocketMock(url) );
       let datasetName: string = "datasetName";
       let actionName: string = "get";
-      let qef: QueryExecuterBuilder = new QueryExecuterBuilder(testurl, reqAdapterMock, tokenManagerMock);
+      let qef: QueryExecuterBuilder = new QueryExecuterBuilder(testProjectID, reqAdapterMock, tokenManagerMock);
       let ds: Dataset = new Dataset(datasetName, qef);
-      rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
+      rtcm.init(testProjectID, tokenManagerMock, reqAdapterMock).then( () => {
         spyOn(rtcm, "send");
         rtcm.unsubscribe(actionName, ds);
         expect(rtcm.send).toHaveBeenCalledWith({ nsp: `${datasetName}.${actionName}`,
@@ -221,7 +224,7 @@ describe("RTCModule class", () => {
     });
 
     beforeEach(() => {
-      initializeRTC = rtcm.init(testurl, tokenManagerMock, reqAdapterMock);
+      initializeRTC = rtcm.init(testProjectID, tokenManagerMock, reqAdapterMock);
     });
 
     it("should not forward the message when type is not 'event'", (done) => {
@@ -254,7 +257,7 @@ describe("RTCModule class", () => {
       const expectedErrorMessage: string = `${MESSAGE.RTC.EXCEPTION_IN_CLIENT_CALLBACK}${new Error(genericError)}`;
       const errorLengthToCompare = 120;
       rtcm = new RTCModule( () => { throw new Error(genericError); }, (url: string) => new WebSocketMock(url) );
-      rtcm.init(testurl, tokenManagerMock, reqAdapterMock).then( () => {
+      rtcm.init(testProjectID, tokenManagerMock, reqAdapterMock).then( () => {
         try {
           rtcm.websocket.onmessage(result);
         } catch (err) {
@@ -286,7 +289,7 @@ describe("RTCModule class", () => {
     it("should throw an useful error part 2", (done) => {
       let rtcm: any = new RTCModule(() => { return; },
         (url: string) => new WebSocketMock(url, () => { throw new Error("not opened"); }));
-      rtcm.init(testurl, tokenManagerMock, reqAdapterMock)
+      rtcm.init(testProjectID, tokenManagerMock, reqAdapterMock)
         .then( () => { return; } )
         .catch( (error: Error) => {
           done.fail("Initializing the RTCModule should not have failed.");
@@ -301,7 +304,7 @@ describe("RTCModule class", () => {
       let rtcm: any = new RTCModule(() => { return; },
         (url: string) => new WebSocketMock(url, () => { throw new Error("not opened"); }));
       const errMess: string = "The connection seems to be closed. Did you properly initialize the RTC Module by calling the init method? Or maybe you terminated the RTC Module early?";
-      rtcm.init(testurl, tokenManagerMock, reqAdapterMock)
+      rtcm.init(testProjectID, tokenManagerMock, reqAdapterMock)
         .then( () => {
           rtcm.terminate().then( () => {
             expect( () => rtcm.send("test")).toThrow(new Error(errMess));
@@ -319,7 +322,7 @@ describe("RTCModule class", () => {
       const mockErr = "Something went terribly wrong.";
       let rtcm: any = new RTCModule(() => { return; },
         (url: string) => { throw new Error(mockErr); });
-      rtcm.init(testurl, tokenManagerMock, reqAdapterMock)
+      rtcm.init(testProjectID, tokenManagerMock, reqAdapterMock)
         .then( () => {
           done.fail("Initializing the RTCModule should have failed.");
         }).catch( (error: Error) => {
