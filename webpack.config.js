@@ -56,12 +56,12 @@ const common = {
 // browser SDK config
 const browser = {
   entry: {
-    "jexia-sdk": path.resolve(__dirname, 'src','indexBrowser'),
-    "jexia-sdk.min": path.resolve(__dirname, 'src','indexBrowser')
+    "browser": path.resolve(__dirname, 'src','indexBrowser'),
+    "browser.min": path.resolve(__dirname, 'src','indexBrowser')
   },
   output: {
-    path: path.resolve(__dirname, "dist"),
-    filename: "browser-[name].js",
+    path: path.resolve(__dirname, "./"),
+    filename: "[name].js",
     libraryTarget: 'umd',
     library: "jexia"
   }
@@ -70,12 +70,12 @@ const browser = {
 // node SDK config
 const node = {
   entry: {
-    "jexia-sdk": path.resolve(__dirname, 'src','indexNode'),
-    "jexia-sdk.min": path.resolve(__dirname, 'src','indexNode')
+    "node": path.resolve(__dirname, 'src','indexNode'),
+    "node.min": path.resolve(__dirname, 'src','indexNode')
   },
   output: {
-    path: path.resolve(__dirname, "dist"),
-    filename: "node-[name].js",
+    path: path.resolve(__dirname, "./"),
+    filename: "[name].js",
     libraryTarget: 'commonjs'
   },
   target: 'node'

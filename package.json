@@ -1,11 +1,12 @@
 {
   "name": "jexia-sdk-js",
-  "version": "0.0.0",
+  "version": "1.9.0",
   "description": "jexia javascript sdk",
   "main": "index.js",
   "scripts": {
-    "cleanup": "rimraf dist coverage docs .nyc_output",
+    "cleanup": "rimraf dist coverage docs .nyc_output && npm run cleanup:dist",
     "cleanup:full": "npm run cleanup && rimraf node_modules",
+    "cleanup:dist": "rimraf browser.*js node.*js",
     "lint": "tslint \"src/**/*.ts\" \"spec/**/*.ts\"",
     "transpile": "npm run cleanup && tsc",
     "test": "npm run transpile && nyc jasmine",
@@ -19,7 +20,7 @@
     "type": "git",
     "url": "https://github.com/jexia-com/jexia-sdk-js.git"
   },
-  "author": "Mihai Coman",
+  "author": "jexia.com",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/jexia-com/jexia-sdk-js/issues"
@@ -43,9 +44,11 @@
     "typescript": "^2.3.0",
     "webpack": "^2.4.1",
     "webpack-uglify-js-plugin": "^1.1.9",
-    "ws": "^3.1.0"
-  },
-  "dependencies": {
+    "ws": "^3.1.0",
     "node-fetch": "^1.6.3"
-  }
+  },
+  "files": [
+    "node.js",
+    "browser.js"
+  ]
 }
