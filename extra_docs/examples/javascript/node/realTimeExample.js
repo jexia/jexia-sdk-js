@@ -1,9 +1,12 @@
-jexiaClient = require("../../../../dist/node-jexia-sdk.min.js").jexiaClient;
-dataOperations = require("../../../../dist/node-jexia-sdk.min.js").dataOperations;
-fetch = require("node-fetch");
-field = require("../../../../dist/node-jexia-sdk.min.js").field;
-realTime = require("../../../../dist/node-jexia-sdk.min.js").realTime;
-ws = require("ws");
+
+const jexiaSDK = require('jexia-sdk-js/node');
+const fetch = require('node-fetch');
+const ws = require("ws");
+
+const dataOperations = jexiaSDK.dataOperations;
+const field = jexiaSDK.field;
+const jexiaClient = jexiaSDK.jexiaClient;
+const realTime = jexiaSDK.realTime;
 
 let dom = dataOperations();
 let rtc = realTime((messageObject) => {

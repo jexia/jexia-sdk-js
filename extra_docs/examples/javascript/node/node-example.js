@@ -1,7 +1,10 @@
-jexiaClient = require("../../../../dist/node-jexia-sdk.min.js").jexiaClient;
-dataOperations = require("../../../../dist/node-jexia-sdk.min.js").dataOperations;
-fetch = require("node-fetch");
-field = require("../../../../dist/node-jexia-sdk.min.js").field;
+
+const jexiaSDK = require('jexia-sdk-js/node');
+const fetch = require('node-fetch');
+
+const jexiaClient = jexiaSDK.jexiaClient;
+const dataOperations = jexiaSDK.dataOperations;
+const field = jexiaSDK.field;
 
 //Initialize DataOperationsModule
 let dom = dataOperations();

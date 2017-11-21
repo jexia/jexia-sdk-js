@@ -1,11 +1,14 @@
-jexiaClient = require("../../../../dist/node-jexia-sdk.min.js").jexiaClient;
-dataOperations = require("../../../../dist/node-jexia-sdk.min.js").dataOperations;
-fetch = require("node-fetch");
-field = require("../../../../dist/node-jexia-sdk.min.js").field;
+const jexiaSDK = require('jexia-sdk-js/node');
+const fetch = require('node-fetch');
+
+const jexiaClient = jexiaSDK.jexiaClient;
+const dataOperations = jexiaSDK.dataOperations;
+const field = jexiaSDK.field;
+
 //Initialize DataOperationsModule
 let dataModule = dataOperations();
 //Initialize Client and pass DataOperationsModule to it.
-let client = jexiaClient(fetch).init({appUrl: "localhost", key: "anna@example.com", secret: "annie123"}, dataModule);
+let client = jexiaClient(fetch).init({projectID: "localhost", key: "anna@example.com", secret: "annie123"}, dataModule);
 //select Posts
 function selectPosts(jexiaClient){
     jexiaClient.then( (initializedClient) => {
