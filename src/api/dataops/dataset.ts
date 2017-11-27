@@ -1,32 +1,33 @@
 import { RequestExecuter } from "../../internal/executer";
 import { QueryExecuterBuilder } from "../../internal/queryExecuterBuilder";
+import { IResource } from "../core/resource";
 import { DeleteQuery} from "./deleteQuery";
 import { InsertQuery} from "./insertQuery";
 import { SelectQuery} from "./selectQuery";
 import { UpdateQuery} from "./updateQuery";
 
-export class Dataset {
-    private dataset: string;
+export class Dataset implements IResource {
+    private datasetName: string;
     private queryExecuterBuilder: RequestExecuter;
     public constructor(dataset: string, queryExecuterBuilder: QueryExecuterBuilder) {
-        this.dataset = dataset;
-        this.queryExecuterBuilder = queryExecuterBuilder.createQueryExecuter(this.dataset);
+        this.datasetName = dataset;
+        this.queryExecuterBuilder = queryExecuterBuilder.createQueryExecuter(this.datasetName);
     }
 
     public get name(): string {
-      return this.dataset;
+      return this.datasetName;
     }
 
     public select() {
-        return new SelectQuery(this.queryExecuterBuilder, this.dataset);
+        return new SelectQuery(this.queryExecuterBuilder, this.datasetName);
     }
     public update(data: object) {
-        return new UpdateQuery(this.queryExecuterBuilder, data, this.dataset);
+        return new UpdateQuery(this.queryExecuterBuilder, data, this.datasetName);
     }
     public insert(records: Array<object>) {
-        return new InsertQuery(this.queryExecuterBuilder, records, this.dataset);
+        return new InsertQuery(this.queryExecuterBuilder, records, this.datasetName);
     }
     public delete() {
-        return new DeleteQuery(this.queryExecuterBuilder, this.dataset);
+        return new DeleteQuery(this.queryExecuterBuilder, this.datasetName);
     }
 }

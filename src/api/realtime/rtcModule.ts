@@ -3,7 +3,7 @@ import { MESSAGE } from "../../config/message";
 import { IRequestAdapter } from "../../internal/requestAdapter";
 import { IModule } from "../core/module";
 import { TokenManager } from "../core/tokenManager";
-import { Dataset } from "../dataops/dataset";
+import { IResource } from "../core/resource";
 
 export class RTCModule implements IModule {
   private websocket: WebSocket;
@@ -64,12 +64,12 @@ export class RTCModule implements IModule {
     return Object.getOwnPropertyNames(this.callStack);
   }
 
-  public subscribe(method: string, dataset: Dataset) {
-    return this.subscription("subscribe", method, dataset.name);
+  public subscribe(method: string, resource: IResource) {
+    return this.subscription("subscribe", method, resource.name);
   }
 
-  public unsubscribe(method: string, dataset: Dataset) {
-    return this.subscription("unsubscribe", method, dataset.name);
+  public unsubscribe(method: string, resource: IResource) {
+    return this.subscription("unsubscribe", method, resource.name);
   }
 
   public terminate() {
@@ -95,9 +95,9 @@ export class RTCModule implements IModule {
     }
   }
 
-  private subscription(type: string, method: string, datasetName: string): Promise<any> {
+  private subscription(type: string, method: string, resourceName: string): Promise<any> {
     return new Promise((resolve, reject) => {
-      let nsp = this.buildSubscriptionUri(method, datasetName);
+      let nsp = this.buildSubscriptionUri(method, resourceName);
       this.callStack[nsp] = (message: MessageEvent) => {
         const response = JSON.parse(message.data);
         if (response.type === type && response.status === "success" && response.nsp === nsp) {
@@ -126,8 +126,8 @@ export class RTCModule implements IModule {
     }
   }
 
-  private buildSubscriptionUri(method: string, datasetName: string) {
-    return `${datasetName}.${this.associateMethod(method)}`;
+  private buildSubscriptionUri(method: string, resourceName: string) {
+    return `${resourceName}.${this.associateMethod(method)}`;
   }
 
   private buildSocketOpenUri(projectID: string, token: string) {
