@@ -14,7 +14,7 @@ export interface IOffset {
 }
 
 export interface IFilterable {
-  filter(filter: IFilteringCriterion): IFilterable;
+  where(filter: IFilteringCriterion): IFilterable;
 }
 
 export interface ISortable {

@@ -20,7 +20,7 @@ export class UpdateQuery implements ILimit, IOffset, IFilterable, IExecutable, I
     this.request.Query.Offset = offset;
     return this;
   }
-  public filter(filter: IFilteringCriterion): UpdateQuery {
+  public where(filter: IFilteringCriterion): UpdateQuery {
     this.request.Query.setFilterCriteria(filter);
     return this;
   }

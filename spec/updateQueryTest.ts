@@ -24,7 +24,7 @@ describe("UpdateQuery class", () => {
     it("should expose the proper methods", (done) => {
         let qe = createRequestExecuterMock(projectID, dataset);
         let query = new UpdateQuery(qe, { title: "changed first field"}, dataset);
-        expect(typeof query.filter).toBe("function");
+        expect(typeof query.where).toBe("function");
         expect(typeof query.limit).toBe("function");
         expect(typeof query.offset).toBe("function");
         expect(typeof query.sortAsc).toBe("function");
@@ -37,7 +37,7 @@ describe("UpdateQuery class", () => {
     it("its query object should have desired properties", (done) => {
         let qe = createRequestExecuterMock(projectID, dataset);
         let queryObj: any = new UpdateQuery(qe, {title: "changed first field"}, dataset)
-        .filter(new FilteringCondition("field", "operator", ["value"])).limit(2);
+        .where(new FilteringCondition("field", "operator", ["value"])).limit(2);
         expect(queryObj).toBeDefined();
         expect(queryObj.request).toBeDefined();
         expect(queryObj.request.Query).toBeDefined();

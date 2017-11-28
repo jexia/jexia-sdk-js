@@ -3,7 +3,7 @@ import { field, IFilteringCriterion } from "../src/api/dataops/filteringApi";
 describe("FieldFilter class", () => {
   describe("when building a filter with one condition and greater than operator", () => {
     it("compiles to the proper JSON", () => {
-      let filter: IFilteringCriterion = field("name").isMoreThan("value");
+      let filter: IFilteringCriterion = field("name").isGreaterThan("value");
       let jsonResult: object = (filter as any).lowLevelCondition.compile();
       expect(jsonResult as any).toEqual({ field: "name", operator: ">", values: [ "value" ], type: "and" });
     });
@@ -31,7 +31,7 @@ describe("FieldFilter class", () => {
   });
   describe("when building a filter with one condition and equal-or-more-than operator", () => {
     it("compiles to the proper JSON", () => {
-      let filter: IFilteringCriterion = field("name").isEqualOrMoreThan("value");
+      let filter: IFilteringCriterion = field("name").isEqualOrGreaterThan("value");
       let jsonResult: object = (filter as any).lowLevelCondition.compile();
       expect(jsonResult as any).toEqual({ field: "name", operator: ">=", values: [ "value" ], type: "and" });
     });
@@ -70,7 +70,7 @@ describe("FieldFilter class", () => {
     it("compiles to the proper JSON", () => {
       let start = "1";
       let end = "2";
-      let filter: IFilteringCriterion = field("name").isAValueBetween(start, end);
+      let filter: IFilteringCriterion = field("name").isBetween(start, end);
       let jsonResult: object = (filter as any).lowLevelCondition.compile();
       expect(jsonResult as any).toEqual({ field: "name", operator: "BETWEEN", values: [start, end], type: "and" });
     });

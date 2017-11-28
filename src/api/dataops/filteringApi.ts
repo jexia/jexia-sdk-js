@@ -4,7 +4,7 @@ import { CompositeFilteringCondition, FilteringCondition, ICondition } from "./f
 class FieldFilter implements IFieldFilter {
   constructor(private fieldName: string) {}
 
-  public isMoreThan(value: string): IFilteringCriterion {
+  public isGreaterThan(value: string): IFilteringCriterion {
     return new FilteringCriterion(new FilteringCondition(this.fieldName, ">", [value]));
   }
 
@@ -20,7 +20,7 @@ class FieldFilter implements IFieldFilter {
     return new FilteringCriterion(new FilteringCondition(this.fieldName, "<>", [value]));
   }
 
-  public isEqualOrMoreThan(value: string): IFilteringCriterion {
+  public isEqualOrGreaterThan(value: string): IFilteringCriterion {
     return new FilteringCriterion(new FilteringCondition(this.fieldName, ">=", [value]));
   }
 
@@ -52,7 +52,7 @@ class FieldFilter implements IFieldFilter {
     return new FilteringCriterion(new FilteringCondition(this.fieldName, "REGEXP", [regexp]));
   }
 
-  public isAValueBetween(start: string, end: string): IFilteringCriterion {
+  public isBetween(start: string, end: string): IFilteringCriterion {
     return new FilteringCriterion(new FilteringCondition(this.fieldName, "BETWEEN", [start, end]));
   }
 }
@@ -87,11 +87,11 @@ export interface IFilteringCriterion {
 }
 
 export interface IFieldFilter {
-  isMoreThan(value: string): IFilteringCriterion;
+  isGreaterThan(value: string): IFilteringCriterion;
   isLessThan(value: string): IFilteringCriterion;
   isEqualTo(value: string): IFilteringCriterion;
   isDifferentFrom(value: string): IFilteringCriterion;
-  isEqualOrMoreThan(value: string): IFilteringCriterion;
+  isEqualOrGreaterThan(value: string): IFilteringCriterion;
   isEqualOrLessThan(value: string): IFilteringCriterion;
   isNull(): IFilteringCriterion;
   isNotNull(): IFilteringCriterion;
@@ -99,7 +99,7 @@ export interface IFieldFilter {
   isNotInArray(values: string[]): IFilteringCriterion;
   isLike(value: string): IFilteringCriterion;
   satisfiesRegexp(regexp: string): IFilteringCriterion;
-  isAValueBetween(start: string, end: string): IFilteringCriterion;
+  isBetween(start: string, end: string): IFilteringCriterion;
 }
 
 export function field(name: string): IFieldFilter {

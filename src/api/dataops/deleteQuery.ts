@@ -23,7 +23,7 @@ export class DeleteQuery implements IFields, ILimit, IOffset, IFilterable, IExec
     this.request.Query.Offset = offset;
     return this;
   }
-  public filter(filter: IFilteringCriterion): DeleteQuery {
+  public where(filter: IFilteringCriterion): DeleteQuery {
     this.request.Query.setFilterCriteria(filter);
     return this;
   }

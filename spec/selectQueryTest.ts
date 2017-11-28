@@ -26,7 +26,7 @@ describe("SelectQuery class", () => {
       let query: SelectQuery = new SelectQuery(qe, dataset);
       expect(typeof(query.execute)).toBe("function");
       expect(typeof(query.fields)).toBe("function");
-      expect(typeof(query.filter)).toBe("function");
+      expect(typeof(query.where)).toBe("function");
       expect(typeof(query.limit)).toBe("function");
       expect(typeof(query.offset)).toBe("function");
       expect(typeof(query.sortAsc)).toBe("function");
@@ -37,8 +37,8 @@ describe("SelectQuery class", () => {
   describe("when configuring a select query object", () => {
     it("it should have the correct query options set", () => {
       let qe = createRequestExecuterMock(projectID, dataset);
-      let cond = field("field").isMoreThan("value");
-      let queryObj: any = new SelectQuery(qe, "dataset").filter(cond).limit(2).sortAsc("updated_at");
+      let cond = field("field").isGreaterThan("value");
+      let queryObj: any = new SelectQuery(qe, "dataset").where(cond).limit(2).sortAsc("updated_at");
       expect(queryObj).toBeDefined();
       expect(queryObj.request).toBeDefined();
       expect(queryObj.request.Query).toBeDefined();

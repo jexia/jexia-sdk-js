@@ -23,7 +23,7 @@ describe("DeleteQuery class", () => {
     it("should expose the proper methods", () => {
       let qe = createRequestExecuterMock(projectID, dataset);
       let query = new DeleteQuery(qe, dataset);
-      expect(typeof query.filter).toBe("function");
+      expect(typeof query.where).toBe("function");
       expect(typeof query.limit).toBe("function");
       expect(typeof query.offset).toBe("function");
       expect(typeof query.sortAsc).toBe("function");
@@ -34,8 +34,8 @@ describe("DeleteQuery class", () => {
   describe("when configuring a deleteQuery object", () => {
     it("its query object should have the correct query options set", () => {
       let qe = createRequestExecuterMock(projectID, dataset);
-      let cond = field("field").isMoreThan("value");
-      let queryObj: any = new DeleteQuery(qe, dataset).filter(cond);
+      let cond = field("field").isGreaterThan("value");
+      let queryObj: any = new DeleteQuery(qe, dataset).where(cond);
       expect(queryObj).toBeDefined();
       expect(queryObj.request).toBeDefined();
       expect(queryObj.request.Query).toBeDefined();

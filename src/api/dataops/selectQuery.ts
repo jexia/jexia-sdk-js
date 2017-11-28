@@ -28,7 +28,7 @@ export class SelectQuery implements IFields, ILimit, IOffset, IFilterable, IExec
     return this;
   }
 
-  public filter(filter: IFilteringCriterion): SelectQuery {
+  public where(filter: IFilteringCriterion): SelectQuery {
     this.request.Query.setFilterCriteria(filter);
     return this;
   }

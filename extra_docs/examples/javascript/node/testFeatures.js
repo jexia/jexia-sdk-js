@@ -83,7 +83,7 @@ function offsetLimitRecords(jexiaClient){
 function filterRecords(jexiaClient){
       jexiaClient.then( (initializedClient) => {
         let postDataset = dataModule.dataset("posts");
-        postDataset.select().filter(field("title").isEqualTo("My second post")).execute().then( (records) => {
+        postDataset.select().where(field("title").isEqualTo("My second post")).execute().then( (records) => {
             console.log(records);
             process.exit();
         }).catch( (error) => {
@@ -142,7 +142,7 @@ function insertRecord(jexiaClient){
 function deleteRecord(jexiaClient){
     jexiaClient.then( (initializedClient) => {
         let postDataset = dataModule.dataset("posts");
-        postDataset.delete().filter(field("title").isEqualTo("My second post")).execute().then( (records) => {
+        postDataset.delete().where(field("title").isEqualTo("My second post")).execute().then( (records) => {
             console.log("Record " + JSON.stringify(records)) ;
             process.exit();
         }).catch( (error) => {
@@ -155,7 +155,7 @@ function deleteRecord(jexiaClient){
 function updateRecord(jexiaClient){
     jexiaClient.then( (initializedClient) => {
         let postDataset = dataModule.dataset("posts");
-        postDataset.update({title: "New Posttttt"}).filter(field("title").isEqualTo("New Post")).execute().then( (records) => {
+        postDataset.update({title: "New Posttttt"}).where(field("title").isEqualTo("New Post")).execute().then( (records) => {
             console.log("Record " + JSON.stringify(records)) ;
             process.exit();
         }).catch( (error) => {
