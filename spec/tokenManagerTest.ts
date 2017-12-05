@@ -1,9 +1,9 @@
 // tslint:disable:max-line-length
-import { API } from "../src/config/config";
+import { TokenStorage } from "../src/api/core/componentStorage";
 import { IAuthToken, TokenManager } from "../src/api/core/tokenManager";
+import { API } from "../src/config/config";
 import { MESSAGE } from "../src/config/message";
 import { requestAdapterMockFactory } from "./testUtils";
-import { TokenStorage } from "../src/api/core/componentStorage";
 
 const validProjectID = "validProjectID";
 

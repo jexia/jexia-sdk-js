@@ -2,10 +2,10 @@
 // tslint:disable:max-classes-per-file
 import { Dataset } from "../src/api/dataops/dataset";
 import { RTCModule } from "../src/api/realtime/rtcModule";
+import { API } from "../src/config/config";
 import { MESSAGE } from "../src/config/message";
 import { QueryExecuterBuilder } from "../src/internal/queryExecuterBuilder";
 import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
-import { API } from "../src/config/config";
 
 class BaseWebSocketMock {
   public url: string;

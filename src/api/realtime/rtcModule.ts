@@ -2,8 +2,8 @@ import { API } from "../../config/config";
 import { MESSAGE } from "../../config/message";
 import { IRequestAdapter } from "../../internal/requestAdapter";
 import { IModule } from "../core/module";
-import { TokenManager } from "../core/tokenManager";
 import { IResource } from "../core/resource";
+import { TokenManager } from "../core/tokenManager";
 
 export class RTCModule implements IModule {
   private websocket: WebSocket;

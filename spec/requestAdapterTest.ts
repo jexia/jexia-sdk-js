@@ -1,7 +1,7 @@
 // tslint:disable:max-line-length
 import { API } from "../src/config/config";
-import { IHTTPResponse, IRequestAdapter, IRequestOptions, Methods, RequestAdapter } from "../src/internal/requestAdapter";
 import { MESSAGE } from "../src/config/message";
+import { IHTTPResponse, IRequestAdapter, IRequestOptions, Methods, RequestAdapter } from "../src/internal/requestAdapter";
 
 /* Mock request adapter */
 export const mockRequestAdapter: IRequestAdapter = {
