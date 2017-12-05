@@ -5,7 +5,7 @@ The SDK currently exposes the following features:
   - real-time notifications for subscribed events
   - Authentication and authorization is handled automatically by the SDK, the user only needs to provide credentials once at SDK initialization.
 
-The SDK is currently focused on *consuming* data. *Managing* the data schema (creating Datasets, adding columns to Datasets, etc.) is out of scope for now.
+The SDK is currently focused on *consuming* data. *Managing* the data schema (creating Datasets, adding columns to Datasets, etc.) is out of scope for now. The data schema management is done through our web application at [app.jexia.com](app.jexia.com).
 
 ### On-demand data access
 The user can execute the following operations on records:
@@ -37,7 +37,7 @@ The examples are made with a simple data schema in mind: think a basic social me
 ### Importing the SDK into your JS project
 
 ``` Javascript
-import Client from "Anemo SDK location";
+import { jexiaClient } from "Anemo SDK location";
 ```
 
 ### Initialization and Authentication
@@ -48,7 +48,7 @@ The `jexiaClient()` function will return an instance of the `Client` class. On N
 import { jexiaClient } from "Anemo SDK location";
 import fetch from "node-fetch";
 
-let initializedClientPromise = jexiaClient(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "password"});
+let initializedClientPromise = jexiaClient(fetch).init({projectID: "your Jexia App URL", key: "username", secret: "password"});
 initializedClientPromise.then( (initializedClient) => {
   // you have been succesfully logged in!
   // you can start using the initializedClient variable here
@@ -72,7 +72,7 @@ import fetch from "node-fetch";
 
 let dataModule = dataOperations();
 
-let initializedClientPromise = jexiaClient(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "password"}, dataModule);
+let initializedClientPromise = jexiaClient(fetch).init({projectID: "your Jexia App URL", key: "username", secret: "password"}, dataModule);
 initializedClientPromise.then( (initializedClient) => {
   // you have been succesfully logged in!
   // you can start using the dataModule variable to operate on records here
@@ -112,7 +112,7 @@ Using all the temporary variables in this example is for demonstration purposes,
 
 ``` Javascript
 [..]
-jexiaClient(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "password"}, dataModule).then( (initializedClient) => {
+jexiaClient(fetch).init({projectID: "your Jexia App URL", key: "username", secret: "password"}, dataModule).then( (initializedClient) => {
   let postsDataset = dataModule.dataset("posts");
   let unexecutedQuery = postsDataset.select();
   let executedQueryPromise = unexecutedQuery.execute();
@@ -129,7 +129,7 @@ If you watch closely, the API is chainable, so you can rewrite the query in a mu
 
 ``` Javascript
 [..]
-jexiaClient(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "password"}, dataModule).then( (initializedClient) => {
+jexiaClient(fetch).init({projectID: "your Jexia App URL", key: "username", secret: "password"}, dataModule).then( (initializedClient) => {
   dataModule.dataset("posts").select().execute().then( (records) => {
     // you can start iterating through the posts here
   }).catch( (error) => {
@@ -282,7 +282,7 @@ The real-time functionality is added through a separate module. The module needs
 ### Importing:
 
 ``` Javascript
-import { RTCModule } from "Anemo SDK location";
+import { realTime } from "Anemo SDK location";
 ```
 
 ### Instantiating:
@@ -292,7 +292,7 @@ The real-time module needs a websocket client in order to function.
 When running the app in the browser, this dependency can be ignored, as the SDK will load the native browser implementation:
 
 ``` Javascript
-import { RTCModule } from "Anemo SDK location";
+import { realTime } from "Anemo SDK location";
 
 let rtcmod = realTime(
   (message) => { // do stuff with your real time notification here }
@@ -316,7 +316,7 @@ The real-time module needs to be passed to the `Client` when initializing the la
 
 ``` Javascript
 [..]
-jexiaClient(fetch).init({appUrl: "your Jexia App URL", key: "username", secret: "password"}, rtcmod).then( (initializedClient) => {
+jexiaClient(fetch).init({projectID: "your Jexia App URL", key: "username", secret: "password"}, rtcmod).then( (initializedClient) => {
   // you have been succesfully logged in
   // you can start using the initialized rtcmod here
 }).catch( (error) => {
