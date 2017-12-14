@@ -1,9 +1,10 @@
-import { API, DELAY } from "../../config/config";
+import { DELAY } from "../../config/config";
 import { MESSAGE } from "../../config/message";
-import { IRequestAdapter, Methods } from "../../internal/requestAdapter";
+import { getLoginMethod, refreshToken } from "../../internal/authManager";
+import { IRequestAdapter } from "../../internal/requestAdapter";
 import { IStorageComponent, TokenStorage } from "./componentStorage";
 
-type Tokens = {token: string, refresh_token: string};
+export type Tokens = {token: string, refresh_token: string};
 
 export interface IAuthOptions {
   /* application URL */
@@ -84,47 +85,13 @@ export class TokenManager {
 
   private login(opts: IAuthOptions): Promise<IAuthToken> {
     /* no need to wait for tokens */
-    return this.requestAdapter
-      .execute(this.buildLoginUrl(opts.projectID), {
-        body: {
-          email: opts.key,
-          password: opts.secret,
-        },
-        method: Methods.POST,
-      })
-      .then((newTokens: Tokens) => {
-        return ({token: newTokens.token, refreshToken: newTokens.refresh_token} as IAuthToken);
-      })
-      .then((tokens) => this.storage.setTokens(tokens))
-      /* convert response to IAuthToken interface */
-
-      /* catch login error */
-      .catch((err: Error) => {
-        /* add specific information to error */
-        throw new Error(`Unable to authenticate: ${err.message}`);
-      });
-  }
-
-  private buildLoginUrl(projectID: string): string {
-    return `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.AUTHURL}`;
+    const loginFunction = getLoginMethod(opts);
+    return loginFunction(opts, this.requestAdapter).
+      then((tokens: IAuthToken) => this.storage.setTokens(tokens));
   }
 
   private refresh(projectID: string): Promise<IAuthToken> {
-    /* wait for tokens */
-    return this.tokens
-      /* wait for tokens */
-      .then((tokens: IAuthToken) => this.requestAdapter.execute(this.buildLoginUrl(projectID), {
-          body: {refresh_token: tokens.refreshToken}, headers: {Authorization: tokens.token}, method: Methods.PATCH,
-        }),
-      )
-      /* convert response to IAuthToken interface */
-      .then((newTokens: Tokens) => ({token: newTokens.token, refreshToken: newTokens.refresh_token} as IAuthToken))
-      .then((tokens) => this.storage.setTokens(tokens))
-
-      /* catch refresh token error */
-      .catch((err: Error) => {
-        /* add specific information to error */
-        throw new Error(`Unable to refresh token: ${err.message}`);
-      });
+    return refreshToken(this.tokens, this.requestAdapter, projectID).
+      then((tokens) => this.storage.setTokens(tokens));
   }
 }
