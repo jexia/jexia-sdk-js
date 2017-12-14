@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/jexia-com/jexia-sdk-js/tree/develop.svg?style=svg&circle-token=f8ceab291f3b6e143586717aa72ac6987c26da98)](https://circleci.com/gh/jexia-com/jexia-sdk-js/tree/develop)
+
 # Jexia Javascript SDK
 This is the official Javascript SDK for interacting with Jexia projects. It's developed with [TypeScript](https://typescript.org) and transpiled to ES5 with [Webpack](https://webpack.js.org/).
 
