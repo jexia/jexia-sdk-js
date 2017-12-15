@@ -15,7 +15,7 @@
     "compodoc": "compodoc",
     "docs": "rimraf docs && npm run compodoc -- src/api -p tsconfig.json --disablePrivateOrInternalSupport --disableCoverage --disableSourceCode --name \"Jexia Javascript SDK\" --output docs --includes extra_docs",
     "bundle": "webpack",
-    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
+    "semantic-release": "semantic-release pre && semantic-release post"
   },
   "repository": {
     "type": "git",
