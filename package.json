@@ -33,6 +33,7 @@
     "@types/node": "^7.0.18",
     "@types/node-fetch": "1.6.7",
     "@types/ws": "^3.0.2",
+    "condition-circle": "2.0.1",
     "cz-conventional-changelog": "2.1.0",
     "jasmine": "2.6.0",
     "node-fetch": "^1.6.3",
@@ -54,7 +55,8 @@
     "browser.js"
   ],
   "release": {
-    "branch": "develop"
+    "branch": "develop",
+    "verifyConditions": "condition-circle"
   },
   "config": {
     "commitizen": {

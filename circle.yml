@@ -4,9 +4,9 @@ machine:
 
 dependencies:
   pre:
-    - echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+    - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
     - echo 'machine github.com' > ~/.netrc
-    - echo "login $GITHUB_TOKEN" >> ~/.netrc
+    - echo "login ${GITHUB_TOKEN}" >> ~/.netrc
 
 test:
   override:
