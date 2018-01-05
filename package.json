@@ -26,7 +26,7 @@
     "build:es2015": "tsc -p ./build/tsconfig.es2015.json",
     "build:bundle": "webpack --config build/webpack.config.js",
     "build:package": "shx mkdir -p ./dist && shx cp package.json ./dist/package.json",
-    "semantic-release": "semantic-release pre && semantic-release post"
+    "semantic-release": "semantic-release pre && npm publish ./dist && semantic-release post"
   },
   "repository": {
     "type": "git",

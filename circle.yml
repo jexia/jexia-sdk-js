@@ -17,5 +17,5 @@ deployment:
   production:
     branch: develop
     commands:
-      - npm run bundle
+      - npm run build
       - npm run semantic-release || true

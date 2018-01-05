@@ -49,7 +49,7 @@ Generate HTML documentation/API reference for the project:
 
 Generate Javascript bundles using Webpack (handles necessary transpiling on its own but only produces transpiled bundles, not separate transpiled modules):
 
-- `npm run bundle`
+- `npm run build`
 
 ## Contributing
 
