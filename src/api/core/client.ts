@@ -2,7 +2,7 @@ import { IRequestAdapter, RequestAdapter } from "../../internal/requestAdapter";
 import { IModule } from "./module";
 import { IAuthOptions, TokenManager } from "./tokenManager";
 
-export default class Client {
+export class Client {
   /* token manager (responsible for getting fresh and valid token), should be injected to plugins/modules (if needed) */
   public tokenManager: TokenManager;
   /* request adapter */

@@ -3,22 +3,18 @@ logs
 *.log
 npm-debug.log*
 
-#Transpiled/bundled code
-dist
-
-browser.js
-browser.min.js
-node.js
-node.min.js
-
 #Typescript typedef files
 typings
+
+#Distribution files
+dist
 
 #Generated documentation
 docs
 
 # Runtime data
 pids
+.temp
 *.pid
 *.seed
 

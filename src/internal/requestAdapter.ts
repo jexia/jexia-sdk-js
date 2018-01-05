@@ -4,7 +4,7 @@ import { strEnum } from "./utils";
 /* List of allowed methods */
 export const Methods = strEnum(["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]);
 /* request method string based enum type */
-type Method = keyof typeof Methods;
+export type Method = keyof typeof Methods;
 
 export interface IRequestOptions {
   /* request method (optional) */

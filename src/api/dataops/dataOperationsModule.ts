@@ -4,7 +4,7 @@ import { IModule } from "../core/module";
 import { TokenManager } from "../core/tokenManager";
 import { Dataset } from "./dataset";
 
-export default class DataOperationsModule implements IModule {
+export class DataOperationsModule implements IModule {
   private queryExecuterBuilder: QueryExecuterBuilder;
 
   public init(projectID: string,

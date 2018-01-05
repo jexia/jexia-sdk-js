@@ -2,7 +2,7 @@ import { IAuthOptions, IAuthToken, Tokens } from "../api/core/tokenManager";
 import { API } from "../config/config";
 import { IRequestAdapter, Methods } from "./requestAdapter";
 
-interface ILoginFunction {
+export interface ILoginFunction {
   (opts: IAuthOptions, requestAdapter: IRequestAdapter): Promise<IAuthToken>;
 }
 

@@ -3,7 +3,7 @@ import { RequestExecuter } from "../src/internal/executer";
 import { QueryExecuterBuilder } from "../src/internal/queryExecuterBuilder";
 import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
 
-class RequestAdapterMockFactory {
+export class RequestAdapterMockFactory {
   public genericSuccesfulExecution(): IRequestAdapter {
     return {
       execute(uri: string, opt: IRequestOptions): Promise<any> {

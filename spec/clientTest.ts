@@ -1,4 +1,4 @@
-import Client from "../src/api/core/client";
+import { Client } from "../src/api/core/client";
 import { IModule } from "../src/api/core/module";
 import { TokenManager } from "../src/api/core/tokenManager";
 import { IHTTPResponse, IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";

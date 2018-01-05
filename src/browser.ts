@@ -1,8 +1,8 @@
-import Client from "./api/core/client";
+import { Client } from "./api/core/client";
 import { TokenStorage, WebStorageComponent } from "./api/core/componentStorage";
-import DataOperationsModule from "./api/dataops/dataOperationsModule";
-import { combineCriteria, field } from "./api/dataops/filteringApi";
+import { DataOperationsModule } from "./api/dataops/dataOperationsModule";
 import { RTCModule } from "./api/realtime/rtcModule";
+export * from "./index";
 
 /**
  * It checks if the browser is capable of using the Web Storage API
@@ -38,24 +38,16 @@ if (storageAvailable("localStorage") && storageAvailable("sessionStorage")) {
   TokenStorage.setStorageAPI(new WebStorageComponent(true, window));
 }
 
-function jexiaClient(): Client {
+export function jexiaClient(): Client {
   return new Client(window.fetch.bind(window));
 }
 
-function realTime(messageReceivedCallback: Function): RTCModule {
+export function realTime(messageReceivedCallback: Function): RTCModule {
   return new RTCModule(messageReceivedCallback, (appUrl: string) => {
     return new WebSocket(appUrl);
   });
 }
 
-function dataOperations(): DataOperationsModule {
+export function dataOperations(): DataOperationsModule {
   return new DataOperationsModule();
 }
-
-export {
-  combineCriteria,
-  dataOperations,
-  field,
-  jexiaClient,
-  realTime,
-};
