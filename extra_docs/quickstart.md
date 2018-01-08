@@ -256,9 +256,22 @@ posts.insert([ {title: "New Post", content:"content here"},
 [..]
 ```
 
-### Modifying records
+### Updating records
 
-[Work in progress]
+The `update` method is used to modify records, it always has to be used with the `where` method and a filter criteria.
+
+``` Javascript
+[..]
+let posts = dataModule.dataset("posts");
+const filter = field("id").isInArray([1, 2]);
+posts.update({
+  title: "Changing title",
+}).where(filter).execute().then(() => {
+  // the elements that fill the criteria now have been changed
+}).catch( (error) => {
+  // you can see the error info here, if something goes wrong
+});
+```
 
 ### Deleting records
 
