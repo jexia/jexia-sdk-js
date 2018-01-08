@@ -40,6 +40,8 @@
   "homepage": "https://github.com/jexia-com/jexia-sdk-js#readme",
   "devDependencies": {
     "@compodoc/compodoc": "^1.0.0-beta.14",
+    "@semantic-release/git": "^2.0.1",
+    "@semantic-release/npm": "^2.6.1",
     "@types/jasmine": "2.5.47",
     "@types/node": "^7.0.18",
     "@types/node-fetch": "1.6.7",
@@ -70,9 +72,7 @@
         "path": "@semantic-release/npm",
         "pkgRoot": "dist"
       },
-      {
-        "path": "@semantic-release/git"
-      }
+      "@semantic-release/git"
     ]
   },
   "config": {
