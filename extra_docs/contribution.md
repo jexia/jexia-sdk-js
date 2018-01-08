@@ -51,6 +51,20 @@ Generate Javascript bundles using Webpack (handles necessary transpiling on its 
 
 - `npm run build`
 
+## Commit convention
+
+This repository follows the convention used by the [AngularJS Commit Message Conventions](https://docs.google.com/document/d/1QrDFcIiPjSLDn3EL15IJygNPiHORgU1_OOAqWjiDU5Y/edit). This means that every commit has to have a message with meta information that will be read by the semantic-release package to calculate the following version every time a PR is merged.
+
+Each commit message consists of a **header**, a **body** and a **footer**. The header has a special format that includes a **type**, a **scope** and a **subject**:
+
+<type>(<scope>): <subject>
+<BLANK LINE>
+<body>
+<BLANK LINE>
+<footer>
+
+You can use the command line utility [cz-cli](https://github.com/commitizen/cz-cli) to create commits with the message following the right format in a very easy way. The package is already setup to work with it.
+
 ## Contributing
 
 Please make sure you have no linting or unit test errors before creating a PR. Again, we advise installing a [Tslint](https://github.com/palantir/tslint) addon for your IDE. 
