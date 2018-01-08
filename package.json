@@ -26,7 +26,7 @@
     "build:es2015": "tsc -p ./build/tsconfig.es2015.json",
     "build:bundle": "webpack --config build/webpack.config.js",
     "build:package": "shx mkdir -p ./dist && shx cp package.json ./dist/package.json",
-    "semantic-release": "semantic-release pre && npm publish ./dist && semantic-release post"
+    "semantic-release": "semantic-release"
   },
   "repository": {
     "type": "git",
@@ -51,7 +51,7 @@
     "npm-run-all": "^4.1.2",
     "nyc": "^10.3.2",
     "opn-cli": "^3.1.0",
-    "semantic-release": "^8.2.0",
+    "semantic-release": "12.2.0",
     "shx": "^0.2.2",
     "ts-loader": "^2.0.3",
     "ts-node": "^2.1.0",
@@ -64,7 +64,16 @@
   },
   "release": {
     "branch": "develop",
-    "verifyConditions": "condition-circle"
+    "verifyConditions": "condition-circle",
+    "publish": [
+      {
+        "path": "@semantic-release/npm",
+        "pkgRoot": "dist"
+      },
+      {
+        "path": "@semantic-release/git"
+      }
+    ]
   },
   "config": {
     "commitizen": {
