@@ -1,10 +1,15 @@
 import { DELAY } from "../../config/config";
 import { MESSAGE } from "../../config/message";
-import { getLoginMethod, refreshToken } from "../../internal/authManager";
 import { IRequestAdapter } from "../../internal/requestAdapter";
+import { userCredentialsAuth } from "../auth";
 import { IStorageComponent, TokenStorage } from "./componentStorage";
 
-export type Tokens = {token: string, refresh_token: string};
+export type Tokens = { token: string, refresh_token: string };
+
+export interface IAuthAdapter {
+  login(opts: IAuthOptions, requestAdapter: IRequestAdapter): Promise<IAuthToken>;
+  refresh(tokenPair: Promise<IAuthToken>, requestAdapter: IRequestAdapter, projectID: string): Promise<IAuthToken>;
+}
 
 export interface IAuthOptions {
   /* application URL */
@@ -17,6 +22,8 @@ export interface IAuthOptions {
   readonly refreshInterval?: Number;
   /* remember user (optional) */
   readonly remember?: boolean;
+  /* auth method */
+  readonly authMethod?: () => IAuthAdapter;
 }
 
 export interface IAuthToken {
@@ -31,6 +38,8 @@ export class TokenManager {
   private refreshInterval: number;
   /* JWT and refresh tokens */
   private tokens: Promise<IAuthToken>;
+
+  private authMethod: IAuthAdapter;
 
   private storage: IStorageComponent;
 
@@ -50,6 +59,7 @@ export class TokenManager {
   }
 
   public init(opts: IAuthOptions): Promise<TokenManager> {
+    this.authMethod = opts.authMethod ? opts.authMethod() : userCredentialsAuth();
     /* check if email/password were provided */
     if (!opts.key || !opts.secret) {
       return Promise.reject(new Error("Please provide valid application credentials."));
@@ -86,13 +96,12 @@ export class TokenManager {
 
   private login(opts: IAuthOptions): Promise<IAuthToken> {
     /* no need to wait for tokens */
-    const loginFunction = getLoginMethod(opts);
-    return loginFunction(opts, this.requestAdapter).
+    return this.authMethod.login(opts, this.requestAdapter).
       then((tokens: IAuthToken) => this.storage.setTokens(tokens));
   }
 
   private refresh(projectID: string): Promise<IAuthToken> {
-    return refreshToken(this.tokens, this.requestAdapter, projectID).
+    return this.authMethod.refresh(this.tokens, this.requestAdapter, projectID).
       then((tokens) => this.storage.setTokens(tokens));
   }
 }

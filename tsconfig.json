@@ -1,9 +1,12 @@
 {
   "compilerOptions": {
     "strict": true,
-    "module": "commonjs",
+    "moduleResolution": "node",
     "target": "es5",
-    "lib": ["es7", "dom"],
+    "lib": [
+      "es7",
+      "dom"
+    ],
     "sourceMap": false,
     "outDir": "./.temp",
     "alwaysStrict": true,
@@ -11,11 +14,18 @@
     "noUnusedLocals": true,
     "pretty": true,
     "declaration": false,
-    "removeComments": true
+    "removeComments": true,
+    "baseUrl": ".",
+    "paths": {
+      "jexia-sdk-js/*": [
+        "src/*"
+      ]
+    }
   },
   "include": [
     "src/**/*",
-    "spec/**/*"
+    "spec/**/*",
+    "extra_docs/**/*"
   ],
   "exclude": [
     "src/api/core/componentStorage.ts",

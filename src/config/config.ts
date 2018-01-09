@@ -11,7 +11,6 @@ export const API = {
     PORT: ":8082",
     PROTOCOL: "wss",
   },
-  AUTHURL: "auth",
   DOMAIN: "com",
   HOST: "app.jexia",
   PORT: 443,
