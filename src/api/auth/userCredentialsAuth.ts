@@ -45,5 +45,5 @@ export class UserCredentialsAuth implements IAuthAdapter {
 }
 
 function buildLoginUrl(projectID: string): string {
-  return `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/auth`;
+  return `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.AUTH.USER_CREDENTIALS}`;
 }

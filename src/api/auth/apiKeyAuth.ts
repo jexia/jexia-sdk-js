@@ -45,5 +45,5 @@ export class ApiKeyAuth implements IAuthAdapter {
 }
 
 function buildLoginUrl(projectID: string): string {
-  return `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/ak/authentication`;
+  return `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.AUTH.API_KEY}`;
 }

@@ -1,5 +1,9 @@
 // tslint:disable:object-literal-sort-keys
 export const API = {
+  AUTH: {
+    USER_CREDENTIALS: "auth",
+    API_KEY: "ak/authentication",
+  },
   DATA: {
     ENDPOINT: "sdk-api",
   },
