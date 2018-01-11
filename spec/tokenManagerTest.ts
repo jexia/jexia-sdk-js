@@ -1,14 +1,30 @@
 // tslint:disable:max-line-length
 // tslint:disable:no-string-literal
+import { apiKeyAuth } from "../src//api/auth";
+import { ApiKeyAuth } from "../src/api/auth/apiKeyAuth";
+import { UserCredentialsAuth } from "../src/api/auth/userCredentialsAuth";
 import { TokenStorage } from "../src/api/core/componentStorage";
-import { IAuthToken, TokenManager } from "../src/api/core/tokenManager";
-import { API } from "../src/config/config";
+import { IAuthAdapter, IAuthToken, TokenManager } from "../src/api/core/tokenManager";
 import { MESSAGE } from "../src/config/message";
 import { requestAdapterMockFactory } from "./testUtils";
 
 const validProjectID = "validProjectID";
 
 const validOpts = () => ({ projectID: validProjectID, key: "validKey", refreshInterval: 500, secret: "validSecret" });
+
+const authMethodMock = (
+  resultValue = "authMethodMockToken",
+  resultPromise = Promise.resolve(resultValue),
+) => {
+  const authMethod = jasmine.createSpyObj<IAuthAdapter>("authMethodMock", ["login", "refresh"]);
+  (authMethod.login as jasmine.Spy).and.returnValue(resultPromise);
+  (authMethod.refresh as jasmine.Spy).and.returnValue(resultPromise);
+  return {
+    authMethod,
+    resultValue,
+    resultPromise,
+  };
+};
 
 const tokenManagerWithTokens = () =>
   (new TokenManager(requestAdapterMockFactory().succesfulExecution({ token: "token", refresh_token: "refreshToken" })));
@@ -110,19 +126,58 @@ describe("Class: TokenManager", () => {
           done();
         });
     });
+
+    it("should use user credentials as a default auth method", (done) => {
+      tm.init(validOpts())
+        .then((tokenManager: TokenManager) => {
+          expect(tokenManager["authMethod"] instanceof UserCredentialsAuth).toBeTruthy();
+          done();
+        })
+        .catch((err: Error) => done.fail(`init should not have failed: ${err.message}`));
+    });
+
+    it("should use the given auth method", (done) => {
+      tm.init({ ...validOpts(), authMethod: apiKeyAuth })
+        .then((tokenManager: TokenManager) => {
+          expect(tokenManager["authMethod"] instanceof ApiKeyAuth).toBeTruthy();
+          done();
+        })
+        .catch((err: Error) => done.fail(`init should not have failed: ${err.message}`));
+    });
+
+    it("should use auth method adapter correctly", (done) => {
+      const { authMethod, resultValue } = authMethodMock();
+      const opts = { ...validOpts(), authMethod: () => authMethod };
+      spyOn(tm["storage"], "setTokens");
+      tm.init(opts)
+        .then((tokenManager: TokenManager) => {
+          expect(authMethod.login).toHaveBeenCalledWith(opts, tokenManager["requestAdapter"]);
+          expect(tm["storage"].setTokens).toHaveBeenCalledWith(resultValue);
+          done();
+        })
+        .catch((err: Error) => done.fail(`init should not have failed: ${err.message}`));
+    });
   });
 
   describe("when refreshing the token", () => {
-    it("should send the refresh token request to the correct url", (done) => {
-      let mockAdapter = requestAdapterMockFactory().succesfulExecution({token: "token", refresh_token: "refreshToken"});
-      let tokenManager = new TokenManager(mockAdapter);
-      tokenManager.init({projectID: validProjectID, key: "validKey", secret: "validSecret"}).then( () => {
-        spyOn(mockAdapter, "execute").and.callThrough();
-        tokenManager["refresh"]("projectID").then( () => {
-          expect(mockAdapter.execute).toHaveBeenCalledWith(`${API.PROTOCOL}://projectID.${API.HOST}.${API.DOMAIN}:${API.PORT}/auth`, jasmine.any(Object) );
-          done();
-        }).catch( (err: Error) => done.fail(`refresh should not have failed: ${err.message}`));
-      });
+    it("should use the auth method adapter correct", (done) => {
+      const { authMethod, resultValue } = authMethodMock();
+      const opts = { ...validOpts(), authMethod: () => authMethod };
+      const tm = tokenManagerWithTokens();
+      spyOn(tm["storage"], "setTokens");
+      tm.init(opts)
+        .then((tokenManager) => {
+          setTimeout(() => {
+            expect(authMethod.refresh).toHaveBeenCalledWith(
+              tokenManager["tokens"],
+              tokenManager["requestAdapter"],
+              opts.projectID,
+            );
+            expect(tm["storage"].setTokens).toHaveBeenCalledWith(resultValue);
+            done();
+          }, 700);
+        })
+        .catch((err: Error) => done.fail(`init should not have failed: ${err.message}`));
     });
 
     it("should throw an error on refresh token failure", (done) => {
