@@ -8,6 +8,11 @@ import { requestAdapterMockFactory } from "./testUtils";
 
 const validProjectID = "validProjectID";
 
+const validOpts = () => ({ projectID: validProjectID, key: "validKey", refreshInterval: 500, secret: "validSecret" });
+
+const tokenManagerWithTokens = () =>
+  (new TokenManager(requestAdapterMockFactory().succesfulExecution({ token: "token", refresh_token: "refreshToken" })));
+
 describe("Class: TokenManager", () => {
   describe("when authenticating", () => {
     let tm: TokenManager;
@@ -121,7 +126,7 @@ describe("Class: TokenManager", () => {
     });
 
     it("should throw an error on refresh token failure", (done) => {
-      (new TokenManager(requestAdapterMockFactory().succesfulExecution({token: "token", refresh_token: "refreshToken"})))
+      tokenManagerWithTokens()
         .init({projectID: validProjectID, key: "validKey", secret: "validSecret"})
         .then((tokenManager: TokenManager) => {
           tokenManager["requestAdapter"] = requestAdapterMockFactory().failedExecution("refresh error.");
@@ -136,8 +141,8 @@ describe("Class: TokenManager", () => {
     });
 
     it("should have updated token after successful auto refresh", (done) => {
-      (new TokenManager(requestAdapterMockFactory().succesfulExecution({token: "token", refresh_token: "refreshToken"})))
-        .init({projectID: validProjectID, key: "validKey", refreshInterval: 500, secret: "validSecret"})
+      tokenManagerWithTokens()
+        .init(validOpts())
         .then((tokenManager: TokenManager) => {
           tokenManager["requestAdapter"] = requestAdapterMockFactory().succesfulExecution({token: "updatedToken", refresh_token: "updatedRefreshToken"});
           setTimeout(() => {
@@ -153,8 +158,8 @@ describe("Class: TokenManager", () => {
     });
 
     it("should have updated refresh token after successful auto refresh", (done) => {
-      (new TokenManager(requestAdapterMockFactory().succesfulExecution({token: "token", refresh_token: "refreshToken"})))
-        .init({projectID: validProjectID, key: "validKey", refreshInterval: 500, secret: "validSecret"})
+      tokenManagerWithTokens()
+        .init(validOpts())
         .then((tokenManager: TokenManager) => {
           tokenManager["requestAdapter"] = requestAdapterMockFactory().succesfulExecution({token: "updatedToken", refresh_token: "updatedRefreshToken"});
           setTimeout(() => {
