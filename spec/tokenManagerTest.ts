@@ -51,7 +51,7 @@ describe("Class: TokenManager", () => {
       tm.init({projectID: validProjectID, key: "validKey", secret: "validSecret"})
         .then((output: TokenManager) => {
           expect(output instanceof TokenManager).toBe(true);
-          return (output as any).tokens;
+          return output["tokens"];
         })
         .then((tokens: IAuthToken) => {
           expect(tokens.token).toBe("validToken");
@@ -113,7 +113,7 @@ describe("Class: TokenManager", () => {
       let tokenManager = new TokenManager(mockAdapter);
       tokenManager.init({projectID: validProjectID, key: "validKey", secret: "validSecret"}).then( () => {
         spyOn(mockAdapter, "execute").and.callThrough();
-        (tokenManager as any).refresh("projectID").then( () => {
+        tokenManager["refresh"]("projectID").then( () => {
           expect(mockAdapter.execute).toHaveBeenCalledWith(`${API.PROTOCOL}://projectID.${API.HOST}.${API.DOMAIN}:${API.PORT}/auth`, jasmine.any(Object) );
           done();
         }).catch( (err: Error) => done.fail(`refresh should not have failed: ${err.message}`));
@@ -124,8 +124,8 @@ describe("Class: TokenManager", () => {
       (new TokenManager(requestAdapterMockFactory().succesfulExecution({token: "token", refresh_token: "refreshToken"})))
         .init({projectID: validProjectID, key: "validKey", secret: "validSecret"})
         .then((tokenManager: TokenManager) => {
-          (tokenManager as any).requestAdapter = requestAdapterMockFactory().failedExecution("refresh error.");
-          (tokenManager as any).refresh(validProjectID)
+          tokenManager["requestAdapter"] = requestAdapterMockFactory().failedExecution("refresh error.");
+          tokenManager["refresh"](validProjectID)
             .then( () => done.fail("refresh should have failed"))
             .catch( (err: Error) => {
               expect(err.message).toEqual("Unable to refresh token: refresh error.");
@@ -139,7 +139,7 @@ describe("Class: TokenManager", () => {
       (new TokenManager(requestAdapterMockFactory().succesfulExecution({token: "token", refresh_token: "refreshToken"})))
         .init({projectID: validProjectID, key: "validKey", refreshInterval: 500, secret: "validSecret"})
         .then((tokenManager: TokenManager) => {
-          (tokenManager as any).requestAdapter = requestAdapterMockFactory().succesfulExecution({token: "updatedToken", refresh_token: "updatedRefreshToken"});
+          tokenManager["requestAdapter"] = requestAdapterMockFactory().succesfulExecution({token: "updatedToken", refresh_token: "updatedRefreshToken"});
           setTimeout(() => {
             tokenManager.token
               .then((token: string) => {
@@ -156,9 +156,9 @@ describe("Class: TokenManager", () => {
       (new TokenManager(requestAdapterMockFactory().succesfulExecution({token: "token", refresh_token: "refreshToken"})))
         .init({projectID: validProjectID, key: "validKey", refreshInterval: 500, secret: "validSecret"})
         .then((tokenManager: TokenManager) => {
-          (tokenManager as any).requestAdapter = requestAdapterMockFactory().succesfulExecution({token: "updatedToken", refresh_token: "updatedRefreshToken"});
+          tokenManager["requestAdapter"] = requestAdapterMockFactory().succesfulExecution({token: "updatedToken", refresh_token: "updatedRefreshToken"});
           setTimeout(() => {
-            (tokenManager as any).tokens
+            tokenManager["tokens"]
               .then((tokens: IAuthToken) => {
                 expect(tokens.refreshToken).toBe("updatedRefreshToken");
                 done();
