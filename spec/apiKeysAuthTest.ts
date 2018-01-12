@@ -16,13 +16,13 @@ describe("ApiKeyAuth", () => {
     const requestAdapter = jasmine.createSpyObj<IRequestAdapter>("requestAdapterMock", ["execute"]);
     (requestAdapter.execute as jasmine.Spy).and.returnValue(resultPromise);
     return {
-      tokens,
-      tokenPair: Promise.resolve({ token: tokens.token, refreshToken: tokens.refresh_token }),
+      clientOpts: validOpts(),
       requestAdapter,
       resultValue,
       resultPromise,
-      clientOpts: validOpts(),
       subject: new ApiKeyAuth(),
+      tokens,
+      tokenPair: Promise.resolve({ token: tokens.token, refreshToken: tokens.refresh_token }),
     };
   }
 
