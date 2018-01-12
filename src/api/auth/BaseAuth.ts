@@ -12,9 +12,8 @@ export abstract class BaseAuth implements IAuthAdapter {
         body: this.getLoginRequestBody(opts),
         method: Methods.POST,
       })
-      .then((newTokens: Tokens) => {
-        return ({ token: newTokens.token, refreshToken: newTokens.refresh_token } as IAuthToken);
-      })
+      /* convert response to IAuthToken interface */
+      .then(({ token, refresh_token }: Tokens) => ({ token, refreshToken: refresh_token }))
       /* catch login error */
       .catch((err: Error) => {
         /* add specific information to error */
@@ -35,7 +34,7 @@ export abstract class BaseAuth implements IAuthAdapter {
         method: Methods.PATCH,
       }))
       /* convert response to IAuthToken interface */
-      .then((newTokens: Tokens) => ({ token: newTokens.token, refreshToken: newTokens.refresh_token } as IAuthToken))
+      .then(({ token, refresh_token }: Tokens) => ({ token, refreshToken: refresh_token }))
       /* catch refresh token error */
       .catch((err: Error) => {
         /* add specific information to error */
