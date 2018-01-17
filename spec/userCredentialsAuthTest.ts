@@ -26,7 +26,7 @@ describe("UserCredentialsAuth", () => {
     };
   }
 
-  describe("when login in", () => {
+  describe("when logging in", () => {
 
     it("should make request to the right url", () => {
       const { subject, clientOpts, requestAdapter } = createSubject();
