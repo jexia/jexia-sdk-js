@@ -68,6 +68,7 @@ export class TokenManager {
   }
 
   public terminate(): void {
+    this.storage.clear();
     clearInterval(this.refreshInterval);
     delete this.tokens;
   }

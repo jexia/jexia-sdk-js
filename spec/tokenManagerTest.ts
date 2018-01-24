@@ -1,4 +1,5 @@
 // tslint:disable:max-line-length
+// tslint:disable:no-string-literal
 import { TokenStorage } from "../src/api/core/componentStorage";
 import { IAuthToken, TokenManager } from "../src/api/core/tokenManager";
 import { API } from "../src/config/config";
@@ -68,16 +69,41 @@ describe("Class: TokenManager", () => {
         done();
       });
     });
+  });
+
+  describe("when the client is terminated", () => {
+    let tm: TokenManager;
+
+    beforeEach(() => {
+      TokenStorage.cleanStorage();
+      tm = new TokenManager(requestAdapterMockFactory().succesfulExecution({ token: "validToken", refresh_token: "validRefreshToken" }));
+    });
+
+    it("should have clear the session storage", (done) => {
+      spyOn(tm["storage"], "clear");
+      tm.init({ projectID: validProjectID, key: "validKey", secret: "validSecret" })
+        .then(() => tm.terminate())
+        .then(() => expect(tm["storage"]["clear"]).toHaveBeenCalledWith())
+        .then(done, done.fail);
+    });
+
+    it("should have clear the refresh process interval", (done) => {
+      spyOn(global, "clearInterval");
+      tm.init({ projectID: validProjectID, key: "validKey", secret: "validSecret" })
+        .then(() => tm.terminate())
+        .then(() => expect(global.clearInterval).toHaveBeenCalledWith(tm["refreshInterval"]))
+        .then(done, done.fail);
+    });
 
     it("should throw an error if the token is accessed after terminate", (done) => {
-      tm.init({projectID: validProjectID, key: "validKey", secret: "validSecret"})
-      .then(() => tm.terminate())
-      .then(() => tm.token)
-      .then( () => done.fail("Token access should have failed"))
-      .catch((err: Error) => {
-        expect(err.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
-        done();
-      });
+      tm.init({ projectID: validProjectID, key: "validKey", secret: "validSecret" })
+        .then(() => tm.terminate())
+        .then(() => tm.token)
+        .then(() => done.fail("Token access should have failed"))
+        .catch((err: Error) => {
+          expect(err.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
+          done();
+        });
     });
   });
 
