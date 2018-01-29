@@ -48,14 +48,19 @@ const moduleVoidTerminatingError: IModule = {
   },
 };
 
+function createTokenManagerMock() {
+  const mock = jasmine.createSpyObj(["init", "terminate"]);
+  mock.init.and.returnValue(Promise.resolve(mock));
+  return mock;
+}
+
 describe("Class: Client", () => {
   describe("on init", () => {
     it("should fail when passed a single module that failed to init", (done) => {
       let client = new Client((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
         return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve()} as IHTTPResponse);
       });
-      /* replace request adapter with mock */
-      client.tokenManager = new TokenManager(mockRequestAdapter);
+      client.tokenManager = createTokenManagerMock();
 
       client
         .init({
@@ -66,14 +71,8 @@ describe("Class: Client", () => {
         }, mockModuleFailure)
         .then((cli: Client) => done.fail("init should have failed"))
         .catch((err: Error) => {
-          if (!(client.tokenManager as any).refreshInterval) {
-            done.fail(`Refresh Interval on TokenManager is undefined, so login failed; maybe mock logic is broken?
-              ${err}`);
-            return;
-          }
           expect(err).toEqual(errFailedToInitModule);
-          /* check if refresh loop has been stopped and interval is clean */
-          expect((client.tokenManager as any).refreshInterval._repeat).toBeNull();
+          expect(client.tokenManager.terminate).toHaveBeenCalledWith();
           done();
         });
     });
@@ -82,8 +81,7 @@ describe("Class: Client", () => {
       let client = new Client((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
         return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve()} as IHTTPResponse);
       });
-      /* replace request adapter with mock */
-      client.tokenManager = new TokenManager(mockRequestAdapter);
+      client.tokenManager = createTokenManagerMock();
 
       client
         .init({
@@ -100,8 +98,7 @@ describe("Class: Client", () => {
       let client = new Client((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
         return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve()} as IHTTPResponse);
       });
-      /* replace request adapter with mock */
-      client.tokenManager = new TokenManager(mockRequestAdapter);
+      client.tokenManager = createTokenManagerMock();
 
       client
         .init(
@@ -112,14 +109,8 @@ describe("Class: Client", () => {
         )
         .then((cli: Client) => done.fail("init should have failed"))
         .catch((err: Error) => {
-          if (!(client.tokenManager as any).refreshInterval) {
-            done.fail(`Refresh Interval on TokenManager is undefined, so login failed; maybe mock logic is broken?
-              ${err}`);
-            return;
-          }
           expect(err).toEqual(errFailedToInitModule);
-          /* check if refresh loop has been stopped and interval is clean */
-          expect((client.tokenManager as any).refreshInterval._repeat).toBeNull();
+          expect(client.tokenManager.terminate).toHaveBeenCalledWith();
           done();
         });
     });
@@ -167,7 +158,7 @@ describe("Class: Client", () => {
         return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve()} as IHTTPResponse);
       });
       /* replace request adapter with mock */
-      client.tokenManager = new TokenManager(mockRequestAdapter);
+      client.tokenManager = createTokenManagerMock();
 
       client
         .init({
@@ -187,12 +178,12 @@ describe("Class: Client", () => {
         .catch((err: Error) => done.fail("init should not have failed"));
     });
 
-    it("should fail when terminates", (done) => {
+    it("should fail when any module fails to terminate", (done) => {
       let client = new Client((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
         return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve()} as IHTTPResponse);
       });
       /* replace request adapter with mock */
-      client.tokenManager = new TokenManager(mockRequestAdapter);
+      client.tokenManager = createTokenManagerMock();
 
       client
         .init({

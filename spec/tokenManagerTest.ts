@@ -1,6 +1,5 @@
 // tslint:disable:max-line-length
 // tslint:disable:no-string-literal
-import { apiKeyAuth } from "../src//api/auth";
 import { ApiKeyAuth } from "../src/api/auth/apiKeyAuth";
 import { UserCredentialsAuth } from "../src/api/auth/userCredentialsAuth";
 import { TokenStorage } from "../src/api/core/componentStorage";
@@ -127,19 +126,19 @@ describe("Class: TokenManager", () => {
         });
     });
 
-    it("should use user credentials as a default auth method", (done) => {
+    it("should use api key as a default auth method", (done) => {
       tm.init(validOpts())
         .then((tokenManager: TokenManager) => {
-          expect(tokenManager["authMethod"] instanceof UserCredentialsAuth).toBeTruthy();
+          expect(tokenManager["authMethod"] instanceof ApiKeyAuth).toBeTruthy();
           done();
         })
         .catch((err: Error) => done.fail(`init should not have failed: ${err.message}`));
     });
 
     it("should use the given auth method", (done) => {
-      tm.init({ ...validOpts(), authMethod: apiKeyAuth })
+      tm.init({ ...validOpts(), authMethod: () => new UserCredentialsAuth() })
         .then((tokenManager: TokenManager) => {
-          expect(tokenManager["authMethod"] instanceof ApiKeyAuth).toBeTruthy();
+          expect(tokenManager["authMethod"] instanceof UserCredentialsAuth).toBeTruthy();
           done();
         })
         .catch((err: Error) => done.fail(`init should not have failed: ${err.message}`));
