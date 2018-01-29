@@ -1,7 +1,7 @@
 import { DELAY } from "../../config/config";
 import { MESSAGE } from "../../config/message";
 import { IRequestAdapter } from "../../internal/requestAdapter";
-import { userCredentialsAuth } from "../auth";
+import { apiKeyAuth } from "../auth";
 import { IStorageComponent, TokenStorage } from "./componentStorage";
 
 export type Tokens = { token: string, refresh_token: string };
@@ -59,7 +59,7 @@ export class TokenManager {
   }
 
   public init(opts: IAuthOptions): Promise<TokenManager> {
-    this.authMethod = opts.authMethod ? opts.authMethod() : userCredentialsAuth();
+    this.authMethod = opts.authMethod ? opts.authMethod() : apiKeyAuth();
     /* check if email/password were provided */
     if (!opts.key || !opts.secret) {
       return Promise.reject(new Error("Please provide valid application credentials."));
