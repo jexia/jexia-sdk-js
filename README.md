@@ -28,8 +28,8 @@ const module = jexiaSDK.dataOperations();
 
 var credentials = {
   projectID: "test",
-  key: "anna@example.com",
-  secret: "annie123"
+  key: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+  secret: "a_secret"
 };
 
 jexiaSDK.jexiaClient(fetch).init(credentials, module).then(function() {

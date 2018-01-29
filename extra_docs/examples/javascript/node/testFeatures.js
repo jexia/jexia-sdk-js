@@ -8,7 +8,7 @@ const field = jexiaSDK.field;
 //Initialize DataOperationsModule
 let dataModule = dataOperations();
 //Initialize Client and pass DataOperationsModule to it.
-let client = jexiaClient(fetch).init({projectID: "localhost", key: "anna@example.com", secret: "annie123"}, dataModule);
+let client = jexiaClient(fetch).init({projectID: "localhost", key: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", secret: "a_secret"}, dataModule);
 //select Posts
 function selectPosts(jexiaClient){
     jexiaClient.then( (initializedClient) => {

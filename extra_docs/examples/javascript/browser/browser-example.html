@@ -8,7 +8,7 @@
                 document.getElementById("authorize").onclick = function(){
                     //Initialize dataOperationsModule
                     let dom = jexia.dataOperations();
-                    let jexiaClient = jexia.jexiaClient().init({ projectID: "anemo002", key: "anna@example.com", secret: "annie123" }, dom).then((initializedClient) => {
+                    let jexiaClient = jexia.jexiaClient().init({ projectID: "anemo002", key: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", secret: "a_secret" }, dom).then((initializedClient) => {
                         dom.dataset("posts").select().execute().then((records) => {
                             let data = records;
                             for(let i=0; i < data.length; i++){

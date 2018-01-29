@@ -17,7 +17,7 @@ let rtc = realTime((messageObject) => {
 });
 let jexiaClientInstance = jexiaClient(fetch);
 
-jexiaClientInstance.init({projectID: "anemo002", key: "anna@example.com", secret: "annie123"}, dom, rtc).then( () => {
+jexiaClientInstance.init({projectID: "anemo002", key: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", secret: "a_secret"}, dom, rtc).then( () => {
   return rtc.subscribe("insert", dom.dataset("keywords")).then( () => {
     console.log("Succesfully subscribed to dataset changes");
     return dom.dataset("keywords").insert([{keyword: "aNewKeyword"}, {keyword: "anotherKeyword"}]).execute();

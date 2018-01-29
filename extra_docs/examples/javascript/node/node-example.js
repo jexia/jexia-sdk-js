@@ -9,7 +9,7 @@ const field = jexiaSDK.field;
 //Initialize DataOperationsModule
 let dom = dataOperations();
 //Initialize Client and pass DataOperationsModule to it.
-jexiaClient(fetch).init({projectID: "anemo002", key: "anna@example.com", secret: "annie123"}, dom).then( (initializedClient) => {
+jexiaClient(fetch).init({projectID: "anemo002", key: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", secret: "a_secret"}, dom).then( (initializedClient) => {
   dom.dataset("posts").select().where(field("title").isEqualTo("My first post")).execute().then( (records) => {
     console.log(records);
     process.exit();
