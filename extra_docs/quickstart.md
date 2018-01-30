@@ -2,7 +2,6 @@
 
 The SDK currently exposes the following features:
   - on-demand access to data stored in DataSets (creating, reading, updating, deleting records)
-  - real-time notifications for subscribed events
   - Authentication and authorization is handled automatically by the SDK, the user only needs to provide credentials once at SDK initialization.
 
 The SDK is currently focused on *consuming* data. *Managing* the data schema (creating Datasets, adding columns to Datasets, etc.) is out of scope for now. The data schema management is done through our web application at [app.jexia.com](app.jexia.com).
@@ -22,11 +21,6 @@ Executing an operation on a set of records is done through a Query. Depending on
   - relations (records from related datasets, as instructed, will also be affected by the request)
 
 All these features are handled server-side. Right now there is no client-side functionality implemented for filtering, sorting, etc. 
-
-### Real-time communication
-
-The user can subscribe to events and will be notified in real time when those events are fired off on the server.
-Right now the events are only related to actions made on data. Subscription works on a per-dataset (and schema), per-action level. For example: adding records to the Posts dataset, or deleting records in the Users dataset.
 
 ## Code samples
 
@@ -285,67 +279,6 @@ posts.delete().where(field("title").isLike("test")).execute().then( (records) =>
 }).catch( (error) => {
   // you can see the error info here, if something goes wrong
 });
-[..]
-```
-
-## Real-time communication code samples
-
-The real-time functionality is added through a separate module. The module needs to be imported, instantiated and initialized along with the client.
-
-### Importing:
-
-``` Javascript
-import { realTime } from "Anemo SDK location";
-```
-
-### Instantiating:
-
-The real-time module needs a websocket client in order to function.
-
-When running the app in the browser, this dependency can be ignored, as the SDK will load the native browser implementation:
-
-``` Javascript
-import { realTime } from "Anemo SDK location";
-
-let rtcmod = realTime(
-  (message) => { // do stuff with your real time notification here }
-);
-```
-
-For Node.JS apps, a websocket client needs to be imported and a callback instantiating the websocket client must be passed to the real-time module, as in this example.
-
-``` Javascript
-import WebSocket from "your favorite Node.JS WebSocket implementation";
-
-let rtcmod = realTime(
-  (message) => { // do stuff with your real time notification here },
-  (appUrl) => new WebSocket(appUrl)
-);
-```
-
-### Initializing:
-
-The real-time module needs to be passed to the `Client` when initializing the latter. The `Client` accepts a spread parameter to define the modules that need to be initialized. 
-
-``` Javascript
-[..]
-jexiaClient(fetch).init({projectID: "your Jexia App URL", key: "username", secret: "password"}, rtcmod).then( (initializedClient) => {
-  // you have been succesfully logged in
-  // you can start using the initialized rtcmod here
-}).catch( (error) => {
-  // there was a problem logging in or initializing the real-time module
-});
-[..]
-```
-
-### Subscribing to events:
-
-After a succesful module initialization, the user can start subscribing to events. When a real-time message is pushed from the server, the callback defined when instantiating the real-time module will be called.
-
-``` Javascript
-[..]
-let posts = dataModule.dataset("posts");
-rtcmod.subscribe("insert", posts);
 [..]
 ```
 
