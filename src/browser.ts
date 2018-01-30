@@ -1,7 +1,6 @@
 import { Client } from "./api/core/client";
 import { TokenStorage, WebStorageComponent } from "./api/core/componentStorage";
 import { DataOperationsModule } from "./api/dataops/dataOperationsModule";
-import { RTCModule } from "./api/realtime/rtcModule";
 export * from "./index";
 
 /**
@@ -40,12 +39,6 @@ if (storageAvailable("localStorage") && storageAvailable("sessionStorage")) {
 
 export function jexiaClient(): Client {
   return new Client(window.fetch.bind(window));
-}
-
-export function realTime(messageReceivedCallback: Function): RTCModule {
-  return new RTCModule(messageReceivedCallback, (appUrl: string) => {
-    return new WebSocket(appUrl);
-  });
 }
 
 export function dataOperations(): DataOperationsModule {
