@@ -2,10 +2,10 @@ import { RequestExecuter } from "../../internal/executer";
 import { Query } from "../../internal/query";
 import { compileDataRequest } from "../../internal/queryBasedCompiler";
 
-export class DataRequest {
+export class DataRequest<T = any> {
   private action: string;
-  private query: Query;
-  private records: Array<object>;
+  private query: Query<T>;
+  private records: T[];
 
   constructor(action: string, dataset: string) {
     this.action = action;
@@ -27,15 +27,15 @@ export class DataRequest {
     return this.query;
   }
 
-  public set Records(records: Array<object>){
+  public set Records(records: T[]){
     this.records = records;
   }
 
-  public get Records(): Array<object> {
+  public get Records(): T[] {
     return this.records;
   }
 
-  public execute(queryExecuter: RequestExecuter): Promise<any> {
+  public execute(queryExecuter: RequestExecuter): Promise<T[]> {
     return queryExecuter.executeRequest(compileDataRequest(this));
   }
 }

@@ -1,3 +1,4 @@
+import { DefaultDatasetFields } from "../api/dataops/dataset";
 import { IFilteringCriterion } from "../api/dataops/filteringApi";
 import { ICondition } from "../api/dataops/filteringCondition";
 import { MESSAGE } from "../config/message";
@@ -7,7 +8,7 @@ interface ISort {
   direction: string;
 }
 
-export class Query {
+export class Query<T = any> {
   private dataSet: string;
   private fields: string[];
   private limit: number;
@@ -15,7 +16,7 @@ export class Query {
   private filteringConditions: ICondition;
   private orders: ISort[];
   private relations: Query[];
-  private data: object;
+  private data: T;
 
   constructor(dataSet: string) {
     this.dataSet = dataSet;
@@ -23,11 +24,11 @@ export class Query {
     this.relations = [];
   }
 
-  public set Data(data: object){
+  public set Data(data: T){
     this.data = data;
   }
 
-  public get Data(): object {
+  public get Data(): T {
     return this.data;
   }
 
@@ -80,7 +81,7 @@ export class Query {
     return this.relations;
   }
 
-  public AddSortCondition(direction: string, ...fields: string[]) {
+  public AddSortCondition<K extends keyof T>(direction: "asc" | "desc", ...fields: Array<K | DefaultDatasetFields>) {
     if (fields.length === 0) {
       throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
     }

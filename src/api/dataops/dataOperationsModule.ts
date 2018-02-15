@@ -14,7 +14,7 @@ export class DataOperationsModule implements IModule {
     return Promise.resolve(this);
   }
 
-  public dataset(dataset: string): Dataset {
+  public dataset<T = any>(dataset: string): Dataset<T> {
     if (this.queryExecuterBuilder == null) {
       throw new Error("Client has not been initialised properly. Please instantiate \
                       client for invoking this method");

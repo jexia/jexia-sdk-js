@@ -1,41 +1,42 @@
 import { RequestExecuter } from "../../internal/executer";
 import { DataRequest } from "./dataRequest";
+import { DefaultDatasetFields } from "./dataset";
 import { IFilteringCriterion } from "./filteringApi";
 import { IExecutable, IFields, IFilterable, ILimit, IOffset, ISortable } from "./queryInterfaces";
 
-export class DeleteQuery implements IFields, ILimit, IOffset, IFilterable, IExecutable, ISortable {
-  private request: DataRequest;
+export class DeleteQuery<T = any> implements IFields, ILimit, IOffset, IFilterable, IExecutable, ISortable {
+  private request: DataRequest<T>;
   private queryExecuter: RequestExecuter;
   public constructor(queryExecuter: RequestExecuter, dataset: string) {
     this.request = new DataRequest("delete", dataset);
     this.queryExecuter = queryExecuter;
     this.request.Action = "delete";
   }
-  public fields(...fields: string[]): DeleteQuery {
+  public fields<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this {
     this.request.Query.Fields = fields;
     return this;
   }
-  public limit(limit: number): DeleteQuery {
+  public limit(limit: number): this {
     this.request.Query.Limit = limit;
     return this;
   }
-  public offset(offset: number): DeleteQuery {
+  public offset(offset: number): this {
     this.request.Query.Offset = offset;
     return this;
   }
-  public where(filter: IFilteringCriterion): DeleteQuery {
+  public where(filter: IFilteringCriterion): this {
     this.request.Query.setFilterCriteria(filter);
     return this;
   }
-  public sortAsc(...fields: string[]): DeleteQuery {
+  public sortAsc<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this {
     this.request.Query.AddSortCondition("asc", ...fields);
     return this;
   }
-  public sortDesc(...fields: string[]): DeleteQuery {
+  public sortDesc<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this {
     this.request.Query.AddSortCondition("desc", ...fields);
     return this;
   }
-  public execute(): Promise<any> {
+  public execute(): Promise<T[]> {
     return this.request.execute(this.queryExecuter);
   }
 }

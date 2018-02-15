@@ -1,11 +1,13 @@
 import { RequestExecuter } from "../../internal/executer";
 import { DataRequest } from "./dataRequest";
-import { Dataset } from "./dataset";
+import { Dataset, DefaultDatasetFields } from "./dataset";
 import { IFilteringCriterion } from "./filteringApi";
 import { IExecutable, IFields, IFilterable, ILimit, IOffset, IRelational, ISortable } from "./queryInterfaces";
 
-export class SelectQuery implements IFields, ILimit, IOffset, IFilterable, IExecutable, IRelational, ISortable {
-  private request: DataRequest;
+export class SelectQuery<T = any>
+  implements IFields, ILimit, IOffset, IFilterable, IExecutable, IRelational, ISortable {
+
+  private request: DataRequest<T>;
   private queryExecuter: RequestExecuter;
 
   public constructor(queryExecuter: RequestExecuter, dataset: string) {
@@ -13,43 +15,43 @@ export class SelectQuery implements IFields, ILimit, IOffset, IFilterable, IExec
     this.queryExecuter = queryExecuter;
   }
 
-  public fields(...fields: string[]): SelectQuery {
+  public fields<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this {
     this.request.Query.Fields = fields;
     return this;
   }
 
-  public limit(limit: number): SelectQuery {
+  public limit(limit: number): this {
     this.request.Query.Limit = limit;
     return this;
   }
 
-  public offset(offset: number): SelectQuery {
+  public offset(offset: number): this {
     this.request.Query.Offset = offset;
     return this;
   }
 
-  public where(filter: IFilteringCriterion): SelectQuery {
+  public where(filter: IFilteringCriterion): this {
     this.request.Query.setFilterCriteria(filter);
     return this;
   }
 
-  public sortAsc(...fields: string[]): SelectQuery {
+  public sortAsc<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this {
     this.request.Query.AddSortCondition("asc", ...fields);
     return this;
   }
-  public sortDesc(...fields: string[]): SelectQuery {
+  public sortDesc<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this {
     this.request.Query.AddSortCondition("desc", ...fields);
     return this;
   }
 
   // tslint:disable-next-line:max-line-length
-  public relation(dataSet: Dataset, callback: (query: SelectQuery) => SelectQuery = (q: SelectQuery) => q): SelectQuery {
+  public relation(dataSet: Dataset, callback: (query: SelectQuery) => SelectQuery = (q: SelectQuery) => q): this {
     let relation: SelectQuery = callback(dataSet.select());
     this.request.Query.AddRelation(relation.request.Query);
     return this;
   }
 
-  public execute(): Promise<any> {
+  public execute(): Promise<T[]> {
     return this.request.execute(this.queryExecuter);
   }
 }

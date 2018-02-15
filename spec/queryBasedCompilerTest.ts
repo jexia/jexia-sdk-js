@@ -89,10 +89,10 @@ describe("QueryBasedCompiler class", () => {
   describe("when receiving a Query with a sorting condition set", () => {
     it("it compiles the Query to the expected object literal", () => {
       let query = new Query(dataset);
-      query.AddSortCondition("ASC", "field1", "field2");
+      query.AddSortCondition("asc", "field1", "field2");
       let compiler = new QueryBasedCompiler(query);
       expect(compiler.compile()).toEqual({
-          orders: [{fields: [ "field1", "field2" ], direction: "ASC"}],
+          orders: [{fields: [ "field1", "field2" ], direction: "asc"}],
       });
     });
   });
@@ -113,12 +113,12 @@ describe("QueryBasedCompiler class", () => {
       query.Limit = 10;
       query.Fields = fields;
       query.Filter = new FilteringCondition("field", "operator", ["value"]);
-      query.AddSortCondition("ASC", "field1", "field2");
+      query.AddSortCondition("asc", "field1", "field2");
       let compiler = new QueryBasedCompiler(query);
       expect(compiler.compile()).toEqual({
         conditions: [{ field: "field", operator: "operator", values: [ "value" ], type: "and" }],
         fields,
-        orders: [{fields: [ "field1", "field2" ], direction: "ASC"}],
+        orders: [{fields: [ "field1", "field2" ], direction: "asc"}],
         range: {offset: 10, limit: 10},
       });
     });
@@ -144,11 +144,11 @@ describe("Request - Query compiling integration tests", () => {
       request.Query.Limit = 10;
       request.Query.Fields = ["field1", "field2"];
       request.Query.Filter = new FilteringCondition("field", "operator", ["value"]);
-      request.Query.AddSortCondition("ASC", "field1", "field2");
+      request.Query.AddSortCondition("asc", "field1", "field2");
       expect(compileDataRequest(request)).toEqual({action: "select", params: {
         conditions: [{ field: "field", operator: "operator", values: [ "value" ], type: "and" }],
         fields: [ "field1", "field2" ],
-        orders: [{fields: [ "field1", "field2" ], direction: "ASC"}],
+        orders: [{fields: [ "field1", "field2" ], direction: "asc"}],
         range: {offset: 10, limit: 10},
       }});
     });

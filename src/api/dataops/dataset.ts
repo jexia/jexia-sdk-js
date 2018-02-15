@@ -4,9 +4,11 @@ import { IResource } from "../core/resource";
 import { DeleteQuery} from "./deleteQuery";
 import { InsertQuery} from "./insertQuery";
 import { SelectQuery} from "./selectQuery";
-import { UpdateQuery} from "./updateQuery";
+import { UpdateQuery } from "./updateQuery";
 
-export class Dataset implements IResource {
+export type DefaultDatasetFields = "id" | "created_at" | "updated_at";
+
+export class Dataset<T = any> implements IResource {
     private datasetName: string;
     private queryExecuterBuilder: RequestExecuter;
     public constructor(dataset: string, queryExecuterBuilder: QueryExecuterBuilder) {
@@ -22,7 +24,7 @@ export class Dataset implements IResource {
      * Creates a Select query.
      * With no filters set, returns all records in the selected dataset.
      */
-    public select(): SelectQuery {
+    public select(): SelectQuery<T> {
         return new SelectQuery(this.queryExecuterBuilder, this.datasetName);
     }
 
@@ -32,7 +34,7 @@ export class Dataset implements IResource {
      * for the fields that you want to modify. Don't forget to apply
      * a filter to specify the fields that will be modified.
      */
-    public update(data: object): UpdateQuery {
+    public update(data: T): UpdateQuery<T> {
         return new UpdateQuery(this.queryExecuterBuilder, data, this.datasetName);
     }
 
@@ -42,7 +44,7 @@ export class Dataset implements IResource {
      * If saving into a strict schema dataset, you need to provide values for the
      * required fields for that particular dataset.
      */
-    public insert(records: Array<object>): InsertQuery {
+    public insert(records: T[]): InsertQuery<T> {
         return new InsertQuery(this.queryExecuterBuilder, records, this.datasetName);
     }
 
@@ -51,7 +53,7 @@ export class Dataset implements IResource {
      * You need to specify a filter to narrow down the records that you want deleted
      * from the backend.
      */
-    public delete(): DeleteQuery {
+    public delete(): DeleteQuery<T> {
         return new DeleteQuery(this.queryExecuterBuilder, this.datasetName);
     }
 }

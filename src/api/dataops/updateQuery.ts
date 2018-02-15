@@ -1,39 +1,40 @@
 import { RequestExecuter } from "../../internal/executer";
 import { DataRequest } from "./dataRequest";
+import { DefaultDatasetFields } from "./dataset";
 import { IFilteringCriterion } from "./filteringApi";
 import { IExecutable, IFilterable, ILimit, IOffset, ISortable } from "./queryInterfaces";
 
-export class UpdateQuery implements ILimit, IOffset, IFilterable, IExecutable, ISortable {
-  private request: DataRequest;
+export class UpdateQuery<T = any> implements ILimit, IOffset, IFilterable, IExecutable, ISortable {
+  private request: DataRequest<T>;
   private queryExecuter: RequestExecuter;
 
-  public constructor(queryExecuter: RequestExecuter, data: object, dataset: string) {
+  public constructor(queryExecuter: RequestExecuter, data: T, dataset: string) {
     this.request = new DataRequest("update", dataset);
     this.queryExecuter = queryExecuter;
     this.request.Query.Data = data;
   }
-  public limit(limit: number): UpdateQuery {
+  public limit(limit: number): this {
     this.request.Query.Limit = limit;
     return this;
   }
-  public offset(offset: number): UpdateQuery {
+  public offset(offset: number): this {
     this.request.Query.Offset = offset;
     return this;
   }
-  public where(filter: IFilteringCriterion): UpdateQuery {
+  public where(filter: IFilteringCriterion): this {
     this.request.Query.setFilterCriteria(filter);
     return this;
   }
-  public sortAsc(...fields: string[]): UpdateQuery {
+  public sortAsc<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this {
     this.request.Query.AddSortCondition("asc", ...fields);
     return this;
   }
-  public sortDesc(...fields: string[]): UpdateQuery {
+  public sortDesc<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this {
     this.request.Query.AddSortCondition("desc", ...fields);
     return this;
   }
 
-  public execute(): Promise<any> {
+  public execute(): Promise<T[]> {
     return this.request.execute(this.queryExecuter);
   }
 }

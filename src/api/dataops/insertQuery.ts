@@ -2,16 +2,16 @@ import { RequestExecuter } from "../../internal/executer";
 import { DataRequest } from "./dataRequest";
 import { IExecutable} from "./queryInterfaces";
 
-export class InsertQuery implements  IExecutable {
-  private request: DataRequest;
+export class InsertQuery<T = any> implements IExecutable {
+  private request: DataRequest<T>;
   private queryExecuter: RequestExecuter;
 
-  public constructor(queryExecuter: RequestExecuter, records: Array<object>, dataset: string) {
+  public constructor(queryExecuter: RequestExecuter, records: T[], dataset: string) {
     this.request = new DataRequest("insert", dataset);
     this.queryExecuter = queryExecuter;
     this.request.Records = records;
   }
-  public execute(): Promise<any> {
+  public execute(): Promise<T[]> {
     return this.request.execute(this.queryExecuter);
   }
 }
