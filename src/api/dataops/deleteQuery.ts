@@ -35,7 +35,7 @@ export class DeleteQuery implements IFields, ILimit, IOffset, IFilterable, IExec
     this.request.Query.AddSortCondition("desc", ...fields);
     return this;
   }
-  public execute() {
+  public execute(): Promise<any> {
     return this.request.execute(this.queryExecuter);
   }
 }

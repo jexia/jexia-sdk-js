@@ -11,7 +11,7 @@ export class InsertQuery implements  IExecutable {
     this.queryExecuter = queryExecuter;
     this.request.Records = records;
   }
-  public execute() {
+  public execute(): Promise<any> {
     return this.request.execute(this.queryExecuter);
   }
 }

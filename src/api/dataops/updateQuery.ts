@@ -33,7 +33,7 @@ export class UpdateQuery implements ILimit, IOffset, IFilterable, IExecutable, I
     return this;
   }
 
-  public execute() {
+  public execute(): Promise<any> {
     return this.request.execute(this.queryExecuter);
   }
 }

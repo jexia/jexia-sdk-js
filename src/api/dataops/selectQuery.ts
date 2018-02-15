@@ -49,7 +49,7 @@ export class SelectQuery implements IFields, ILimit, IOffset, IFilterable, IExec
     return this;
   }
 
-  public execute() {
+  public execute(): Promise<any> {
     return this.request.execute(this.queryExecuter);
   }
 }
