@@ -1,7 +1,7 @@
 import { RequestExecuter } from "../../internal/executer";
 import { DataRequest } from "./dataRequest";
 import { DefaultDatasetFields } from "./dataset";
-import { IFilteringCriterion } from "./filteringApi";
+import { FieldFilter, IFilteringCriterion, IFilteringCriterionCallback } from "./filteringApi";
 import { IExecutable, IFilterable, ILimit, IOffset, ISortable } from "./queryInterfaces";
 
 export class UpdateQuery<T = any> implements ILimit, IOffset, IFilterable, IExecutable, ISortable {
@@ -21,8 +21,13 @@ export class UpdateQuery<T = any> implements ILimit, IOffset, IFilterable, IExec
     this.request.Query.Offset = offset;
     return this;
   }
-  public where(filter: IFilteringCriterion): this {
-    this.request.Query.setFilterCriteria(filter);
+  public where<K extends keyof T>(
+    filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T, K>): this {
+    this.request.Query.setFilterCriteria(
+      typeof filter === "function" ?
+        filter((field) => new FieldFilter<T, K>(field)) :
+        filter,
+    );
     return this;
   }
   public sortAsc<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this {

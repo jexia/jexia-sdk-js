@@ -1,8 +1,9 @@
 // tslint:disable:max-classes-per-file
+import { DefaultDatasetFields } from "jexia-sdk-js/api/dataops/dataset";
 import { CompositeFilteringCondition, FilteringCondition, ICondition } from "./filteringCondition";
 
-class FieldFilter implements IFieldFilter {
-  constructor(private fieldName: string) {}
+export class FieldFilter<T, K extends keyof T> implements IFieldFilter {
+  constructor(private fieldName: K | DefaultDatasetFields) {}
 
   public isGreaterThan(value: string): IFilteringCriterion {
     return new FilteringCriterion(new FilteringCondition(this.fieldName, ">", [value]));
@@ -81,29 +82,33 @@ class FilteringCriterion implements IFilteringCriterion {
   }
 }
 
-export interface IFilteringCriterion {
-  and(conditionToAdd: IFilteringCriterion): IFilteringCriterion;
-  or(conditionToAdd: IFilteringCriterion): IFilteringCriterion;
+export interface IFilteringCriterion<T = any> {
+  and(conditionToAdd: IFilteringCriterion<T>): IFilteringCriterion<T>;
+  or(conditionToAdd: IFilteringCriterion<T>): IFilteringCriterion<T>;
 }
 
-export interface IFieldFilter {
-  isGreaterThan(value: string): IFilteringCriterion;
-  isLessThan(value: string): IFilteringCriterion;
-  isEqualTo(value: string): IFilteringCriterion;
-  isDifferentFrom(value: string): IFilteringCriterion;
-  isEqualOrGreaterThan(value: string): IFilteringCriterion;
-  isEqualOrLessThan(value: string): IFilteringCriterion;
-  isNull(): IFilteringCriterion;
-  isNotNull(): IFilteringCriterion;
-  isInArray(values: string[]): IFilteringCriterion;
-  isNotInArray(values: string[]): IFilteringCriterion;
-  isLike(value: string): IFilteringCriterion;
-  satisfiesRegexp(regexp: string): IFilteringCriterion;
-  isBetween(start: string, end: string): IFilteringCriterion;
+export interface IFieldFilter<T = any> {
+  isGreaterThan(value: string): IFilteringCriterion<T>;
+  isLessThan(value: string): IFilteringCriterion<T>;
+  isEqualTo(value: string): IFilteringCriterion<T>;
+  isDifferentFrom(value: string): IFilteringCriterion<T>;
+  isEqualOrGreaterThan(value: string): IFilteringCriterion<T>;
+  isEqualOrLessThan(value: string): IFilteringCriterion<T>;
+  isNull(): IFilteringCriterion<T>;
+  isNotNull(): IFilteringCriterion<T>;
+  isInArray(values: string[]): IFilteringCriterion<T>;
+  isNotInArray(values: string[]): IFilteringCriterion<T>;
+  isLike(value: string): IFilteringCriterion<T>;
+  satisfiesRegexp(regexp: string): IFilteringCriterion<T>;
+  isBetween(start: string, end: string): IFilteringCriterion<T>;
 }
 
-export function field(name: string): IFieldFilter {
-  return new FieldFilter(name);
+export function field<T = any>(name: string): IFieldFilter {
+  return new FieldFilter<T, any>(name);
+}
+
+export interface IFilteringCriterionCallback<T, K extends keyof T> {
+  (filter: (field: K | DefaultDatasetFields) => IFieldFilter<T>): IFilteringCriterion<T>;
 }
 
 export function combineCriteria(criteria: IFilteringCriterion): IFilteringCriterion {

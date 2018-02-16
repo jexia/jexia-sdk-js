@@ -1,7 +1,7 @@
 import { RequestExecuter } from "../../internal/executer";
 import { DataRequest } from "./dataRequest";
 import { Dataset, DefaultDatasetFields } from "./dataset";
-import { IFilteringCriterion } from "./filteringApi";
+import { FieldFilter, IFilteringCriterion, IFilteringCriterionCallback } from "./filteringApi";
 import { IExecutable, IFields, IFilterable, ILimit, IOffset, IRelational, ISortable } from "./queryInterfaces";
 
 export class SelectQuery<T = any>
@@ -30,8 +30,13 @@ export class SelectQuery<T = any>
     return this;
   }
 
-  public where(filter: IFilteringCriterion): this {
-    this.request.Query.setFilterCriteria(filter);
+  public where<K extends keyof T>(
+    filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T, K>): this {
+    this.request.Query.setFilterCriteria(
+      typeof filter === "function" ?
+        filter((field) => new FieldFilter<T, K>(field)) :
+        filter,
+    );
     return this;
   }
 

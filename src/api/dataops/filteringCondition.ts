@@ -6,11 +6,13 @@ export interface ICondition {
   compile(): object;
 }
 
+export type LogicalOperator = "and" | "or";
+
 export class FilteringCondition implements ICondition {
   private field: string;
   private operator: string;
   private values: string[];
-  private logicalOperatorType: string;
+  private logicalOperatorType: LogicalOperator;
 
   constructor(field: string, operator: string, values: string[]) {
     this.logicalOperatorType = "and";
@@ -19,11 +21,11 @@ export class FilteringCondition implements ICondition {
     this.values = values;
   }
 
-  public get Type(): string {
+  public get Type(): LogicalOperator {
     return this.logicalOperatorType;
   }
 
-  public set Type(type: string) {
+  public set Type(type: LogicalOperator) {
     this.logicalOperatorType = type;
   }
 
