@@ -1,28 +1,33 @@
-import { createRequestExecuterMock } from "../spec/testUtils";
+// tslint:disable:no-string-literal
+import { createMockFor } from "../spec/testUtils";
+import { DataRequest } from "../src/api/dataops/dataRequest";
 import { DeleteQuery } from "../src/api/dataops/deleteQuery";
 import { field } from "../src/api/dataops/filteringApi";
+import { RequestExecuter } from "../src/internal/executer";
+import { Query } from "../src/internal/query";
 
 describe("DeleteQuery class", () => {
-  let projectID: string;
-  let dataset: string;
 
-  beforeAll( () => {
-    dataset = "dataset";
-    projectID = "projectID";
-  });
-
-  describe("when instantiating a deleteQuery object directly", () => {
-    it("should be able to return required object", () => {
-      let qe = createRequestExecuterMock(projectID, dataset);
-      let query = new DeleteQuery(qe, dataset);
-      expect(query).toBeDefined();
-    });
-  });
+  function createSubject({
+    datasetName = "dataset",
+    queryMock = createMockFor(Query),
+    requestExecuterMock = createMockFor(RequestExecuter),
+  } = {}) {
+    const subject = new DeleteQuery(requestExecuterMock as any, datasetName);
+    const dataRequestMock = createMockFor(DataRequest, undefined, { Query: queryMock });
+    subject["request"] = dataRequestMock as any;
+    return {
+      datasetName,
+      subject,
+      requestExecuterMock,
+      dataRequestMock,
+      queryMock,
+    };
+  }
 
   describe("when instantiating a deleteQuery object", () => {
     it("should expose the proper methods", () => {
-      let qe = createRequestExecuterMock(projectID, dataset);
-      let query = new DeleteQuery(qe, dataset);
+      const { subject: query } = createSubject();
       expect(typeof query.where).toBe("function");
       expect(typeof query.limit).toBe("function");
       expect(typeof query.offset).toBe("function");
@@ -32,16 +37,24 @@ describe("DeleteQuery class", () => {
   });
 
   describe("when configuring a deleteQuery object", () => {
-    it("its query object should have the correct query options set", () => {
-      let qe = createRequestExecuterMock(projectID, dataset);
-      let cond = field("field").isGreaterThan("value");
-      let queryObj: any = new DeleteQuery(qe, dataset).where(cond);
-      expect(queryObj).toBeDefined();
-      expect(queryObj.request).toBeDefined();
-      expect(queryObj.request.Query).toBeDefined();
-      expect(queryObj.request.Query.Filter.compile())
-        .toEqual({ type: "and", field: "field", operator: ">", values: [ "value" ] });
+
+    it("should use the correct filter criteria when receiving it directly", () => {
+      const filter = field("field").isGreaterThan("value");
+      const { subject, queryMock } = createSubject();
+      subject.where(filter);
+      expect(queryMock.setFilterCriteria).toHaveBeenCalledWith(filter);
     });
+
+    it("should use the correct filter criteria when passing it from a callback function", () => {
+      let filter;
+      const { subject, queryMock } = createSubject();
+      subject.where((f) => {
+        filter = f("field").isGreaterThan("value");
+        return filter;
+      });
+      expect(queryMock.setFilterCriteria).toHaveBeenCalledWith(filter);
+    });
+
   });
 
 });

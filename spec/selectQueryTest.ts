@@ -1,16 +1,32 @@
-import { createRequestExecuterMock } from "../spec/testUtils";
+// tslint:disable:no-string-literal
+import { createMockFor, createRequestExecuterMock } from "../spec/testUtils";
+import { DataRequest } from "../src/api/dataops/dataRequest";
 import { field } from "../src/api/dataops/filteringApi";
 import { SelectQuery } from "../src/api/dataops/selectQuery";
 import { MESSAGE } from "../src/config/message";
+import { RequestExecuter } from "../src/internal/executer";
+import { Query } from "../src/internal/query";
 
 describe("SelectQuery class", () => {
-  let projectID: string;
-  let dataset: string;
+  const projectID = "projectID";
+  const dataset = "dataset";
 
-  beforeAll( () => {
-    dataset = "dataset";
-    projectID = "projectID";
-  });
+  function createSubject({
+    datasetName = "dataset",
+    queryMock = createMockFor(Query),
+    requestExecuterMock = createMockFor(RequestExecuter),
+  } = {}) {
+    const subject = new SelectQuery(requestExecuterMock as any, datasetName);
+    const dataRequestMock = createMockFor(DataRequest, undefined, { Query: queryMock });
+    subject["request"] = dataRequestMock as any;
+    return {
+      datasetName,
+      subject,
+      requestExecuterMock,
+      dataRequestMock,
+      queryMock,
+    };
+  }
 
   describe("when instantiating a select object", () => {
     it("should be able to get the select query object", () => {
@@ -21,17 +37,24 @@ describe("SelectQuery class", () => {
   });
 
   describe("when instantiating a select query object", () => {
-    it("should expose the proper methods", () => {
-      let qe = createRequestExecuterMock(projectID, dataset);
-      let query: SelectQuery = new SelectQuery(qe, dataset);
-      expect(typeof(query.execute)).toBe("function");
-      expect(typeof(query.fields)).toBe("function");
-      expect(typeof(query.where)).toBe("function");
-      expect(typeof(query.limit)).toBe("function");
-      expect(typeof(query.offset)).toBe("function");
-      expect(typeof(query.sortAsc)).toBe("function");
-      expect(typeof(query.sortDesc)).toBe("function");
+
+    it("should use the correct filter criteria when receiving it directly", () => {
+      const filter = field("field").isGreaterThan("value");
+      const { subject, queryMock } = createSubject();
+      subject.where(filter);
+      expect(queryMock.setFilterCriteria).toHaveBeenCalledWith(filter);
     });
+
+    it("should use the correct filter criteria when passing it from a callback function", () => {
+      let filter;
+      const { subject, queryMock } = createSubject();
+      subject.where((f) => {
+        filter = f("field").isGreaterThan("value");
+        return filter;
+      });
+      expect(queryMock.setFilterCriteria).toHaveBeenCalledWith(filter);
+    });
+
   });
 
   describe("when configuring a select query object", () => {
