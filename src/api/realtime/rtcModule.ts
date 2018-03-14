@@ -1,11 +1,10 @@
 import { API } from "../../config/config";
 import { MESSAGE } from "../../config/message";
 import { IRequestAdapter } from "../../internal/requestAdapter";
-import { IModule } from "../core/module";
 import { IResource } from "../core/resource";
 import { TokenManager } from "../core/tokenManager";
 
-export class RTCModule implements IModule {
+export class RTCModule {
   private websocket: WebSocket;
   private websocketCreateCallback: Function;
   private messageReceivedCallback: Function;

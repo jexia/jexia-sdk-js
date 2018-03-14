@@ -4,8 +4,9 @@ import { Dataset } from "../src/api/dataops/dataset";
 import { RTCModule } from "../src/api/realtime/rtcModule";
 import { API } from "../src/config/config";
 import { MESSAGE } from "../src/config/message";
-import { QueryExecuterBuilder } from "../src/internal/queryExecuterBuilder";
+import { RequestExecuter } from "../src/internal/executer";
 import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
+import { createMockFor } from "./testUtils";
 
 class BaseWebSocketMock {
   public url: string;
@@ -127,12 +128,11 @@ describe("RTCModule class", () => {
     let webSockerMock: WebSocketMock;
 
     beforeAll(() => {
-      rtcm = new RTCModule(() => { return; }, (url: string) => {
+      rtcm = new RTCModule(() => {/* */}, (url: string) => {
         webSockerMock = new WebSocketMock(url);
         return webSockerMock;
       });
-      let qef: QueryExecuterBuilder = new QueryExecuterBuilder(testProjectID, reqAdapterMock, tokenManagerMock);
-      ds = new Dataset(datasetName, qef);
+      ds = new Dataset(datasetName, createMockFor(RequestExecuter));
     });
 
     it("should send the proper JSON message to Sharky", (done) => {
@@ -191,21 +191,16 @@ describe("RTCModule class", () => {
   });
 
   describe("when unsubscribing from events for a dataset", () => {
-    it("should send the proper JSON message to Sharky", (done) => {
-      let rtcm: any = new RTCModule(() => { return; }, (url: string) => new WebSocketMock(url) );
-      let datasetName: string = "datasetName";
-      let actionName: string = "get";
-      let qef: QueryExecuterBuilder = new QueryExecuterBuilder(testProjectID, reqAdapterMock, tokenManagerMock);
-      let ds: Dataset = new Dataset(datasetName, qef);
-      rtcm.init(testProjectID, tokenManagerMock, reqAdapterMock).then( () => {
-        spyOn(rtcm, "send");
-        rtcm.unsubscribe(actionName, ds);
-        expect(rtcm.send).toHaveBeenCalledWith({ nsp: `${datasetName}.${actionName}`,
-          type: "unsubscribe",
-        });
-        done();
-      }).catch( (error: Error) => {
-        done.fail("Initializing the RTCModule should not have failed.");
+    it("should send the proper JSON message to Sharky", async () => {
+      const rtcm: any = new RTCModule(() => {/* */}, (url: string) => new WebSocketMock(url) );
+      const datasetName = "datasetName";
+      const actionName = "get";
+      const ds = new Dataset(datasetName, createMockFor(RequestExecuter));
+      await rtcm.init(testProjectID, tokenManagerMock, reqAdapterMock);
+      spyOn(rtcm, "send");
+      rtcm.unsubscribe(actionName, ds);
+      expect(rtcm.send).toHaveBeenCalledWith({ nsp: `${datasetName}.${actionName}`,
+        type: "unsubscribe",
       });
     });
   });

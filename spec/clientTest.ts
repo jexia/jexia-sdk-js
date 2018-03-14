@@ -1,74 +1,61 @@
-import { Client } from "../src/api/core/client";
+// tslint:disable:no-string-literal
+import { ReflectiveInjector } from "injection-js";
+import { Client, ClientInit } from "../src/api/core/client";
 import { IModule } from "../src/api/core/module";
-import { TokenManager } from "../src/api/core/tokenManager";
-import { IHTTPResponse, IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
-import { mockRequestAdapter } from "./requestAdapterTest";
-import { requestAdapterMockFactory } from "./testUtils";
+import { AuthOptions, TokenManager } from "../src/api/core/tokenManager";
+import { IHTTPResponse, IRequestOptions, RequestAdapter } from "../src/internal/requestAdapter";
+import { deferPromise } from "../src/internal/utils";
+import { mockPrototypeOf } from "./testUtils";
 
 const errFailedToInitModule = new Error("failed to init module");
 
+const validClientOpts = Object.freeze({
+  key: "validKey",
+  projectID: "validProjectID",
+  refreshInterval: 500,
+  secret: "validSecret",
+});
+
+const fetchWithRequestMockOk = (uri: string, opts?: IRequestOptions): Promise<IHTTPResponse> => {
+  return Promise.resolve({
+    json: () => Promise.resolve({ token: "token", refresh_token: "refresh_token" }), ok: true, status: 200,
+  } as IHTTPResponse);
+};
+
 const mockModuleFailure: IModule = {
-  init: (projectID: string, tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<IModule> => {
-    return Promise.reject(errFailedToInitModule);
-  },
-  terminate: () => {
-    return Promise.resolve();
-  },
+  init: (injector: ReflectiveInjector) => Promise.reject(errFailedToInitModule),
+  terminate: () => Promise.resolve({} as any),
 };
 
 const mockModuleSuccess: IModule = {
-  init: (projectID: string, tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<IModule> => {
-    return Promise.resolve(mockModuleSuccess);
-  },
-  terminate: () => {
-    return Promise.resolve();
-  },
+  init: (injector: ReflectiveInjector) => Promise.resolve(mockModuleSuccess),
+  terminate: () => Promise.resolve({} as any),
 };
 
 const moduleVoidTerminating: IModule = {
-  init: (projectID: string, tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<IModule> => {
-    return Promise.resolve(moduleVoidTerminating);
-  },
-  terminate: () => {
-    return Promise.resolve();
-  },
+  init: (injector: ReflectiveInjector) => Promise.resolve(moduleVoidTerminating),
+  terminate: () => Promise.resolve({} as any),
 };
 
 const moduleVoidTerminatingError: IModule = {
-  init: (projectID: string, tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<IModule> => {
-    return Promise.resolve(moduleVoidTerminatingError);
-  },
-  terminate: () => {
-    let errorPromise = new Promise((resolve, error) => {
-      setTimeout(() => {
-        error("some error");
-      }, 1);
-    });
-    return errorPromise;
-  },
+  init: (injector: ReflectiveInjector) => Promise.resolve(moduleVoidTerminatingError),
+  terminate: () => new Promise<any>((resolve, reject) => {
+    setTimeout(() => reject("some error"), 1);
+  }),
 };
 
-function createTokenManagerMock() {
-  const mock = jasmine.createSpyObj(["init", "terminate"]);
-  mock.init.and.returnValue(Promise.resolve(mock));
-  return mock;
-}
-
 describe("Class: Client", () => {
+
+  beforeEach(() => {
+    mockPrototypeOf(TokenManager);
+    (TokenManager.prototype.init as jasmine.Spy).and.callFake(function (this: any) { return Promise.resolve(this); });
+  });
+
   describe("on init", () => {
     it("should fail when passed a single module that failed to init", (done) => {
-      let client = new Client((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
-        return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve()} as IHTTPResponse);
-      });
-      client.tokenManager = createTokenManagerMock();
-
+      const client = new Client(fetchWithRequestMockOk);
       client
-        .init({
-          key: "validKey",
-          projectID: "validProjectID",
-          refreshInterval: 500,
-          secret: "validSecret",
-        }, mockModuleFailure)
+        .init(validClientOpts, mockModuleFailure)
         .then((cli: Client) => done.fail("init should have failed"))
         .catch((err: Error) => {
           expect(err).toEqual(errFailedToInitModule);
@@ -77,32 +64,70 @@ describe("Class: Client", () => {
         });
     });
 
-    it("should not fail when passed a single module that was loaded successfully", (done) => {
-      let client = new Client((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
-        return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve()} as IHTTPResponse);
-      });
-      client.tokenManager = createTokenManagerMock();
+    it("should not fail when passed a single module that was loaded successfully", async () => {
+      await (new Client(fetchWithRequestMockOk)).init(validClientOpts, mockModuleSuccess);
+    });
 
-      client
-        .init({
-          key: "validKey",
-          projectID: "validProjectID",
-          refreshInterval: 500,
-          secret: "validSecret",
-         }, mockModuleSuccess)
-        .then((cli: Client) => done())
-        .catch((err: Error) => done.fail("init should not have failed"));
+    it("should inject into the modules the system initialization promise that wait for all the modules", (done) => {
+      const defer  = deferPromise();
+      let injector: ReflectiveInjector | undefined;
+      spyOn(mockModuleSuccess, "init").and.callFake((i: ReflectiveInjector) => {
+        injector = i;
+        return defer.promise;
+      });
+      (new Client(fetchWithRequestMockOk)).init(validClientOpts, mockModuleSuccess);
+      setTimeout(() => {
+        const mainInit = injector!.get(ClientInit);
+        const initFinish = jasmine.createSpy("initFinish");
+        mainInit.then(initFinish);
+        expect(initFinish).not.toHaveBeenCalled();
+        defer.resolve();
+        setTimeout(() => {
+          expect(initFinish).toHaveBeenCalled();
+          done();
+        });
+      });
+    });
+
+    it("should inject into the modules the auth options", async () => {
+      let injector: ReflectiveInjector | undefined;
+      spyOn(mockModuleSuccess, "init").and.callFake((i: ReflectiveInjector) => {
+        injector = i;
+        return Promise.resolve();
+      });
+      await (new Client(fetchWithRequestMockOk)).init(validClientOpts, mockModuleSuccess);
+      const authOptions = injector!.get(AuthOptions);
+      expect(authOptions).toBe(validClientOpts);
+    });
+
+    it("should inject into the modules the request adapter with the given fetch function", async () => {
+      let injector: ReflectiveInjector | undefined;
+      spyOn(mockModuleSuccess, "init").and.callFake((i: ReflectiveInjector) => {
+        injector = i;
+        return Promise.resolve();
+      });
+      await (new Client(fetchWithRequestMockOk)).init(validClientOpts, mockModuleSuccess);
+      const requestAdapter = injector!.get(RequestAdapter);
+      expect(requestAdapter instanceof RequestAdapter).toBeTruthy();
+      expect(requestAdapter["fetch"]).toBe(fetchWithRequestMockOk);
+    });
+
+    it("should inject into the modules the token manager", async () => {
+      let injector: ReflectiveInjector | undefined;
+      spyOn(mockModuleSuccess, "init").and.callFake((i: ReflectiveInjector) => {
+        injector = i;
+        return Promise.resolve();
+      });
+      await (new Client(fetchWithRequestMockOk)).init(validClientOpts, mockModuleSuccess);
+      const tokenManager = injector!.get(TokenManager);
+      expect(tokenManager instanceof TokenManager).toBeTruthy();
     });
 
     it("should fail if passed multiple modules and at least one fails to init", (done) => {
-      let client = new Client((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
-        return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve()} as IHTTPResponse);
-      });
-      client.tokenManager = createTokenManagerMock();
-
+      const client = new Client(fetchWithRequestMockOk);
       client
         .init(
-          {projectID: "validProjectID", key: "validKey", refreshInterval: 500, secret: "validSecret"},
+          validClientOpts,
           mockModuleSuccess,
           mockModuleSuccess,
           mockModuleFailure,
@@ -115,92 +140,37 @@ describe("Class: Client", () => {
         });
     });
 
-    it("should pass the correct parameters to the modules", (done) => {
+    it("should pass the correct parameters to the modules", async () => {
       spyOn(mockModuleSuccess, "init");
-      let adapterMock = requestAdapterMockFactory().genericSuccesfulExecution();
-      let tokenManagerMock = new TokenManager(adapterMock);
-      let validProjectID = "validProjectID";
-      let client = new Client((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
-        return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve()} as IHTTPResponse);
-      });
-      (client as any).tokenManager = tokenManagerMock;
-      (client as any).requestAdapter = adapterMock;
-      client.init({projectID: validProjectID, key: "validKey", secret: "validSecret"}, mockModuleSuccess).then( () => {
-        expect(mockModuleSuccess.init).toHaveBeenCalledWith(validProjectID, tokenManagerMock, adapterMock);
-        done();
-      }).catch( (err) => {
-        done.fail(`init should not have failed: ${err.message}`);
-      });
+      const client = new Client(fetchWithRequestMockOk);
+      await client.init({ projectID: "validProjectID", key: "validKey", secret: "validSecret"}, mockModuleSuccess);
+      expect(mockModuleSuccess.init).toHaveBeenCalled();
     });
 
-    it("should not fail if passed multiple modules and all are loaded successfully", (done) => {
-      let client = new Client((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
-        return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve()} as IHTTPResponse);
-      });
-      /* replace request adapter with mock */
-      client.tokenManager = new TokenManager(mockRequestAdapter);
-
-      client
-        .init(
-          {projectID: "validProjectID", key: "validKey", refreshInterval: 500, secret: "validSecret"},
-          mockModuleSuccess,
-          mockModuleSuccess,
-          mockModuleSuccess,
-        )
-        .then((cli: Client) => done())
-        .catch((err: Error) => done.fail("init should not have failed"));
+    it("should not fail if passed multiple modules and all are loaded successfully", async () => {
+      await (new Client(fetchWithRequestMockOk)).init(
+        validClientOpts,
+        mockModuleSuccess,
+        mockModuleSuccess,
+        mockModuleSuccess,
+      );
     });
   });
 
   describe("on terminate", () => {
-    it("should not fail when terminates all modules", (done) => {
-      let client = new Client((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
-        return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve()} as IHTTPResponse);
-      });
-      /* replace request adapter with mock */
-      client.tokenManager = createTokenManagerMock();
-
-      client
-        .init({
-          key: "validKey",
-          projectID: "validProjectID",
-          refreshInterval: 500,
-          secret: "validSecret",
-        }, mockModuleSuccess)
-        .then((cli: Client) => {
-          cli
-            .terminate()
-            .then(() => {
-              done();
-            })
-            .catch((err: Error) => done.fail("finalize shoud not have failed"));
-        })
-        .catch((err: Error) => done.fail("init should not have failed"));
+    it("should not fail when terminates all modules", async () => {
+      const cli = await (new Client(fetchWithRequestMockOk)).init(validClientOpts, mockModuleSuccess);
+      await cli.terminate();
     });
 
-    it("should fail when any module fails to terminate", (done) => {
-      let client = new Client((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
-        return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve()} as IHTTPResponse);
-      });
-      /* replace request adapter with mock */
-      client.tokenManager = createTokenManagerMock();
-
-      client
-        .init({
-          key: "validKey",
-          projectID: "validProjectID",
-          refreshInterval: 500,
-          secret: "validSecret",
-        }, moduleVoidTerminatingError)
-        .then((cli: Client) => {
-          cli
-            .terminate()
-            .then(() => {
-              done.fail("init should not have done it well");
-            })
-            .catch((err: Error) => done());
-        })
-        .catch((err: Error) => done.fail("init should not have failed at initing"));
+    it("should fail when any module fails to terminate", async () => {
+      await (new Client(fetchWithRequestMockOk))
+        .init(validClientOpts, moduleVoidTerminatingError)
+        .then((cli: Client) => cli
+          .terminate()
+          .then(() => { throw new Error("init should not have done it well"); })
+          .catch(() => {/* */}),
+        );
     });
   });
 });

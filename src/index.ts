@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 export { Client } from "./api/core/client";
 export { TokenStorage, WebStorageComponent } from "./api/core/componentStorage";
 export { DataOperationsModule } from "./api/dataops/dataOperationsModule";

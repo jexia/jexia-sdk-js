@@ -1,32 +1,22 @@
   // tslint:disable:no-string-literal
-import { TokenManager } from "../src/api/core/tokenManager";
 import { RequestExecuter } from "../src/internal/executer";
-import { QueryExecuterBuilder } from "../src/internal/queryExecuterBuilder";
-import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
+import { RequestAdapter } from "../src/internal/requestAdapter";
 
 export class RequestAdapterMockFactory {
-  public genericSuccesfulExecution(): IRequestAdapter {
-    return {
-      execute(uri: string, opt: IRequestOptions): Promise<any> {
-        return createGenericSuccesfulResponse();
-      },
-    };
+  public genericSuccesfulExecution(): RequestAdapter {
+    return createMockFor(RequestAdapter, { returnValue: createGenericSuccesfulResponse() });
   }
 
-  public succesfulExecution(response: object): IRequestAdapter {
-    return {
-      execute(uri: string, opt: IRequestOptions): Promise<any> {
-        return createResponseForSuccesfulRequest(response);
-      },
-    };
+  public withResponse(response: Promise<any>): RequestAdapter {
+    return createMockFor(RequestAdapter, { returnValue: response });
   }
 
-  public failedExecution(errorMesage: string): IRequestAdapter {
-    return {
-      execute(uri: string, opt: IRequestOptions): Promise<any> {
-        return createResponseForFailedRequest(errorMesage);
-      },
-    };
+  public succesfulExecution(response: object): RequestAdapter {
+    return createMockFor(RequestAdapter, { returnValue: createResponseForSuccesfulRequest(response) });
+  }
+
+  public failedExecution(errorMessage: string): RequestAdapter {
+    return createMockFor(RequestAdapter, { returnValue: createResponseForFailedRequest(errorMessage) });
   }
 }
 
@@ -35,9 +25,7 @@ export function requestAdapterMockFactory() {
 }
 
 export function createResponseForSuccesfulRequest(fetchResponseMock: Object): Promise<any> {
-  return new Promise<any>( (resolve, reject) => {
-    resolve(fetchResponseMock);
-  });
+  return Promise.resolve(fetchResponseMock);
 }
 
 export function createResponseForFailedRequest(errorMessage: string): Promise<any> {
@@ -47,16 +35,11 @@ export function createResponseForFailedRequest(errorMessage: string): Promise<an
 }
 
 export function createGenericSuccesfulResponse(): Promise<any> {
-  return new Promise<any>( (resolve, reject) => {
-    resolve({ Status: "OK" });
-  });
+  return Promise.resolve({ Status: "OK" });
 }
 
 export function createRequestExecuterMock(projectID: string, datasetName: string): RequestExecuter {
-  let reqAdapterMock = requestAdapterMockFactory().genericSuccesfulExecution();
-  let tokenManagerMock = new TokenManager(reqAdapterMock);
-  let qefMock = new QueryExecuterBuilder(projectID, reqAdapterMock, tokenManagerMock);
-  return qefMock.createQueryExecuter(datasetName);
+  return createMockFor(RequestExecuter, { returnValue: createGenericSuccesfulResponse() });
 }
 
 export interface ISpyOptions {
@@ -70,7 +53,7 @@ interface IConstructor<T> {
 }
 
 export function createMockFor<T>
-    (obj: IConstructor<T>, spyOptions?: ISpyOptions, defaultProps?: object): jasmine.SpyObj<T> {
+    (obj: IConstructor<T> | string[], spyOptions?: ISpyOptions, defaultProps?: object): jasmine.SpyObj<T> {
   const methodNames = Array.isArray(obj) ? obj : getMethodNamesOf(obj);
   if (!methodNames.length && spyOptions) {
     throw new Error("Given blueprint has no methods to spyOn");
@@ -83,7 +66,7 @@ export function createMockFor<T>
   }
   if (defaultProps) {
     Object.entries(defaultProps)
-      .forEach(([key, value]: any) => spyObj[key] = value);
+      .forEach(([key, value]) => spyObj[key] = value);
   }
   return spyObj;
 }
@@ -108,7 +91,7 @@ export function mockPrototypeOf(obj: any, spyOptions: ISpyOptions = {}, defaultP
     });
 }
 
-function getMethodNamesOf(obj: any) {
+function getMethodNamesOf(obj: any): string[] {
   return Object.getOwnPropertyNames(obj.prototype).filter((i) => i !== "constructor");
 }
 

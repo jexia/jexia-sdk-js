@@ -8,6 +8,7 @@ import { MESSAGE } from "../src/config/message";
 import { requestAdapterMockFactory } from "./testUtils";
 
 const validProjectID = "validProjectID";
+const defaultToken = Object.freeze({ token: "token", refresh_token: "refreshToken" });
 
 const validOpts = () => ({ projectID: validProjectID, key: "validKey", refreshInterval: 500, secret: "validSecret" });
 
@@ -25,8 +26,10 @@ const authMethodMock = (
   };
 };
 
-const tokenManagerWithTokens = () =>
-  (new TokenManager(requestAdapterMockFactory().succesfulExecution({ token: "token", refresh_token: "refreshToken" })));
+const tokenManagerWithTokens = () => {
+  const requestAdapter = requestAdapterMockFactory().succesfulExecution(defaultToken);
+  return new TokenManager(requestAdapter);
+};
 
 describe("Class: TokenManager", () => {
   describe("when authenticating", () => {
@@ -166,15 +169,16 @@ describe("Class: TokenManager", () => {
       spyOn(tm["storage"], "setTokens");
       tm.init(opts)
         .then((tokenManager) => {
+          const tokens = tokenManager["tokens"];
           setTimeout(() => {
             expect(authMethod.refresh).toHaveBeenCalledWith(
-              tokenManager["tokens"],
+              tokens,
               tokenManager["requestAdapter"],
               opts.projectID,
             );
             expect(tm["storage"].setTokens).toHaveBeenCalledWith(resultValue);
             done();
-          }, 700);
+          }, opts.refreshInterval + 10);
         })
         .catch((err: Error) => done.fail(`init should not have failed: ${err.message}`));
     });

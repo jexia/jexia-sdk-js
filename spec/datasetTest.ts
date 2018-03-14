@@ -1,40 +1,20 @@
-import { TokenManager } from "../src/api/core/tokenManager";
 import { Dataset } from "../src/api/dataops/dataset";
-import { QueryExecuterBuilder } from "../src/internal/queryExecuterBuilder";
-import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
+import { RequestExecuter } from "../src/internal/executer";
+import { createMockFor } from "./testUtils";
 
 describe("Dataset class", () => {
-  let reqAdapterMock: IRequestAdapter;
-  let tokenManagerMock: TokenManager;
-
-  beforeAll( () => {
-    reqAdapterMock = {
-      execute(uri: string, opt: IRequestOptions): Promise<any> {
-        return Promise.resolve();
-      },
-    };
-    tokenManagerMock = new TokenManager(reqAdapterMock);
-    /* replace request adapter with mock */
-  });
 
   describe("when instantiating a dataset object directly", () => {
-    it("should create a valid object", (done) => {
-        tokenManagerMock = new TokenManager(reqAdapterMock);
-        let qef: QueryExecuterBuilder = new QueryExecuterBuilder("projectID", reqAdapterMock, tokenManagerMock);
-        let ds = new Dataset("test", qef);
-        expect(ds).toBeDefined();
-        done();
+    it("should create a valid object", () => {
+      const dataset = new Dataset("test", createMockFor(RequestExecuter));
+      expect(dataset).toBeDefined();
     });
   });
 
   describe("when instantiating a dataset object directly", () => {
-    it("should be able to call required methods on dataset", (done) => {
-        tokenManagerMock = new TokenManager(reqAdapterMock);
-        let qef: QueryExecuterBuilder = new QueryExecuterBuilder("projectID", reqAdapterMock, tokenManagerMock);
-        let ds = new Dataset("test", qef);
-        let query = ds.select();
-        expect(query).toBeDefined();
-        done();
+    it("should be able to call required methods on dataset", () => {
+      const dataset = new Dataset("test", createMockFor(RequestExecuter));
+      expect(dataset.select()).toBeDefined();
     });
   });
 

@@ -1,18 +1,17 @@
 import { MESSAGE } from "../config/message";
-import { strEnum } from "./utils";
 
 /* List of allowed methods */
-export const Methods = strEnum(["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]);
-/* request method string based enum type */
-export type Method = keyof typeof Methods;
+export enum Methods {
+  GET = "GET",
+  POST = "POST",
+  PUT = "PUT",
+  PATCH = "PATCH",
+  DELETE = "DELETE",
+  OPTIONS = "OPTIONS",
+}
 
-export interface IRequestOptions {
-  /* request method (optional) */
-  method?: Method;
-  /* headers (optional) */
-  headers?: Object;
-  /* body (optional) */
-  body?: Object;
+export interface IRequestOptions extends RequestInit {
+  body?: any;
 }
 
 interface IServerErrors {
@@ -45,8 +44,10 @@ export interface IRequestAdapter {
   execute(uri: string, opt: IRequestOptions): Promise<any>;
 }
 
+export type Fetch = (url: string, init?: IRequestOptions) => Promise<IHTTPResponse>;
+
 export class RequestAdapter implements IRequestAdapter {
-  constructor(private fetch: Function) {}
+  constructor(private fetch: Fetch) {}
 
   public execute(uri: string, opt: IRequestOptions): Promise<any> {
     return this.fetch(uri, {body: JSON.stringify(opt.body), headers: opt.headers, method: opt.method})

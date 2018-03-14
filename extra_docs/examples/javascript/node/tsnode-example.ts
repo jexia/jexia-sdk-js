@@ -2,13 +2,10 @@
 // Node application
 import { dataOperations, field, jexiaClient } from "jexia-sdk-js/node";
 
-// You will need to add a compatible dependency to your project. For development of the SDK we've used node-fetch
-import nodeFetch from "node-fetch";
-
 // Initialize DataOperationsModule
 let dom = dataOperations();
 // Initialize Client and pass DataOperationsModule to it.
-jexiaClient(nodeFetch).init({
+jexiaClient().init({
   projectID: "anemo002",
   key: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
   secret: "a_secret",

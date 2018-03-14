@@ -1,7 +1,19 @@
-/* utility function to create a K:V from a list of strings */
-export function strEnum<T extends string>(o: T[]): {[K in T]: K} {
-  return o.reduce((res, key) => {
-    res[key] = key;
-    return res;
-  }, Object.create(null));
+
+export type DeferType<T = any> = {
+  promise: Promise<T>,
+  resolve(value?: T): void,
+  reject(err: any): void,
+};
+
+export function deferPromise<T = any>(): DeferType<T> {
+  let resolve;
+  let reject;
+  return {
+    promise: new Promise<T>((internalResolve, internalReject) => {
+      resolve = internalResolve;
+      reject = internalReject;
+    }),
+    resolve,
+    reject,
+  } as any;
 }

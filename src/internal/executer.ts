@@ -1,24 +1,32 @@
-import { TokenManager } from "../api/core/tokenManager";
+import { Inject, Injectable } from "injection-js";
+import { ClientInit } from "../api/core/client";
+import { AuthOptions, IAuthOptions, TokenManager } from "../api/core/tokenManager";
+import { DataSetName } from "../api/dataops/injectionTokens";
 import { API } from "../config/config";
 import { ICompiledRequest } from "./queryBasedCompiler";
-import { IRequestAdapter, IRequestOptions, Methods } from "./requestAdapter";
+import { Methods, RequestAdapter } from "./requestAdapter";
 
+@Injectable()
 export class RequestExecuter {
-  constructor(private projectID: string,
-              private dataSetName: string,
-              private requestAdapter: IRequestAdapter,
-              private tokenManager: TokenManager) {}
+  constructor(
+    @Inject(AuthOptions) private config: IAuthOptions,
+    @Inject(DataSetName) private dataSetName: string,
+    @Inject(ClientInit) private systemInit: Promise<any>,
+    private requestAdapter: RequestAdapter,
+    private tokenManager: TokenManager,
+  ) { }
 
-  public executeRequest(options: ICompiledRequest): Promise<any> {
-    let requestUrl: string = this.getRequestUrl();
-    return this.tokenManager.token.then( (token: string) => {
-      let reqOpt: IRequestOptions = {headers: { Authorization: token}, body: options, method: Methods.POST };
-      return this.requestAdapter.execute(requestUrl, reqOpt);
-    });
+  public async executeRequest(options: ICompiledRequest): Promise<any> {
+    await this.systemInit;
+    const token = await this.tokenManager.token;
+    return this.requestAdapter.execute(
+      this.getRequestUrl(),
+      { headers: { Authorization: token }, body: options, method: Methods.POST },
+    );
   }
 
   private getRequestUrl(): string {
-    return `${API.PROTOCOL}://${this.projectID}.${API.HOST}.` +
+    return `${API.PROTOCOL}://${this.config.projectID}.${API.HOST}.` +
       `${API.DOMAIN}:${API.PORT}/${API.DATA.ENDPOINT}/${this.dataSetName}`;
   }
 }

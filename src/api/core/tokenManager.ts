@@ -1,8 +1,9 @@
+import { Injectable, InjectionToken } from "injection-js";
 import { DELAY } from "../../config/config";
 import { MESSAGE } from "../../config/message";
-import { IRequestAdapter } from "../../internal/requestAdapter";
+import { IRequestAdapter, RequestAdapter } from "../../internal/requestAdapter";
 import { apiKeyAuth } from "../auth";
-import { IStorageComponent, TokenStorage } from "./componentStorage";
+import { TokenStorage } from "./componentStorage";
 
 export type Tokens = { token: string, refresh_token: string };
 
@@ -26,6 +27,8 @@ export interface IAuthOptions {
   readonly authMethod?: () => IAuthAdapter;
 }
 
+export const AuthOptions = new InjectionToken<IAuthOptions>("IAuthOptions");
+
 export interface IAuthToken {
   /* JSON web token */
   readonly token: string;
@@ -33,6 +36,7 @@ export interface IAuthToken {
   readonly refreshToken: string;
 }
 
+@Injectable()
 export class TokenManager {
   /* store interval to be able to end refresh loop from outside */
   private refreshInterval: number;
@@ -41,14 +45,11 @@ export class TokenManager {
 
   private authMethod: IAuthAdapter;
 
-  private storage: IStorageComponent;
-
-  private requestAdapter: IRequestAdapter;
+  private storage = TokenStorage.getStorageAPI();
   /* do not store key and secret */
-  constructor(requestAdapter: IRequestAdapter) {
-    this.requestAdapter = requestAdapter;
-    this.storage = TokenStorage.getStorageAPI();
-  }
+  constructor(
+    private requestAdapter: RequestAdapter,
+  ) {}
 
   public get token(): Promise<string> {
     /* only actual token should be exposed (refresh_token should be hidden) */
@@ -69,7 +70,7 @@ export class TokenManager {
       return Promise.reject(new Error("Please supply a valid Jexia project ID."));
     }
 
-    this.tokens = this.storage.isEmpty() === true ? this.login(opts) : this.storage.getTokens();
+    this.tokens = this.storage.isEmpty() ? this.login(opts) : this.storage.getTokens();
 
     /* make sure that tokens have been successfully received */
     return this.tokens

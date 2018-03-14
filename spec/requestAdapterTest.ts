@@ -30,7 +30,7 @@ export const mockRequestAdapter: IRequestAdapter = {
 describe("Class: RequestAdapter", () => {
   describe("when creating the RequestAdapter", () => {
     it("should create a valid object", () => {
-      expect(new RequestAdapter((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
+      expect(new RequestAdapter((uri: string, opts?: IRequestOptions): Promise<IHTTPResponse> => {
         return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve()} as IHTTPResponse);
       })).toBeDefined();
     });
@@ -39,7 +39,7 @@ describe("Class: RequestAdapter", () => {
   describe("when executing a succesful query", () => {
     const respData = [{id: 1}, {id: 2}, {id: 3}];
     it("should not throw an exception and should return the data", (done) => {
-      (new RequestAdapter((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
+      (new RequestAdapter((uri: string, opts?: IRequestOptions): Promise<IHTTPResponse> => {
         return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve(respData)} as IHTTPResponse);
       }))
         .execute("validProjectID", {headers: {}})
@@ -55,7 +55,7 @@ describe("Class: RequestAdapter", () => {
     describe("when calling fetch fails", () => {
       const error = {errors: ["unauthorized"]};
       it("should cause fetch error", (done) => {
-        (new RequestAdapter((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
+        (new RequestAdapter((uri: string, opts?: IRequestOptions): Promise<IHTTPResponse> => {
           return Promise.resolve({ok: false, status: 401, json: () => Promise.resolve(error)} as IHTTPResponse);
         }))
           .execute("invalidProjectID", {})
@@ -72,7 +72,7 @@ describe("Class: RequestAdapter", () => {
     describe("when executing query with not ok status", () => {
       const error = new Error("error");
       it("should throw an exception", (done) => {
-        (new RequestAdapter((uri: string, opts: IRequestOptions): Promise<IHTTPResponse> => {
+        (new RequestAdapter((uri: string, opts?: IRequestOptions): Promise<IHTTPResponse> => {
           return Promise.reject(error);
         }))
           .execute("validProjectID", {})

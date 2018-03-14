@@ -1,29 +1,38 @@
-import { QueryExecuterBuilder } from "../../internal/queryExecuterBuilder";
-import { IRequestAdapter } from "../../internal/requestAdapter";
+import { ReflectiveInjector } from "injection-js";
+import { RequestExecuter } from "../../internal/executer";
 import { IModule } from "../core/module";
-import { TokenManager } from "../core/tokenManager";
 import { Dataset } from "./dataset";
+import { DataSetName } from "./injectionTokens";
 
 export class DataOperationsModule implements IModule {
-  private queryExecuterBuilder: QueryExecuterBuilder;
+  private injector: ReflectiveInjector;
 
-  public init(projectID: string,
-              tokenManager: TokenManager,
-              requestAdapter: IRequestAdapter): Promise<DataOperationsModule> {
-    this.queryExecuterBuilder = new QueryExecuterBuilder(projectID, requestAdapter, tokenManager);
+  public init(
+    coreInjector: ReflectiveInjector,
+  ): Promise<DataOperationsModule> {
+    this.injector = coreInjector.resolveAndCreateChild([
+      {
+        provide: DataSetName,
+        useFactory: () => { throw new Error("Please set the dataset name at the DI"); },
+      },
+      RequestExecuter,
+      Dataset,
+    ]);
     return Promise.resolve(this);
   }
 
   public dataset<T = any>(dataset: string): Dataset<T> {
-    if (this.queryExecuterBuilder == null) {
-      throw new Error("Client has not been initialised properly. Please instantiate \
-                      client for invoking this method");
-    }
-    return new Dataset(dataset, this.queryExecuterBuilder);
+    return this.injector.resolveAndCreateChild([
+      {
+        provide: DataSetName,
+        useValue: dataset,
+      },
+      RequestExecuter,
+      Dataset,
+    ]).get(Dataset);
   }
 
-  public terminate(): Promise<any> {
-    delete this.queryExecuterBuilder;
+  public terminate(): Promise<DataOperationsModule> {
     return Promise.resolve(this);
   }
 }

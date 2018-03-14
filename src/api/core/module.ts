@@ -1,8 +1,7 @@
-import { IRequestAdapter } from "../../internal/requestAdapter";
-import { TokenManager } from "./tokenManager";
+import { ReflectiveInjector } from "injection-js";
 
 export interface IModule {
   /* module should have init function that returns the promise of itself */
-  init(projectID: string, tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<IModule>;
-  terminate(): Promise<any>;
+  init(coreInjector: ReflectiveInjector): Promise<IModule>;
+  terminate(): Promise<IModule>;
 }
