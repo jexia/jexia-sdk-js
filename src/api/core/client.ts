@@ -38,9 +38,13 @@ export class Client {
     /* save only projectID (do not store key and secret) */
     this.modules = modules;
 
-    this.tokenManager.init(opts)
+    const parallel: Array<Promise<any>> = [
+      this.tokenManager.init(opts),
       /* init all modules */
-      .then(() => Promise.all(modules.map((m) => m.init(injector))))
+      ...modules.map((m) => m.init(injector)),
+    ];
+
+    Promise.all(parallel)
       /* make the Client available only after all modules have been successfully initialized */
       .then(() => this)
       /* if token manager failed to init or at least one of core modules failed to load */

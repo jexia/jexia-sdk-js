@@ -140,10 +140,10 @@ describe("Class: Client", () => {
         });
     });
 
-    it("should pass the correct parameters to the modules", async () => {
+    it("should init the modules synchronous passing the correct parameters", () => {
       spyOn(mockModuleSuccess, "init");
       const client = new Client(fetchWithRequestMockOk);
-      await client.init({ projectID: "validProjectID", key: "validKey", secret: "validSecret"}, mockModuleSuccess);
+      client.init({ projectID: "validProjectID", key: "validKey", secret: "validSecret"}, mockModuleSuccess);
       expect(mockModuleSuccess.init).toHaveBeenCalled();
     });
 
