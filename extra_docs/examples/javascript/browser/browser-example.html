@@ -1,25 +1,29 @@
 <html>
-    <head>
-        <script src="../../../../dist/bundle/browser.js"></script>
-    </head>
-       <body>
-           <a href="#" id="authorize">Authorize</a>
-           <script type="text/javascript">
-                document.getElementById("authorize").onclick = function(){
-                    //Initialize dataOperationsModule
-                    let dom = jexia.dataOperations();
-                    let jexiaClient = jexia.jexiaClient().init({ projectID: "anemo002", key: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", secret: "a_secret" }, dom).then((initializedClient) => {
-                        dom.dataset("posts").select().execute().then((records) => {
-                            let data = records;
-                            for(let i=0; i < data.length; i++){
-                                document.write("<ul><li>" + data[i].title + "</li></ul>")
-                            }
-                            console.log(JSON.stringify(data))
-                        }).catch((error) => {
-                            console.log(error)
-                        })
-                    })
-                }
-           </script>
-        </body>
+  <head>
+      <script src="../../../../dist/bundle/browser.js"></script>
+  </head>
+  <body>
+    <a href="#" id="authorize">Authorize</a>
+    <script type="text/javascript">
+      document.getElementById("authorize").onclick = function(){
+        //Initialize dataOperationsModule
+        let dom = jexia.dataOperations();
+        let credentials = {
+          projectID: "test",
+          key: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+          secret: "a_secret"
+        };
+        let jexiaClient = jexia.jexiaClient().init(credentials, dom);
+        dom.dataset("posts")
+          .select()
+          .execute()
+          .then(data => {
+            for (const item of data) {
+              document.write("<ul><li>" + item.title + "</li></ul>");
+            }
+          })
+          .catch(error => console.log(error));
+      }
+    </script>
+  </body>
 </html>

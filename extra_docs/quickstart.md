@@ -36,16 +36,14 @@ import { jexiaClient } from "Anemo SDK location";
 
 ### Initialization and Authentication
 
-The `jexiaClient()` function will return an instance of the `Client` class. On Node.JS, you will need to provide a `fetch` standard compliant function as a parameter. You will need to add a compatible dependency to your project. For development of the SDK we've used `node-fetch` and can recommend it. The browser SDK will use the native `fetch` implementation.
+The `jexiaClient()` function will return an instance of the `Client` class. You can provide a custom `fetch` standard compliant function as a parameter, as default we are using are using `node-fetch` package at NodeJS, and the native `fetch` implementation on at the browser.
 
 ``` Javascript
 import { jexiaClient } from "Anemo SDK location";
-import fetch from "node-fetch";
 
-let initializedClientPromise = jexiaClient(fetch).init({projectID: "your Jexia App URL", key: "username", secret: "password"});
+let initializedClientPromise = jexiaClient().init({projectID: "your Jexia App URL", key: "username", secret: "password"});
 initializedClientPromise.then( (initializedClient) => {
   // you have been succesfully logged in!
-  // you can start using the initializedClient variable here
 }).catch( (error) => {
   // uh-oh, there was a problem logging in, check the error.message for more info
 });
@@ -54,25 +52,30 @@ initializedClientPromise.then( (initializedClient) => {
 ### The Module system
 
 The Jexia SDK is built as a set of modules (or plugins) structured around a core entity (the `Client` class used above).
-In order to use a module you need to: 
+In order to use a module you need to:
+
 - initialize it
 - pass it to the `Client` when calling the `.init()` method
 
 Probably the most useful module is the Data Operation Module (`DataOperationsModule` class). The example below will show how to initialize the SDK using this module. Follow the `dataModule` variable to see how this mechanism works.
 
+The modules await the client initialization before make any operation that depends on it, so you don't need to manually await the client initialization promise.
+
 ``` Javascript
 import { jexiaClient, dataOperations } from "Anemo SDK Location";
-import fetch from "node-fetch";
 
 let dataModule = dataOperations();
 
-let initializedClientPromise = jexiaClient(fetch).init({projectID: "your Jexia App URL", key: "username", secret: "password"}, dataModule);
-initializedClientPromise.then( (initializedClient) => {
-  // you have been succesfully logged in!
-  // you can start using the dataModule variable to operate on records here
-}).catch( (error) => {
-  // uh-oh, there was a problem logging in, check the error.message for more info
-});
+jexiaClient().init({projectID: "your Jexia App URL", key: "username", secret: "password"}, dataModule);
+
+dataModule.dataset("posts")
+  .select()
+  .then( (data) => {
+    // you have been succesfully logged in!
+    // you can start using the dataModule variable to operate on records here
+  }).catch( (error) => {
+    // uh-oh, there was a problem logging in, check the error.message for more info
+  });
 ```
 
 ### Dataset objects and Query objects
@@ -106,15 +109,16 @@ Using all the temporary variables in this example is for demonstration purposes,
 
 ``` Javascript
 [..]
-jexiaClient(fetch).init({projectID: "your Jexia App URL", key: "username", secret: "password"}, dataModule).then( (initializedClient) => {
-  let postsDataset = dataModule.dataset("posts");
-  let unexecutedQuery = postsDataset.select();
-  let executedQueryPromise = unexecutedQuery.execute();
-  executedQueryPromise.then( (records) => {
-    // you can start iterating through the posts here
-  }).catch( (error) => {
-    // there was a problem retrieving the records
-  });
+jexiaClient(fetch).init({projectID: "your Jexia App URL", key: "username", secret: "password"}, dataModule);
+
+let postsDataset = dataModule.dataset("posts");
+let unexecutedQuery = postsDataset.select();
+let executedQueryPromise = unexecutedQuery.execute();
+
+executedQueryPromise.then( (records) => {
+  // you can start iterating through the posts here
+}).catch( (error) => {
+  // there was a problem retrieving the records
 });
 [..]
 ```
@@ -123,13 +127,16 @@ If you watch closely, the API is chainable, so you can rewrite the query in a mu
 
 ``` Javascript
 [..]
-jexiaClient(fetch).init({projectID: "your Jexia App URL", key: "username", secret: "password"}, dataModule).then( (initializedClient) => {
-  dataModule.dataset("posts").select().execute().then( (records) => {
+jexiaClient(fetch).init({projectID: "your Jexia App URL", key: "username", secret: "password"}, dataModule);
+
+dataModule.dataset("posts")
+  .select()
+  .execute()
+  .then( (records) => {
     // you can start iterating through the posts here
   }).catch( (error) => {
     // there was a problem retrieving the records
   });
-});
 [..]
 ```
 
@@ -189,6 +196,14 @@ In order to use these conditions, they need to be added to a query using the `.w
 ``` Javascript
 [..]
 posts.select().where(field("username").isEqualTo("Harry"));
+[..]
+```
+
+The `.where` method also accepts a lazy callback, that receives the `field` method received as an argument:
+
+``` Javascript
+[..]
+posts.select().where(field => field("username").isEqualTo("Harry"));
 [..]
 ```
 

@@ -22,9 +22,7 @@ npm install jexia-sdk-js --save
 ```javascript
 // Node application
 const jexiaSDK = require('jexia-sdk-js/node');
-// You will need to add a compatible dependency to your project. For development of the SDK we've used node-fetch
-const fetch = require('node-fetch');
-const module = jexiaSDK.dataOperations();
+const dataModule = jexiaSDK.dataOperations();
 
 var credentials = {
   projectID: "test",
@@ -32,20 +30,17 @@ var credentials = {
   secret: "a_secret"
 };
 
-jexiaSDK.jexiaClient(fetch).init(credentials, module).then(function() {
-  module
-    .dataset("posts")
-    .select()
-    .execute()
-    .then(function(records) {
-      console.log("All the records:", records);
-    })
-    .catch(function(error) {
-      console.error("Something wrong happened:", error);
-    });
-}).catch(function(error) {
-  console.error("Something wrong happened:", error);
-});
+jexiaSDK.jexiaClient().init(credentials, dataModule);
+dataModule
+  .dataset("posts")
+  .select()
+  .execute()
+  .then(function(records) {
+    console.log("All the records:", records);
+  })
+  .catch(function(error) {
+    console.error("Something wrong happened:", error);
+  });
 ```
 
 ## Development
