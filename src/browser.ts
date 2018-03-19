@@ -1,7 +1,7 @@
+export * from "./index";
 import { Client } from "./api/core/client";
 import { TokenStorage, WebStorageComponent } from "./api/core/componentStorage";
 import { DataOperationsModule } from "./api/dataops/dataOperationsModule";
-export * from "./index";
 
 /**
  * It checks if the browser is capable of using the Web Storage API
