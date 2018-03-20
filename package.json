@@ -44,6 +44,10 @@
     "url": "https://github.com/jexia-com/jexia-sdk-js/issues"
   },
   "homepage": "https://github.com/jexia-com/jexia-sdk-js#readme",
+  "dependencies": {
+    "injection-js": "^2.2.1",
+    "reflect-metadata": "^0.1.12"
+  },
   "devDependencies": {
     "@commitlint/cli": "^5.2.8",
     "@commitlint/config-conventional": "^5.2.3",
@@ -58,14 +62,12 @@
     "condition-circle": "2.0.1",
     "cz-conventional-changelog": "2.1.0",
     "husky": "^0.14.3",
-    "injection-js": "^2.2.1",
     "jasmine": "^2.8.0",
     "node-fetch": "^2.1.1",
     "nodemon": "^1.14.11",
     "npm-run-all": "^4.1.2",
     "nyc": "^10.3.2",
     "opn-cli": "^3.1.0",
-    "reflect-metadata": "^0.1.10",
     "semantic-release": "12.2.0",
     "shx": "^0.2.2",
     "ts-loader": "^2.0.3",
