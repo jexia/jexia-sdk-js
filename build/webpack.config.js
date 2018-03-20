@@ -29,7 +29,8 @@ const common = {
     filename: "[name].js",
     libraryTarget: 'umd',
     library: "jexia"
-  }
+  },
+  mode: "development"
 };
 
 const minify = {
@@ -39,8 +40,11 @@ const minify = {
     filename: "[name].min.js",
   },
   plugins: [
-    new UglifyJsPlugin(),
+    new UglifyJsPlugin({
+      extractComments: true,
+    }),
   ],
+  mode: "production"
 };
 
 module.exports = [
