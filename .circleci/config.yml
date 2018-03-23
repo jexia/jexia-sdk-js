@@ -1,0 +1,33 @@
+version: 2
+jobs:
+  test:
+    docker:
+      - image: circleci/node:8.9.0
+    steps:
+      - checkout
+      - run: npm install
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+  deploy:
+    docker:
+      - image: circleci/node:8.9.0
+    steps:
+      - checkout
+      - run: npm install
+      - run: npm run build
+      - run: npm run docs
+      - run: npm run docs:deploy
+      - run: npm run semantic-release
+
+workflows:
+  version: 2
+  test-n-deploy:
+    jobs:
+      - test
+      - deploy:
+          requires:
+            - test
+          filters:
+            branches:
+              only: master
