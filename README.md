@@ -1,23 +1,16 @@
-[![CircleCI](https://circleci.com/gh/jexia-com/jexia-sdk-js/tree/develop.svg?style=svg&circle-token=f8ceab291f3b6e143586717aa72ac6987c26da98)](https://circleci.com/gh/jexia-com/jexia-sdk-js/tree/develop)
-
 # Jexia Javascript SDK
-This is the official Javascript SDK for interacting with Jexia projects. It's developed with [TypeScript](https://typescript.org) and transpiled to ES5 with [Webpack](https://webpack.js.org/).
 
-Check out the `Quick Start Guide` for a quick guide on using the SDK in your application.
+[![CircleCI](https://circleci.com/gh/jexia/jexia-sdk-js.svg?style=svg)](https://circleci.com/gh/jexia/jexia-sdk-js)
 
-Check out the `Code Contribution Guide` for a quick guide on using the development environment to contribute with code changes.
+This is the official JavaScript / TypeScript SDK for interacting with Jexia projects.
 
-## Installation
-
-### NPM
-
-It can be easily installed by using npm as follows:
+## Install
 
 ```bash
 npm install jexia-sdk-js --save
 ```
 
-## Quick Example
+## Example Use
 
 ```javascript
 // Node application
@@ -35,42 +28,24 @@ dataModule
   .dataset("posts")
   .select()
   .execute()
-  .then(function(records) {
-    console.log("All the records:", records);
-  })
-  .catch(function(error) {
-    console.error("Something wrong happened:", error);
-  });
+  .then(records => console.log("All the records:", records))
+  .catch(error => console.error("Something wrong happened:", error));
 ```
 
-## Development
+## Developer Guide
 
-### Requirements
+### Getting Started
 
-* [node](https://nodejs.org/en/) >= 8.x
-* [npm](https://www.npmjs.com/) >= 5.x
-* A Jexia project in the cloud.
+Check out the [Quick Start Guide](extra_docs/quickstart.md) for a quick guide on using the SDK in your application.
 
-### Setting up the project
+### Api Docs
 
-The project only requires installing node dependences:
+Check out the [Api Docs](https://jexia.github.io/jexia-sdk-js/) for detailed view of the JavaScript SDK Api.
 
-```bash
-npm install
-```
+### Contributing
 
-**Transpiling the code**
+You can find all the steps at the [Contributing Guide](CONTRIBUTING.md).
 
-In order to have the code transpiled.
+## License
 
-```bash
-npm run transpile
-```
-
-### Tests
-
-Tests are written with [Jasmine](https://jasmine.github.io) in the `spec/` directory and coverage is measured by [istanbul](https://istanbul.js.org/).
-
-```bash
-npm run test
-```
+[MIT](LICENSE)

@@ -1,4 +1,4 @@
-# Quick Start Guide for the Javascript Anemo SDK
+# Quick Start Guide for the Javascript SDK
 
 The SDK currently exposes the following features:
   - on-demand access to data stored in DataSets (creating, reading, updating, deleting records)
