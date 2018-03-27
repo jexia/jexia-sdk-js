@@ -54,8 +54,10 @@
     "@commitlint/cli": "^5.2.8",
     "@commitlint/config-conventional": "^5.2.3",
     "@compodoc/compodoc": "^1.0.0-beta.14",
-    "@semantic-release/git": "^2.0.1",
-    "@semantic-release/npm": "^2.6.1",
+    "@semantic-release/changelog": "^2.0.1",
+    "@semantic-release/git": "^4.0.1",
+    "@semantic-release/github": "^4.2.8",
+    "@semantic-release/npm": "^3.2.2",
     "@types/jasmine": "^2.8.3",
     "@types/node": "^7.0.18",
     "@types/node-fetch": "1.6.7",
@@ -84,14 +86,24 @@
     "ws": "^3.1.0"
   },
   "release": {
-    "branch": "develop",
-    "verifyConditions": "condition-circle",
+    "branch": "master",
+    "verifyConditions": [
+      "condition-circle",
+      "@semantic-release/changelog",
+      "@semantic-release/npm",
+      "@semantic-release/git"
+    ],
+    "prepare": [
+      "@semantic-release/changelog",
+      "@semantic-release/npm",
+      "@semantic-release/git"
+    ],
     "publish": [
       {
         "path": "@semantic-release/npm",
         "pkgRoot": "dist"
       },
-      "@semantic-release/git"
+      "@semantic-release/github"
     ]
   },
   "config": {
