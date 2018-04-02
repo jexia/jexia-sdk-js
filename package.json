@@ -1,6 +1,6 @@
 {
   "name": "jexia-sdk-js",
-  "version": "3.2.0",
+  "version": "0.0.0-development",
   "description": "Jexia Javascript SDK",
   "main": "index.js",
   "module": "./_esm5/index.js",
@@ -35,7 +35,6 @@
     "build:bundle": "webpack --config build/webpack.config.js",
     "build:package": "shx mkdir -p ./dist && shx cp package.json ./dist/package.json",
     "build:readme": "shx mkdir -p ./dist && shx cp README.md ./dist/README.md",
-    "postpublish": "cp -r $WORKING_DIRECTORY/dist/package.json $WORKING_DIRECTORY && cp -r $WORKING_DIRECTORY/dist/npm-shrinkwrap.json $WORKING_DIRECTORY/",
     "semantic-release": "semantic-release"
   },
   "repository": {
