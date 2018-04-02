@@ -35,6 +35,7 @@
     "build:bundle": "webpack --config build/webpack.config.js",
     "build:package": "shx mkdir -p ./dist && shx cp package.json ./dist/package.json",
     "build:readme": "shx mkdir -p ./dist && shx cp README.md ./dist/README.md",
+    "postpublish": "cp -r dist/package.json . && cp -r dist/npm-shrinkwrap.json .",
     "semantic-release": "semantic-release"
   },
   "repository": {
