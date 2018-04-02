@@ -35,7 +35,6 @@
     "build:bundle": "webpack --config build/webpack.config.js",
     "build:package": "shx mkdir -p ./dist && shx cp package.json ./dist/package.json",
     "build:readme": "shx mkdir -p ./dist && shx cp README.md ./dist/README.md",
-    "postpublish": "shx cp -r dist/package.json . && shx cp -r dist/npm-shrinkwrap.json .",
     "semantic-release": "semantic-release"
   },
   "repository": {
@@ -110,14 +109,7 @@
         "path": "@semantic-release/npm",
         "pkgRoot": "dist"
       },
-      {
-        "path": "@semantic-release/git",
-        "assets": [
-          "CHANGELOG.md",
-          "package.json",
-          "npm-shrinkwrap.json"
-        ]
-      },
+      "@semantic-release/git",
       "@semantic-release/github"
     ]
   },
