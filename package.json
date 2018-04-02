@@ -1,6 +1,6 @@
 {
   "name": "jexia-sdk-js",
-  "version": "0.0.0-development",
+  "version": "3.2.0",
   "description": "Jexia Javascript SDK",
   "main": "index.js",
   "module": "./_esm5/index.js",
@@ -34,6 +34,8 @@
     "build:es2015": "tsc -p ./build/tsconfig.es2015.json",
     "build:bundle": "webpack --config build/webpack.config.js",
     "build:package": "shx mkdir -p ./dist && shx cp package.json ./dist/package.json",
+    "build:readme": "shx mkdir -p ./dist && shx cp README.md ./dist/README.md",
+    "postpublish": "shx cp -r dist/package.json . && shx cp -r dist/npm-shrinkwrap.json .",
     "semantic-release": "semantic-release"
   },
   "repository": {
@@ -55,7 +57,7 @@
     "@commitlint/config-conventional": "^6.1.3",
     "@compodoc/compodoc": "^1.1.1",
     "@semantic-release/changelog": "^2.0.1",
-    "@semantic-release/git": "^4.0.1",
+    "@semantic-release/git": "^3.1.1",
     "@semantic-release/github": "^4.2.8",
     "@semantic-release/npm": "^3.2.2",
     "@types/jasmine": "^2.8.3",
@@ -90,18 +92,31 @@
     "verifyConditions": [
       "condition-circle",
       "@semantic-release/changelog",
-      "@semantic-release/npm",
+      {
+        "path": "@semantic-release/npm",
+        "pkgRoot": "dist"
+      },
       "@semantic-release/git"
     ],
     "prepare": [
       "@semantic-release/changelog",
-      "@semantic-release/npm",
-      "@semantic-release/git"
+      {
+        "path": "@semantic-release/npm",
+        "pkgRoot": "dist"
+      }
     ],
     "publish": [
       {
         "path": "@semantic-release/npm",
         "pkgRoot": "dist"
+      },
+      {
+        "path": "@semantic-release/git",
+        "assets": [
+          "CHANGELOG.md",
+          "package.json",
+          "npm-shrinkwrap.json"
+        ]
       },
       "@semantic-release/github"
     ]

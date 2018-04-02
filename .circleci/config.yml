@@ -8,6 +8,7 @@ jobs:
       - run: npm install
       - run: npm run lint
       - run: npm test
+      - run: npm run docs
       - run: npm run build
   deploy:
     docker:
@@ -16,9 +17,9 @@ jobs:
       - checkout
       - run: npm install
       - run: npm run build
+      - run: npm run semantic-release
       - run: npm run docs
       - run: npm run docs:deploy
-      - run: npm run semantic-release
 
 workflows:
   version: 2
