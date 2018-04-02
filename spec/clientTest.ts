@@ -97,7 +97,7 @@ describe("Class: Client", () => {
       });
       await (new Client(fetchWithRequestMockOk)).init(validClientOpts, mockModuleSuccess);
       const authOptions = injector!.get(AuthOptions);
-      expect(authOptions).toBe(validClientOpts);
+      expect(authOptions).toBe({});
     });
 
     it("should inject into the modules the request adapter with the given fetch function", async () => {
