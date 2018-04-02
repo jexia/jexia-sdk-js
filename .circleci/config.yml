@@ -13,6 +13,8 @@ jobs:
   deploy:
     docker:
       - image: circleci/node:8.9.0
+    environment:
+      WORKING_DIRECTORY: /home/circleci/project
     steps:
       - checkout
       - run: npm install
