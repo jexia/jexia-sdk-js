@@ -70,6 +70,7 @@ jexiaClient().init({projectID: "your Jexia App URL", key: "username", secret: "p
 
 dataModule.dataset("posts")
   .select()
+  .execute()
   .then( (data) => {
     // you have been succesfully logged in!
     // you can start using the dataModule variable to operate on records here
