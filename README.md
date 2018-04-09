@@ -36,7 +36,7 @@ dataModule
 
 ### Getting Started
 
-Check out the [Quick Start Guide](extra_docs/quickstart.md) for a quick guide on using the SDK in your application.
+Check out the [Quick Start Guide](https://jexia.github.io/jexia-sdk-js/additional-documentation/quick-start-guide.html) for a quick guide on using the SDK in your application.
 
 ### Api Docs
 
@@ -44,8 +44,8 @@ Check out the [Api Docs](https://jexia.github.io/jexia-sdk-js/) for detailed vie
 
 ### Contributing
 
-You can find all the steps at the [Contributing Guide](CONTRIBUTING.md).
+You can find all the steps at the [Contributing Guide](https://jexia.github.io/jexia-sdk-js/additional-documentation/code-of-conduct.html).
 
 ## License
 
-[MIT](LICENSE)
+[MIT](https://jexia.github.io/jexia-sdk-js/license.html)
