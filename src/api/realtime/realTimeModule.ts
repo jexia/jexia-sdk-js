@@ -1,31 +1,32 @@
+import { ReflectiveInjector } from "injection-js";
+import { IModule } from "jexia-sdk-js/api/core/module";
 import { API } from "../../config/config";
 import { MESSAGE } from "../../config/message";
-import { IRequestAdapter } from "../../internal/requestAdapter";
 import { IResource } from "../core/resource";
-import { TokenManager } from "../core/tokenManager";
+import { AuthOptions, IAuthOptions, TokenManager } from "../core/tokenManager";
 
-/**
- * @internal
- */
-export class RTCModule {
+export class RTCModule implements IModule {
   private websocket: WebSocket;
-  private websocketCreateCallback: Function;
   private messageReceivedCallback: Function;
   private callStack: any = {};
+  private injector: ReflectiveInjector;
 
-  constructor(messageReceivedCallback: Function, websocketCreateCallback?: Function) {
-    this.messageReceivedCallback = messageReceivedCallback;
-    if (websocketCreateCallback) {
-      this.websocketCreateCallback = websocketCreateCallback;
-    } else {
-      this.websocketCreateCallback = (appUrl: string) => new WebSocket(appUrl);
-    }
-  }
+  constructor(
+    private websocketBuilder = (appUrl: string) => new WebSocket(appUrl),
+  ) { }
 
-  public init(projectID: string, tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<RTCModule> {
+  // public init(projectID: string, tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<RTCModule> {
+  public init(
+    coreInjector: ReflectiveInjector,
+  ): Promise<this> {
+    this.injector = coreInjector;
+
+    const tokenManager: TokenManager = this.injector.get(TokenManager);
+    const { projectID }: IAuthOptions = this.injector.get(AuthOptions);
+
     return tokenManager.token.then( (token) => {
       try {
-        this.websocket = this.websocketCreateCallback(this.buildSocketOpenUri(projectID, token));
+        this.websocket = this.websocketBuilder(this.buildSocketOpenUri(projectID, token));
       } catch (error) {
         throw new Error(`${MESSAGE.RTC.ERROR_CREATING_WEBSOCKET} Original error: ${error.message}`);
       }
@@ -58,8 +59,9 @@ export class RTCModule {
         this.websocket.onclose = (event: CloseEvent) => {
           reject(new Error(`${MESSAGE.RTC.CONNECTION_CLOSED}${event.code}`));
         };
-      }).then( () => this);
-    });
+      });
+    })
+    .then(() => this);
   }
 
   public pendingSubscriptionRequests(): string[] {
@@ -74,12 +76,10 @@ export class RTCModule {
     return this.subscription("unsubscribe", method, resource.name);
   }
 
-  public terminate() {
+  public terminate(): Promise<this> {
     return new Promise( (resolve, reject) => {
-      this.websocket.onclose = () => resolve();
-      this.websocket.onerror = (err) => {
-        reject(err);
-      };
+      this.websocket.onclose = () => resolve(this);
+      this.websocket.onerror = (err) => reject(err);
       this.websocket.close();
     });
   }
