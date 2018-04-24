@@ -1,5 +1,13 @@
 
-const { dataOperations, realTime, jexiaClient } = require("jexia-sdk-js/node");
+// Node application
+import { dataOperations, jexiaClient, realTime } from "jexia-sdk-js/node";
+
+// Optionally use interfaces to type your datasets,
+// then you will have better auto complete and type cheeking
+interface Post {
+  title: string;
+  published: boolean;
+}
 
 // Initialize DataOperationsModule
 let dom = dataOperations();
@@ -11,8 +19,8 @@ jexiaClient().init({
   secret: "a_secret",
 }, dom, realTime());
 
-// Use your data module
-dom.dataset("posts")
+// Use your data module with an optional generic type
+dom.dataset<Post>("posts")
   // Chose the events you wanna watch
   .watch("created", "deleted")
   .subscribe(
