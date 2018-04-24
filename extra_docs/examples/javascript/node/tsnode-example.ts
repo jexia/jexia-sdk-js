@@ -2,6 +2,13 @@
 // Node application
 import { dataOperations, jexiaClient } from "jexia-sdk-js/node";
 
+// Optionally use interfaces to type your datasets,
+// then you will have better auto complete and type cheeking
+interface Post {
+  title: string;
+  published: boolean;
+}
+
 // Initialize DataOperationsModule
 let dom = dataOperations();
 // Initialize Client and pass DataOperationsModule to it.
@@ -10,8 +17,9 @@ jexiaClient().init({
   key: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
   secret: "a_secret",
 }, dom);
-// Use your data module
-dom.dataset("posts")
+
+// Use your data module with an optional generic type
+dom.dataset<Post>("posts")
   .select()
   .where((field) => field("title").isEqualTo("My first post"))
   .execute()
