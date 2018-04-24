@@ -1,3 +1,4 @@
+// tslint:disable:no-string-literal
 import { createMockFor } from "../../../spec/testUtils";
 import { RequestExecuter } from "../../internal/executer";
 import { Dataset } from "./dataset";
@@ -26,6 +27,11 @@ describe("Dataset class", () => {
   it("should be able start a delete query", () => {
     const dataset = new Dataset("test", createMockFor(RequestExecuter));
     expect(dataset.delete() instanceof DeleteQuery).toBeTruthy();
+  });
+
+  it("should throw an error when try to use the watch method without the real time module", () => {
+    const dataset = new Dataset("test", createMockFor(RequestExecuter));
+    expect(() => dataset["watch"]()).toThrow();
   });
 
 });

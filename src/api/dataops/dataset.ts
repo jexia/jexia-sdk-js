@@ -108,4 +108,9 @@ export class Dataset<T extends object = any, D extends DatasetInterface<T> = Dat
   public delete(): DeleteQuery<D> {
     return new DeleteQuery<D>(this.requestExecuter, this.datasetName);
   }
+
 }
+
+(Dataset as any).prototype.watch = () => {
+  throw new Error("Import and initialize real time module to use this method!");
+};
