@@ -2,29 +2,50 @@ import { ReflectiveInjector } from "injection-js";
 import { IModule } from "jexia-sdk-js/api/core/module";
 import { API } from "../../config/config";
 import { MESSAGE } from "../../config/message";
-import { IResource } from "../core/resource";
 import { AuthOptions, IAuthOptions, TokenManager } from "../core/tokenManager";
+import { IWebSocket, IWebSocketBuilder, WebSocketState } from "./realTime.interfaces";
 
-export class RTCModule implements IModule {
-  private websocket: WebSocket;
-  private messageReceivedCallback: Function;
-  private callStack: any = {};
-  private injector: ReflectiveInjector;
+/**
+ * Real Time Module used to work with realtime events from datasets.
+ * This object must be build from the helper functions, never to be instantiated direct.
+ *
+ * @example
+ * ```typescript
+ * import { jexiaClient, dataOperations, realTime } from "jexia-sdk-js/node";
+ *
+ * const dataModule = dataOperations();
+ * const realTimeModule = realTime();
+ *
+ * jexiaClient().init({projectID: "your Jexia App URL", key: "username", secret: "password"},
+ *   dataModule, realTimeModule);
+ *
+ * dataModule.dataset("posts")
+ *   .watch()
+ *   .subscribe(e => console.log(e));
+ * ```
+ */
+export class RealTimeModule implements IModule {
+  private websocket: IWebSocket;
 
+  /**
+   * @internal
+   */
   constructor(
-    private websocketBuilder = (appUrl: string) => new WebSocket(appUrl),
+    private websocketBuilder: IWebSocketBuilder,
   ) { }
 
-  // public init(projectID: string, tokenManager: TokenManager, requestAdapter: IRequestAdapter): Promise<RTCModule> {
+  /**
+   * @internal
+   */
   public init(
     coreInjector: ReflectiveInjector,
   ): Promise<this> {
-    this.injector = coreInjector;
+    const tokenManager: TokenManager = coreInjector.get(TokenManager);
+    const { projectID }: IAuthOptions = coreInjector.get(AuthOptions);
 
-    const tokenManager: TokenManager = this.injector.get(TokenManager);
-    const { projectID }: IAuthOptions = this.injector.get(AuthOptions);
+    const datasetWatch = require("./datasetWatch");
 
-    return tokenManager.token.then( (token) => {
+    return tokenManager.token.then((token) => {
       try {
         this.websocket = this.websocketBuilder(this.buildSocketOpenUri(projectID, token));
       } catch (error) {
@@ -32,104 +53,30 @@ export class RTCModule implements IModule {
       }
 
       if (!this.websocket) {
-        return Promise.reject(MESSAGE.RTC.BAD_WEBSOCKET_CREATION_CALLBACK);
+        throw new Error(MESSAGE.RTC.BAD_WEBSOCKET_CREATION_CALLBACK);
       }
 
-      this.websocket.onmessage = (message: MessageEvent) => {
-        const messageData = JSON.parse(message.data);
-        if (messageData.type === "event") {
-          try {
-            this.messageReceivedCallback({ data: messageData.data, event: messageData.nsp });
-          } catch (err) {
-            throw new Error(`${MESSAGE.RTC.EXCEPTION_IN_CLIENT_CALLBACK}${err.stack}`);
-          }
-        } else if (messageData.type === "subscribe") {
-          this.pendingSubscriptionRequests().forEach((functionMessage) => {
-            this.callStack[functionMessage](message);
-          });
-        }
-      };
       return new Promise((resolve, reject) => {
-        this.websocket.onopen = () => {
-          resolve();
-        };
-        this.websocket.onerror = (err: Event) => {
-          reject(new Error(`${MESSAGE.RTC.CONNECTION_FAILED}`));
-        };
-        this.websocket.onclose = (event: CloseEvent) => {
-          reject(new Error(`${MESSAGE.RTC.CONNECTION_CLOSED}${event.code}`));
-        };
+        this.websocket.onopen = resolve;
+        this.websocket.onerror = () => reject(new Error(MESSAGE.RTC.CONNECTION_FAILED));
       });
     })
+    .then(() => datasetWatch.start(this.websocket, () => tokenManager.token))
     .then(() => this);
   }
 
-  public pendingSubscriptionRequests(): string[] {
-    return Object.getOwnPropertyNames(this.callStack);
-  }
-
-  public subscribe(method: string, resource: IResource) {
-    return this.subscription("subscribe", method, resource.name);
-  }
-
-  public unsubscribe(method: string, resource: IResource) {
-    return this.subscription("unsubscribe", method, resource.name);
-  }
-
+  /**
+   * @internal
+   */
   public terminate(): Promise<this> {
-    return new Promise( (resolve, reject) => {
+    if (this.websocket.readyState === WebSocketState.CLOSED) {
+      return Promise.resolve(this);
+    }
+    return new Promise((resolve, reject) => {
       this.websocket.onclose = () => resolve(this);
       this.websocket.onerror = (err) => reject(err);
       this.websocket.close();
     });
-  }
-
-  private associateMethod(method: string) {
-    switch (method) {
-      case "insert":
-        return "post";
-      case "select":
-        return "get";
-      case "update":
-        return "put";
-      default:
-        return method;
-    }
-  }
-
-  private subscription(type: string, method: string, resourceName: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      let nsp = this.buildSubscriptionUri(method, resourceName);
-      this.callStack[nsp] = (message: MessageEvent) => {
-        const response = JSON.parse(message.data);
-        if (response.type === type && response.status === "success" && response.nsp === nsp) {
-          delete this.callStack[nsp];
-          resolve(message);
-        } else if (response.type === type && response.status === "failure" && response.nsp === nsp) {
-          delete this.callStack[nsp];
-          reject(new Error("Error trying to ${type}"));
-        }
-      };
-      this.send({type, nsp});
-    });
-  }
-
-  private send(message: object) {
-    if (!this.websocket) {
-      throw new Error(MESSAGE.RTC.NO_WESBSOCKET_PRESENT);
-    }
-    try {
-      this.websocket.send(JSON.stringify(message));
-    } catch (error) {
-      if  (error.message === MESSAGE.RTC.NOT_OPEN_ERROR) {
-        throw new Error(MESSAGE.RTC.NOT_OPEN_MESSAGE);
-      }
-      throw new Error(error);
-    }
-  }
-
-  private buildSubscriptionUri(method: string, resourceName: string) {
-    return `${resourceName}.${this.associateMethod(method)}`;
   }
 
   private buildSocketOpenUri(projectID: string, token: string) {
@@ -139,7 +86,7 @@ export class RTCModule implements IModule {
     // needed and include : or / along with the actual values, when they are needed.
     // See /config/config.ts vs. /config/config.prod.ts for actual values.
     let result = `${API.REAL_TIME.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}` +
-      `${API.REAL_TIME.PORT}${API.REAL_TIME.ENDPOINT}/${token}`;
+      `${API.REAL_TIME.PORT}${API.REAL_TIME.ENDPOINT}${token}`;
     // temporary variable used for devenv debugging purposes
     return result;
   }

@@ -14,12 +14,33 @@ export enum WebSocketState {
  * Minimal required WebSocket interface to use the real time module
  */
 export interface IWebSocket {
+  /**
+   * `readyState` from WebSocket
+   */
   readyState: number;
+  /**
+   * `onclose` from WebSocket
+   */
   onclose: ((ev: any) => any) | null;
+  /**
+   * `onerror` from WebSocket
+   */
   onerror: ((ev: any) => any) | null;
+  /**
+   * `onmessage` from WebSocket
+   */
   onmessage: ((ev: any) => any) | null;
+  /**
+   * `onopen` from WebSocket
+   */
   onopen: ((ev: any) => any) | null;
+  /**
+   * `close` from WebSocket
+   */
   close(): void;
+  /**
+   * `send` from WebSocket
+   */
   send(data: string): void;
 }
 
@@ -27,6 +48,10 @@ export interface IWebSocket {
  * Builder function for the WebSocket object
  */
 export interface IWebSocketBuilder {
+  /**
+   * @param appUrl Url of your Jexia project
+   * @returns Minimal required WebSocket interface to use the real time module
+   */
   (appUrl: string): IWebSocket;
 }
 

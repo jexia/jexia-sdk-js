@@ -96,4 +96,9 @@ export class Dataset<T = any> implements IResource {
   public delete(): DeleteQuery<T> {
     return new DeleteQuery(this.requestExecuter, this.datasetName);
   }
+
 }
+
+(Dataset as any).prototype.watch = () => {
+  throw new Error("Import and initialize real time module to use this method!");
+};

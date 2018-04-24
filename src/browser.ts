@@ -2,6 +2,8 @@ export * from "./index";
 import { Client } from "./api/core/client";
 import { TokenStorage, WebStorageComponent } from "./api/core/componentStorage";
 import { DataOperationsModule } from "./api/dataops/dataOperationsModule";
+import { IWebSocketBuilder } from "./api/realtime/realTime.interfaces";
+import { RealTimeModule } from "./api/realtime/realTimeModule";
 
 /**
  * It checks if the browser is capable of using the Web Storage API
@@ -43,4 +45,8 @@ export function jexiaClient(): Client {
 
 export function dataOperations(): DataOperationsModule {
   return new DataOperationsModule();
+}
+
+export function realTime(webSocketBuilder: IWebSocketBuilder = (appUrl) => new WebSocket(appUrl)): RealTimeModule {
+  return new RealTimeModule(webSocketBuilder);
 }
