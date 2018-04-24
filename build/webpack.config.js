@@ -1,20 +1,19 @@
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const webpack = require('webpack');
-const path = require('path');
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const webpack = require("webpack");
+const path = require("path");
 
-const SRC_PATH = '../src';
-const DIST_PATH = '../dist/bundle';
+const SRC_PATH = "../src";
+const DIST_PATH = "../dist/bundle";
 
 const common = {
   entry: {
-    "browser": path.resolve(__dirname, SRC_PATH, 'browser'),
-    "node": path.resolve(__dirname, SRC_PATH, 'node')
+    "browser": path.resolve(__dirname, SRC_PATH, "browser")
   },
   module: {
     rules: [
       {
         test: /\.ts?$/,
-        loader: 'ts-loader',
+        loader: "ts-loader",
         include: [
           path.resolve(__dirname, SRC_PATH)
         ]
@@ -26,8 +25,8 @@ const common = {
   },
   output: {
     path: path.resolve(__dirname, DIST_PATH),
-    filename: "[name].js",
-    libraryTarget: 'umd',
+    filename: "[name].umd.js",
+    libraryTarget: "umd",
     library: "jexia"
   },
   mode: "development"
@@ -37,7 +36,7 @@ const minify = {
   ...common,
   output: {
     ...common.output,
-    filename: "[name].min.js",
+    filename: "[name].umd.min.js",
   },
   plugins: [
     new UglifyJsPlugin({
