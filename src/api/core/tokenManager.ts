@@ -5,37 +5,83 @@ import { IRequestAdapter, RequestAdapter } from "../../internal/requestAdapter";
 import { apiKeyAuth } from "../auth";
 import { TokenStorage } from "./componentStorage";
 
-export type Tokens = { token: string, refresh_token: string };
+/**
+ * API interface of the authorization token
+ */
+export type Tokens = {
+  /**
+   * JSON web token
+   */
+  token: string,
+  /**
+   * Refresh token
+   */
+  refresh_token: string,
+};
 
+/**
+ * Interface used at the client to login at the project
+ */
 export interface IAuthAdapter {
+  /**
+   * Login at the project
+   */
   login(opts: IAuthOptions, requestAdapter: IRequestAdapter): Promise<IAuthToken>;
+  /**
+   * Refresh the authorization
+   */
   refresh(tokenPair: Promise<IAuthToken>, requestAdapter: IRequestAdapter, projectID: string): Promise<IAuthToken>;
 }
 
+/**
+ * Authorization options of the project
+ */
 export interface IAuthOptions {
-  /* application URL */
+  /**
+   * Project ID
+   */
   readonly projectID: string;
-  /* email */
+  /**
+   * Project Key
+   */
   readonly key: string;
-  /* password */
+  /**
+   * Project Password
+   */
   readonly secret: string;
-  /* token refresh interval (optional) */
+  /**
+   * Token refresh interval
+   */
   readonly refreshInterval?: Number;
-  /* remember user (optional) */
+  /**
+   * Remember user flag
+   */
   readonly remember?: boolean;
-  /* auth method */
+  /**
+   * Auth method to be used
+   */
   readonly authMethod?: () => IAuthAdapter;
 }
 
 export const AuthOptions = new InjectionToken<IAuthOptions>("IAuthOptions");
 
+/**
+ * Internal interface of the authorization token
+ */
 export interface IAuthToken {
-  /* JSON web token */
+  /**
+   * JSON web token
+   */
   readonly token: string;
-  /* refresh token */
+  /**
+   * Refresh token
+   */
   readonly refreshToken: string;
 }
 
+/**
+ * @internal
+ */
 @Injectable()
 export class TokenManager {
   /* store interval to be able to end refresh loop from outside */

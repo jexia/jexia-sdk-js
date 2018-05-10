@@ -1,3 +1,8 @@
+// tslint:disable:max-classes-per-file
+
+/**
+ * @internal
+ */
 export interface ICondition {
   Type: string;
   or(condition: ICondition): ICondition;
@@ -6,8 +11,14 @@ export interface ICondition {
   compile(): object;
 }
 
+/**
+ * @internal
+ */
 export type LogicalOperator = "and" | "or";
 
+/**
+ * @internal
+ */
 export class FilteringCondition implements ICondition {
   private field: string;
   private operator: string;
@@ -42,7 +53,9 @@ export class FilteringCondition implements ICondition {
   }
 }
 
-// tslint:disable-next-line:max-classes-per-file
+/**
+ * @internal
+ */
 export class CompositeFilteringCondition implements ICondition {
   private logicalOperatorType: string;
   private conditions: ICondition[];

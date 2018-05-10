@@ -2,6 +2,9 @@ import { RequestExecuter } from "../../internal/executer";
 import { Query } from "../../internal/query";
 import { compileDataRequest } from "../../internal/queryBasedCompiler";
 
+/**
+ * @internal
+ */
 export class DataRequest<T = any> {
   private action: string;
   private query: Query<T>;
@@ -20,9 +23,6 @@ export class DataRequest<T = any> {
     return this.action;
   }
 
-  /**
-   * @internal
-   */
   public get Query(): Query {
     return this.query;
   }

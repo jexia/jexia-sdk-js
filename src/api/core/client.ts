@@ -4,18 +4,41 @@ import { deferPromise } from "../../internal/utils";
 import { IModule } from "./module";
 import { AuthOptions, IAuthOptions, TokenManager } from "./tokenManager";
 
+/**
+ * @internal
+ */
 export const ClientInit = new InjectionToken<Promise<Client>>("SystemInit");
 
+/**
+ * Jexia main client fo the JavaScript SDK, used to initialize the necessary modules with your project information.
+ * This object must be build from the helper functions, never to be instantiated direct.
+ *
+ * @example
+ * ```typescript
+ * import { jexiaClient } from "jexia-sdk-js/node";
+ *
+ * jexiaClient().init({projectID: "your Jexia App URL", key: "username", secret: "password"}, arrayOfJexiaModules);
+ * ```
+ */
 export class Client {
   /* token manager (responsible for getting fresh and valid token), should be injected to plugins/modules (if needed) */
   private tokenManager: TokenManager;
   /* modules to be initilized */
   private modules: IModule[];
 
+  /**
+   * @internal
+   */
   public constructor(
     private fetch: Fetch,
   ) {}
 
+  /**
+   * Initialized the Jexia client with all the used modules
+   * @param opts Your project data
+   * @param modules Jexia modules that will be used
+   * @returns A promise that just finishes when all the given modules finished their initialization
+   */
   public init(opts: IAuthOptions, ...modules: IModule[]): Promise<Client> {
     const systemDefer = deferPromise<Client>();
     const injector = ReflectiveInjector.resolveAndCreate([
@@ -59,6 +82,10 @@ export class Client {
     return systemDefer.promise;
   }
 
+  /**
+   * Terminate the Jexia client with all the used modules
+   * @returns A promise that just finishes when all the given modules finished their termination
+   */
   public terminate(): Promise<Client> {
     /* terminates the token manager */
     this.tokenManager.terminate();
