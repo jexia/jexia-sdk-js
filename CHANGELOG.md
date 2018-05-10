@@ -1,3 +1,11 @@
+<a name="3.2.6"></a>
+## [3.2.6](https://github.com/jexia/jexia-sdk-js/compare/v3.2.5...v3.2.6) (2018-05-10)
+
+
+### Bug Fixes
+
+* **types:** exposing and correcting interface types ([eb3ed56](https://github.com/jexia/jexia-sdk-js/commit/eb3ed56))
+
 <a name="3.2.5"></a>
 ## [3.2.5](https://github.com/jexia/jexia-sdk-js/compare/v3.2.4...v3.2.5) (2018-04-02)
 
