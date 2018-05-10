@@ -59,7 +59,7 @@ describe("Class: Client", () => {
         .then((cli: Client) => done.fail("init should have failed"))
         .catch((err: Error) => {
           expect(err).toEqual(errFailedToInitModule);
-          expect(client.tokenManager.terminate).toHaveBeenCalledWith();
+          expect(client["tokenManager"].terminate).toHaveBeenCalledWith();
           done();
         });
     });
@@ -135,7 +135,7 @@ describe("Class: Client", () => {
         .then((cli: Client) => done.fail("init should have failed"))
         .catch((err: Error) => {
           expect(err).toEqual(errFailedToInitModule);
-          expect(client.tokenManager.terminate).toHaveBeenCalledWith();
+          expect(client["tokenManager"].terminate).toHaveBeenCalledWith();
           done();
         });
     });
