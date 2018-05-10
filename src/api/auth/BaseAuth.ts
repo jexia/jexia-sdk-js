@@ -2,6 +2,9 @@ import { API } from "../../config/config";
 import { IRequestAdapter, Methods } from "../../internal/requestAdapter";
 import { IAuthAdapter, IAuthOptions, IAuthToken, Tokens } from "../core/tokenManager";
 
+/**
+ * @internal
+ */
 export abstract class BaseAuth implements IAuthAdapter {
 
   protected abstract authUrl: string;

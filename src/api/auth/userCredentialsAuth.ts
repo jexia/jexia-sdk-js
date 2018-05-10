@@ -2,6 +2,9 @@ import { API } from "../../config/config";
 import { IAuthOptions } from "../core/tokenManager";
 import { BaseAuth } from "./BaseAuth";
 
+/**
+ * @internal
+ */
 export class UserCredentialsAuth extends BaseAuth {
 
   protected authUrl = API.AUTH.USER_CREDENTIALS;

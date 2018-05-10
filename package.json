@@ -26,7 +26,7 @@
     "preexample": "npm run build:main",
     "example": "node extra_docs/examples/javascript/node/node-example.js",
     "predocs": "npm run cleanup:docs",
-    "docs": "compodoc src/api -p tsconfig.json --disablePrivateOrInternalSupport --disableCoverage --disableSourceCode --name \"Jexia Javascript SDK\" --output docs --includes extra_docs --includesName Guides",
+    "docs": "compodoc src/api -p tsconfig.json --disableSourceCode --disablePrivate --disableProtected --disableInternal --name \"Jexia Javascript SDK\" --output docs --includes extra_docs --includesName Guides",
     "docs:deploy": "npm run tsnode -- build/api-docs-publish",
     "build": "npm-run-all cleanup:dist -p build:*",
     "build:main": "tsc -p ./build/tsconfig.main.json",
@@ -54,7 +54,7 @@
   "devDependencies": {
     "@commitlint/cli": "^6.1.3",
     "@commitlint/config-conventional": "^6.1.3",
-    "@compodoc/compodoc": "^1.1.1",
+    "@compodoc/compodoc": "^1.1.2",
     "@semantic-release/changelog": "^2.0.1",
     "@semantic-release/git": "^3.1.1",
     "@semantic-release/github": "^4.2.8",

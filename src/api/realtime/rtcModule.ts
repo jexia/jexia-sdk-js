@@ -4,6 +4,9 @@ import { IRequestAdapter } from "../../internal/requestAdapter";
 import { IResource } from "../core/resource";
 import { TokenManager } from "../core/tokenManager";
 
+/**
+ * @internal
+ */
 export class RTCModule {
   private websocket: WebSocket;
   private websocketCreateCallback: Function;

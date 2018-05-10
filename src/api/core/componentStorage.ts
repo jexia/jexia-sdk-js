@@ -1,6 +1,9 @@
 // tslint:disable:max-classes-per-file
 import { IAuthToken } from "./tokenManager";
 
+/**
+ * @internal
+ */
 export interface IStorageComponent {
   isEmpty(): boolean;
   setTokens(tokens: IAuthToken): Promise<IAuthToken>;
@@ -8,6 +11,9 @@ export interface IStorageComponent {
   clear(): Promise<void>;
 }
 
+/**
+ * @internal
+ */
 export class WebStorageComponent implements IStorageComponent {
 
   private storage: Storage;
@@ -45,6 +51,9 @@ export class WebStorageComponent implements IStorageComponent {
   }
 }
 
+/**
+ * @internal
+ */
 export class MemoryStorageComponent implements IStorageComponent {
 
   private tokens: IAuthToken;
@@ -72,6 +81,9 @@ export class MemoryStorageComponent implements IStorageComponent {
   }
 }
 
+/**
+ * @internal
+ */
 export class TokenStorage {
   public static getStorageAPI(): IStorageComponent {
     return TokenStorage.storage;
