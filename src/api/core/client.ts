@@ -8,7 +8,7 @@ export const ClientInit = new InjectionToken<Promise<Client>>("SystemInit");
 
 export class Client {
   /* token manager (responsible for getting fresh and valid token), should be injected to plugins/modules (if needed) */
-  public tokenManager: TokenManager;
+  private tokenManager: TokenManager;
   /* modules to be initilized */
   private modules: IModule[];
 
@@ -70,8 +70,4 @@ export class Client {
       .then(() => this);
   }
 
-}
-
-export function authenticate(projectID: string, key: string, secret: string): IAuthOptions {
-  return {projectID, key, secret};
 }
