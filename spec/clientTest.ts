@@ -78,7 +78,7 @@ describe("Class: Client", () => {
       (new Client(fetchWithRequestMockOk)).init(validClientOpts, mockModuleSuccess);
       setTimeout(() => {
         const mainInit = injector!.get(ClientInit);
-        const initFinish = jasmine.createSpy("initFinish");
+        const initFinish = jest.fn();
         mainInit.then(initFinish);
         expect(initFinish).not.toHaveBeenCalled();
         defer.resolve();

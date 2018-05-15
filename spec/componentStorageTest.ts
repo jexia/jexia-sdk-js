@@ -33,7 +33,7 @@ describe("ComponentStorage", ()  => {
     describe(component, () => {
       let instanceComponent: WebStorageComponent | MemoryStorageComponent;
       let savedTokens: Promise<any>;
-      const errorSettingTokens = (done: DoneFn) => {
+      const errorSettingTokens = (done: jest.DoneCallback) => {
         return () => done.fail("setting tokens should not fail");
       };
 

@@ -10,18 +10,13 @@
   "scripts": {
     "cleanup": "run-p cleanup:*",
     "cleanup:dist": "shx rm -rf dist",
-    "cleanup:coverage": "shx rm -rf coverage",
     "cleanup:docs": "shx rm -rf docs",
-    "cleanup:temp": "shx rm -rf .temp",
-    "cleanup:nyc": "shx rm -rf .nyc_output",
     "commit": "git-cz",
     "commitmsg": "commitlint -e $GIT_PARAMS",
     "lint": "tslint \"src/**/*.ts\" \"spec/**/*.ts\"",
-    "transpile": "npm run cleanup && tsc",
-    "test": "npm run transpile && nyc jasmine",
-    "test-simple": "tsc && jasmine || true",
-    "tdd": "nodemon -e ts -w *.ts --exec npm run test-simple",
-    "test:coverage": "npm run test && nyc report --reporter=html && opn coverage/index.html",
+    "test": "jest",
+    "test:ci": "jest --no-cache --ci --testResultsProcessor=\"jest-junit\"",
+    "tdd": "jest --watch",
     "tsnode": "ts-node --project tsconfig.examples.json -r tsconfig-paths/register",
     "preexample": "npm run build:main",
     "example": "node extra_docs/examples/javascript/node/node-example.js",
@@ -36,6 +31,28 @@
     "build:package": "shx mkdir -p ./dist && shx cp package.json ./dist/package.json",
     "build:readme": "shx mkdir -p ./dist && shx cp README.md ./dist/README.md",
     "semantic-release": "semantic-release"
+  },
+  "jest": {
+    "transform": {
+      ".(ts)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "(Test|spec).ts?$",
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "setupFiles": [
+      "<rootDir>/spec/helpers/imports.ts"
+    ],
+    "collectCoverageFrom": [
+      "src/**/*.ts"
+    ],
+    "coveragePathIgnorePatterns": [
+      "src/config/",
+      "src/browser.ts",
+      "src/node.ts"
+    ],
+    "collectCoverage": true
   },
   "repository": {
     "type": "git",
@@ -59,7 +76,7 @@
     "@semantic-release/git": "^3.1.1",
     "@semantic-release/github": "^4.2.8",
     "@semantic-release/npm": "^3.2.2",
-    "@types/jasmine": "^2.8.3",
+    "@types/jest": "^22.2.3",
     "@types/node": "^7.0.18",
     "@types/node-fetch": "1.6.7",
     "@types/ws": "^3.0.2",
@@ -67,14 +84,15 @@
     "condition-circle": "2.0.1",
     "cz-conventional-changelog": "2.1.0",
     "husky": "^0.14.3",
-    "jasmine": "^2.8.0",
+    "jest": "^22.4.3",
+    "jest-junit": "^3.7.0",
     "node-fetch": "^2.1.1",
     "nodemon": "^1.14.11",
     "npm-run-all": "^4.1.2",
-    "nyc": "^10.3.2",
     "opn-cli": "^3.1.0",
     "semantic-release": "^15.1.4",
     "shx": "^0.2.2",
+    "ts-jest": "^22.4.6",
     "ts-loader": "^4.1.0",
     "ts-node": "^5.0.1",
     "tsconfig-paths": "^3.1.3",
