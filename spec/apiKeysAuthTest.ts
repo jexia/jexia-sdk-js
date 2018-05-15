@@ -3,6 +3,7 @@ import { ApiKeyAuth } from "../src/api/auth/apiKeyAuth";
 import { Tokens } from "../src/api/core/tokenManager";
 import { API } from "../src/config/config";
 import { IRequestAdapter, Methods } from "../src/internal/requestAdapter";
+import { createMockFor } from "./testUtils";
 
 describe("ApiKeyAuth", () => {
 
@@ -13,8 +14,7 @@ describe("ApiKeyAuth", () => {
     resultValue = tokens,
     resultPromise = Promise.resolve(resultValue),
   } = {} as any) {
-    const requestAdapter = jasmine.createSpyObj<IRequestAdapter>("requestAdapterMock", ["execute"]);
-    (requestAdapter.execute as jasmine.Spy).and.returnValue(resultPromise);
+    const requestAdapter: IRequestAdapter = createMockFor(["execute"], { returnValue: resultPromise });
     return {
       clientOpts: validOpts(),
       requestAdapter,

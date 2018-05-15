@@ -52,21 +52,32 @@ interface IConstructor<T> {
   new(...args: any[]): T;
 }
 
-export function createMockFor<T>
-    (obj: IConstructor<T> | string[], spyOptions?: ISpyOptions, defaultProps?: object): jasmine.SpyObj<T> {
-  const methodNames = Array.isArray(obj) ? obj : getMethodNamesOf(obj);
+export type SpyObj<T> = T & {
+  [k in keyof T]: jest.Mock<T>;
+};
+
+export function createMockFor<T, K extends keyof T>
+    (obj: IConstructor<T> | K[] | any[], spyOptions?: ISpyOptions, defaultProps?: object): SpyObj<T> {
+  const methodNames: K[] = Array.isArray(obj) ? obj : getMethodNamesOf(obj);
   if (!methodNames.length && spyOptions) {
     throw new Error("Given blueprint has no methods to spyOn");
   }
-  const spyObj = methodNames.length ?
-    jasmine.createSpyObj((obj as any)["name"] || methodNames[0], methodNames) : {};
+  const spyObj = {} as SpyObj<T>;
+
+  methodNames.forEach((m) => {
+    const spy = jest.fn();
+    if (spyOptions) {
+      setSpyOptions(spy, spyOptions);
+    }
+    (spyObj as any)[m] = jest.fn();
+  });
 
   if (spyOptions) {
-    methodNames.forEach((m) => { setSpyOptions(spyObj[m], spyOptions); });
+    methodNames.forEach((m) => { setSpyOptions(spyObj[m] as any, spyOptions); });
   }
   if (defaultProps) {
     Object.entries(defaultProps)
-      .forEach(([key, value]) => spyObj[key] = value);
+      .forEach(([key, value]) => (spyObj as any)[key] = value);
   }
   return spyObj;
 }
@@ -75,35 +86,37 @@ export function mockPrototypeOf(obj: any, spyOptions: ISpyOptions = {}, defaultP
   getMethodNamesOf(obj)
     .forEach((m) => {
       const descriptor = Object.getOwnPropertyDescriptor(obj.prototype, m);
-      if (descriptor && descriptor.get) {
-        const getter = spyOnProperty(obj.prototype, m, "get");
-        const defaultValue = defaultProps[m];
-        if (defaultValue) {
-          getter.and.returnValue(defaultValue);
-        }
-      }
-      if (descriptor && descriptor.set) {
-        spyOnProperty(obj.prototype, m, "set");
-      }
       if (!descriptor || !descriptor.set && !descriptor.get) {
         setSpyOptions(spyOn(obj.prototype, m), spyOptions);
       }
     });
 }
 
-function getMethodNamesOf(obj: any): string[] {
-  return Object.getOwnPropertyNames(obj.prototype).filter((i) => i !== "constructor");
+function getMethodNamesOf<T extends Function, K extends keyof T>(obj: T): K[] {
+  return Object.getOwnPropertyNames(obj.prototype).filter((i) => i !== "constructor") as K[];
 }
 
-function setSpyOptions(spy: jasmine.Spy, opts: ISpyOptions = {}) {
+function setSpyOptions(spy: jest.Mock | jasmine.Spy, opts: ISpyOptions = {}) {
+  if (spy.hasOwnProperty("and")) {
+    if (opts.returnValue !== undefined) {
+      (spy as jasmine.Spy).and.returnValue(opts.returnValue);
+    }
+    if (opts.callFake !== undefined) {
+      (spy as jasmine.Spy).and.callFake(opts.callFake);
+    }
+    if (opts.callThrough !== undefined) {
+      (spy as jasmine.Spy).and.callThrough();
+    }
+    return;
+  }
   if (opts.returnValue !== undefined) {
-    spy.and.returnValue(opts.returnValue);
+    (spy as jest.Mock).mockReturnValue(opts.returnValue);
   }
   if (opts.callFake !== undefined) {
-    spy.and.callFake(opts.callFake);
+    (spy as jest.Mock).mockImplementation(opts.callFake);
   }
   if (opts.callThrough !== undefined) {
-    spy.and.callThrough();
+    (spy as jest.Mock).mockClear();
   }
 }
 

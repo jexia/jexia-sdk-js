@@ -5,7 +5,7 @@ import { UserCredentialsAuth } from "../src/api/auth/userCredentialsAuth";
 import { TokenStorage } from "../src/api/core/componentStorage";
 import { IAuthAdapter, IAuthToken, TokenManager } from "../src/api/core/tokenManager";
 import { MESSAGE } from "../src/config/message";
-import { requestAdapterMockFactory } from "./testUtils";
+import { createMockFor, requestAdapterMockFactory } from "./testUtils";
 
 const validProjectID = "validProjectID";
 const defaultToken = Object.freeze({ token: "token", refresh_token: "refreshToken" });
@@ -16,9 +16,7 @@ const authMethodMock = (
   resultValue = "authMethodMockToken",
   resultPromise = Promise.resolve(resultValue),
 ) => {
-  const authMethod = jasmine.createSpyObj<IAuthAdapter>("authMethodMock", ["login", "refresh"]);
-  (authMethod.login as jasmine.Spy).and.returnValue(resultPromise);
-  (authMethod.refresh as jasmine.Spy).and.returnValue(resultPromise);
+  const authMethod: IAuthAdapter = createMockFor(["login", "refresh"], { returnValue: resultPromise });
   return {
     authMethod,
     resultValue,

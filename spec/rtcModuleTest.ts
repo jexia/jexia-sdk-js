@@ -212,7 +212,7 @@ describe("RTCModule class", () => {
 
     beforeAll(() => {
       const mocks = createMocks(validToken);
-      testCallback = jasmine.createSpy("testCallback");
+      testCallback = jest.fn();
       tokenManagerMock = mocks.tokenManagerMock;
       reqAdapterMock = mocks.reqAdapterMock;
       rtcm = new RTCModule(testCallback, (url: string) => new WebSocketMock(url) );
@@ -278,7 +278,7 @@ describe("RTCModule class", () => {
       // you can find the actual error message in rtcmodule.ts / RTCModule file
       // The idea is to make sure we catch the underlying exception and give
       // a useful error message instead.
-      expect( () => rtcm.send("test")).toThrow(new Error(errMess));
+      expect( () => rtcm.send("test")).toThrow(errMess);
     });
 
     it("should throw an useful error part 2", (done) => {
@@ -289,7 +289,7 @@ describe("RTCModule class", () => {
         .catch( (error: Error) => {
           done.fail("Initializing the RTCModule should not have failed.");
         });
-      expect( () => rtcm.send("test")).toThrow(new Error(errMess));
+      expect( () => rtcm.send("test")).toThrow(errMess);
       done();
     });
   });
@@ -302,7 +302,7 @@ describe("RTCModule class", () => {
       rtcm.init(testProjectID, tokenManagerMock, reqAdapterMock)
         .then( () => {
           rtcm.terminate().then( () => {
-            expect( () => rtcm.send("test")).toThrow(new Error(errMess));
+            expect( () => rtcm.send("test")).toThrow(errMess);
             done();
           });
         }).catch( (error: Error) => {

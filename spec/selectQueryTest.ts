@@ -82,7 +82,7 @@ describe("SelectQuery class", () => {
 
     ["sortAsc", "sortDesc"].forEach((method) => {
       it(`it should throws and error when ${method} is called`, () => {
-        expect(() => queryObj[method]()).toThrowError(Error, MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
+        expect(() => queryObj[method]()).toThrow(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
       });
     });
   });

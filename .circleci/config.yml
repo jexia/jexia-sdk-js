@@ -7,7 +7,15 @@ jobs:
       - checkout
       - run: npm install
       - run: npm run lint
-      - run: npm test
+      - run:
+          name: "Testing"
+          command: npm run test:ci
+          environment:
+            JEST_JUNIT_OUTPUT: "reports/junit/js-test-results.xml"
+      - store_test_results:
+          path: reports/junit
+      - store_artifacts:
+          path: reports/junit
       - run: npm run docs
       - run: npm run build
   deploy:
