@@ -1,3 +1,11 @@
+<a name="3.2.7"></a>
+## [3.2.7](https://github.com/jexia/jexia-sdk-js/compare/v3.2.6...v3.2.7) (2018-05-16)
+
+
+### Bug Fixes
+
+* **SelectQuery:** adding generic tipe for relation filter ([84155e1](https://github.com/jexia/jexia-sdk-js/commit/84155e1))
+
 <a name="3.2.6"></a>
 ## [3.2.6](https://github.com/jexia/jexia-sdk-js/compare/v3.2.5...v3.2.6) (2018-05-10)
 
