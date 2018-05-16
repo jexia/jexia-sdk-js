@@ -97,8 +97,11 @@ export class SelectQuery<T = any>
    * @param dataSet name of the related dataset
    * @param callback callback that returns the select query for the related dataset
    */
-  public relation(dataSet: Dataset, callback: (query: SelectQuery) => SelectQuery = (q: SelectQuery) => q): this {
-    let relation: SelectQuery = callback(dataSet.select());
+  public relation<R>(
+    dataSet: Dataset<R>,
+    callback: (query: SelectQuery<R>) => SelectQuery<R> = (q) => q,
+  ): this {
+    let relation = callback(dataSet.select());
     this.request.Query.AddRelation(relation.request.Query);
     return this;
   }
