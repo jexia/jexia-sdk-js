@@ -1,3 +1,4 @@
+// tslint:disable:no-string-literal
 import {
   MemoryStorageComponent,
   TokenStorage,
@@ -61,16 +62,23 @@ describe("ComponentStorage", ()  => {
           .catch(errorSettingTokens(done));
       });
 
-      it("should clear the saved tokens", (done) => {
-        savedTokens
-          .then(() => {
-            return instanceComponent.clear();
-          })
-          .then(() => {
-            expect(instanceComponent.isEmpty()).toBe(true);
-            done();
-          })
-          .catch(errorSettingTokens(done));
+      it("should clear the saved tokens", async () => {
+        await instanceComponent.clear();
+        expect(instanceComponent.isEmpty()).toBe(true);
+      });
+
+      it("should be empty if there is no token", async () => {
+        spyOn(instanceComponent as any, "getToken").and.returnValue({
+          refreshToken: "testRefreshToken",
+        });
+        expect(instanceComponent.isEmpty()).toBe(true);
+      });
+
+      it("should be empty if there is no refreshToken", async () => {
+        spyOn(instanceComponent as any, "getToken").and.returnValue({
+          token: "testToken",
+        });
+        expect(instanceComponent.isEmpty()).toBe(true);
       });
     });
   });
@@ -120,6 +128,24 @@ describe("ComponentStorage", ()  => {
       expect(TokenStorage.getStorageAPI()).toEqual(webStorage);
     });
 
+    it("should use localStorage to remember the storage", () => {
+      const storageTypes = {
+        localStorage: {},
+        sessionStorage: {},
+      };
+      const webStorage = new WebStorageComponent(true, storageTypes);
+      expect(webStorage["storage"]).toBe(storageTypes.localStorage);
+    });
+
+    it("should use sessionStorage when it is not to remember the storage", () => {
+      const storageTypes = {
+        localStorage: {},
+        sessionStorage: {},
+      };
+      const webStorage = new WebStorageComponent(false, storageTypes);
+      expect(webStorage["storage"]).toBe(storageTypes.sessionStorage);
+    });
+
     it("should set new tokens", (done) => {
       const memoryStorageComponent = new MemoryStorageComponent();
       TokenStorage.setStorageAPI(memoryStorageComponent);
@@ -135,8 +161,19 @@ describe("ComponentStorage", ()  => {
         .catch(() => done.fail("setting new tokens should now fail"));
     });
 
-    it("should throw an error when trying to use a new instance", () => {
+    it("should throw an error when trying to use a new instance when there is an storage", () => {
       expect(() => new TokenStorage()).toThrowError();
+    });
+
+    it("should have a storage by default", () => {
+      expect(TokenStorage["storage"]).toBeInstanceOf(MemoryStorageComponent);
+    });
+
+    it("should create a storage when creating a new instance without one", () => {
+      (TokenStorage as any).storage = null;
+      // tslint:disable-next-line:no-unused-new
+      new TokenStorage();
+      expect(TokenStorage["storage"]).toBeInstanceOf(MemoryStorageComponent);
     });
   });
 

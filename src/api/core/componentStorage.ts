@@ -24,7 +24,7 @@ export class WebStorageComponent implements IStorageComponent {
 
   public isEmpty(): boolean {
     const tokens = this.getToken();
-    return (tokens.token === null || tokens.refreshToken === null);
+    return (!tokens.token || !tokens.refreshToken);
   }
 
   public setTokens(tokens: IAuthToken): Promise<IAuthToken> {
