@@ -1,6 +1,6 @@
   // tslint:disable:no-string-literal
 import { RequestExecuter } from "../src/internal/executer";
-import { RequestAdapter } from "../src/internal/requestAdapter";
+import { IHTTPResponse, IRequestOptions, RequestAdapter } from "../src/internal/requestAdapter";
 
 export class RequestAdapterMockFactory {
   public genericSuccesfulExecution(): RequestAdapter {
@@ -145,3 +145,16 @@ export function deepClone<T>(obj: T): T {
     });
   return clone;
 }
+
+export const validClientOpts = Object.freeze({
+  key: "validKey",
+  projectID: "validProjectID",
+  refreshInterval: 500,
+  secret: "validSecret",
+});
+
+export const fetchWithRequestMockOk = (uri: string, opts?: IRequestOptions): Promise<IHTTPResponse> => {
+  return Promise.resolve({
+    json: () => Promise.resolve({ token: "token", refresh_token: "refresh_token" }), ok: true, status: 200,
+  } as IHTTPResponse);
+};

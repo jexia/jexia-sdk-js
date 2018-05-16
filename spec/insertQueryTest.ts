@@ -1,3 +1,4 @@
+// tslint:disable:no-string-literal
 import { createRequestExecuterMock } from "../spec/testUtils";
 import { InsertQuery } from "../src/api/dataops/insertQuery";
 
@@ -37,5 +38,13 @@ describe("InsertQuery class", () => {
         expect(queryObj.request.records).toEqual([{title: "Another first post", user_id: 1}]);
         done();
     });
+  });
+
+  it("should correct execute the query", () => {
+    let qe = createRequestExecuterMock(projectID, dataset);
+    let subject: any = new InsertQuery(qe, [{ title: "Another first post", user_id: 1 }], dataset);
+    spyOn(subject["request"], "execute");
+    subject.execute();
+    expect(subject["request"].execute).toHaveBeenLastCalledWith(qe);
   });
 });

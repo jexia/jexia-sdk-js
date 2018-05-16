@@ -3,24 +3,11 @@ import { ReflectiveInjector } from "injection-js";
 import { Client, ClientInit } from "../src/api/core/client";
 import { IModule } from "../src/api/core/module";
 import { AuthOptions, TokenManager } from "../src/api/core/tokenManager";
-import { IHTTPResponse, IRequestOptions, RequestAdapter } from "../src/internal/requestAdapter";
+import { RequestAdapter } from "../src/internal/requestAdapter";
 import { deferPromise } from "../src/internal/utils";
-import { mockPrototypeOf } from "./testUtils";
+import { fetchWithRequestMockOk, mockPrototypeOf, validClientOpts } from "./testUtils";
 
 const errFailedToInitModule = new Error("failed to init module");
-
-const validClientOpts = Object.freeze({
-  key: "validKey",
-  projectID: "validProjectID",
-  refreshInterval: 500,
-  secret: "validSecret",
-});
-
-const fetchWithRequestMockOk = (uri: string, opts?: IRequestOptions): Promise<IHTTPResponse> => {
-  return Promise.resolve({
-    json: () => Promise.resolve({ token: "token", refresh_token: "refresh_token" }), ok: true, status: 200,
-  } as IHTTPResponse);
-};
 
 const mockModuleFailure: IModule = {
   init: (injector: ReflectiveInjector) => Promise.reject(errFailedToInitModule),

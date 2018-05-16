@@ -45,6 +45,13 @@ describe("FieldFilter class", () => {
   });
   describe("when building a filter with one condition and is null operator", () => {
     it("compiles to the proper JSON", () => {
+      let filter: IFilteringCriterion = field("name").isNull();
+      let jsonResult: object = (filter as any).lowLevelCondition.compile();
+      expect(jsonResult as any).toEqual({ field: "name", operator: "IS_NULL", values: [], type: "and" });
+    });
+  });
+  describe("when building a filter with one condition and is null operator", () => {
+    it("compiles to the proper JSON", () => {
       let filter: IFilteringCriterion = field("name").isNotNull();
       let jsonResult: object = (filter as any).lowLevelCondition.compile();
       expect(jsonResult as any).toEqual({ field: "name", operator: "IS_NOT_NULL", values: [ ], type: "and" });
