@@ -1,4 +1,6 @@
-import { field, IFilteringCriterion } from "../src/api/dataops/filteringApi";
+// tslint:disable:no-string-literal
+import { combineCriteria, field, IFilteringCriterion } from "../src/api/dataops/filteringApi";
+import { CompositeFilteringCondition } from "../src/api/dataops/filteringCondition";
 
 describe("FieldFilter class", () => {
   describe("when building a filter with one condition and greater than operator", () => {
@@ -126,5 +128,20 @@ describe("FieldFilter class", () => {
         type: "and" };
       expect(result).toEqual(expected);
     });
+  });
+
+  describe("when combining criteria", () => {
+
+    it("should combine with high level criteria", () => {
+      const filter: any = field("name").isEqualTo("value");
+      const condition: any = combineCriteria(filter);
+      expect(condition["lowLevelCondition"]).toEqual(
+        new CompositeFilteringCondition(filter["lowLevelCondition"], "AND"));
+    });
+
+    it("should fail without parameter", () => {
+      expect(() => combineCriteria(undefined as any)).toThrow();
+    });
+
   });
 });
