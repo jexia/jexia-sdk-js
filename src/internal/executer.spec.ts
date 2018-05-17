@@ -1,8 +1,8 @@
-import { API } from "../src/config/config";
-import { RequestExecuter } from "../src/internal/executer";
-import { Methods, RequestAdapter } from "../src/internal/requestAdapter";
-import { deferPromise } from "../src/internal/utils";
-import { requestAdapterMockFactory } from "./testUtils";
+import { requestAdapterMockFactory } from "../../spec/testUtils";
+import { API } from "../config/config";
+import { RequestExecuter } from "./executer";
+import { Methods, RequestAdapter } from "./requestAdapter";
+import { deferPromise } from "./utils";
 
 describe("QueryExecuter class", () => {
   let reqAdapterMock: RequestAdapter;

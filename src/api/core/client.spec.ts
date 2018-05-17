@@ -1,11 +1,11 @@
 // tslint:disable:no-string-literal
 import { ReflectiveInjector } from "injection-js";
-import { Client, ClientInit } from "../src/api/core/client";
-import { IModule } from "../src/api/core/module";
-import { AuthOptions, TokenManager } from "../src/api/core/tokenManager";
-import { RequestAdapter } from "../src/internal/requestAdapter";
-import { deferPromise } from "../src/internal/utils";
-import { fetchWithRequestMockOk, mockPrototypeOf, validClientOpts } from "./testUtils";
+import { fetchWithRequestMockOk, mockPrototypeOf, validClientOpts } from "../../../spec/testUtils";
+import { RequestAdapter } from "../../internal/requestAdapter";
+import { deferPromise } from "../../internal/utils";
+import { Client, ClientInit } from "./client";
+import { IModule } from "./module";
+import { AuthOptions, TokenManager } from "./tokenManager";
 
 const errFailedToInitModule = new Error("failed to init module");
 

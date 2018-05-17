@@ -1,4 +1,4 @@
-import { CompositeFilteringCondition, FilteringCondition } from "../src/api/dataops/filteringCondition";
+import { CompositeFilteringCondition, FilteringCondition } from "./filteringCondition";
 
 describe("FilteringCondition class", () => {
   describe("when compiling a simple condition", () => {

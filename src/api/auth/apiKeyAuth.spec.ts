@@ -1,9 +1,9 @@
 // tslint:disable:max-line-length
-import { ApiKeyAuth } from "../src/api/auth/apiKeyAuth";
-import { Tokens } from "../src/api/core/tokenManager";
-import { API } from "../src/config/config";
-import { IRequestAdapter, Methods } from "../src/internal/requestAdapter";
-import { createMockFor } from "./testUtils";
+import { createMockFor } from "../../../spec/testUtils";
+import { API } from "../../config/config";
+import { IRequestAdapter, Methods } from "../../internal/requestAdapter";
+import { Tokens } from "../core/tokenManager";
+import { ApiKeyAuth } from "./apiKeyAuth";
 
 describe("ApiKeyAuth", () => {
 

@@ -1,10 +1,10 @@
 import { Inject, Injectable } from "injection-js";
 import { RequestExecuter } from "../../internal/executer";
 import { IResource } from "../core/resource";
-import { DeleteQuery} from "./deleteQuery";
-import { DataSetName } from "./injectionTokens";
-import { InsertQuery} from "./insertQuery";
-import { SelectQuery} from "./selectQuery";
+import { DataSetName } from "./dataops.tokens";
+import { DeleteQuery } from "./deleteQuery";
+import { InsertQuery } from "./insertQuery";
+import { SelectQuery } from "./selectQuery";
 import { UpdateQuery } from "./updateQuery";
 
 /**

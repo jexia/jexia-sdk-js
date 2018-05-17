@@ -3,9 +3,8 @@ import {
   MemoryStorageComponent,
   TokenStorage,
   WebStorageComponent,
-} from "../src/api/core/componentStorage";
-
-import { IAuthToken } from "../src/api/core/tokenManager";
+} from "./componentStorage";
+import { IAuthToken } from "./tokenManager";
 
 class WebStorageApiMock {
   private dictionary: any = {};

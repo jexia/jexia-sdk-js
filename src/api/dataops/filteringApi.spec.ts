@@ -1,6 +1,6 @@
 // tslint:disable:no-string-literal
-import { combineCriteria, field, IFilteringCriterion } from "../src/api/dataops/filteringApi";
-import { CompositeFilteringCondition } from "../src/api/dataops/filteringCondition";
+import { combineCriteria, field, IFilteringCriterion } from "./filteringApi";
+import { CompositeFilteringCondition } from "./filteringCondition";
 
 describe("FieldFilter class", () => {
   describe("when building a filter with one condition and greater than operator", () => {

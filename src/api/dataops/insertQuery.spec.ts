@@ -1,12 +1,12 @@
 // tslint:disable:no-string-literal
-import { createRequestExecuterMock } from "../spec/testUtils";
-import { InsertQuery } from "../src/api/dataops/insertQuery";
+import { createRequestExecuterMock } from "../../../spec/testUtils";
+import { InsertQuery } from "./insertQuery";
 
 describe("InsertQuery class", () => {
   let projectID: string;
   let dataset: string;
 
-  beforeAll( () => {
+  beforeAll(() => {
     dataset = "dataset";
     projectID = "projectID";
   });

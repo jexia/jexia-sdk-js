@@ -1,9 +1,9 @@
 // tslint:disable:max-line-length
-import { UserCredentialsAuth } from "../src/api/auth/userCredentialsAuth";
-import { Tokens } from "../src/api/core/tokenManager";
-import { API } from "../src/config/config";
-import { IRequestAdapter, Methods } from "../src/internal/requestAdapter";
-import { createMockFor } from "./testUtils";
+import { createMockFor } from "../../../spec/testUtils";
+import { Tokens } from "../../api/core/tokenManager";
+import { API } from "../../config/config";
+import { IRequestAdapter, Methods } from "../../internal/requestAdapter";
+import { UserCredentialsAuth } from "./userCredentialsAuth";
 
 describe("UserCredentialsAuth", () => {
 

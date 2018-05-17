@@ -1,13 +1,13 @@
 // tslint:disable:no-string-literal
 // tslint:disable:one-variable-per-declaration
-import { createMockFor, createRequestExecuterMock, SpyObj } from "../spec/testUtils";
-import { Dataset } from "../src";
-import { DataRequest } from "../src/api/dataops/dataRequest";
-import { field } from "../src/api/dataops/filteringApi";
-import { SelectQuery } from "../src/api/dataops/selectQuery";
-import { MESSAGE } from "../src/config/message";
-import { RequestExecuter } from "../src/internal/executer";
-import { Query } from "../src/internal/query";
+import { Dataset } from "../..";
+import { createMockFor, createRequestExecuterMock, SpyObj } from "../../../spec/testUtils";
+import { MESSAGE } from "../../config/message";
+import { RequestExecuter } from "../../internal/executer";
+import { Query } from "../../internal/query";
+import { DataRequest } from "./dataRequest";
+import { field } from "./filteringApi";
+import { SelectQuery } from "./selectQuery";
 
 describe("SelectQuery class", () => {
   const projectID = "projectID";

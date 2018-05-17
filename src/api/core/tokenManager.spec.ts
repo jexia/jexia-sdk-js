@@ -1,11 +1,11 @@
 // tslint:disable:max-line-length
 // tslint:disable:no-string-literal
-import { ApiKeyAuth } from "../src/api/auth/apiKeyAuth";
-import { UserCredentialsAuth } from "../src/api/auth/userCredentialsAuth";
-import { TokenStorage } from "../src/api/core/componentStorage";
-import { IAuthAdapter, IAuthToken, TokenManager } from "../src/api/core/tokenManager";
-import { MESSAGE } from "../src/config/message";
-import { createMockFor, requestAdapterMockFactory } from "./testUtils";
+import { createMockFor, requestAdapterMockFactory } from "../../../spec/testUtils";
+import { MESSAGE } from "../../config/message";
+import { ApiKeyAuth } from "../auth/apiKeyAuth";
+import { UserCredentialsAuth } from "../auth/userCredentialsAuth";
+import { TokenStorage } from "./componentStorage";
+import { IAuthAdapter, IAuthToken, TokenManager } from "./tokenManager";
 
 const validProjectID = "validProjectID";
 const defaultToken = Object.freeze({ token: "token", refresh_token: "refreshToken" });

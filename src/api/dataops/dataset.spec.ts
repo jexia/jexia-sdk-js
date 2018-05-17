@@ -1,10 +1,10 @@
-import { Dataset } from "../src/api/dataops/dataset";
-import { DeleteQuery } from "../src/api/dataops/deleteQuery";
-import { InsertQuery } from "../src/api/dataops/insertQuery";
-import { SelectQuery } from "../src/api/dataops/selectQuery";
-import { UpdateQuery } from "../src/api/dataops/updateQuery";
-import { RequestExecuter } from "../src/internal/executer";
-import { createMockFor } from "./testUtils";
+import { createMockFor } from "../../../spec/testUtils";
+import { RequestExecuter } from "../../internal/executer";
+import { Dataset } from "./dataset";
+import { DeleteQuery } from "./deleteQuery";
+import { InsertQuery } from "./insertQuery";
+import { SelectQuery } from "./selectQuery";
+import { UpdateQuery } from "./updateQuery";
 
 describe("Dataset class", () => {
 
