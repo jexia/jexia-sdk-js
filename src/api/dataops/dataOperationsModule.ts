@@ -1,8 +1,8 @@
 import { ReflectiveInjector } from "injection-js";
 import { RequestExecuter } from "../../internal/executer";
 import { IModule } from "../core/module";
+import { DataSetName } from "./dataops.tokens";
 import { Dataset } from "./dataset";
-import { DataSetName } from "./injectionTokens";
 
 /**
  * Data Operation Module used to retrieve the dataset objects.

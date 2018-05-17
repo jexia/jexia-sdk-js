@@ -1,5 +1,5 @@
-import { Dataset } from "./dataset";
-import { IFilteringCriterion } from "./filteringApi";
+import { Dataset } from "jexia-sdk-js/api/dataops/dataset";
+import { IFilteringCriterion } from "jexia-sdk-js/api/dataops/filteringApi";
 
 /**
  * @internal

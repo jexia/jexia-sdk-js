@@ -2,7 +2,7 @@ import { RequestExecuter } from "../../internal/executer";
 import { DataRequest } from "./dataRequest";
 import { DefaultDatasetFields } from "./dataset";
 import { FieldFilter, IFilteringCriterion, IFilteringCriterionCallback } from "./filteringApi";
-import { IExecutable, IFields, IFilterable, ILimit, IOffset, ISortable } from "./queryInterfaces";
+import { IExecutable, IFields, IFilterable, ILimit, IOffset, ISortable } from "./query.interfaces";
 
 /**
  * Query object specialized for delete statements.

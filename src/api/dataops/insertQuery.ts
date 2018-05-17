@@ -1,6 +1,6 @@
 import { RequestExecuter } from "../../internal/executer";
 import { DataRequest } from "./dataRequest";
-import { IExecutable} from "./queryInterfaces";
+import { IExecutable } from "./query.interfaces";
 
 /**
  * Query object specialized for insert statements.

@@ -1,12 +1,12 @@
 // tslint:disable:no-string-literal
 // tslint:disable:one-variable-per-declaration
-import { createMockFor, createRequestExecuterMock, deepFreeze, SpyObj } from "../spec/testUtils";
-import { field } from "../src";
-import { DataRequest } from "../src/api/dataops/dataRequest";
-import { UpdateQuery } from "../src/api/dataops/updateQuery";
-import { MESSAGE } from "../src/config/message";
-import { RequestExecuter } from "../src/internal/executer";
-import { Query } from "../src/internal/query";
+import { field } from "../..";
+import { createMockFor, createRequestExecuterMock, deepFreeze, SpyObj } from "../../../spec/testUtils";
+import { MESSAGE } from "../../config/message";
+import { RequestExecuter } from "../../internal/executer";
+import { Query } from "../../internal/query";
+import { DataRequest } from "./dataRequest";
+import { UpdateQuery } from "./updateQuery";
 
 describe("UpdateQuery class", () => {
   const projectID = "projectID";

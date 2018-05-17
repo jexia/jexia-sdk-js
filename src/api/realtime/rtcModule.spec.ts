@@ -1,12 +1,12 @@
 // tslint:disable:max-line-length
 // tslint:disable:max-classes-per-file
-import { Dataset } from "../src/api/dataops/dataset";
-import { RTCModule } from "../src/api/realtime/rtcModule";
-import { API } from "../src/config/config";
-import { MESSAGE } from "../src/config/message";
-import { RequestExecuter } from "../src/internal/executer";
-import { IRequestAdapter, IRequestOptions } from "../src/internal/requestAdapter";
-import { createMockFor } from "./testUtils";
+import { createMockFor } from "../../../spec/testUtils";
+import { API } from "../../config/config";
+import { MESSAGE } from "../../config/message";
+import { RequestExecuter } from "../../internal/executer";
+import { IRequestAdapter, IRequestOptions } from "../../internal/requestAdapter";
+import { Dataset } from "../dataops/dataset";
+import { RTCModule } from "./rtcModule";
 
 class BaseWebSocketMock {
   public url: string;

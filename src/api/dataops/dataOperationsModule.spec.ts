@@ -1,8 +1,8 @@
 // tslint:disable:no-string-literal
 // tslint:disable:no-empty
-import { DataOperationsModule } from "../src/api/dataops/dataOperationsModule";
-import { Dataset, jexiaClient } from "../src/node";
-import { fetchWithRequestMockOk, validClientOpts } from "./testUtils";
+import { fetchWithRequestMockOk, validClientOpts } from "../../../spec/testUtils";
+import { Dataset, jexiaClient } from "../../node";
+import { DataOperationsModule } from "./dataOperationsModule";
 
 describe("Real Time Module", () => {
 
