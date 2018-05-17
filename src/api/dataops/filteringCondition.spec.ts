@@ -1,6 +1,12 @@
 import { CompositeFilteringCondition, FilteringCondition } from "./filteringCondition";
 
 describe("FilteringCondition class", () => {
+
+  it("should have a default logical operator type of 'and'", () => {
+    const condition = new FilteringCondition("field", "operator", ["value"]);
+    expect(condition.Type).toBe("and");
+  });
+
   describe("when compiling a simple condition", () => {
     let condition: FilteringCondition;
     let field = "field";
@@ -38,6 +44,13 @@ describe("FilteringCondition class", () => {
 });
 
 describe("CompositeFilteringCondition class", () => {
+
+  it("should use the given logical operator type", () => {
+    const compCondition = new CompositeFilteringCondition(
+      new FilteringCondition("field", "operator", ["value"]), "and");
+    expect(compCondition.Type).toBe("and");
+  });
+
   describe("when compiling a condition", () => {
     let compCondition: CompositeFilteringCondition;
     let field = "field";
