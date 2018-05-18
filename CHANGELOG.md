@@ -1,3 +1,11 @@
+<a name="3.3.0"></a>
+# [3.3.0](https://github.com/jexia/jexia-sdk-js/compare/v3.2.7...v3.3.0) (2018-05-18)
+
+
+### Features
+
+* **array-fields:** overloads all methods that receive field names to accept array ([c23e5c8](https://github.com/jexia/jexia-sdk-js/commit/c23e5c8)), closes [#8](https://github.com/jexia/jexia-sdk-js/issues/8)
+
 <a name="3.2.7"></a>
 ## [3.2.7](https://github.com/jexia/jexia-sdk-js/compare/v3.2.6...v3.2.7) (2018-05-16)
 
