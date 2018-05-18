@@ -1,3 +1,4 @@
+import { MESSAGE } from "../../config/message";
 import { RequestExecuter } from "../../internal/executer";
 import { DataRequest } from "./dataRequest";
 import { DefaultDatasetFields } from "./dataset";
@@ -19,7 +20,7 @@ import { IExecutable, IFields, IFilterable, ILimit, IOffset, ISortable } from ".
  *
  * @template T Generic type of your dataset, default to any
  */
-export class DeleteQuery<T = any> implements IFields, ILimit, IOffset, IFilterable, IExecutable, ISortable {
+export class DeleteQuery<T = any> implements IFields<T>, ILimit, IOffset, IFilterable, IExecutable, ISortable<T> {
 
   private request: DataRequest<T>;
   private queryExecuter: RequestExecuter;
@@ -37,8 +38,10 @@ export class DeleteQuery<T = any> implements IFields, ILimit, IOffset, IFilterab
    * Select the fields to be returned at the response that represent the affected data
    * @param fields fields names
    */
-  public fields<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this {
-    this.request.Query.Fields = fields;
+  public fields<K extends keyof T>(fields: Array<K | DefaultDatasetFields>): this;
+  public fields<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this;
+  public fields<K extends keyof T>(field: K | DefaultDatasetFields, ...fields: Array<K | DefaultDatasetFields>): this {
+    this.request.Query.Fields = Array.isArray(field) ? field : [field, ...fields];
     return this;
   }
 
@@ -78,8 +81,13 @@ export class DeleteQuery<T = any> implements IFields, ILimit, IOffset, IFilterab
    * Sort ascendent the response that will represent the affected data
    * @param fields fields names to sort with
    */
-  public sortAsc<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this {
-    this.request.Query.AddSortCondition("asc", ...fields);
+  public sortAsc<K extends keyof T>(fields: Array<K | DefaultDatasetFields>): this;
+  public sortAsc<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this;
+  public sortAsc<K extends keyof T>(field: K | DefaultDatasetFields, ...fields: Array<K | DefaultDatasetFields>): this {
+    if (!field || field.length === 0) {
+      throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
+    }
+    this.request.Query.AddSortCondition("asc", ...(Array.isArray(field) ? field : field && [field, ...fields]));
     return this;
   }
 
@@ -87,8 +95,14 @@ export class DeleteQuery<T = any> implements IFields, ILimit, IOffset, IFilterab
    * Sort decedent the response that will represent the affected data
    * @param fields fields names to sort with
    */
-  public sortDesc<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this {
-    this.request.Query.AddSortCondition("desc", ...fields);
+  public sortDesc<K extends keyof T>(fields: Array<K | DefaultDatasetFields>): this;
+  public sortDesc<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this;
+  public sortDesc<K extends keyof T>(
+    field: K | DefaultDatasetFields, ...fields: Array<K | DefaultDatasetFields>): this {
+    if (!field || field.length === 0) {
+      throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
+    }
+    this.request.Query.AddSortCondition("desc", ...(Array.isArray(field) ? field : field && [field, ...fields]));
     return this;
   }
 

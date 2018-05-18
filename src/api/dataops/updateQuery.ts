@@ -1,3 +1,4 @@
+import { MESSAGE } from "../../config/message";
 import { RequestExecuter } from "../../internal/executer";
 import { DataRequest } from "./dataRequest";
 import { DefaultDatasetFields } from "./dataset";
@@ -21,7 +22,7 @@ import { IExecutable, IFilterable, ILimit, IOffset, ISortable } from "./query.in
  *
  * @template T Generic type of your dataset, default to any
  */
-export class UpdateQuery<T = any> implements ILimit, IOffset, IFilterable, IExecutable, ISortable {
+export class UpdateQuery<T = any> implements ILimit, IOffset, IFilterable, IExecutable, ISortable<T> {
   private request: DataRequest<T>;
   private queryExecuter: RequestExecuter;
 
@@ -70,8 +71,13 @@ export class UpdateQuery<T = any> implements ILimit, IOffset, IFilterable, IExec
    * Sort ascendent the response that will represent the affected data
    * @param fields fields names to sort with
    */
-  public sortAsc<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this {
-    this.request.Query.AddSortCondition("asc", ...fields);
+  public sortAsc<K extends keyof T>(fields: Array<K | DefaultDatasetFields>): this;
+  public sortAsc<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this;
+  public sortAsc<K extends keyof T>(field: K | DefaultDatasetFields, ...fields: Array<K | DefaultDatasetFields>): this {
+    if (!field || field.length === 0) {
+      throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
+    }
+    this.request.Query.AddSortCondition("asc", ...(Array.isArray(field) ? field : field && [field, ...fields]));
     return this;
   }
 
@@ -79,8 +85,14 @@ export class UpdateQuery<T = any> implements ILimit, IOffset, IFilterable, IExec
    * Sort decedent the response that will represent the affected data
    * @param fields fields names to sort with
    */
-  public sortDesc<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this {
-    this.request.Query.AddSortCondition("desc", ...fields);
+  public sortDesc<K extends keyof T>(fields: Array<K | DefaultDatasetFields>): this;
+  public sortDesc<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this;
+  public sortDesc<K extends keyof T>(
+    field: K | DefaultDatasetFields, ...fields: Array<K | DefaultDatasetFields>): this {
+    if (!field || field.length === 0) {
+      throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
+    }
+    this.request.Query.AddSortCondition("desc", ...(Array.isArray(field) ? field : field && [field, ...fields]));
     return this;
   }
 
