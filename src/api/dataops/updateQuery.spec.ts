@@ -11,7 +11,7 @@ import { UpdateQuery } from "./updateQuery";
 describe("UpdateQuery class", () => {
   const projectID = "projectID";
   const dataset = "dataset";
-  const testFields = Object.freeze(["first_test_field", "second_test_field"]);
+  const testFields = Object.freeze(["first_test_field", "second_test_field", "last_test_field"]);
   const defaultData = deepFreeze({ title: "changed first field" });
 
   function createSubject({
@@ -90,13 +90,37 @@ describe("UpdateQuery class", () => {
       expect(queryObj["request"].Query["offset"]).toEqual(testNum);
     });
 
-    it("should have the correct query for sortAsc", () => {
+    it("should have the correct query for sortAsc with a single array", () => {
+      const { subject } = createSubject({ mockDataRequest: false });
+      const queryObj = subject.sortAsc([...testFields]);
+      expect(queryObj["request"].Query["orders"]).toEqual([{ fields: testFields, direction: "asc" }]);
+    });
+
+    it("should have the correct query for sortAsc with a single value", () => {
+      const { subject } = createSubject({ mockDataRequest: false });
+      const queryObj = subject.sortAsc(testFields[0]);
+      expect(queryObj["request"].Query["orders"]).toEqual([{ fields: [testFields[0]], direction: "asc" }]);
+    });
+
+    it("should have the correct query for sortAsc with multiple values", () => {
       const { subject } = createSubject({ mockDataRequest: false });
       const queryObj = subject.sortAsc(...testFields);
       expect(queryObj["request"].Query["orders"]).toEqual([{ fields: testFields, direction: "asc" }]);
     });
 
-    it("should have the correct query for sortDesc", () => {
+    it("should have the correct query for sortDesc with a single array", () => {
+      const { subject } = createSubject({ mockDataRequest: false });
+      const queryObj = subject.sortDesc([...testFields]);
+      expect(queryObj["request"].Query["orders"]).toEqual([{ fields: testFields, direction: "desc" }]);
+    });
+
+    it("should have the correct query for sortDesc with a single value", () => {
+      const { subject } = createSubject({ mockDataRequest: false });
+      const queryObj = subject.sortDesc(testFields[0]);
+      expect(queryObj["request"].Query["orders"]).toEqual([{ fields: [testFields[0]], direction: "desc" }]);
+    });
+
+    it("should have the correct query for sortDesc with multiple values", () => {
       const { subject } = createSubject({ mockDataRequest: false });
       const queryObj = subject.sortDesc(...testFields);
       expect(queryObj["request"].Query["orders"]).toEqual([{ fields: testFields, direction: "desc" }]);
