@@ -16,7 +16,7 @@
     "lint": "tslint \"src/**/*.ts\" \"spec/**/*.ts\"",
     "test": "jest",
     "test:ci": "jest --no-cache --ci --testResultsProcessor=\"jest-junit\"",
-    "tdd": "jest --watch",
+    "tdd": "jest --no-cache --watch",
     "tsnode": "ts-node --project tsconfig.examples.json -r tsconfig-paths/register",
     "preexample": "npm run build:main",
     "example": "node extra_docs/examples/javascript/node/node-example.js",
