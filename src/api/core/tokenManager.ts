@@ -116,7 +116,7 @@ export class TokenManager {
       return Promise.reject(new Error("Please supply a valid Jexia project ID."));
     }
 
-    this.tokens = this.storage.isEmpty() ? this.login(opts) : this.storage.getTokens();
+    this.tokens = this.storage.isEmpty() ? this.login(opts) : this.refresh(opts.projectID);
 
     /* make sure that tokens have been successfully received */
     return this.tokens
@@ -127,7 +127,7 @@ export class TokenManager {
   public terminate(): void {
     this.storage.clear();
     clearInterval(this.refreshInterval);
-    delete this.tokens;
+    this.tokens = null as any;
   }
 
   private refreshToken(opts: IAuthOptions) {
@@ -143,12 +143,12 @@ export class TokenManager {
 
   private login(opts: IAuthOptions): Promise<IAuthToken> {
     /* no need to wait for tokens */
-    return this.authMethod.login(opts, this.requestAdapter).
-      then((tokens: IAuthToken) => this.storage.setTokens(tokens));
+    return this.authMethod.login(opts, this.requestAdapter)
+      .then((tokens: IAuthToken) => this.storage.setTokens(tokens));
   }
 
   private refresh(projectID: string): Promise<IAuthToken> {
-    return this.authMethod.refresh(this.tokens, this.requestAdapter, projectID).
-      then((tokens) => this.storage.setTokens(tokens));
+    return this.tokens = this.authMethod.refresh(this.storage.getTokens(), this.requestAdapter, projectID)
+      .then((tokens) => this.storage.setTokens(tokens));
   }
 }
