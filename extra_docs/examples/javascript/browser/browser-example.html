@@ -3,9 +3,13 @@
       <script src="../../../../dist/bundle/browser.js"></script>
   </head>
   <body>
-    <a href="#" id="authorize">Authorize</a>
+    <i>loading...</i>
     <script type="text/javascript">
-      document.getElementById("authorize").onclick = function(){
+      window.onload = function(){
+        if(!jexia) {
+          throw new Error("Please run `npm run build` task before run this example.");
+        }
+
         //Initialize dataOperationsModule
         let dom = jexia.dataOperations();
         let credentials = {
@@ -22,7 +26,10 @@
               document.write("<ul><li>" + item.title + "</li></ul>");
             }
           })
-          .catch(error => console.log(error));
+          .catch(error => {
+            document.write(error);
+            console.log(error);
+          });
       }
     </script>
   </body>
