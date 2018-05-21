@@ -1,3 +1,11 @@
+<a name="3.3.1"></a>
+## [3.3.1](https://github.com/jexia/jexia-sdk-js/compare/v3.3.0...v3.3.1) (2018-05-21)
+
+
+### Bug Fixes
+
+* **TokenManager:** fix refresh token time inconsistency when initializing ([3c97eb4](https://github.com/jexia/jexia-sdk-js/commit/3c97eb4))
+
 <a name="3.3.0"></a>
 # [3.3.0](https://github.com/jexia/jexia-sdk-js/compare/v3.2.7...v3.3.0) (2018-05-18)
 
