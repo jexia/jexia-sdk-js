@@ -19,12 +19,12 @@ Following the last example, your dataset gonna have the type `Dataset<Post>`, an
 
 ### Fields Validation
 
-For each query method that receives field names, such as `.fields("title")` or `.sortAsc("title")`, typescript compiler will validate if they field exists at the given interface, or if it is a [default filed name](/miscellaneous/typealiases.html#DefaultDatasetFields), resulting in a compilation error if any of the given field names were not found.
+For each query method that receives field names, such as `.fields("title")` or `.sortAsc("title")`, typescript compiler will validate if they field exists at the given interface, or if it is a [default filed name](https://jexia.github.io/jexia-sdk-js/miscellaneous/typealiases.html#DefaultDatasetFields), resulting in a compilation error if any of the given field names were not found.
 
-![typed result example](/assets/typescript-fields-validation.gif)
+![typed result example](https://jexia.github.io/jexia-sdk-js/assets/typescript-fields-validation.gif)
 
 ### Typed Query Results
 
 All the results of your queries will automatically use the given interface, without the need to manually type it.
 
-![typed result example](/assets/typescript-query-results-example.gif)
+![typed result example](https://jexia.github.io/jexia-sdk-js/assets/typescript-query-results-example.gif)
