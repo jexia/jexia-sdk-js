@@ -8,7 +8,7 @@ import { SelectQuery } from "./selectQuery";
 import { UpdateQuery } from "./updateQuery";
 
 /**
- * @internal
+ * Default fields that will always exist for any dataset
  */
 export type DefaultDatasetFields = "id" | "created_at" | "updated_at";
 
