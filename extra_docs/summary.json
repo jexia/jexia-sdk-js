@@ -4,6 +4,10 @@
     "file": "quickstart.md"
   },
   {
+    "title": "TypeScript Features",
+    "file": "typescript.md"
+  },
+  {
     "title": "Code of Conduct",
     "file": "../CODE_OF_CONDUCT.md"
   }
