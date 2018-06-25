@@ -1,7 +1,7 @@
 // tslint:disable:max-line-length
-import { combineLatest } from "rxjs/observable/combineLatest";
-import { Observer } from "rxjs/Observer";
-import { Subscription } from "rxjs/Subscription";
+import { Subscription } from "rxjs/internal/Subscription";
+import { Observer } from "rxjs/internal/types";
+import { combineLatest } from "rxjs/operators";
 import { EventSubscriptionType } from "src";
 import { createMockFor, deepFreeze, SpyObj } from "../../../spec/testUtils";
 import { MESSAGE } from "../../config/message";
@@ -480,9 +480,8 @@ describe("Dataset Watch", () => {
       const subsErrors = subscriptionErrors(done);
       const eventMessage = createEventMessageData({ name: "test-name" });
 
-      const combinedObs = combineLatest(
-        dataset.watch(),
-        dataset.watch(),
+      const combinedObs = dataset.watch().pipe(
+        combineLatest(dataset.watch()),
       );
 
       subs.push(combinedObs.subscribe(

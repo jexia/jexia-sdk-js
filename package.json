@@ -75,7 +75,7 @@
   "dependencies": {
     "injection-js": "^2.2.1",
     "reflect-metadata": "^0.1.12",
-    "rxjs": "^5.5.9"
+    "rxjs": "^6.2.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^6.1.3",

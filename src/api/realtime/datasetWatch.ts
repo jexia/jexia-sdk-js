@@ -1,5 +1,5 @@
-import { Observable } from "rxjs/Observable";
-import { Observer } from "rxjs/Observer";
+import { Observable } from "rxjs/internal/Observable";
+import { Observer } from "rxjs/internal/types";
 import { MESSAGE } from "../../config/message";
 import { Dataset } from "../dataops/dataset";
 import {
