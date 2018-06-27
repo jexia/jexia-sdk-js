@@ -1,14 +1,13 @@
 import { Dataset } from "jexia-sdk-js/api/dataops/dataset";
-import { DefaultDatasetFields } from "jexia-sdk-js/api/dataops/dataset";
 import { IFilteringCriterion } from "jexia-sdk-js/api/dataops/filteringApi";
 
 /**
  * @internal
  */
 export interface IFields<T> {
-  fields<K extends keyof T>(fields: Array<K | DefaultDatasetFields>): this;
-  fields<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this;
-  fields<K extends keyof T>(field: K | DefaultDatasetFields, ...fields: Array<K | DefaultDatasetFields>): this;
+  fields<K extends keyof T>(fields: K[]): this;
+  fields<K extends keyof T>(...fields: K[]): this;
+  fields<K extends keyof T>(field: K, ...fields: K[]): this;
 }
 
 /**
@@ -36,12 +35,12 @@ export interface IFilterable {
  * @internal
  */
 export interface ISortable<T> {
-  sortAsc<K extends keyof T>(fields: Array<K | DefaultDatasetFields>): this;
-  sortAsc<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this;
-  sortAsc<K extends keyof T>(field: K | DefaultDatasetFields, ...fields: Array<K | DefaultDatasetFields>): this;
-  sortDesc<K extends keyof T>(fields: Array<K | DefaultDatasetFields>): this;
-  sortDesc<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this;
-  sortDesc<K extends keyof T>(field: K | DefaultDatasetFields, ...fields: Array<K | DefaultDatasetFields>): this;
+  sortAsc<K extends keyof T>(fields: K[]): this;
+  sortAsc<K extends keyof T>(...fields: K[]): this;
+  sortAsc<K extends keyof T>(field: K, ...fields: K[]): this;
+  sortDesc<K extends keyof T>(fields: K[]): this;
+  sortDesc<K extends keyof T>(...fields: K[]): this;
+  sortDesc<K extends keyof T>(field: K, ...fields: K[]): this;
 }
 
 /**

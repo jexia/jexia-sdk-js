@@ -13,6 +13,18 @@ import { UpdateQuery } from "./updateQuery";
 export type DefaultDatasetFields = "id" | "created_at" | "updated_at";
 
 /**
+ * Default dataset interface type
+ */
+export type DefaultDatasetInterface = {
+  [P in DefaultDatasetFields]: string;
+};
+
+/**
+ * Extend user provided interface (T) with default dataset fields
+ */
+export type DatasetInterface<T> = T & DefaultDatasetInterface;
+
+/**
  * Dataset object used to fetch and modify data at your datasets.
  * For TypeScript users it implements a generic type T that represents your dataset, default to any.
  * This object must be build from the data operations module, never to be instantiated direct.
@@ -61,7 +73,7 @@ export class Dataset<T = any> implements IResource {
    * @returns Query object specialized for select statements.
    * With no filters set, returns all records in the selected dataset.
    */
-  public select(): SelectQuery<T> {
+  public select(): SelectQuery<DatasetInterface<T>> {
     return new SelectQuery(this.requestExecuter, this.datasetName);
   }
 
@@ -71,13 +83,13 @@ export class Dataset<T = any> implements IResource {
    * @returns Query object specialized for update statements.
    * Don't forget to apply a filter to specify the fields that will be modified.
    */
-  public update(data: T): UpdateQuery<T> {
+  public update(data: DatasetInterface<T>): UpdateQuery<DatasetInterface<T>> {
     return new UpdateQuery(this.requestExecuter, data, this.datasetName);
   }
 
   /**
    * Creates an Insert query.
-   * @param data An array of dictionaries that contains the key:value pairs for
+   * @param records An array of dictionaries that contains the key:value pairs for
    * the fields that you want to store at this dataset
    * @returns Query object specialized for insert statements
    * If saving into a strict schema dataset, you need to provide values for the
@@ -93,7 +105,7 @@ export class Dataset<T = any> implements IResource {
    * You need to specify a filter to narrow down the records that you want deleted
    * from the backend.
    */
-  public delete(): DeleteQuery<T> {
+  public delete(): DeleteQuery<DatasetInterface<T>> {
     return new DeleteQuery(this.requestExecuter, this.datasetName);
   }
 }

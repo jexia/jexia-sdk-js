@@ -1,7 +1,6 @@
 import { MESSAGE } from "../../config/message";
 import { RequestExecuter } from "../../internal/executer";
 import { DataRequest } from "./dataRequest";
-import { DefaultDatasetFields } from "./dataset";
 import { FieldFilter, IFilteringCriterion, IFilteringCriterionCallback } from "./filteringApi";
 import { IExecutable, IFields, IFilterable, ILimit, IOffset, ISortable } from "./query.interfaces";
 
@@ -38,16 +37,16 @@ export class DeleteQuery<T = any> implements IFields<T>, ILimit, IOffset, IFilte
    * Select the fields to be returned at the response that represent the affected data
    * @param fields fields names
    */
-  public fields<K extends keyof T>(fields: Array<K | DefaultDatasetFields>): this;
-  public fields<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this;
-  public fields<K extends keyof T>(field: K | DefaultDatasetFields, ...fields: Array<K | DefaultDatasetFields>): this {
+  public fields<K extends keyof T>(fields: K[]): this;
+  public fields<K extends keyof T>(...fields: K[]): this;
+  public fields<K extends keyof T>(field: K, ...fields: K[]): this {
     this.request.Query.Fields = Array.isArray(field) ? field : [field, ...fields];
     return this;
   }
 
   /**
    * Limit the operation for the first n records
-   * @param fields fields names
+   * @param limit number limit records amount
    */
   public limit(limit: number): this {
     this.request.Query.Limit = limit;
@@ -55,8 +54,8 @@ export class DeleteQuery<T = any> implements IFields<T>, ILimit, IOffset, IFilte
   }
 
   /**
-   * Limit the operation for the last n records
-   * @param fields fields names
+   * Offset selection with the offset records
+   * @param offset number offset amount
    */
   public offset(offset: number): this {
     this.request.Query.Offset = offset;
@@ -67,11 +66,11 @@ export class DeleteQuery<T = any> implements IFields<T>, ILimit, IOffset, IFilte
    * Filter the dataset rows with some conditions where the operation will be applied
    * @param filter Filtering criteria or a callback that returns a filtering criteria with the conditions
    */
-  public where<K extends keyof T>(
-    filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T, K>): this {
+  public where(
+    filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>): this {
     this.request.Query.setFilterCriteria(
       typeof filter === "function" ?
-        filter((field) => new FieldFilter<T, K>(field)) :
+        filter((field) => new FieldFilter(field)) :
         filter,
     );
     return this;
@@ -81,9 +80,9 @@ export class DeleteQuery<T = any> implements IFields<T>, ILimit, IOffset, IFilte
    * Sort ascendent the response that will represent the affected data
    * @param fields fields names to sort with
    */
-  public sortAsc<K extends keyof T>(fields: Array<K | DefaultDatasetFields>): this;
-  public sortAsc<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this;
-  public sortAsc<K extends keyof T>(field: K | DefaultDatasetFields, ...fields: Array<K | DefaultDatasetFields>): this {
+  public sortAsc<K extends keyof T>(fields: K[]): this;
+  public sortAsc<K extends keyof T>(...fields: K[]): this;
+  public sortAsc<K extends keyof T>(field: K, ...fields: K[]): this {
     if (!field || field.length === 0) {
       throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
     }
@@ -95,10 +94,10 @@ export class DeleteQuery<T = any> implements IFields<T>, ILimit, IOffset, IFilte
    * Sort decedent the response that will represent the affected data
    * @param fields fields names to sort with
    */
-  public sortDesc<K extends keyof T>(fields: Array<K | DefaultDatasetFields>): this;
-  public sortDesc<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this;
+  public sortDesc<K extends keyof T>(fields: K[]): this;
+  public sortDesc<K extends keyof T>(...fields: K[]): this;
   public sortDesc<K extends keyof T>(
-    field: K | DefaultDatasetFields, ...fields: Array<K | DefaultDatasetFields>): this {
+    field: K, ...fields: K[]): this {
     if (!field || field.length === 0) {
       throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
     }

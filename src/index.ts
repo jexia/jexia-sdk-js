@@ -7,7 +7,7 @@ export { DataOperationsModule } from "./api/dataops/dataOperationsModule";
 export {
   combineCriteria,
   field,
-  IFieldFilter,
+  FieldFilter,
   IFilteringCriterion,
   IFilteringCriterionCallback,
 } from "./api/dataops/filteringApi";

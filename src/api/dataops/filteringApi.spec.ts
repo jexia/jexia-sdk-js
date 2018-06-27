@@ -144,4 +144,97 @@ describe("FieldFilter class", () => {
     });
 
   });
+
+  describe("when building a filter with number type value", () => {
+    describe("greater than operator", () => {
+      it("should compile to the proper JSON", () => {
+        let filter = field("name").isGreaterThan(100);
+        let jsonResult: object = (filter as any).lowLevelCondition.compile();
+        expect(jsonResult as any).toEqual({ field: "name", operator: ">", values: [ 100 ], type: "and" });
+      });
+    });
+    describe("less than operator", () => {
+      it("should compile to the proper JSON", () => {
+        let filter = field("name").isLessThan(100);
+        let jsonResult: object = (filter as any).lowLevelCondition.compile();
+        expect(jsonResult as any).toEqual({ field: "name", operator: "<", values: [ 100 ], type: "and" });
+      });
+    });
+    describe("is equal to operator", () => {
+      it("should compile to the proper JSON", () => {
+        let filter = field("name").isEqualTo(100);
+        let jsonResult: object = (filter as any).lowLevelCondition.compile();
+        expect(jsonResult as any).toEqual({ field: "name", operator: "=", values: [ 100 ], type: "and" });
+      });
+    });
+  });
+
+  describe("when building a filter with boolean type value", () => {
+    describe("is equal to operator", () => {
+      it("should compile to the proper JSON", () => {
+        let filter = field("name").isEqualTo(true);
+        let jsonResult: object = (filter as any).lowLevelCondition.compile();
+        expect(jsonResult as any).toEqual({ field: "name", operator: "=", values: [ true ], type: "and" });
+      });
+    });
+    describe("is not equal to operator", () => {
+      it("should compile to the proper JSON", () => {
+        let filter = field("name").isDifferentFrom(false);
+        let jsonResult: object = (filter as any).lowLevelCondition.compile();
+        expect(jsonResult as any).toEqual({ field: "name", operator: "<>", values: [ false ], type: "and" });
+      });
+    });
+  });
+
+  describe("when building a filter with Date type value", () => {
+    let date = new Date();
+    describe("greater than operator", () => {
+      it("should compile to the proper JSON", () => {
+        let filter = field("name").isGreaterThan(date);
+        let jsonResult: object = (filter as any).lowLevelCondition.compile();
+        expect(jsonResult as any).toEqual({ field: "name", operator: ">", values: [ date ], type: "and" });
+      });
+    });
+    describe("less than operator", () => {
+      it("should compile to the proper JSON", () => {
+        let filter = field("name").isLessThan(date);
+        let jsonResult: object = (filter as any).lowLevelCondition.compile();
+        expect(jsonResult as any).toEqual({ field: "name", operator: "<", values: [ date ], type: "and" });
+      });
+    });
+    describe("is equal to operator", () => {
+      it("should compile to the proper JSON", () => {
+        let filter = field("name").isEqualTo(date);
+        let jsonResult: object = (filter as any).lowLevelCondition.compile();
+        expect(jsonResult as any).toEqual({ field: "name", operator: "=", values: [ date ], type: "and" });
+      });
+    });
+    describe("is between operator", () => {
+      it("should compile to the proper JSON", () => {
+        let date2 = new Date();
+        let filter = field("name").isBetween(date, date2);
+        let jsonResult: object = (filter as any).lowLevelCondition.compile();
+        expect(jsonResult as any).toEqual({ field: "name", operator: "BETWEEN", values: [ date, date2 ], type: "and" });
+      });
+    });
+  });
+
+  describe("when building a filter with object type value", () => {
+    describe("is equal to operator", () => {
+      it("should compile to the proper JSON", () => {
+        let filter = field("name").isEqualTo({ name: "Peter Jackson" });
+        let jsonResult: object = (filter as any).lowLevelCondition.compile();
+        expect(jsonResult as any)
+          .toEqual({ field: "name", operator: "=", values: [ { name: "Peter Jackson" } ], type: "and" });
+      });
+    });
+    describe("is not equal to operator", () => {
+      it("should compile to the proper JSON", () => {
+        let filter = field("name").isDifferentFrom({ name: "Peter Jackson" });
+        let jsonResult: object = (filter as any).lowLevelCondition.compile();
+        expect(jsonResult as any)
+          .toEqual({ field: "name", operator: "<>", values: [ { name: "Peter Jackson" } ], type: "and" });
+      });
+    });
+  });
 });
