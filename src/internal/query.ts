@@ -1,4 +1,3 @@
-import { DefaultDatasetFields } from "../api/dataops/dataset";
 import { IFilteringCriterion } from "../api/dataops/filteringApi";
 import { ICondition } from "../api/dataops/filteringCondition";
 import { MESSAGE } from "../config/message";
@@ -81,7 +80,7 @@ export class Query<T = any> {
     return this.relations;
   }
 
-  public AddSortCondition<K extends keyof T>(direction: "asc" | "desc", ...fields: Array<K | DefaultDatasetFields>) {
+  public AddSortCondition<K extends keyof T>(direction: "asc" | "desc", ...fields: K[]) {
     if (fields.length === 0) {
       throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
     }

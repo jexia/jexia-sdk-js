@@ -8,7 +8,7 @@ describe("FilteringCondition class", () => {
   });
 
   describe("when compiling a simple condition", () => {
-    let condition: FilteringCondition;
+    let condition: FilteringCondition<string>;
     let field = "field";
     let operator = "operator";
     let value = "value";
@@ -23,7 +23,7 @@ describe("FilteringCondition class", () => {
   });
 
   describe("when adding a condition with the AND/OR methods", () => {
-    let condition: FilteringCondition;
+    let condition: FilteringCondition<string>;
     let field = "field";
     let operator = "operator";
     let value = "value";

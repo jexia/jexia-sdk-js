@@ -1,7 +1,6 @@
 import { MESSAGE } from "../../config/message";
 import { RequestExecuter } from "../../internal/executer";
 import { DataRequest } from "./dataRequest";
-import { DefaultDatasetFields } from "./dataset";
 import { FieldFilter, IFilteringCriterion, IFilteringCriterionCallback } from "./filteringApi";
 import { IExecutable, IFilterable, ILimit, IOffset, ISortable } from "./query.interfaces";
 
@@ -57,11 +56,11 @@ export class UpdateQuery<T = any> implements ILimit, IOffset, IFilterable, IExec
    * Filter the dataset records with some conditions where the operation will be applied
    * @param filter Filtering criteria or a callback that returns a filtering criteria with the conditions
    */
-  public where<K extends keyof T>(
-    filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T, K>): this {
+  public where(
+    filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>): this {
     this.request.Query.setFilterCriteria(
       typeof filter === "function" ?
-        filter((field) => new FieldFilter<T, K>(field)) :
+        filter((field) => new FieldFilter(field)) :
         filter,
     );
     return this;
@@ -71,9 +70,9 @@ export class UpdateQuery<T = any> implements ILimit, IOffset, IFilterable, IExec
    * Sort ascendent the response that will represent the affected data
    * @param fields fields names to sort with
    */
-  public sortAsc<K extends keyof T>(fields: Array<K | DefaultDatasetFields>): this;
-  public sortAsc<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this;
-  public sortAsc<K extends keyof T>(field: K | DefaultDatasetFields, ...fields: Array<K | DefaultDatasetFields>): this {
+  public sortAsc<K extends keyof T>(fields: K[]): this;
+  public sortAsc<K extends keyof T>(...fields: K[]): this;
+  public sortAsc<K extends keyof T>(field: K, ...fields: K[]): this {
     if (!field || field.length === 0) {
       throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
     }
@@ -85,10 +84,10 @@ export class UpdateQuery<T = any> implements ILimit, IOffset, IFilterable, IExec
    * Sort decedent the response that will represent the affected data
    * @param fields fields names to sort with
    */
-  public sortDesc<K extends keyof T>(fields: Array<K | DefaultDatasetFields>): this;
-  public sortDesc<K extends keyof T>(...fields: Array<K | DefaultDatasetFields>): this;
+  public sortDesc<K extends keyof T>(fields: K[]): this;
+  public sortDesc<K extends keyof T>(...fields: K[]): this;
   public sortDesc<K extends keyof T>(
-    field: K | DefaultDatasetFields, ...fields: Array<K | DefaultDatasetFields>): this {
+    field: K, ...fields: K[]): this {
     if (!field || field.length === 0) {
       throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
     }
