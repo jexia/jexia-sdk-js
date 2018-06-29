@@ -1,3 +1,11 @@
+<a name="3.4.0"></a>
+# [3.4.0](https://github.com/jexia/jexia-sdk-js/compare/v3.3.1...v3.4.0) (2018-06-29)
+
+
+### Features
+
+* **filtering-condition:** allow any types for conditional methods ([ee1e01a](https://github.com/jexia/jexia-sdk-js/commit/ee1e01a))
+
 <a name="3.3.1"></a>
 ## [3.3.1](https://github.com/jexia/jexia-sdk-js/compare/v3.3.0...v3.3.1) (2018-05-21)
 
