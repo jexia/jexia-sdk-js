@@ -109,7 +109,7 @@ export interface IFilteringCriterion<T = any> {
  * @template T Generic type of your dataset, default to any
  * @template K Generic name of the dataset field you want to filter by
  */
-export function field<T = DatasetInterface<any>, K extends keyof DatasetInterface<T> = any>(name: K):
+export function field<T = DatasetInterface<any>, K extends Extract<keyof DatasetInterface<T>, string> = any>(name: K):
   FieldFilter<DatasetInterface<T>[K]> {
   return new FieldFilter<DatasetInterface<T>[K]>(name);
 }
@@ -122,7 +122,7 @@ export function field<T = DatasetInterface<any>, K extends keyof DatasetInterfac
  * @template K Keys of the of your dataset, default to any
  */
 export type IFilteringCriterionCallback<T> =
-  (filter: <K extends keyof T>(field: K) => FieldFilter<T[K]>) => IFilteringCriterion<T>;
+  (filter: <K extends Extract<keyof T, string>>(field: K) => FieldFilter<T[K]>) => IFilteringCriterion<T>;
 
 /**
  * Starts a filtering criteria combination with a filtering criteria

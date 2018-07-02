@@ -80,7 +80,7 @@ export class Query<T = any> {
     return this.relations;
   }
 
-  public AddSortCondition<K extends keyof T>(direction: "asc" | "desc", ...fields: K[]) {
+  public AddSortCondition<K extends Extract<keyof T, string>>(direction: "asc" | "desc", ...fields: K[]) {
     if (fields.length === 0) {
       throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
     }

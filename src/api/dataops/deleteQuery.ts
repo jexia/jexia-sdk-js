@@ -37,9 +37,9 @@ export class DeleteQuery<T = any> implements IFields<T>, ILimit, IOffset, IFilte
    * Select the fields to be returned at the response that represent the affected data
    * @param fields fields names
    */
-  public fields<K extends keyof T>(fields: K[]): this;
-  public fields<K extends keyof T>(...fields: K[]): this;
-  public fields<K extends keyof T>(field: K, ...fields: K[]): this {
+  public fields<K extends Extract<keyof T, string>>(fields: K[]): this;
+  public fields<K extends Extract<keyof T, string>>(...fields: K[]): this;
+  public fields<K extends Extract<keyof T, string>>(field: K, ...fields: K[]): this {
     this.request.Query.Fields = Array.isArray(field) ? field : [field, ...fields];
     return this;
   }
@@ -80,9 +80,9 @@ export class DeleteQuery<T = any> implements IFields<T>, ILimit, IOffset, IFilte
    * Sort ascendent the response that will represent the affected data
    * @param fields fields names to sort with
    */
-  public sortAsc<K extends keyof T>(fields: K[]): this;
-  public sortAsc<K extends keyof T>(...fields: K[]): this;
-  public sortAsc<K extends keyof T>(field: K, ...fields: K[]): this {
+  public sortAsc<K extends Extract<keyof T, string>>(fields: K[]): this;
+  public sortAsc<K extends Extract<keyof T, string>>(...fields: K[]): this;
+  public sortAsc<K extends Extract<keyof T, string>>(field: K, ...fields: K[]): this {
     if (!field || field.length === 0) {
       throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
     }
@@ -94,9 +94,9 @@ export class DeleteQuery<T = any> implements IFields<T>, ILimit, IOffset, IFilte
    * Sort decedent the response that will represent the affected data
    * @param fields fields names to sort with
    */
-  public sortDesc<K extends keyof T>(fields: K[]): this;
-  public sortDesc<K extends keyof T>(...fields: K[]): this;
-  public sortDesc<K extends keyof T>(
+  public sortDesc<K extends Extract<keyof T, string>>(fields: K[]): this;
+  public sortDesc<K extends Extract<keyof T, string>>(...fields: K[]): this;
+  public sortDesc<K extends Extract<keyof T, string>>(
     field: K, ...fields: K[]): this {
     if (!field || field.length === 0) {
       throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
