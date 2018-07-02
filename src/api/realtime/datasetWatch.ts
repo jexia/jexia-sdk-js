@@ -100,7 +100,7 @@ export function start(webSocket: WebSocket, getToken: IGetToken) {
 function watch<T>(
   this: Dataset<T>,
   eventType: EventSubscriptionType | EventSubscriptionType[] = "all",
-  ...others: EventSubscriptionType[],
+  ...others: EventSubscriptionType[]
 ): Observable<RealTimeEventMessage<T>> {
   // creating a unified array and removing duplicated event types
   const events = Array.from(new Set((Array.isArray(eventType) ? eventType : [eventType]).concat(others)));

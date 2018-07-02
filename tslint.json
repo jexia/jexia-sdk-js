@@ -1,6 +1,12 @@
 {
     "extends": "tslint:recommended",
     "rules": {
-      "object-literal-sort-keys": false
+      "object-literal-sort-keys": false,
+      "trailing-comma": [
+        true,
+        {
+          "esSpecCompliant": true
+        }
+      ]
     }
 }
