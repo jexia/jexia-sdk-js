@@ -1,10 +1,10 @@
 import { createMockFor } from "../../../spec/testUtils";
 import { RequestExecuter } from "../../internal/executer";
 import { Dataset } from "./dataset";
-import { DeleteQuery } from "./deleteQuery";
-import { InsertQuery } from "./insertQuery";
-import { SelectQuery } from "./selectQuery";
-import { UpdateQuery } from "./updateQuery";
+import { DeleteQuery } from "./queries/deleteQuery";
+import { InsertQuery } from "./queries/insertQuery";
+import { SelectQuery } from "./queries/selectQuery";
+import { UpdateQuery } from "./queries/updateQuery";
 
 describe("Dataset class", () => {
 

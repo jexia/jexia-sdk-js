@@ -44,7 +44,7 @@ export class DataOperationsModule implements IModule {
    * @param dataset name of the dataset
    * @returns Dataset object used to fetch and modify data at your datasets.
    */
-  public dataset<T = any>(dataset: string): Dataset<T> {
+  public dataset<T extends object = any>(dataset: string): Dataset<T> {
     return this.injector.resolveAndCreateChild([
       {
         provide: DataSetName,
