@@ -2,10 +2,10 @@ import { Inject, Injectable } from "injection-js";
 import { RequestExecuter } from "../../internal/executer";
 import { IResource } from "../core/resource";
 import { DataSetName } from "./dataops.tokens";
-import { DeleteQuery } from "./deleteQuery";
-import { InsertQuery } from "./insertQuery";
-import { SelectQuery } from "./selectQuery";
-import { UpdateQuery } from "./updateQuery";
+import { DeleteQuery } from "./queries/deleteQuery";
+import { InsertQuery } from "./queries/insertQuery";
+import { SelectQuery } from "./queries/selectQuery";
+import { UpdateQuery } from "./queries/updateQuery";
 
 /**
  * Default fields that will always exist for any dataset
@@ -51,7 +51,7 @@ export type DatasetInterface<T> = T & DefaultDatasetInterface;
  * @template T Generic type of your dataset, default to any
  */
 @Injectable()
-export class Dataset<T = any> implements IResource {
+export class Dataset<T extends object = any, D extends DatasetInterface<T> = DatasetInterface<T>> implements IResource {
 
   /**
    * @internal
@@ -73,8 +73,8 @@ export class Dataset<T = any> implements IResource {
    * @returns Query object specialized for select statements.
    * With no filters set, returns all records in the selected dataset.
    */
-  public select(): SelectQuery<DatasetInterface<T>> {
-    return new SelectQuery(this.requestExecuter, this.datasetName);
+  public select(): SelectQuery<D> {
+    return new SelectQuery<D>(this.requestExecuter, this.datasetName);
   }
 
   /**
@@ -83,8 +83,8 @@ export class Dataset<T = any> implements IResource {
    * @returns Query object specialized for update statements.
    * Don't forget to apply a filter to specify the fields that will be modified.
    */
-  public update(data: DatasetInterface<T>): UpdateQuery<DatasetInterface<T>> {
-    return new UpdateQuery(this.requestExecuter, data, this.datasetName);
+  public update(data: D): UpdateQuery<D> {
+    return new UpdateQuery<D>(this.requestExecuter, data, this.datasetName);
   }
 
   /**
@@ -96,7 +96,7 @@ export class Dataset<T = any> implements IResource {
    * required fields for that particular dataset.
    */
   public insert(records: T[]): InsertQuery<T> {
-    return new InsertQuery(this.requestExecuter, records, this.datasetName);
+    return new InsertQuery<T>(this.requestExecuter, records, this.datasetName);
   }
 
   /**
@@ -105,7 +105,7 @@ export class Dataset<T = any> implements IResource {
    * You need to specify a filter to narrow down the records that you want deleted
    * from the backend.
    */
-  public delete(): DeleteQuery<DatasetInterface<T>> {
-    return new DeleteQuery(this.requestExecuter, this.datasetName);
+  public delete(): DeleteQuery<D> {
+    return new DeleteQuery<D>(this.requestExecuter, this.datasetName);
   }
 }

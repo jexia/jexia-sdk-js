@@ -1,5 +1,7 @@
 // tslint:disable:no-string-literal
-import { createRequestExecuterMock } from "../../../spec/testUtils";
+import { createRequestExecuterMock } from "../../../../spec/testUtils";
+import { compileDataRequest } from "../../../internal/queryBasedCompiler";
+import { QueryAction } from "./baseQuery";
 import { InsertQuery } from "./insertQuery";
 
 describe("InsertQuery class", () => {
@@ -34,8 +36,7 @@ describe("InsertQuery class", () => {
         let qe = createRequestExecuterMock(projectID, dataset);
         let queryObj: any = new InsertQuery(qe, [{title: "Another first post", user_id: 1}], dataset);
         expect(queryObj).toBeDefined();
-        expect(queryObj.request).toBeDefined();
-        expect(queryObj.request.records).toEqual([{title: "Another first post", user_id: 1}]);
+        expect(queryObj.records).toEqual([{title: "Another first post", user_id: 1}]);
         done();
     });
   });
@@ -43,8 +44,13 @@ describe("InsertQuery class", () => {
   it("should correct execute the query", () => {
     let qe = createRequestExecuterMock(projectID, dataset);
     let subject: any = new InsertQuery(qe, [{ title: "Another first post", user_id: 1 }], dataset);
-    spyOn(subject["request"], "execute");
+    let compiledRequest = compileDataRequest({
+      action: QueryAction.insert,
+      query: subject["query"],
+      records: subject["records"],
+    });
+    spyOn(subject["queryExecuter"], "executeRequest");
     subject.execute();
-    expect(subject["request"].execute).toHaveBeenLastCalledWith(qe);
+    expect(subject["queryExecuter"].executeRequest).toHaveBeenLastCalledWith(compiledRequest);
   });
 });

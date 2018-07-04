@@ -1,38 +1,38 @@
-import { DataRequest } from "../api/dataops/dataRequest";
 import { FilteringCondition } from "../api/dataops/filteringCondition";
+import { QueryAction } from "../api/dataops/queries/baseQuery";
 import { Query } from "./query";
 import { compileDataRequest, QueryBasedCompiler } from "./queryBasedCompiler";
 
 describe("compileDataRequest function", () => {
-  let request: DataRequest;
+  let request: { action: QueryAction; records: any[]; query: Query };
 
   beforeEach(() => {
-    request = new DataRequest("select", "dataset");
+    request = {action: QueryAction.select, records: [], query: new Query("dataset")};
   });
 
   describe("when compiling a Request that does not have an action set", () => {
     it("throws an error", () => {
-      request.Action = "";
+      (request as any).action = "";
       expect(() => compileDataRequest(request)).toThrow();
     });
   });
 
   describe("when compiling a Request with an action set", () => {
     it("it compiles the Request to the expected object literal", () => {
-      expect(compileDataRequest(request)).toEqual({action: "select"});
+      expect(compileDataRequest(request)).toEqual({ action: "select", records: [] });
     });
 
     it("it compiles the Request to the expected object literal", () => {
-      request.Action = "update";
-      expect(compileDataRequest(request)).toEqual({action: "update"});
+      request.action = QueryAction.update;
+      expect(compileDataRequest(request)).toEqual({ action: "update", records: [] });
     });
   });
 
   describe("when compiling a Request with Records set", () => {
     it("compiles the Request to the expected object literal", () => {
       let records = [{text: "text1"}, {text: "text2"}, {text: "text3"}];
-      request.Records = records;
-      expect(compileDataRequest(request)).toEqual({ action: "select", records});
+      request.records = records;
+      expect(compileDataRequest(request)).toEqual({ action: "select", records });
     });
   });
 });
@@ -86,6 +86,13 @@ describe("QueryBasedCompiler class", () => {
     });
   });
 
+  describe("when trying to set sort condition without fields", () => {
+    it("it should throw an error", () => {
+      let query = new Query(dataset);
+      expect(() => query.AddSortCondition("asc")).toThrow();
+    });
+  });
+
   describe("when receiving a Query with a sorting condition set", () => {
     it("it compiles the Query to the expected object literal", () => {
       let query = new Query(dataset);
@@ -94,6 +101,16 @@ describe("QueryBasedCompiler class", () => {
       expect(compiler.compile()).toEqual({
           orders: [{fields: [ "field1", "field2" ], direction: "asc"}],
       });
+    });
+  });
+
+  describe("when receiving a Query with a filtering condition set", () => {
+    it("it compiles the Query to the expected object literal", () => {
+      let query = new Query(dataset);
+      (query as any).setFilterCriteria({
+        lowLevelCondition: "test",
+      });
+      expect((query as any).filteringConditions).toEqual("test");
     });
   });
 
@@ -126,31 +143,31 @@ describe("QueryBasedCompiler class", () => {
 });
 
 describe("Request - Query compiling integration tests", () => {
-  let request: DataRequest;
+  let request: { action: QueryAction; records: any[]; query: Query };
 
   beforeEach( () => {
-    request = new DataRequest("select", "dataset");
+    request = {action: QueryAction.select, records: [], query: new Query("dataset")};
   });
 
   describe("when setting up a simple request", () => {
     it("gets compiled to an object literal as expected by the back-end", () => {
-      expect(compileDataRequest(request)).toEqual({action: "select"});
+      expect(compileDataRequest(request)).toEqual({action: "select", records: []});
     });
   });
 
   describe("when setting up a request with query options but without relations", () => {
     it("gets compiled to an object literal as expected by the back-end", () => {
-      request.Query.Offset = 10;
-      request.Query.Limit = 10;
-      request.Query.Fields = ["field1", "field2"];
-      request.Query.Filter = new FilteringCondition("field", "operator", ["value"]);
-      request.Query.AddSortCondition("asc", "field1", "field2");
+      request.query.Offset = 10;
+      request.query.Limit = 10;
+      request.query.Fields = ["field1", "field2"];
+      request.query.Filter = new FilteringCondition("field", "operator", ["value"]);
+      request.query.AddSortCondition("asc", "field1", "field2");
       expect(compileDataRequest(request)).toEqual({action: "select", params: {
         conditions: [{ field: "field", operator: "operator", values: [ "value" ], type: "and" }],
         fields: [ "field1", "field2" ],
         orders: [{fields: [ "field1", "field2" ], direction: "asc"}],
         range: {offset: 10, limit: 10},
-      }});
+      }, records: []});
     });
   });
 
@@ -161,9 +178,9 @@ describe("Request - Query compiling integration tests", () => {
       let relation2 = new Query("relation2");
       relation1.Fields = fields;
       relation2.Fields = fields;
-      request.Query.Fields = fields;
-      request.Query.AddRelation(relation1);
-      request.Query.AddRelation(relation2);
+      request.query.Fields = fields;
+      request.query.AddRelation(relation1);
+      request.query.AddRelation(relation2);
       expect(compileDataRequest(request)).toEqual({action: "select", params: {
         fields,
         relations: {
@@ -174,7 +191,7 @@ describe("Request - Query compiling integration tests", () => {
             fields,
           },
         },
-      }});
+      }, records: []});
     });
   });
 
@@ -191,9 +208,9 @@ describe("Request - Query compiling integration tests", () => {
       relation4.Fields = fields;
       relation1.AddRelation(relation3);
       relation2.AddRelation(relation4);
-      request.Query.Fields = fields;
-      request.Query.AddRelation(relation1);
-      request.Query.AddRelation(relation2);
+      request.query.Fields = fields;
+      request.query.AddRelation(relation1);
+      request.query.AddRelation(relation2);
       expect(compileDataRequest(request)).toEqual({action: "select", params: {
         fields,
         relations: {
@@ -206,7 +223,7 @@ describe("Request - Query compiling integration tests", () => {
             relations: { relation4: {fields} },
           },
         },
-      }});
+      }, records: []});
     });
   });
 });

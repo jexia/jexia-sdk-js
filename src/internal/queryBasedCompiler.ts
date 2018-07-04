@@ -1,5 +1,5 @@
-import { DataRequest } from "../api/dataops/dataRequest";
 import { ICondition } from "../api/dataops/filteringCondition";
+import { QueryAction } from "../api/dataops/queries/baseQuery";
 import { Query } from "./query";
 
 export interface ICompiledRequest {
@@ -16,20 +16,26 @@ export interface ICompiledQuery {
   range?: object;
 }
 
-export function compileDataRequest(dataRequest: DataRequest): ICompiledRequest {
-  if (!dataRequest.Action) {
-    throw new Error("You need to set an Action before compiling the Request.");
+export interface IDataRequest {
+  action: QueryAction;
+  query: Query;
+  records: any[];
+}
+
+export function compileDataRequest(dataRequest: IDataRequest): ICompiledRequest {
+  if (!dataRequest.action) {
+    throw new Error("You need to set an action before compiling the Request.");
   }
 
-  let compiledQuery: ICompiledRequest = {action: dataRequest.Action};
-  let compiledQueryOptions = new QueryBasedCompiler(dataRequest.Query).compile();
+  let compiledQuery: ICompiledRequest = {action: dataRequest.action};
+  let compiledQueryOptions = new QueryBasedCompiler(dataRequest.query).compile();
 
   if (compiledQueryOptions && Object.keys(compiledQueryOptions).length !== 0 ) {
     compiledQuery.params = compiledQueryOptions;
   }
 
-  if (dataRequest.Records) {
-    compiledQuery.records = dataRequest.Records;
+  if (dataRequest.records) {
+    compiledQuery.records = dataRequest.records;
   }
 
   return compiledQuery;
