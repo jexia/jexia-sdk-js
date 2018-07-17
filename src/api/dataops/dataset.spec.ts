@@ -7,6 +7,18 @@ import { SelectQuery } from "./queries/selectQuery";
 import { UpdateQuery } from "./queries/updateQuery";
 
 describe("Dataset class", () => {
+  describe("after initiating", () => {
+    it("dataset name should be set", () => {
+      const dataset = new Dataset("test", createMockFor(RequestExecuter));
+      expect(dataset.name).toEqual("test");
+    });
+
+    it("requestExecuter should be set", () => {
+      const requestExecuter = createMockFor(RequestExecuter);
+      const dataset = new Dataset("test", requestExecuter);
+      expect((dataset as any).requestExecuter).toEqual(requestExecuter);
+    });
+  });
 
   it("should be able start a select query", () => {
     const dataset = new Dataset("test", createMockFor(RequestExecuter));

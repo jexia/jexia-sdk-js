@@ -2,61 +2,43 @@ import { IFilteringCriterion } from "../api/dataops/filteringApi";
 import { ICondition } from "../api/dataops/filteringCondition";
 import { MESSAGE } from "../config/message";
 
-interface ISort {
+/* Sort direction
+ */
+export type Direction = "asc" | "desc";
+
+/* Data sorting
+ * list of fields + direction
+ */
+interface ISort<K> {
+  fields: K[];
+  direction: Direction;
+}
+
+/* Array of data sorting
+   fields should be in inherited generic dataset model (if it's been set)
+ */
+type SortedFields<T> = Array<ISort<Extract<keyof T, string>>>;
+
+export interface ICompiledQuery<T> {
+  data: T;
+  conditions: Array<object>;
   fields: string[];
-  direction: string;
+  orders: SortedFields<T>;
+  range: { limit?: number, offset?: number };
+  relations: {[key: string]: Partial<ICompiledQuery<T>>};
 }
 
 export class Query<T = any> {
-  private dataSet: string;
-  private fields: string[];
-  private limit: number;
-  private offset: number;
+  public fields: string[];
+  public limit: number;
+  public offset: number;
+  public data: T;
+
+  private relations: Query[] = [];
   private filteringConditions: ICondition;
-  private orders: ISort[];
-  private relations: Query[];
-  private data: T;
+  private orders: SortedFields<T> = [];
 
-  constructor(dataSet: string) {
-    this.dataSet = dataSet;
-    this.orders = [];
-    this.relations = [];
-  }
-
-  public set Data(data: T){
-    this.data = data;
-  }
-
-  public get Data(): T {
-    return this.data;
-  }
-
-  public get Dataset(): string {
-    return this.dataSet;
-  }
-
-  public set Fields(fields: string[]){
-    this.fields = fields;
-  }
-
-  public get Fields(): string[] {
-    return this.fields;
-  }
-
-  public set Limit(limit: number){
-    this.limit = limit;
-  }
-
-  public get Limit(){
-    return this.limit;
-  }
-
-  public set Offset(offset: number){
-    this.offset = offset;
-  }
-
-  public get Offset(){
-    return this.offset;
+  constructor(public readonly dataset: string) {
   }
 
   /*
@@ -68,30 +50,64 @@ export class Query<T = any> {
     this.filteringConditions = (filter as any).lowLevelCondition;
   }
 
-  public set Filter(condition: ICondition) {
-    this.filteringConditions = condition;
-  }
-
-  public get Filter(): ICondition {
-    return this.filteringConditions;
-  }
-
-  public get Relations(): Query[] {
-    return this.relations;
-  }
-
-  public AddSortCondition<K extends Extract<keyof T, string>>(direction: "asc" | "desc", ...fields: K[]) {
+  public addSortCondition<K extends Extract<keyof T, string>>(direction: "asc" | "desc", ...fields: K[]) {
     if (fields.length === 0) {
       throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
     }
     this.orders.push({ fields, direction });
   }
 
-  public get SortOrders(): Array<object> {
-    return this.orders;
+  public addRelation(relation: Query): void {
+    this.relations.push(relation);
   }
 
-  public AddRelation(relation: Query): void {
-    this.relations.push(relation);
+  /* Collect all conditionals inside one object
+   * to pass it to the API. Some conditionals can be skipped
+   */
+  public compile(): Partial<ICompiledQuery<T>> {
+    let compiledQueryOptions: Partial<ICompiledQuery<T>> = {};
+
+    /* Compile conditions
+     */
+    if (this.filteringConditions) {
+      compiledQueryOptions.conditions = [this.filteringConditions.compile()];
+    }
+
+    /* Compile limit and offset options
+     */
+    if (this.limit || this.offset) {
+      compiledQueryOptions.range = {
+        ...this.limit ? { limit: this.limit } : {},
+        ...this.offset ? { offset: this.offset } : {},
+      };
+    }
+
+    /* Compile fields
+     */
+    if (this.fields) {
+      compiledQueryOptions.fields = this.fields;
+    }
+
+    /* Compile sort options
+     */
+    if (this.orders.length) {
+      compiledQueryOptions.orders = this.orders;
+    }
+
+    /* Compile data
+     */
+    if (this.data) {
+      compiledQueryOptions.data = this.data;
+    }
+
+    /* Compile relations
+     */
+    if (this.relations.length) {
+      compiledQueryOptions.relations = this.relations.reduce((relations, relation) => (
+        { ...relations, [relation.dataset]: relation.compile() }
+      ), {});
+    }
+
+    return compiledQueryOptions;
   }
 }

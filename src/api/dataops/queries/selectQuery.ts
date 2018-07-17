@@ -31,7 +31,7 @@ export class SelectQuery<T> extends FilterableQuery<T> {
    * @param limit number limit records amount
    */
   public limit(limit: number): this {
-    this.query.Limit = limit;
+    this.query.limit = limit;
     return this;
   }
 
@@ -40,7 +40,7 @@ export class SelectQuery<T> extends FilterableQuery<T> {
    * @param offset number offset amount
    */
   public offset(offset: number): this {
-    this.query.Offset = offset;
+    this.query.offset = offset;
     return this;
   }
 
@@ -54,7 +54,7 @@ export class SelectQuery<T> extends FilterableQuery<T> {
     if (!field || field.length === 0) {
       throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
     }
-    this.query.AddSortCondition("asc", ...(Array.isArray(field) ? field : field && [field, ...fields]));
+    this.query.addSortCondition("asc", ...(Array.isArray(field) ? field : field && [field, ...fields]));
     return this;
   }
 
@@ -68,7 +68,7 @@ export class SelectQuery<T> extends FilterableQuery<T> {
     if (!field || field.length === 0) {
       throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
     }
-    this.query.AddSortCondition("desc", ...(Array.isArray(field) ? field : field && [field, ...fields]));
+    this.query.addSortCondition("desc", ...(Array.isArray(field) ? field : field && [field, ...fields]));
     return this;
   }
 }

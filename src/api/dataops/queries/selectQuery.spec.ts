@@ -4,8 +4,6 @@ import { createMockFor, createRequestExecuterMock } from "../../../../spec/testU
 import { MESSAGE } from "../../../config/message";
 import { RequestExecuter } from "../../../internal/executer";
 import { Query } from "../../../internal/query";
-import { compileDataRequest } from "../../../internal/queryBasedCompiler";
-import { QueryAction } from "./baseQuery";
 import { SelectQuery } from "./selectQuery";
 
 interface ITestUser {
@@ -120,14 +118,9 @@ describe("SelectQuery class", () => {
   it("should correct execute the query", () => {
     let qe = createRequestExecuterMock(projectID, dataset);
     let subject: any = new SelectQuery(qe, dataset);
-    let compiledRequest = compileDataRequest({
-      action: QueryAction.select,
-      query: subject["query"],
-      records: subject["records"],
-    });
     spyOn(subject["queryExecuter"], "executeRequest");
     subject.execute();
-    expect(subject["queryExecuter"].executeRequest).toHaveBeenLastCalledWith(compiledRequest);
+    expect(subject["queryExecuter"].executeRequest).toHaveBeenLastCalledWith({action: "select"});
   });
 
 });
