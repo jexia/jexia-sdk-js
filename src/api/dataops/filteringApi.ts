@@ -64,7 +64,7 @@ export class FieldFilter<U> {
 /**
  * @internal
  */
-class FilteringCriterion implements IFilteringCriterion {
+export class FilteringCriterion implements IFilteringCriterion {
   private lowLevelCondition: ICondition;
 
   constructor(lowLevelCondition?: ICondition, highLevelCriteria?: FilteringCriterion) {

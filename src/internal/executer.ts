@@ -3,7 +3,6 @@ import { ClientInit } from "../api/core/client";
 import { AuthOptions, IAuthOptions, TokenManager } from "../api/core/tokenManager";
 import { DataSetName } from "../api/dataops/dataops.tokens";
 import { API } from "../config/config";
-import { ICompiledRequest } from "./queryBasedCompiler";
 import { Methods, RequestAdapter } from "./requestAdapter";
 
 @Injectable()
@@ -16,7 +15,7 @@ export class RequestExecuter {
     private tokenManager: TokenManager,
   ) { }
 
-  public async executeRequest(options: ICompiledRequest): Promise<any> {
+  public async executeRequest(options: any): Promise<any> {
     await this.systemInit;
     const token = await this.tokenManager.token;
     return this.requestAdapter.execute(
