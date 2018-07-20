@@ -1,5 +1,9 @@
 // tslint:disable:object-literal-sort-keys
 export const API = {
+  AUTH: {
+    USER_CREDENTIALS: "auth",
+    API_KEY: "ak/authentication",
+  },
   DATA: {
     ENDPOINT: "sdk-api",
   },
@@ -7,11 +11,10 @@ export const API = {
     ENDPOINT: "fs",
   },
   REAL_TIME: {
-    ENDPOINT: "/realtime",
+    ENDPOINT: "/rtc?Authorization=",
     PORT: "",
     PROTOCOL: "wss",
   },
-  AUTHURL: "auth",
   DOMAIN: "com",
   HOST: "app.jexia",
   PORT: 443,

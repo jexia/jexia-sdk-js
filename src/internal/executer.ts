@@ -2,7 +2,7 @@ import { Inject, Injectable } from "injection-js";
 import { ClientInit } from "../api/core/client";
 import { AuthOptions, IAuthOptions, TokenManager } from "../api/core/tokenManager";
 import { DataSetName } from "../api/dataops/dataops.tokens";
-import { API } from "../config/config";
+import { API } from "../config";
 import { ICompiledRequest } from "./queryBasedCompiler";
 import { Methods, RequestAdapter } from "./requestAdapter";
 

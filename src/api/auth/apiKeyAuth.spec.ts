@@ -1,6 +1,6 @@
 // tslint:disable:max-line-length
 import { createMockFor } from "../../../spec/testUtils";
-import { API } from "../../config/config";
+import { API } from "../../config";
 import { IRequestAdapter, Methods } from "../../internal/requestAdapter";
 import { Tokens } from "../core/tokenManager";
 import { ApiKeyAuth } from "./apiKeyAuth";

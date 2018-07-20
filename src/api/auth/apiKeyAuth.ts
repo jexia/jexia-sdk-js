@@ -1,4 +1,4 @@
-import { API } from "../../config/config";
+import { API } from "../../config";
 import { IAuthOptions } from "../core/tokenManager";
 import { BaseAuth } from "./BaseAuth";
 

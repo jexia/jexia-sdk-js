@@ -4,7 +4,7 @@ import { Observer } from "rxjs/internal/types";
 import { combineLatest } from "rxjs/operators";
 import { EventSubscriptionType } from "src";
 import { createMockFor, deepFreeze, SpyObj } from "../../../spec/testUtils";
-import { MESSAGE } from "../../config/message";
+import { MESSAGE } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
 import { Dataset } from "../dataops/dataset";
 import * as datasetWatch from "./datasetWatch";
@@ -14,7 +14,6 @@ import {
   JwtRefreshArgument,
   NotificationCodes,
   RealTimeCommand,
-  RealTimeCommandResponse,
   RealTimeCommandTypes,
   RealTimeEventMessage,
   RealTimeMessage,
@@ -38,40 +37,49 @@ function createSubject({
   tokenPromise = Promise.resolve(tokenTest),
   getToken = jasmine.createSpy().and.returnValue(tokenPromise),
 } = {}) {
+
+  let dataset = new Dataset(datasetName, requestExecuterMock);
+
   if (start) {
+    /* this should be done in realTimeModule, not supposed to be tested here */
+    Dataset.prototype.watch = datasetWatch.watch;
+    Dataset.prototype.webSocket = webSocketMock;
+
     datasetWatch.start(webSocketMock, getToken);
   }
   return {
     getToken,
     webSocketMock,
     requestExecuterMock,
-    dataset: new Dataset(datasetName, requestExecuterMock),
+    dataset,
     otherDataset: new Dataset(otherDatasetName, requestExecuterMock),
     subject: datasetWatch,
   };
 }
 
-function createSubscribeCommandMessage(action: EventSubscriptionType[], dataset = datasetName): RealTimeMessage {
+function createSubscribeCommandMessage(action: EventSubscriptionType[], dataset = datasetName) {
   return createCommandMessage(RealTimeCommandTypes.Subscribe, action, dataset);
 }
 
-function createUnsubscribeCommandMessage(action: EventSubscriptionType[], dataset = datasetName): RealTimeMessage {
+function createUnsubscribeCommandMessage(action: EventSubscriptionType[], dataset = datasetName) {
   return createCommandMessage(RealTimeCommandTypes.UnSubscribe, action, dataset);
 }
 
-function createCommandMessage(command: RealTimeCommandTypes, action: EventSubscriptionType[], dataset = datasetName): RealTimeMessage {
+function createCommandMessage(command: RealTimeCommandTypes, action: EventSubscriptionType[], dataset = datasetName) {
   return {
-    type: RealTimeMessageTypes.Command,
-    data: {
-      command,
-      arguments: {
-        action,
-        resource: {
-          type: ResourceType.Dataset,
-          name: dataset,
+    data: JSON.stringify({
+      type: RealTimeMessageTypes.Command,
+      data: {
+        command,
+        arguments: {
+          action,
+          resource: {
+            type: ResourceType.Dataset,
+            name: dataset,
+          },
         },
-      },
-    } as RealTimeCommand,
+      }
+    })
   };
 }
 
@@ -87,8 +95,12 @@ function createJwtRefreshCommandMessage(token = tokenTest): RealTimeMessage {
   };
 }
 
-function createResponseCommandMessage(data: RealTimeCommandResponse) {
-  return { type: RealTimeMessageTypes.CommandResponse, data: JSON.stringify(data) };
+function createResponseCommandMessage(data: any) {
+  return {
+    data: JSON.stringify({
+      type: RealTimeMessageTypes.CommandResponse, data
+    }
+  )};
 }
 
 function createNotificationMessage(code = NotificationCodes.TokenAboutToExpire, info = "some test info", data?: any) {
@@ -101,9 +113,11 @@ function createNotificationMessage(code = NotificationCodes.TokenAboutToExpire, 
 
 function createEventMessage(messageOptions?: Partial<RealTimeEventMessage>) {
   return {
-    type: RealTimeMessageTypes.EventMessage,
-    data: JSON.stringify(createEventMessageData(null, messageOptions)),
-  };
+    data: JSON.stringify({
+      type: RealTimeMessageTypes.EventMessage,
+      data: createEventMessageData(null, messageOptions),
+    }
+  )};
 }
 
 function createEventMessageData(data: any = {}, options?: Partial<RealTimeEventMessage>): RealTimeEventMessage {
@@ -144,126 +158,162 @@ describe("Dataset Watch", () => {
     subs = [];
   });
 
-  it("should not append the realtime implementation on dataset before start with the websocket", () => {
-    const { dataset } = createSubject({ start: false });
-    try {
-      dataset.watch();
-      throw new Error(shouldHaveFailed);
-    } catch (error) {
-      expect(error.message).not.toBe(shouldHaveFailed);
-    }
-  });
-
-  it("should not append the realtime implementation on dataset before start with the websocket", () => {
-    const { dataset } = createSubject();
-    try {
-      dataset.watch("non existing event" as any);
-      throw new Error(shouldHaveFailed);
-    } catch (error) {
-      expect(error.message).toBe(MESSAGE.RTC.BAD_EVENT_SUBSCRIPTION_TYPE);
-    }
-  });
-
-  it("should append the realtime implementation on dataset after start with the websocket", () => {
-    const { dataset, webSocketMock } = createSubject();
-    const observable = dataset.watch();
-    expect(observable).toBeTruthy();
-    expect(dataset.webSocket).toBe(webSocketMock);
-  });
-
   describe("when subscribing to the realtime observable", () => {
 
-    it("should send subscription command for all dataset events by default", () => {
+    it("should send subscription command for all dataset events by default", async () => {
       const { dataset, webSocketMock } = createSubject();
-      subs.push(dataset.watch().subscribe());
-      expect(webSocketMock.send).toHaveBeenCalledWith(JSON.stringify(createSubscribeCommandMessage(["all"])));
+
+      const sub = dataset.watch().subscribe();
+
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          expect(webSocketMock.send).toHaveBeenCalledWith(createSubscribeCommandMessage(["all"]).data);
+          sub.unsubscribe();
+          resolve();
+        });
+      });
+
     });
 
-    it("should send subscription command for a single dataset event", () => {
+    it("should throw an error if there is a wrong dataset event", () => {
+      const { dataset } = createSubject();
+
+      try {
+        // typescript type checking cancellation
+        (dataset.watch as any)("wrongEvent").subscribe();
+      } catch (error) {
+        expect(error.message).toEqual(MESSAGE.RTC.BAD_EVENT_SUBSCRIPTION_TYPE);
+      }
+    });
+
+    it("should send subscription command for a single dataset event", async () => {
       const { dataset, webSocketMock } = createSubject();
       const events = "created";
-      subs.push(dataset.watch(events).subscribe());
-      expect(webSocketMock.send).toHaveBeenCalledWith(JSON.stringify(createSubscribeCommandMessage([events])));
+      const sub = dataset.watch(events).subscribe();
+
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          expect(webSocketMock.send).toHaveBeenCalledWith(createSubscribeCommandMessage([events]).data);
+          sub.unsubscribe();
+          resolve();
+        });
+      });
     });
 
-    it("should send subscribe command for even if there is another observer listen to the same event in another dataset", () => {
-      const { dataset, otherDataset, webSocketMock } = createSubject();
-      const events = "created";
-      const firstSub = dataset.watch(events).subscribe();
-      subs.push(otherDataset.watch(events).subscribe());
-      firstSub.unsubscribe();
-      expect(webSocketMock.send).toHaveBeenCalledWith(JSON.stringify(createSubscribeCommandMessage([events])));
-    });
+    it("should send subscribe command for even if there is another observer listen to the same event in another dataset",
+      async () => new Promise((done) => {
+        const {dataset, otherDataset, webSocketMock} = createSubject();
+        const events = "created";
+        const firstSub = dataset.watch(events).subscribe();
+        const secondSub = otherDataset.watch(events).subscribe();
+        setTimeout(() => {
+          firstSub.unsubscribe();
+          expect(webSocketMock.send).toHaveBeenCalledWith(createSubscribeCommandMessage([events]).data);
+          secondSub.unsubscribe();
+          done();
+        });
+    }));
 
-    it("should send subscription command for multiple dataset events by spread operator", () => {
+    it("should send subscription command for multiple dataset events by spread operator", (done) => {
       const { dataset, webSocketMock } = createSubject();
       const events: EventSubscriptionType[] = ["created", "updated"];
       subs.push(dataset.watch(...events).subscribe());
-      expect(webSocketMock.send).toHaveBeenCalledWith(JSON.stringify(createSubscribeCommandMessage(events)));
+      setTimeout(() => {
+        expect(webSocketMock.send).toHaveBeenCalledWith(createSubscribeCommandMessage(events).data);
+        done();
+      });
     });
 
-    it("should send subscription command for multiple dataset events by array", () => {
+    it("should send subscription command for multiple dataset events by array", (done) => {
       const { dataset, webSocketMock } = createSubject();
       const events: EventSubscriptionType[] = ["created", "updated"];
       subs.push(dataset.watch(events).subscribe());
-      expect(webSocketMock.send).toHaveBeenCalledWith(JSON.stringify(createSubscribeCommandMessage(events)));
+      setTimeout(() => {
+        expect(webSocketMock.send).toHaveBeenCalledWith(createSubscribeCommandMessage(events).data);
+        done();
+      });
     });
 
-    it("should send subscribe command just for 'all' if it send all possible events", () => {
+    it("should send subscribe command just for 'all' if it send all possible events", (done) => {
       const { dataset, webSocketMock, subject } = createSubject();
       subs.push(dataset.watch(...subject.allEvents).subscribe());
-      expect(webSocketMock.send).toHaveBeenCalledWith(JSON.stringify(createSubscribeCommandMessage(["all"])));
+      setTimeout(() => {
+        expect(webSocketMock.send).toHaveBeenCalledWith(createSubscribeCommandMessage(["all"]).data);
+        done();
+      });
     });
 
-    it("should clean duplicated events when sending subscription command", () => {
+    it("should clean duplicated events when sending subscription command", (done) => {
       const { dataset, webSocketMock } = createSubject();
       const events: EventSubscriptionType[] = ["created", "updated"];
       subs.push(dataset.watch([...events, ...events]).subscribe());
-      expect(webSocketMock.send).toHaveBeenCalledWith(JSON.stringify(createSubscribeCommandMessage(events)));
+      setTimeout(() => {
+        expect(webSocketMock.send).toHaveBeenCalledWith(createSubscribeCommandMessage(events).data);
+        done();
+      });
     });
 
-    it("should not send a subscribe command if there is another observable watching the same event at the same dataset", () => {
+    it("should not send a subscribe command if there is another observable watching the same event at the same dataset", (done) => {
       const { dataset, webSocketMock } = createSubject();
       const action: EventSubscriptionType = "deleted";
 
       subs.push(dataset.watch(action).subscribe());
-      webSocketMock.send.mockReset();
-      subs.push(dataset.watch(action).subscribe());
 
-      expect(webSocketMock.send).not.toHaveBeenCalledWith(JSON.stringify(createSubscribeCommandMessage([action])));
+      setTimeout(() => {
+        webSocketMock.send.mockReset();
+        subs.push(dataset.watch(action).subscribe());
+
+        setTimeout(() => {
+          expect(webSocketMock.send).not.toHaveBeenCalledWith(createSubscribeCommandMessage([action]).data);
+          done();
+        });
+      });
     });
 
-    it("should not send any subscribe command if there is another observable watching the same events at this dataset", () => {
+    it("should not send any subscribe command if there is another observable watching the same events at this dataset", (done) => {
       const { dataset, webSocketMock } = createSubject();
 
       subs.push(dataset.watch("all").subscribe());
-      webSocketMock.send.mockReset();
-      subs.push(dataset.watch("deleted", "created").subscribe());
 
-      expect(webSocketMock.send).not.toHaveBeenCalled();
+      setTimeout(() => {
+        webSocketMock.send.mockReset();
+        subs.push(dataset.watch("deleted", "created").subscribe());
+        setTimeout(() => {
+          expect(webSocketMock.send).not.toHaveBeenCalled();
+          done();
+        });
+      });
     });
 
-    it("should send a subscribe command for individual events that there is no others observable watching at the same dataset", () => {
+    it("should send a subscribe command for individual events that there is no others observable watching at the same dataset", (done) => {
       const { dataset, webSocketMock } = createSubject();
 
       subs.push(dataset.watch("deleted").subscribe());
       subs.push(dataset.watch("created").subscribe());
 
-      expect(webSocketMock.send).toHaveBeenCalledWith(JSON.stringify(createSubscribeCommandMessage(["deleted"])));
-      expect(webSocketMock.send).toHaveBeenCalledWith(JSON.stringify(createSubscribeCommandMessage(["created"])));
+      setTimeout(() => {
+        expect(webSocketMock.send).toHaveBeenCalledWith(createSubscribeCommandMessage(["deleted"]).data);
+        expect(webSocketMock.send).toHaveBeenCalledWith(createSubscribeCommandMessage(["created"]).data);
+        done();
+      });
     });
 
-    it("should send a subscribe command for individual events that there is no others observable watching at the same dataset even when using 'all'", () => {
+    it("should send a subscribe command for individual events that there is no others observable watching at the same dataset even when using 'all'", (done) => {
       const { dataset, webSocketMock, subject } = createSubject();
       const action: EventSubscriptionType = "deleted";
       const allOtherEvents = subject.allEvents.filter((e) => e !== action);
 
       subs.push(dataset.watch(action).subscribe());
-      webSocketMock.send.mockReset();
-      subs.push(dataset.watch("all").subscribe());
 
-      expect(webSocketMock.send).not.toHaveBeenCalledWith(JSON.stringify(createSubscribeCommandMessage(["deleted"])));
-      expect(webSocketMock.send).toHaveBeenCalledWith(JSON.stringify(createSubscribeCommandMessage(allOtherEvents)));
+      setTimeout(() => {
+        webSocketMock.send.mockReset();
+        subs.push(dataset.watch("all").subscribe());
+        setTimeout(() => {
+          expect(webSocketMock.send).not.toHaveBeenCalledWith(createSubscribeCommandMessage(["deleted"]).data);
+          expect(webSocketMock.send).toHaveBeenCalledWith(createSubscribeCommandMessage(allOtherEvents).data);
+          done();
+        });
+      });
     });
 
     it("should send an error to the observable if the websocket object throws an error when sending the subscription command", (done) => {
@@ -307,19 +357,26 @@ describe("Dataset Watch", () => {
 
   describe("when websocket send a command response message", () => {
 
-    it("should send an error to the observable if the websocket sends an error at the command response", async () => {
+    it("should send an error to the observable if the websocket sends an error at the command response", async (done) => {
       const { dataset, webSocketMock } = createSubject();
       const request = createSubscribeCommandMessage(["all"]);
 
-      setTimeout(() => webSocketMock.onmessage(createResponseCommandMessage({ request, error: realtimeError })), 10);
+      let sub = dataset.watch();
 
-      try {
-        await dataset.watch().toPromise();
-        throw new Error(shouldHaveFailed);
-      } catch (error) {
-        expect(error.message).toContain(realtimeError.code);
-        expect(error.message).toContain(realtimeError.info);
-      }
+      setTimeout(async () => {
+
+        setTimeout(() => webSocketMock.onmessage(
+          createResponseCommandMessage({request, error: realtimeError})), 10);
+
+        try {
+          await sub.toPromise();
+          throw new Error(shouldHaveFailed);
+        } catch (error) {
+          expect(error.message).toContain(realtimeError.code);
+          expect(error.message).toContain(realtimeError.info);
+        }
+        done();
+      });
     });
 
     it("should not send any event to the observable if the websocket sends a success command response", (done) => {
@@ -349,66 +406,90 @@ describe("Dataset Watch", () => {
         subsErrors.complete,
       ));
 
-      webSocketMock.onmessage(createResponseCommandMessage({
-        request: createSubscribeCommandMessage(["all"], otherDatasetName),
-        error: realtimeError,
-      }));
+      setTimeout(() => {
+        webSocketMock.onmessage(createResponseCommandMessage({
+          request: createSubscribeCommandMessage(["all"], otherDatasetName),
+          error: realtimeError,
+        }));
+      });
     });
 
   });
 
   describe("when unsubscribing to the realtime observable", () => {
 
-    it("should send unsubscribe command for all dataset events by default", () => {
+    it("should send unsubscribe command for all dataset events by default", (done) => {
       const { dataset, webSocketMock } = createSubject();
       dataset.watch().subscribe().unsubscribe();
-      expect(webSocketMock.send).toHaveBeenCalledWith(JSON.stringify(createUnsubscribeCommandMessage(["all"])));
+
+      setTimeout(() => {
+        expect(webSocketMock.send).toHaveBeenCalledWith(createUnsubscribeCommandMessage(["all"]).data);
+        done();
+      });
     });
 
-    it("should send unsubscribe command for a single dataset event", () => {
+    it("should send unsubscribe command for a single dataset event", (done) => {
       const { dataset, webSocketMock } = createSubject();
       const events = "created";
       dataset.watch(events).subscribe().unsubscribe();
-      expect(webSocketMock.send).toHaveBeenCalledWith(JSON.stringify(createUnsubscribeCommandMessage([events])));
+      setTimeout(() => {
+        expect(webSocketMock.send).toHaveBeenCalledWith(createUnsubscribeCommandMessage([events]).data);
+        done();
+      });
     });
 
-    it("should send unsubscribe command for even if there is another observer listen to the same event in another dataset", () => {
+    it("should send unsubscribe command for even if there is another observer listen to the same event in another dataset", (done) => {
       const { dataset, otherDataset, webSocketMock } = createSubject();
       const events = "created";
       const firstSub = dataset.watch(events).subscribe();
       subs.push(otherDataset.watch(events).subscribe());
       firstSub.unsubscribe();
-      expect(webSocketMock.send).toHaveBeenCalledWith(JSON.stringify(createUnsubscribeCommandMessage([events])));
+      setTimeout(() => {
+        expect(webSocketMock.send).toHaveBeenCalledWith(createUnsubscribeCommandMessage([events]).data);
+        done();
+      });
     });
 
-    it("should send unsubscribe command for multiple dataset events by spread operator", () => {
+    it("should send unsubscribe command for multiple dataset events by spread operator", (done) => {
       const { dataset, webSocketMock } = createSubject();
       const events: EventSubscriptionType[] = ["created", "updated"];
       dataset.watch(...events).subscribe().unsubscribe();
-      expect(webSocketMock.send).toHaveBeenCalledWith(JSON.stringify(createUnsubscribeCommandMessage(events)));
+      setTimeout(() => {
+        expect(webSocketMock.send).toHaveBeenCalledWith(createUnsubscribeCommandMessage(events).data);
+        done();
+      });
     });
 
-    it("should send unsubscribe command for multiple dataset events by array", () => {
+    it("should send unsubscribe command for multiple dataset events by array", (done) => {
       const { dataset, webSocketMock } = createSubject();
       const events: EventSubscriptionType[] = ["created", "updated"];
       dataset.watch(events).subscribe().unsubscribe();
-      expect(webSocketMock.send).toHaveBeenCalledWith(JSON.stringify(createUnsubscribeCommandMessage(events)));
+      setTimeout(() => {
+        expect(webSocketMock.send).toHaveBeenCalledWith(createUnsubscribeCommandMessage(events).data);
+        done();
+      });
     });
 
-    it("should send unsubscribe command just for 'all' if it send all possible events", () => {
+    it("should send unsubscribe command just for 'all' if it send all possible events", (done) => {
       const { dataset, webSocketMock, subject } = createSubject();
       dataset.watch(...subject.allEvents).subscribe().unsubscribe();
-      expect(webSocketMock.send).toHaveBeenCalledWith(JSON.stringify(createUnsubscribeCommandMessage(["all"])));
+      setTimeout(() => {
+        expect(webSocketMock.send).toHaveBeenCalledWith(createUnsubscribeCommandMessage(["all"]).data);
+        done();
+      });
     });
 
-    it("should clean duplicated events when sending unsubscribe command", () => {
+    it("should clean duplicated events when sending unsubscribe command", (done) => {
       const { dataset, webSocketMock } = createSubject();
       const events: EventSubscriptionType[] = ["created", "updated"];
       dataset.watch([...events, ...events]).subscribe().unsubscribe();
-      expect(webSocketMock.send).toHaveBeenCalledWith(JSON.stringify(createUnsubscribeCommandMessage(events)));
+      setTimeout(() => {
+        expect(webSocketMock.send).toHaveBeenCalledWith(createUnsubscribeCommandMessage(events).data);
+        done();
+      });
     });
 
-    it("should not send an unsubscribe command if there is another observable watching the same event at the same dataset", () => {
+    it("should not send an unsubscribe command if there is another observable watching the same event at the same dataset", (done) => {
       const { dataset, webSocketMock } = createSubject();
       const action: EventSubscriptionType = "deleted";
 
@@ -416,43 +497,66 @@ describe("Dataset Watch", () => {
       subs.push(dataset.watch(action).subscribe());
       firstSub.unsubscribe();
 
-      expect(webSocketMock.send).not.toHaveBeenCalledWith(JSON.stringify(createUnsubscribeCommandMessage([action])));
+      setTimeout(() => {
+        expect(webSocketMock.send).not.toHaveBeenCalledWith(createUnsubscribeCommandMessage([action]).data);
+        done();
+      });
     });
 
-    it("should not send an unsubscribe command for events if there is another observable watching another event at the same dataset", () => {
+    it("should not send an unsubscribe command for events if there is another observable watching another event at the same dataset", (done) => {
       const { dataset, webSocketMock } = createSubject();
 
       const firstSub = dataset.watch("all").subscribe();
       subs.push(dataset.watch("deleted").subscribe());
       firstSub.unsubscribe();
 
-      expect(webSocketMock.send).not.toHaveBeenCalledWith(JSON.stringify(createUnsubscribeCommandMessage(["all"])));
+      setTimeout(() => {
+        expect(webSocketMock.send).not.toHaveBeenCalledWith(createUnsubscribeCommandMessage(["all"]).data);
+        done();
+      });
     });
 
-    it("should not send any unsubscribe command if there is another observables watching all the events at the same dataset", () => {
+    it("should not send any unsubscribe command if there is another observables watching all the events at the same dataset", (done) => {
       const { dataset, webSocketMock } = createSubject();
 
       const firstSub = dataset.watch("deleted").subscribe();
       subs.push(dataset.watch("deleted").subscribe());
       webSocketMock.send.mockReset();
-      firstSub.unsubscribe();
 
-      expect(webSocketMock.send).not.toHaveBeenCalled();
+      setTimeout(() => {
+        firstSub.unsubscribe();
+        expect(webSocketMock.send).not.toHaveBeenCalledWith(createUnsubscribeCommandMessage(["deleted"]).data);
+        done();
+      });
     });
 
-    it("should send an unsubscribe command for individual events that there is no others observable watching at the same dataset", () => {
+    it("should send an unsubscribe command for individual events that there is no others observable watching at the same dataset", (done) => {
       const { dataset, webSocketMock } = createSubject();
 
       const firstSub = dataset.watch("all").subscribe();
       subs.push(dataset.watch("deleted").subscribe());
       firstSub.unsubscribe();
 
-      expect(webSocketMock.send).toHaveBeenCalledWith(JSON.stringify(createUnsubscribeCommandMessage(["created", "updated"])));
+      setTimeout(() => {
+        expect(webSocketMock.send).toHaveBeenCalledWith(createUnsubscribeCommandMessage(["created", "updated"]).data);
+        done();
+      });
     });
 
   });
 
   describe("when websocket receives message events", () => {
+
+    it("should throw an error if message is wrong", () => {
+      const { webSocketMock } = createSubject();
+      try {
+        webSocketMock.onmessage({
+          data: "wrong data"
+        });
+      } catch (error) {
+        expect(error.message).toEqual(MESSAGE.RTC.BAD_MESSAGE);
+      }
+    });
 
     it("should send a message event to the correct observable if the websocket sends an event message for a subscribed event", (done) => {
       const { dataset, otherDataset, webSocketMock } = createSubject();
@@ -471,7 +575,9 @@ describe("Dataset Watch", () => {
         subsErrors.complete,
       ));
 
-      webSocketMock.onmessage(createEventMessage(eventMessage));
+      setTimeout(() => {
+        webSocketMock.onmessage(createEventMessage(eventMessage));
+      });
     });
 
     it("should send a message event to all subscribed observables when the websocket sends an event message for then", (done) => {
@@ -494,7 +600,9 @@ describe("Dataset Watch", () => {
         subsErrors.complete,
       ));
 
-      webSocketMock.onmessage(createEventMessage(eventMessage));
+      setTimeout(() => {
+        webSocketMock.onmessage(createEventMessage(eventMessage));
+      });
     });
 
     it("should send a message event to subscribed observables when the websocket sends an event message even when someone unsubscribed", (done) => {
@@ -516,7 +624,9 @@ describe("Dataset Watch", () => {
 
       firstSub.unsubscribe();
 
-      webSocketMock.onmessage(createEventMessage(eventMessage));
+      setTimeout(() => {
+        webSocketMock.onmessage(createEventMessage(eventMessage));
+      });
     });
 
     it("should send a message event to the observable if the websocket sends an event message for a subscribed event with `all` type", (done) => {
@@ -534,7 +644,9 @@ describe("Dataset Watch", () => {
         subsErrors.complete,
       ));
 
-      webSocketMock.onmessage(createEventMessage(eventMessage));
+      setTimeout(() => {
+        webSocketMock.onmessage(createEventMessage(eventMessage));
+      });
     });
 
     it("should not send a message event to the observable if the websocket sends an event message for a not subscribed event", (done) => {
@@ -548,7 +660,7 @@ describe("Dataset Watch", () => {
       const { webSocketMock } = createSubject();
       const action: EventSubscriptionType = "deleted";
       webSocketMock.onmessage(createEventMessage({ action }));
-      expect(webSocketMock.send).toHaveBeenCalledWith(JSON.stringify(createUnsubscribeCommandMessage([action])));
+      expect(webSocketMock.send).toHaveBeenCalledWith(createUnsubscribeCommandMessage([action]).data);
     });
 
   });

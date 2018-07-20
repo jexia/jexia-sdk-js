@@ -1,5 +1,5 @@
 // tslint:disable:max-line-length
-import { MESSAGE } from "../config/message";
+import { MESSAGE } from "../config";
 import { IHTTPResponse, IRequestAdapter, IRequestOptions, Methods, RequestAdapter } from "./requestAdapter";
 
 /* Mock request adapter */

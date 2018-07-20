@@ -135,7 +135,7 @@ export interface RealTimeCommandResponse {
   /**
    * Copy of the request message
    */
-  request: RealTimeMessage;
+  request: any;
   /**
    * Response data, if available
    */

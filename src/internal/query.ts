@@ -1,6 +1,6 @@
 import { IFilteringCriterion } from "../api/dataops/filteringApi";
 import { ICondition } from "../api/dataops/filteringCondition";
-import { MESSAGE } from "../config/message";
+import { MESSAGE } from "../config";
 
 interface ISort {
   fields: string[];

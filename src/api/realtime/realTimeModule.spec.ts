@@ -48,7 +48,7 @@ describe("Real Time Module", () => {
       const { websocketBuilder, moduleInit } = createSubject();
       await moduleInit();
       expect(websocketBuilder).toHaveBeenCalledWith(
-        "wss://projectIDTest.app.jexia.com:8082/rtc/ws?Authorization=tokenTest",
+        "ws://projectIDTest.app.jexia.local/rtc?Authorization=tokenTest",
       );
     });
 

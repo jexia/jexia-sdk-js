@@ -1,7 +1,7 @@
 // tslint:disable:max-line-length
 // tslint:disable:no-string-literal
 import { createMockFor, requestAdapterMockFactory } from "../../../spec/testUtils";
-import { MESSAGE } from "../../config/message";
+import { MESSAGE } from "../../config";
 import { ApiKeyAuth } from "../auth/apiKeyAuth";
 import { UserCredentialsAuth } from "../auth/userCredentialsAuth";
 import { TokenStorage } from "./componentStorage";

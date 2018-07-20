@@ -1,4 +1,4 @@
-import { API } from "../../config/config";
+import { API } from "../../config";
 import { IRequestAdapter, Methods } from "../../internal/requestAdapter";
 import { IAuthAdapter, IAuthOptions, IAuthToken, Tokens } from "../core/tokenManager";
 

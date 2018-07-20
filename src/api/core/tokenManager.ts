@@ -1,6 +1,5 @@
 import { Injectable, InjectionToken } from "injection-js";
-import { DELAY } from "../../config/config";
-import { MESSAGE } from "../../config/message";
+import { DELAY, MESSAGE } from "../../config";
 import { IRequestAdapter, RequestAdapter } from "../../internal/requestAdapter";
 import { apiKeyAuth } from "../auth";
 import { TokenStorage } from "./componentStorage";

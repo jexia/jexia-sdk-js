@@ -1,4 +1,4 @@
-import { MESSAGE } from "../config/message";
+import { MESSAGE } from "../config";
 
 /* List of allowed methods */
 export enum Methods {

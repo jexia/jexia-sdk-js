@@ -1,10 +1,12 @@
 import { Observable } from "rxjs/internal/Observable";
 import { Observer } from "rxjs/internal/types";
-import { MESSAGE } from "../../config/message";
+import { MESSAGE } from "../../config";
+import { deferPromise } from "../../internal/utils";
 import { Dataset } from "../dataops/dataset";
 import {
   CommandError,
   EventSubscriptionType,
+  IWebSocket,
   RealTimeCommand,
   RealTimeCommandResponse,
   RealTimeCommandTypes,
@@ -18,13 +20,7 @@ import {
 /**
  * @internal
  */
-declare module "jexia-sdk-js/api/dataops/dataset" {
-  // tslint:disable-next-line:interface-name
-  interface Dataset<T> {
-    webSocket: WebSocket;
-    watch: typeof watch;
-  }
-}
+const wsReadyDefer = deferPromise();
 
 /**
  * @internal
@@ -52,15 +48,19 @@ interface IGetToken {
 /**
  * @internal
  */
-export function start(webSocket: WebSocket, getToken: IGetToken) {
-  Dataset.prototype.webSocket = webSocket;
-  Dataset.prototype.watch = watch;
+export function start(webSocket: IWebSocket, getToken: IGetToken) {
 
-  webSocket.onmessage = (message: MessageEvent): void => {
-    switch (message.type as RealTimeMessageTypes) {
+  webSocket.onmessage = (message: { data: string }): void => {
+    let realTimeMessage: RealTimeMessage;
+    try {
+      realTimeMessage = JSON.parse(message.data);
+    } catch (_) {
+      throw new Error(MESSAGE.RTC.BAD_MESSAGE);
+    }
+    switch (realTimeMessage.type) {
       case RealTimeMessageTypes.CommandResponse:
-        const response: RealTimeCommandResponse = JSON.parse(message.data);
-        const request = JSON.stringify(response.request);
+        const response = realTimeMessage.data as RealTimeCommandResponse;
+        const request = response.request.data;
         const callback = responseStack.get(request);
         if (callback) {
           responseStack.delete(request);
@@ -68,7 +68,7 @@ export function start(webSocket: WebSocket, getToken: IGetToken) {
         }
         break;
       case RealTimeMessageTypes.EventMessage:
-        const eventMessage: RealTimeEventMessage = JSON.parse(message.data);
+        const eventMessage = realTimeMessage.data as RealTimeEventMessage;
         const { action, resource: { name } } = eventMessage;
         const subscriptionKey = buildSubscriptionArgument([action], name);
         const observers = messageSubscriptions.get(JSON.stringify(subscriptionKey));
@@ -86,6 +86,8 @@ export function start(webSocket: WebSocket, getToken: IGetToken) {
         }));
     }
   };
+
+  wsReadyDefer.resolve();
 }
 
 /**
@@ -97,7 +99,7 @@ export function start(webSocket: WebSocket, getToken: IGetToken) {
  * @param others events to listen
  * @returns {Observable<RealTimeEventMessage<T>>} Observable with all subscribed events
  */
-function watch<T>(
+export function watch<T extends object = any>(
   this: Dataset<T>,
   eventType: EventSubscriptionType | EventSubscriptionType[] = "all",
   ...others: EventSubscriptionType[]
@@ -111,10 +113,14 @@ function watch<T>(
 
   return Observable.create((observer: Observer<RealTimeEventMessage<T>>) => {
 
-    subscribeEventMessage(this.webSocket, events, this.name, observer)
-      .catch((error) => observer.error(error));
+    /* Wait until websocket be ready */
+    wsReadyDefer.promise.then(() => {
+      subscribeEventMessage(this.webSocket, events, this.name, observer)
+        .catch((error) => observer.error(error));
+    });
 
-    return () => unsubscribeEventMessage(this.webSocket, events, this.name, observer);
+    return () => wsReadyDefer.promise
+      .then(() => unsubscribeEventMessage(this.webSocket, events, this.name, observer));
   });
 }
 
@@ -122,7 +128,7 @@ function watch<T>(
  * @internal
  */
 function subscribeEventMessage(
-  webSocket: WebSocket,
+  webSocket: IWebSocket,
   events: EventSubscriptionType[],
   datasetName: string,
   observer: Observer<RealTimeEventMessage>,
@@ -162,7 +168,7 @@ function subscribeEventMessage(
  * @internal
  */
 function unsubscribeEventMessage(
-  webSocket: WebSocket,
+  webSocket: IWebSocket,
   events: EventSubscriptionType[],
   datasetName: string,
   observer?: Observer<RealTimeEventMessage>,
@@ -173,7 +179,7 @@ function unsubscribeEventMessage(
     const subscriptionEvents = events.includes("all") ? allEvents : events;
     unsubscribeEvents = subscriptionEvents.filter((action) => {
       const subscriptionKey = JSON.stringify(buildSubscriptionArgument([action], datasetName));
-      const observers = messageSubscriptions.get(subscriptionKey)!.filter((o) => o !== observer);
+      const observers = (messageSubscriptions.get(subscriptionKey) || []).filter((o) => o !== observer);
       if (observers.length) {
         messageSubscriptions.set(subscriptionKey, observers);
         return false;
@@ -233,7 +239,7 @@ function buildSubscriptionCommand(
 /**
  * @internal
  */
-function realTimeCommand(webSocket: WebSocket, data: RealTimeCommand): Promise<RealTimeCommandResponse> {
+function realTimeCommand(webSocket: IWebSocket, data: RealTimeCommand): Promise<RealTimeCommandResponse> {
   return (new Promise<RealTimeCommandResponse>((resolve, reject) => {
     const requestCommand: RealTimeMessage = { type: RealTimeMessageTypes.Command, data };
 
@@ -255,7 +261,7 @@ function realTimeCommand(webSocket: WebSocket, data: RealTimeCommand): Promise<R
 /**
  * @internal
  */
-function sendMessage(webSocket: WebSocket, message: RealTimeMessage) {
+function sendMessage(webSocket: IWebSocket, message: RealTimeMessage) {
   try {
     webSocket.send(JSON.stringify(message));
   } catch (error) {
