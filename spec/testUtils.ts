@@ -56,7 +56,7 @@ export type SpyObj<T> = T & {
   [k in keyof T]: jest.Mock<T>;
 };
 
-export function createMockFor<T, K extends keyof T>
+export function createMockFor<T, K extends keyof T = Extract<keyof T, string>>
     (obj: IConstructor<T> | K[] | any[], spyOptions?: ISpyOptions, defaultProps?: object): SpyObj<T> {
   const methodNames: K[] = Array.isArray(obj) ? obj : getMethodNamesOf(obj);
   if (!methodNames.length && spyOptions) {

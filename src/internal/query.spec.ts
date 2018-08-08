@@ -1,6 +1,6 @@
 import { FilteringCriterion } from "../api/dataops/filteringApi";
 import { FilteringCondition } from "../api/dataops/filteringCondition";
-import { Query } from "./query";
+import { IAggField, Query } from "./query";
 
 describe("Query class", () => {
   let query: Query;
@@ -113,12 +113,42 @@ describe("Query class", () => {
         range: { limit: 10, offset: 20 },
       });
     });
-    it("fields option", () => {
-      query.fields = ["field1", "field2"];
-      expect(query.compile()).toEqual({
-        fields: ["field1", "field2"],
+
+    describe("fields option should compile", () => {
+      it("simple string fields", () => {
+        query.fields = ["field1", "field2"];
+        expect(query.compile()).toEqual({
+          fields: ["field1", "field2"],
+        });
+      });
+      it("aggregation method", () => {
+        const aggField: IAggField<any> = { fn: "MAX", col: "field1"};
+        query.fields = [aggField];
+        expect(query.compile()).toEqual({
+          fields: ["MAX(field1)"],
+        });
+      });
+      it("aggregation method with asterisk to id", () => {
+        const aggField: IAggField<any> = { fn: "COUNT", col: "*"};
+        query.fields = [aggField];
+        expect(query.compile()).toEqual({
+          fields: ["COUNT(id)"],
+        });
+      });
+      it("mixed fields", () => {
+        const aggField: IAggField<any> = { fn: "MAX", col: "field3"};
+        query.fields = ["field1", "field2", aggField, "field4"];
+        expect(query.compile()).toEqual({
+          fields: ["field1", "field2", "MAX(field3)", "field4"],
+        });
+      });
+      it("wrong * usage to throwing an error", () => {
+        const aggField: IAggField<any> = { fn: "SUM", col: "*"};
+        query.fields = [aggField];
+        expect(() => query.compile()).toThrow("Field name should be provided with the SUM function");
       });
     });
+
     it("sort option", () => {
       query.addSortCondition(sort1.direction, ...sort1.fields);
       query.addSortCondition(sort2.direction, ...sort2.fields);

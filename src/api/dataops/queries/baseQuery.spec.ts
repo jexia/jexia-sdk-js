@@ -1,3 +1,4 @@
+import { IAggField } from "jexia-sdk-js/internal/query";
 import { createMockFor } from "../../../../spec/testUtils";
 import { RequestExecuter } from "../../../internal/executer";
 import { BaseQuery, QueryAction } from "./baseQuery";
@@ -5,6 +6,7 @@ import { BaseQuery, QueryAction } from "./baseQuery";
 interface IUser {
   id: number;
   name: string;
+  age: number;
 }
 
 let createSubject = ({
@@ -75,6 +77,34 @@ describe("fields method", () => {
     const { subject } = createSubject();
     subject.fields(["id", "name"]);
     expect((subject as any).query.fields).toEqual(["id", "name"]);
+  });
+
+  it("should accept aggregation object", () => {
+    const { subject } = createSubject();
+    const aggField: IAggField<IUser> = { fn: "AVG", col: "age"};
+    subject.fields(aggField);
+    expect((subject as any).query.fields).toEqual([aggField]);
+  });
+
+  it("should accept several fields and aggregation object", () => {
+    const { subject } = createSubject();
+    const aggField: IAggField<IUser> = { fn: "AVG", col: "age"};
+    subject.fields("id", "name", aggField);
+    expect((subject as any).query.fields).toEqual(["id", "name", aggField]);
+  });
+
+  it("should accept aggregation object and several fields", () => {
+    const { subject } = createSubject();
+    const aggField: IAggField<IUser> = { fn: "AVG", col: "age"};
+    subject.fields(aggField, "id", "name");
+    expect((subject as any).query.fields).toEqual([aggField, "id", "name"]);
+  });
+
+  it("should accept several fields and aggregation object as an array", () => {
+    const { subject } = createSubject();
+    const aggField: IAggField<IUser> = { fn: "AVG", col: "age"};
+    subject.fields(["id", "name", aggField]);
+    expect((subject as any).query.fields).toEqual(["id", "name", aggField]);
   });
 });
 
