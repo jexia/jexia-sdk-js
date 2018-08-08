@@ -179,6 +179,37 @@ posts.select().fields("id", "title").execute().then( (records) => {
 [..]
 ```
 
+### Aggregation functions
+
+You can also use following aggregation functions with `.fields` method:
+- MAX
+- MIN
+- AVG
+- SUM
+- EVERY
+- COUNT
+
+There is a special object that you need to use for aggregation:
+```
+{ fn: <AGG_FUNCTION>, col: <DATASET_FIELD> }
+```
+
+Example:
+``` Javascript
+[..]
+posts.select().fields({ fn: "MAX", col: "likes" });
+[..]
+```
+
+For `COUNT` function you can provide asterisk (`*`) as a field name. Also you can combine
+field names with aggregation functions to get more complicated results:
+``` Javascript
+[..]
+posts.select().fields("date", "author", { fn: "COUNT", col: "*" });
+[..]
+``` 
+
+
 ### Filtering records
 
 You can use the filtering feature to select what records a certain query will operate on.

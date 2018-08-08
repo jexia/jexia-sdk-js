@@ -25,7 +25,7 @@ let createSubject = ({
   }
 
   const subject = new FilterableQueryChild<IUser>(requestExecuterMock, action, datasetName);
-  let queryMock = createMockForQuery ? createMockFor(Query) : new Query(datasetName);
+  let queryMock = createMockForQuery ? createMockFor<Query>(Query) : new Query(datasetName);
 
   // tslint:disable-next-line:no-string-literal
   subject["query"] = queryMock;

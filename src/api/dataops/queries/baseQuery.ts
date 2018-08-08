@@ -1,5 +1,5 @@
 import { RequestExecuter } from "../../../internal/executer";
-import { ICompiledQuery, Query } from "../../../internal/query";
+import { IAggField, ICompiledQuery, Query } from "../../../internal/query";
 
 interface ICompiledRequest<T> {
   action: QueryAction;
@@ -48,14 +48,16 @@ export abstract class BaseQuery<T> {
 
   /**
    * Select the fields to be returned at the response that represent the affected data
-   * @param fields fields names
+   * Aggregation functions can be provided as an object:
+   * { fn: aggFn, col: string }
+   * @param fields fields names or aggregation object
    */
-  public fields<K extends Extract<keyof T, string>>(fields: K[]): this;
-  public fields<K extends Extract<keyof T, string>>(...fields: K[]): this;
-  public fields<K extends Extract<keyof T, string>>(field: K, ...fields: K[]): this {
-    this.query.fields = Array.isArray(field) ? field : [field, ...fields];
-    return this;
-  }
+   public fields(fields: Array<Extract<keyof T, string> | IAggField<T>>): this;
+   public fields(...fields: Array<Extract<keyof T, string> | IAggField<T>>): this;
+   public fields(field: any, ...fields: any[]): this {
+     this.query.fields = Array.isArray(field) ? field : [field, ...fields];
+     return this;
+   }
 
   /**
    * Prepare compiled request before execute it
