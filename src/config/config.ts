@@ -2,7 +2,7 @@
 export const API = {
   AUTH: {
     USER_CREDENTIALS: "auth",
-    API_KEY: "ak/authentication",
+    API_KEY: "auth",
   },
   DATA: {
     ENDPOINT: "sdk-api",
