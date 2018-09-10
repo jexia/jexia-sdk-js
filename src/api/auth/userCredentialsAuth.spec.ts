@@ -80,7 +80,7 @@ describe("UserCredentialsAuth", () => {
       const { subject, clientOpts, requestAdapter, tokenPair } = createSubject();
       await subject.refresh(tokenPair, requestAdapter, clientOpts.projectID);
       expect(requestAdapter.execute).toHaveBeenCalledWith(
-        `${API.PROTOCOL}://${clientOpts.projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.AUTH.USER_CREDENTIALS}`,
+        `${API.PROTOCOL}://${clientOpts.projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.AUTH.USER_CREDENTIALS}/refresh`,
         jasmine.anything(),
       );
     });
@@ -92,8 +92,7 @@ describe("UserCredentialsAuth", () => {
         jasmine.anything(),
         jasmine.objectContaining({
           body: { refresh_token: tokens.refresh_token },
-          headers: { Authorization: tokens.token },
-          method: Methods.PATCH,
+          method: Methods.POST,
         }),
       );
     });

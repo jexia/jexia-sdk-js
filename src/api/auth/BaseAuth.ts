@@ -31,10 +31,9 @@ export abstract class BaseAuth implements IAuthAdapter {
   ): Promise<IAuthToken> {
     /* wait for tokens */
     return tokenPair.then((tokens: IAuthToken) => requestAdapter.execute(
-      this.buildLoginUrl(projectID), {
+      `${this.buildLoginUrl(projectID)}/refresh`, {
         body: { refresh_token: tokens.refreshToken },
-        headers: { Authorization: tokens.token },
-        method: Methods.PATCH,
+        method: Methods.POST,
       }))
       /* convert response to IAuthToken interface */
       .then(({ token, refresh_token }: Tokens) => ({ token, refreshToken: refresh_token }))

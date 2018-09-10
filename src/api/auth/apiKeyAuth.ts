@@ -11,6 +11,7 @@ export class ApiKeyAuth extends BaseAuth {
 
   protected getLoginRequestBody(opts: IAuthOptions) {
     return {
+      method: "apk",
       key: opts.key,
       secret: opts.secret,
     };

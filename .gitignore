@@ -23,6 +23,7 @@ lib-cov
 coverage
 .nyc_output
 junit.xml
+.idea/
 
 # node-waf configuration
 .lock-wscript

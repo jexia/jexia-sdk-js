@@ -44,6 +44,7 @@ describe("ApiKeyAuth", () => {
         jasmine.anything(),
         jasmine.objectContaining({
           body: {
+            method: "apk",
             key: clientOpts.key,
             secret: clientOpts.secret,
           },
@@ -80,7 +81,7 @@ describe("ApiKeyAuth", () => {
       const { subject, clientOpts, requestAdapter, tokenPair } = createSubject();
       await subject.refresh(tokenPair, requestAdapter, clientOpts.projectID);
       expect(requestAdapter.execute).toHaveBeenCalledWith(
-        `${API.PROTOCOL}://${clientOpts.projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.AUTH.API_KEY}`,
+        `${API.PROTOCOL}://${clientOpts.projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.AUTH.API_KEY}/refresh`,
         jasmine.anything(),
       );
     });
@@ -92,8 +93,7 @@ describe("ApiKeyAuth", () => {
         jasmine.anything(),
         jasmine.objectContaining({
           body: { refresh_token: tokens.refresh_token },
-          headers: { Authorization: tokens.token },
-          method: Methods.PATCH,
+          method: Methods.POST,
         }),
       );
     });
