@@ -69,7 +69,7 @@ describe("ApiKeyAuth", () => {
         await subject.login(clientOpts, requestAdapter);
         throw new Error("should throw an request error");
       } catch (error) {
-        expect(error.message).toBe("Unable to authenticate: " + resultError.message);
+        expect(error.message).toBe(`Unable to authenticate: [POST ${(subject as any).buildLoginUrl(clientOpts.projectID)}] ` + resultError.message);
       }
     });
 

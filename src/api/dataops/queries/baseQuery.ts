@@ -31,7 +31,7 @@ export abstract class BaseQuery<T> {
   protected query: Query;
 
   constructor(
-      private queryExecuter: RequestExecuter,
+      protected queryExecuter: RequestExecuter,
       private readonly action: QueryAction,
       readonly dataset: string,
   ) {
@@ -54,7 +54,7 @@ export abstract class BaseQuery<T> {
    * @returns Result of this operation with the affected data
    */
   public execute(): Promise<T[]> {
-    return this.queryExecuter.executeRequest(compileDataRequest({
+    return this.queryExecuter.executeQueryRequest(compileDataRequest({
       action: this.action,
       query: this.query,
       records: this.records,

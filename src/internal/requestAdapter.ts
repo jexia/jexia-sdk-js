@@ -14,23 +14,16 @@ export interface IRequestOptions extends RequestInit {
   body?: any;
 }
 
-interface IServerErrors {
-  /* array of errors (from server) */
-  errors: string[];
-}
-
 export interface IHTTPResponse {
   ok: boolean;
   status: number;
+  statusText: string;
   json(): Promise<any>;
 }
 
 function status(response: IHTTPResponse): Promise<IHTTPResponse> {
   if (!response.ok) {
-    /* the fetch request went through but we received an error from the server */
-    return response.json().then((errList: IServerErrors) => {
-      throw new Error(`${MESSAGE.CORE.BACKEND_ERROR}${errList.errors[0]}`);
-    });
+    throw new Error(`${MESSAGE.CORE.BACKEND_ERROR}${response.status} ${response.statusText}`);
   }
   return Promise.resolve(response);
 }
@@ -50,6 +43,27 @@ export class RequestAdapter implements IRequestAdapter {
   constructor(private fetch: Fetch) {}
 
   public execute(uri: string, opt: IRequestOptions): Promise<any> {
+
+    /* TODO mock response, remove after having BE ready */
+    if (opt.method === Methods.POST && uri.includes("/ds/r/")) {
+      return new Promise((resolve, reject) => {
+        let records = opt.body;
+
+        if (!Array.isArray(records)) {
+          reject({
+            errors: ["Incorrect records array"]
+          });
+        } else {
+          resolve(records.map((record: any) => ({
+            ...record,
+            id: "some random mocked id",
+            created_at: new Date().toJSON(),
+            updated_at: new Date().toJSON()
+          })));
+        }
+      });
+    }
+
     return this.fetch(uri, {body: JSON.stringify(opt.body), headers: opt.headers, method: opt.method})
       /* check response status */
       .then(status)

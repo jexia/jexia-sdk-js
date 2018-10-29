@@ -125,9 +125,9 @@ describe("SelectQuery class", () => {
       query: subject["query"],
       records: subject["records"],
     });
-    spyOn(subject["queryExecuter"], "executeRequest");
+    spyOn(subject["queryExecuter"], "executeQueryRequest");
     subject.execute();
-    expect(subject["queryExecuter"].executeRequest).toHaveBeenLastCalledWith(compiledRequest);
+    expect(subject["queryExecuter"].executeQueryRequest).toHaveBeenLastCalledWith(compiledRequest);
   });
 
 });

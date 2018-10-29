@@ -20,7 +20,7 @@ export abstract class BaseAuth implements IAuthAdapter {
       /* catch login error */
       .catch((err: Error) => {
         /* add specific information to error */
-        throw new Error(`Unable to authenticate: ${err.message}`);
+        throw new Error(`Unable to authenticate: [POST ${this.buildLoginUrl(opts.projectID)}] ${err.message}`);
       });
   }
 

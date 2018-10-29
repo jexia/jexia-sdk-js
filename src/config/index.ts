@@ -1,16 +1,14 @@
+import { API as DEFAULT_API, DELAY } from "./config";
 
-/* Change this for production/development builds
+let API = DEFAULT_API;
 
- should be here
- since Typescript doesn't have conditional compiling feature atm
- (see https://github.com/Microsoft/TypeScript/issues/3538)
- */
+/* for development purpose */
+if (process && process.env && process.env.JEXIA_DEV_DOMAIN) {
+  API.DOMAIN = process.env.JEXIA_DEV_DOMAIN;
+}
 
-/* Development */
-export * from "./config";
-
-/* Production */
-// export * from "./config.prod";
+/* Configuration */
+export { API, DELAY };
 
 /* Messages */
 export * from "./message";

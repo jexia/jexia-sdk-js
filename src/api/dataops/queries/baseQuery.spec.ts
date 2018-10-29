@@ -78,6 +78,6 @@ describe("execute method", () => {
   it("should call queryExecuter.executeRequest()", () => {
     let { subject, requestExecuterMock } = createSubject({action: QueryAction.select});
     subject.execute();
-    expect(requestExecuterMock.executeRequest).toHaveBeenLastCalledWith({action: "select"});
+    expect(requestExecuterMock.executeQueryRequest).toHaveBeenLastCalledWith({action: "select"});
   });
 });
