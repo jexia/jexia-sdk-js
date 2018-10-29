@@ -53,17 +53,17 @@ describe("Class: RequestAdapter", () => {
     });
 
     describe("when calling fetch fails", () => {
-      const error = {errors: ["unauthorized"]};
+      const error = "unauthorized";
       it("should cause fetch error", (done) => {
         (new RequestAdapter((uri: string, opts?: IRequestOptions): Promise<IHTTPResponse> => {
-          return Promise.resolve({ok: false, status: 401, json: () => Promise.resolve(error)} as IHTTPResponse);
+          return Promise.resolve({ok: false, status: 401, statusText: error} as IHTTPResponse);
         }))
           .execute("invalidProjectID", {})
           .then((data: any) => {
             done.fail("should throw an error");
           })
           .catch((err: Error) => {
-            expect(err).toEqual(new Error(`${MESSAGE.CORE.BACKEND_ERROR}unauthorized`));
+            expect(err).toEqual(new Error(`${MESSAGE.CORE.BACKEND_ERROR}401 unauthorized`));
             done();
           });
       });

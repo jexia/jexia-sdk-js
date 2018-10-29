@@ -55,9 +55,9 @@
     "coverageThreshold": {
       "global": {
         "branches": 90,
-        "functions": 99,
-        "lines": 99,
-        "statements": 99
+        "functions": 98,
+        "lines": 98,
+        "statements": 98
       }
     },
     "collectCoverage": true
@@ -111,7 +111,8 @@
     "uglifyjs-webpack-plugin": "^1.2.4",
     "webpack": "^4.1.1",
     "webpack-cli": "^2.0.12",
-    "ws": "^3.1.0"
+    "ws": "^3.1.0",
+    "cross-env": "^5.2.0"
   },
   "release": {
     "branch": "master",
