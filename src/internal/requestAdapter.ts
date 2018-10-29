@@ -15,23 +15,16 @@ export interface IRequestOptions extends RequestInit {
   body?: any;
 }
 
-interface IServerErrors {
-  /* array of errors (from server) */
-  errors: string[];
-}
-
 export interface IHTTPResponse {
   ok: boolean;
   status: number;
+  statusText: string;
   json(): Promise<any>;
 }
 
 function status(response: IHTTPResponse): Promise<IHTTPResponse> {
   if (!response.ok) {
-    /* the fetch request went through but we received an error from the server */
-    return response.json().then((errList: IServerErrors) => {
-      throw new Error(`${MESSAGE.CORE.BACKEND_ERROR}${errList.errors[0]}`);
-    });
+    throw new Error(`${MESSAGE.CORE.BACKEND_ERROR}${response.status} ${response.statusText}`);
   }
   return Promise.resolve(response);
 }

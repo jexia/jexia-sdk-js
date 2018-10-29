@@ -5,7 +5,12 @@ export const API = {
     API_KEY: "auth",
   },
   DATA: {
-    ENDPOINT: "sdk-api",
+    ENDPOINT: {
+      /* We are going to use REST API endpoint for create (insert) records and delete records by id(s) */
+      REST: "ds/r",
+      /* Use QUERY endpoint for any queries that have conditions, such as select, update and delete */
+      QUERY: "ds/q",
+    },
   },
   FILES: {
     ENDPOINT: "fs",
@@ -13,12 +18,12 @@ export const API = {
   REAL_TIME: {
     ENDPOINT: "/rtc?Authorization=",
     PORT: "",
-    PROTOCOL: "ws",
+    PROTOCOL: "wss",
   },
-  DOMAIN: "local",
+  DOMAIN: "com",
   HOST: "app.jexia",
-  PORT: 80,
-  PROTOCOL: "http",
+  PORT: 443,
+  PROTOCOL: "https",
 };
 
 /* default refresh token interval: 1 hour and 50 minutes; JEXIA tokens expire in 2 hours */

@@ -16,17 +16,28 @@ export class RequestExecuter {
     private tokenManager: TokenManager,
   ) { }
 
-  public async executeRequest(options: ICompiledRequest): Promise<any> {
+  public async executeRestRequest<T, D>(records: T[]): Promise<D[]> {
     await this.systemInit;
     const token = await this.tokenManager.token;
     return this.requestAdapter.execute(
-      this.getRequestUrl(),
-      { headers: { Authorization: token }, body: options, method: Methods.POST },
+      this.getUrl(),
+      { headers: { Authorization: token }, body: records, method: Methods.POST });
+  }
+
+  public async executeQueryRequest(request: ICompiledRequest): Promise<any> {
+    await this.systemInit;
+    const token = await this.tokenManager.token;
+    return this.requestAdapter.execute(
+      this.getUrl(true),
+      { headers: { Authorization: token }, body: request, method: Methods.POST },
     );
   }
 
-  private getRequestUrl(): string {
-    return `${API.PROTOCOL}://${this.config.projectID}.${API.HOST}.` +
-      `${API.DOMAIN}:${API.PORT}/${API.DATA.ENDPOINT}/${this.dataSetName}`;
+  private getUrl(query: boolean = false): string {
+    return [
+      `${API.PROTOCOL}://${this.config.projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}`,
+      query ? API.DATA.ENDPOINT.QUERY : API.DATA.ENDPOINT.REST,
+      this.dataSetName,
+    ].join("/");
   }
 }

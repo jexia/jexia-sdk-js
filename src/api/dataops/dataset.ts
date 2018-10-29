@@ -95,8 +95,8 @@ export class Dataset<T extends object = any, D extends DatasetInterface<T> = Dat
    * If saving into a strict schema dataset, you need to provide values for the
    * required fields for that particular dataset.
    */
-  public insert(records: T[]): InsertQuery<T> {
-    return new InsertQuery<T>(this.requestExecuter, records, this.datasetName);
+  public insert(records: T[]): InsertQuery<T, D> {
+    return new InsertQuery<T, D>(this.requestExecuter, records, this.datasetName);
   }
 
   /**

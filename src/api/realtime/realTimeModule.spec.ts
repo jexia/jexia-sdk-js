@@ -2,7 +2,7 @@
 // tslint:disable:no-empty
 import { ReflectiveInjector } from "injection-js";
 import { createMockFor, SpyObj } from "../../../spec/testUtils";
-import { MESSAGE } from "../../config/message";
+import { API, MESSAGE } from "../../config";
 import { AuthOptions, TokenManager } from "../core/tokenManager";
 import { IWebSocket, WebSocketState } from "./realTime.interfaces";
 import { RealTimeModule } from "./realTimeModule";
@@ -48,8 +48,8 @@ describe("Real Time Module", () => {
       const { websocketBuilder, moduleInit } = createSubject();
       await moduleInit();
       expect(websocketBuilder).toHaveBeenCalledWith(
-        "ws://projectIDTest.app.jexia.local/rtc?Authorization=tokenTest",
-      );
+        `${API.REAL_TIME.PROTOCOL}://projectIDTest.${API.HOST}.${API.DOMAIN}` +
+        `${API.REAL_TIME.PORT || ""}${API.REAL_TIME.ENDPOINT}tokenTest`);
     });
 
     it("should start dataset watch functionality after initialized with correct parameters", async () => {
