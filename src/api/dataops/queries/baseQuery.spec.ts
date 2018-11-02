@@ -75,9 +75,9 @@ describe("fields method", () => {
 });
 
 describe("execute method", () => {
-  it("should call queryExecuter.executeRequest()", () => {
+  it("should call queryExecuter.executeRestRequest()", () => {
     let { subject, requestExecuterMock } = createSubject({action: QueryAction.select});
     subject.execute();
-    expect(requestExecuterMock.executeQueryRequest).toHaveBeenLastCalledWith({action: "select"});
+    expect(requestExecuterMock.executeRestRequest).toHaveBeenCalled();
   });
 });

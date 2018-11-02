@@ -117,9 +117,18 @@ describe("SelectQuery class", () => {
 
   });
 
-  it("should correct execute the query", () => {
+  it("without any params should execute the rest api", () => {
     let qe = createRequestExecuterMock(projectID, dataset);
     let subject: any = new SelectQuery(qe, dataset);
+    spyOn(subject["queryExecuter"], "executeRestRequest");
+    subject.execute();
+    expect(subject["queryExecuter"].executeRestRequest).toHaveBeenCalled();
+  });
+
+  it("should execute the rest api if there is any param", () => {
+    let qe = createRequestExecuterMock(projectID, dataset);
+    let subject: any = new SelectQuery(qe, dataset);
+    subject.fields("id");
     let compiledRequest = compileDataRequest({
       action: QueryAction.select,
       query: subject["query"],

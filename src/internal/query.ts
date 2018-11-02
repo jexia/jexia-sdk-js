@@ -8,7 +8,6 @@ interface ISort {
 }
 
 export class Query<T = any> {
-  private dataSet: string;
   private fields: string[];
   private limit: number;
   private offset: number;
@@ -17,8 +16,7 @@ export class Query<T = any> {
   private relations: Query[];
   private data: T;
 
-  constructor(dataSet: string) {
-    this.dataSet = dataSet;
+  constructor(private readonly dataSet: string) {
     this.orders = [];
     this.relations = [];
   }
