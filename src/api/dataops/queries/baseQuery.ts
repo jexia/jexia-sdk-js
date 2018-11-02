@@ -54,10 +54,21 @@ export abstract class BaseQuery<T> {
    * @returns Result of this operation with the affected data
    */
   public execute(): Promise<T[]> {
-    return this.queryExecuter.executeQueryRequest(compileDataRequest({
+
+    /* Compile request */
+    const compiledRequest = compileDataRequest({
       action: this.action,
       query: this.query,
       records: this.records,
-    }));
+    });
+
+    /* if it is a select request and it has no query conditions
+        call record (rest) API, otherwise use query API
+     */
+    if (compiledRequest.action === QueryAction.select && !compiledRequest.params) {
+      return this.queryExecuter.executeRestRequest();
+    } else {
+      return this.queryExecuter.executeQueryRequest(compiledRequest);
+    }
   }
 }

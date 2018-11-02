@@ -16,12 +16,12 @@ export class RequestExecuter {
     private tokenManager: TokenManager,
   ) { }
 
-  public async executeRestRequest<T, D>(records: T[]): Promise<D[]> {
+  public async executeRestRequest<T, D>(method = Methods.GET, records?: T[]): Promise<D[]> {
     await this.systemInit;
     const token = await this.tokenManager.token;
     return this.requestAdapter.execute(
       this.getUrl(),
-      { headers: { Authorization: token }, body: records, method: Methods.POST });
+      { headers: { Authorization: token }, method, ...(records ? { body: records } : {}) });
   }
 
   public async executeQueryRequest(request: ICompiledRequest): Promise<any> {
