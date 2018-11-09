@@ -44,26 +44,6 @@ export class RequestAdapter implements IRequestAdapter {
 
   public execute(uri: string, opt: IRequestOptions): Promise<any> {
 
-    /* TODO mock response, remove after having BE ready */
-    if (opt.method === Methods.POST && uri.includes("/ds/r/")) {
-      return new Promise((resolve, reject) => {
-        let records = opt.body;
-
-        if (!Array.isArray(records)) {
-          reject({
-            errors: ["Incorrect records array"]
-          });
-        } else {
-          resolve(records.map((record: any) => ({
-            ...record,
-            id: "some random mocked id",
-            created_at: new Date().toJSON(),
-            updated_at: new Date().toJSON()
-          })));
-        }
-      });
-    }
-
     return this.fetch(uri, {body: JSON.stringify(opt.body), headers: opt.headers, method: opt.method})
       /* check response status */
       .then(status)
