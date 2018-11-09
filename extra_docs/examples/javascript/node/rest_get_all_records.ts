@@ -23,7 +23,6 @@ jexiaClient().init({
 // Use your data module with an optional generic type
 dom.dataset<Post>("posts")
   .select()
-  // .fields("title", "id", "created_at")
   .execute()
   .then((records) => {
     console.log(records);
