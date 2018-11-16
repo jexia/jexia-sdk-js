@@ -2,6 +2,7 @@ export * from "./index";
 import { Client } from "./api/core/client";
 import { TokenStorage, WebStorageComponent } from "./api/core/componentStorage";
 import { DataOperationsModule } from "./api/dataops/dataOperationsModule";
+import { LoggerModule, LogLevel } from "./api/logger/public-api";
 import { IWebSocketBuilder } from "./api/realtime/realTime.interfaces";
 import { RealTimeModule } from "./api/realtime/realTimeModule";
 
@@ -50,3 +51,9 @@ export function dataOperations(): DataOperationsModule {
 export function realTime(webSocketBuilder: IWebSocketBuilder = (appUrl) => new WebSocket(appUrl)): RealTimeModule {
   return new RealTimeModule(webSocketBuilder);
 }
+
+export function logger(level: LogLevel, modules?: string[]) {
+  return new LoggerModule(level, modules);
+}
+
+export * from "./api/logger/public-api";
