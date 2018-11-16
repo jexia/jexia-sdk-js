@@ -1,3 +1,4 @@
+import { Logger } from "../api/logger/logger";
 import { MESSAGE } from "../config";
 
 /* List of allowed methods */
@@ -47,9 +48,17 @@ export interface IRequestAdapter {
 export type Fetch = (url: string, init?: IRequestOptions) => Promise<IHTTPResponse>;
 
 export class RequestAdapter implements IRequestAdapter {
+
+  private logger: Logger = new Logger();
+
   constructor(private fetch: Fetch) {}
 
+  public provideLogger(logger: Logger) {
+    this.logger = logger;
+  }
+
   public execute(uri: string, opt: IRequestOptions): Promise<any> {
+    this.logger.debug("RequestAdapter", `${opt.method} ${uri}`);
     return this.fetch(uri, {body: JSON.stringify(opt.body), headers: opt.headers, method: opt.method})
       /* check response status */
       .then(status)

@@ -1,6 +1,7 @@
 import { InjectionToken, ReflectiveInjector } from "injection-js";
 import { Fetch, RequestAdapter } from "../../internal/requestAdapter";
 import { deferPromise } from "../../internal/utils";
+import { Logger } from "../logger/logger";
 import { IModule } from "./module";
 import { AuthOptions, IAuthOptions, TokenManager } from "./tokenManager";
 
@@ -54,9 +55,13 @@ export class Client {
         provide: RequestAdapter,
         useFactory: () => new RequestAdapter(this.fetch),
       },
+      Logger,
       TokenManager,
     ]);
     this.tokenManager = injector.get(TokenManager);
+
+    /* provide logger for the request adapter */
+    injector.get(RequestAdapter).provideLogger(injector.get(Logger));
 
     /* save only projectID (do not store key and secret) */
     this.modules = modules;
