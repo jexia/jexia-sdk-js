@@ -61,7 +61,7 @@ describe("fields method", () => {
     expect((subject as any).query.fields).toEqual(["id"]);
   });
 
-  it("should accept severeal fields as strings", () => {
+  it("should accept several fields as strings", () => {
     const { subject } = createSubject();
     subject.fields("id", "name");
     expect((subject as any).query.fields).toEqual(["id", "name"]);

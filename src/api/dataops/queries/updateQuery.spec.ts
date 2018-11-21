@@ -1,7 +1,6 @@
 // tslint:disable:no-string-literal
 import { createMockFor, createRequestExecuterMock } from "../../../../spec/testUtils";
 import { RequestExecuter } from "../../../internal/executer";
-import { QueryAction } from "./baseQuery";
 import { UpdateQuery } from "./updateQuery";
 
 let createSubject = ({

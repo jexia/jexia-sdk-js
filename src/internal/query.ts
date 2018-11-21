@@ -43,16 +43,16 @@ export interface ICompiledQuery<T> {
 }
 
 export class Query<T = any> {
-  private fields: Array<KeyOfObject<T> | IAggField<T>>;
-  private limit: number;
-  private offset: number;
+  public fields: Array<KeyOfObject<T> | IAggField<T>>;
+  public limit: number;
+  public offset: number;
+  public data: T;
+
   private filteringConditions: ICondition;
   private orders: SortedFields<T> = [];
-  private relations: Query[];
-  private data: T;
+  private relations: Query[] = [];
 
-
-  constructor(private readonly dataSet: string) {
+  constructor(private readonly dataset: string) {
   }
 
   /*

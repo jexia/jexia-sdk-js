@@ -1,11 +1,9 @@
 // tslint:disable:no-string-literal
 // tslint:disable:one-variable-per-declaration
 import { createMockFor, createRequestExecuterMock } from "../../../../spec/testUtils";
-import { MESSAGE } from "../../../config/message";
+import { MESSAGE } from "../../../config";
 import { RequestExecuter } from "../../../internal/executer";
 import { Query } from "../../../internal/query";
-import { compileDataRequest } from "../../../internal/queryBasedCompiler";
-import { QueryAction } from "./baseQuery";
 import { SelectQuery } from "./selectQuery";
 
 interface ITestUser {
