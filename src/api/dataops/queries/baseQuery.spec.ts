@@ -1,3 +1,4 @@
+import { IAggField } from "jexia-sdk-js/internal/query";
 import { createMockFor } from "../../../../spec/testUtils";
 import { RequestExecuter } from "../../../internal/executer";
 import { BaseQuery, QueryAction } from "./baseQuery";
@@ -5,6 +6,7 @@ import { BaseQuery, QueryAction } from "./baseQuery";
 interface IUser {
   id: number;
   name: string;
+  age: number;
 }
 
 let createSubject = ({
@@ -12,8 +14,12 @@ let createSubject = ({
   datasetName = "dataset",
   requestExecuterMock = createMockFor(RequestExecuter),
 } = {}) => {
-  // Declare child class as long as QueryRequest is abstract
-  class BaseQueryChild<T> extends BaseQuery<T> {};
+  // Declare child class as long as BaseQuery class is abstract
+  class BaseQueryChild<T> extends BaseQuery<T> {
+    constructor(r: RequestExecuter, a: QueryAction, d: string) {
+      super(r, a, d);
+    }
+  }
 
   const subject = new BaseQueryChild<IUser>(requestExecuterMock, action, datasetName);
 
@@ -44,7 +50,7 @@ describe("QueryRequest class", () => {
   });
 
   it("Query dataset should be set to 'dataset'", () => {
-    expect((subject as any).query.dataSet).toEqual("dataset");
+    expect((subject as any).query.dataset).toEqual("dataset");
   });
 });
 
@@ -52,25 +58,62 @@ describe("fields method", () => {
   it("should accept one field as string", () => {
     const { subject } = createSubject();
     subject.fields("id");
-    expect((subject as any).query.Fields).toEqual(["id"]);
+    expect((subject as any).query.fields).toEqual(["id"]);
   });
 
   it("should accept severeal fields as strings", () => {
     const { subject } = createSubject();
     subject.fields("id", "name");
-    expect((subject as any).query.Fields).toEqual(["id", "name"]);
+    expect((subject as any).query.fields).toEqual(["id", "name"]);
   });
 
   it("should accept one field as an array", () => {
     const { subject } = createSubject();
     subject.fields(["id"]);
-    expect((subject as any).query.Fields).toEqual(["id"]);
+    expect((subject as any).query.fields).toEqual(["id"]);
   });
 
   it("should accept several fields in an array", () => {
     const { subject } = createSubject();
     subject.fields(["id", "name"]);
-    expect((subject as any).query.Fields).toEqual(["id", "name"]);
+    expect((subject as any).query.fields).toEqual(["id", "name"]);
+  });
+
+  it("should accept aggregation object", () => {
+    const { subject } = createSubject();
+    const aggField: IAggField<IUser> = { fn: "AVG", col: "age"};
+    subject.fields(aggField);
+    expect((subject as any).query.fields).toEqual([aggField]);
+  });
+
+  it("should accept several fields and aggregation object", () => {
+    const { subject } = createSubject();
+    const aggField: IAggField<IUser> = { fn: "AVG", col: "age"};
+    subject.fields("id", "name", aggField);
+    expect((subject as any).query.fields).toEqual(["id", "name", aggField]);
+  });
+
+  it("should accept aggregation object and several fields", () => {
+    const { subject } = createSubject();
+    const aggField: IAggField<IUser> = { fn: "AVG", col: "age"};
+    subject.fields(aggField, "id", "name");
+    expect((subject as any).query.fields).toEqual([aggField, "id", "name"]);
+  });
+
+  it("should accept several fields and aggregation object as an array", () => {
+    const { subject } = createSubject();
+    const aggField: IAggField<IUser> = { fn: "AVG", col: "age"};
+    subject.fields(["id", "name", aggField]);
+    expect((subject as any).query.fields).toEqual(["id", "name", aggField]);
+  });
+});
+
+describe("compiledRequest method", () => {
+  let { subject } = createSubject();
+  it("should return compiled object", () => {
+    expect((subject as any).compiledRequest).toEqual({
+      action: QueryAction.select,
+    });
   });
 });
 

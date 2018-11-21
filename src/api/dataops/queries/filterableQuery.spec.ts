@@ -18,10 +18,14 @@ let createSubject = ({
   createMockForQuery = true,
 } = {}) => {
   // Declare child class as long as FilterableQuery is abstract
-  class FilterableQueryChild<T> extends FilterableQuery<T> {};
+  class FilterableQueryChild<T> extends FilterableQuery<T> {
+    constructor(r: RequestExecuter, a: QueryAction, d: string) {
+      super(r, a, d);
+    }
+  }
 
   const subject = new FilterableQueryChild<IUser>(requestExecuterMock, action, datasetName);
-  let queryMock = createMockForQuery ? createMockFor(Query) : new Query(datasetName);
+  let queryMock = createMockForQuery ? createMockFor<Query>(Query) : new Query(datasetName);
 
   // tslint:disable-next-line:no-string-literal
   subject["query"] = queryMock;
@@ -75,7 +79,7 @@ describe("when instantiating a select query object", () => {
     const datasetMock = createMockFor(Dataset, { returnValue: { query: testQuery } });
     const queryObj = subject.relation(datasetMock);
     // tslint:disable-next-line:no-string-literal
-    expect(queryObj["query"]["Relations"]).toEqual([testQuery]);
+    expect(queryObj["query"]["relations"]).toEqual([testQuery]);
   });
 
   it("should have the correct query for relation with configured query", () => {

@@ -129,14 +129,9 @@ describe("SelectQuery class", () => {
     let qe = createRequestExecuterMock(projectID, dataset);
     let subject: any = new SelectQuery(qe, dataset);
     subject.fields("id");
-    let compiledRequest = compileDataRequest({
-      action: QueryAction.select,
-      query: subject["query"],
-      records: subject["records"],
-    });
     spyOn(subject["queryExecuter"], "executeQueryRequest");
     subject.execute();
-    expect(subject["queryExecuter"].executeQueryRequest).toHaveBeenLastCalledWith(compiledRequest);
+    expect(subject["queryExecuter"].executeQueryRequest).toHaveBeenLastCalledWith(subject.compiledRequest);
   });
 
 });

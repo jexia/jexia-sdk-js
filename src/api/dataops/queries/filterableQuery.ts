@@ -11,7 +11,7 @@ import { SelectQuery } from "./selectQuery";
  * dataModule.dataset("posts")
  *   .select()
  *   .where(filter => filter("date").isLessThan(lastDate))
- *   .relataion("authors", query => query.where(filter => filter("age").isGreaterThan(minAge)))
+ *   .relation("authors", query => query.where(filter => filter("age").isGreaterThan(minAge)))
  *   .execute();
  * ```
  */
@@ -40,7 +40,7 @@ export abstract class FilterableQuery<T> extends BaseQuery<T> {
     callback: (query: SelectQuery<DatasetInterface<R>>) => SelectQuery<DatasetInterface<R>> = (q) => q,
   ): this {
     let relation = callback(dataSet.select()) as any;
-    this.query.AddRelation(relation.query);
+    this.query.addRelation(relation.query);
     return this;
   }
 }

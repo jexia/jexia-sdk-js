@@ -83,8 +83,8 @@ export class Dataset<T extends object = any, D extends DatasetInterface<T> = Dat
    * @returns Query object specialized for update statements.
    * Don't forget to apply a filter to specify the fields that will be modified.
    */
-  public update(data: D): UpdateQuery<D> {
-    return new UpdateQuery<D>(this.requestExecuter, data, this.datasetName);
+  public update(data: T): UpdateQuery<T> {
+    return new UpdateQuery<T>(this.requestExecuter, data, this.datasetName);
   }
 
   /**

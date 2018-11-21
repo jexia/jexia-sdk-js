@@ -1,8 +1,6 @@
 // tslint:disable:no-string-literal
 import { createMockFor, createRequestExecuterMock } from "../../../../spec/testUtils";
 import { RequestExecuter } from "../../../internal/executer";
-import { compileDataRequest } from "../../../internal/queryBasedCompiler";
-import { QueryAction } from "./baseQuery";
 import { DeleteQuery } from "./deleteQuery";
 
 let createSubject = ({
@@ -40,13 +38,8 @@ describe("QueryRequest class", () => {
   it("should correct execute the query", () => {
     let qe = createRequestExecuterMock(projectID, dataset);
     let subject: any = new DeleteQuery(qe, dataset);
-    let compiledRequest = compileDataRequest({
-      action: QueryAction.delete,
-      query: subject["query"],
-      records: subject["records"],
-    });
     spyOn(subject["queryExecuter"], "executeQueryRequest");
     subject.execute();
-    expect(subject["queryExecuter"].executeQueryRequest).toHaveBeenLastCalledWith(compiledRequest);
+    expect(subject["queryExecuter"].executeQueryRequest).toHaveBeenLastCalledWith({action: "delete"});
   });
 });

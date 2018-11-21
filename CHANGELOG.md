@@ -1,3 +1,11 @@
+<a name="3.5.0"></a>
+# [3.5.0](https://github.com/jexia/jexia-sdk-js/compare/v3.4.0...v3.5.0) (2018-08-13)
+
+
+### Features
+
+* **query:** aggregation functions support ([38805bb](https://github.com/jexia/jexia-sdk-js/commit/38805bb)), closes [#28](https://github.com/jexia/jexia-sdk-js/issues/28)
+
 <a name="3.4.0"></a>
 # [3.4.0](https://github.com/jexia/jexia-sdk-js/compare/v3.3.1...v3.4.0) (2018-06-29)
 
