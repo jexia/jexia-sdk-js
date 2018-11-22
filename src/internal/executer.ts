@@ -20,7 +20,7 @@ export class RequestExecuter {
     const token = await this.tokenManager.token;
     return this.requestAdapter.execute(
       this.getUrl(),
-      { headers: { Authorization: token }, method, ...(records ? { body: records } : {}) });
+      { headers: { Authorization: `Bearer ${token}` }, method, ...(records ? { body: records } : {}) });
   }
 
   public async executeQueryRequest(request: any): Promise<any> {
@@ -28,7 +28,7 @@ export class RequestExecuter {
     const token = await this.tokenManager.token;
     return this.requestAdapter.execute(
       this.getUrl(true),
-      { headers: { Authorization: token }, body: request, method: Methods.POST },
+      { headers: { Authorization: `Bearer ${token}` }, body: request, method: Methods.POST },
     );
   }
 

@@ -81,7 +81,7 @@ describe("QueryExecuter class", () => {
       const re = new RequestExecuter({ projectID } as any, dataset, clientInit, reqAdapterMock, tokenManagerMock);
       await re.executeQueryRequest(mockBody);
       expect(reqAdapterMock.execute).toHaveBeenCalledWith(queryUrl,
-        { headers: { Authorization: validToken }, body: mockBody, method: Methods.POST });
+        { headers: { Authorization: `Bearer ${validToken}` }, body: mockBody, method: Methods.POST });
     });
 
     it("should wait the system initialization before execute the query", (done) => {
