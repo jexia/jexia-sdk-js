@@ -1,6 +1,21 @@
+const MAESTRO = `https://services.jexia.${process.env.JEXIA_DEV_DOMAIN}`;
+const MANAGEMENT = `${MAESTRO}/management`;
+
 export const api = {
-  login: `https://services.jexia.${process.env.JEXIA_DEV_DOMAIN}/auth/signin`,
+  login: `${MAESTRO}/auth/signin`,
   dataset: {
-    create: `https://services.jexia.${process.env.JEXIA_DEV_DOMAIN}/management/${process.env.E2E_PROJECT_ID}/mimir/ds`
+    create: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/mimir/ds`,
+    delete: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/mimir/ds/{dataset_id}`,
+    field: {
+      create: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/mimir/ds/{dataset_id}/field`
+    }
+  },
+  apikey: {
+    create: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/utgard/`,
+    delete: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/utgard/{key}`
+  },
+  policy: {
+    create: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/rakshak/`,
+    delete: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/rakshak/{policy_id}`
   }
 };
