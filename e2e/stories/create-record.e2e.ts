@@ -1,6 +1,6 @@
 import * as Joi from "joi";
 import * as jexiaSDK from "../../src/node";
-import { IAuthOptions, LogLevel } from "../../src/node";
+import { LogLevel } from "../../src/node";
 import { DatasetRecordSchema } from "../lib/dataset";
 import { Management } from "../management";
 
@@ -12,71 +12,78 @@ const joiAssert = require("joi-assert");
 
 let dom = dataOperations();
 
-const credentials: IAuthOptions = {
-  projectID: process.env.E2E_PROJECT_ID as string,
-  key: process.env.E2E_API_KEY as string,
-  secret: process.env.E2E_API_SECRET as string
-};
-
 describe("create record REST API", () => {
+  const management = new Management();
+  let dataset: { name: string, id: string };
+  let apiKey: { id: string, key: string, secret: string };
+  let policy: { id: string };
 
   beforeAll(async () => {
-    await jexiaClient().init(credentials, dom, new jexiaSDK.LoggerModule(LogLevel.DEBUG));
-
-    const management = new Management();
 
     await management.login();
 
-    // uncomment when there will be remove dataset API to clean up things after tests
-    // await management.createDataset("test_dataset");
+    dataset = await management.createDataset("test_dataset");
 
-    /*await management.createDatasetField("name", {
+    await management.createDatasetField(dataset.id, "test_field", {
       type: "string",
       validators: {
-        required: false
+        required: true
       }
-    });*/
+    });
+
+    apiKey = await management.createApiKey();
+    policy = await management.createPolicy(dataset, apiKey);
+
+    await jexiaClient().init({
+      projectID: process.env.E2E_PROJECT_ID as string,
+      key: apiKey.key,
+      secret: apiKey.secret,
+    }, dom, new jexiaSDK.LoggerModule(LogLevel.DEBUG));
+  });
+
+  afterAll(async () => {
+    await management.deleteDataset(dataset.id);
+    await management.deleteApiKey(apiKey.key);
+    await management.deletePolicy(policy.id);
   });
 
   it("create a record with one no required field should return proper record", async () => {
-    const result = await dom.dataset("test_dataset")
-      .insert([{name: "name"}])
+    const result = await dom.dataset(dataset.name)
+      .insert([{test_field: "name"}])
       .execute();
 
     joiAssert(result, Joi.array()
       .items(DatasetRecordSchema.append({
-        name: Joi.string().valid("name").required()
+        test_field: Joi.string().valid("name").required()
       }))
       .length(1)
     );
   });
 
   it("create a several records should return array of created records", async () => {
-    const result = await dom.dataset("test_dataset")
+    const result = await dom.dataset(dataset.name)
       .insert([
-        {name: "name1"},
-        {name: "name2"},
-        {name: "name3"}
+        {test_field: "name1"},
+        {test_field: "name2"},
+        {test_field: "name3"}
       ])
       .execute();
 
     joiAssert(result, Joi.array()
       .items(DatasetRecordSchema.append({
-        name: Joi.string().valid("name1", "name2", "name3").required()
+        test_field: Joi.string().valid("name1", "name2", "name3").required()
       }))
       .length(3)
     );
   });
 
-  /* TODO Activate this test when there will be a field remove API */
   it("create a record without required field name should return an error", async () => {
     let expected: any;
-    const result = await dom.dataset("test_required")
+    await dom.dataset("test_required")
       .insert([{ age: 32 }])
       .execute()
       .catch((error: any) => expected = error);
 
-    expect(result).toBeUndefined();
     expect(expected).toBeDefined();
   });
 
