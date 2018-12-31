@@ -2,6 +2,7 @@ import { Inject, Injectable } from "injection-js";
 import { ClientInit } from "../api/core/client";
 import { AuthOptions, IAuthOptions, TokenManager } from "../api/core/tokenManager";
 import { DataSetName } from "../api/dataops/dataops.tokens";
+import { QueryAction } from "../api/dataops/queries/baseQuery";
 import { API } from "../config";
 import { Methods, RequestAdapter } from "./requestAdapter";
 
@@ -15,28 +16,30 @@ export class RequestExecuter {
     private tokenManager: TokenManager,
   ) { }
 
-  public async executeRestRequest<T, D>(method = Methods.GET, records?: T[]): Promise<D[]> {
+  public async executeRequest(request: any): Promise<any> {
     await this.systemInit;
     const token = await this.tokenManager.token;
     return this.requestAdapter.execute(
       this.getUrl(),
-      { headers: { Authorization: `Bearer ${token}` }, method, ...(records ? { body: records } : {}) });
-  }
-
-  public async executeQueryRequest(request: any): Promise<any> {
-    await this.systemInit;
-    const token = await this.tokenManager.token;
-    return this.requestAdapter.execute(
-      this.getUrl(true),
-      { headers: { Authorization: `Bearer ${token}` }, body: request, method: Methods.POST },
+      { headers: { Authorization: `Bearer ${token}` }, body: request, method: this.getMethod(request.action) },
     );
   }
 
-  private getUrl(query: boolean = false): string {
+  private getUrl(): string {
     return [
       `${API.PROTOCOL}://${this.config.projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}`,
-      query ? API.DATA.ENDPOINT.QUERY : API.DATA.ENDPOINT.REST,
+      API.DATA.ENDPOINT,
       this.dataSetName,
     ].join("/");
+  }
+
+  private getMethod(action: QueryAction): Methods {
+    switch (action) {
+      default:
+      case QueryAction.insert: return Methods.POST;
+      case QueryAction.delete: return Methods.DELETE;
+      case QueryAction.select: return Methods.GET;
+      case QueryAction.update: return Methods.PATCH;
+    }
   }
 }

@@ -1,6 +1,5 @@
 // tslint:disable:no-string-literal
 import { createRequestExecuterMock } from "../../../../spec/testUtils";
-import { Methods } from "../../../internal/requestAdapter";
 import { InsertQuery } from "./insertQuery";
 
 describe("InsertQuery class", () => {
@@ -43,8 +42,10 @@ describe("InsertQuery class", () => {
   it("should correct execute the query", () => {
     let qe = createRequestExecuterMock(projectID, dataset);
     let subject: any = new InsertQuery(qe, [{ title: "Another first post", user_id: 1 }], dataset);
-    spyOn(subject["queryExecuter"], "executeRestRequest");
+    spyOn(subject["queryExecuter"], "executeRequest");
     subject.execute();
-    expect(subject["queryExecuter"].executeRestRequest).toHaveBeenLastCalledWith(Methods.POST, subject["records"]);
+    expect(subject["queryExecuter"].executeRequest).toHaveBeenLastCalledWith({
+      action: "insert", records: subject["records"]
+    });
   });
 });

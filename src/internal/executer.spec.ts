@@ -12,9 +12,7 @@ describe("QueryExecuter class", () => {
   const dataset = "dataset";
   const projectID = "projectID";
   const restUrl = `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}` +
-    `/${API.DATA.ENDPOINT.REST}/${dataset}`;
-  const queryUrl = `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}` +
-    `/${API.DATA.ENDPOINT.QUERY}/${dataset}`;
+    `/${API.DATA.ENDPOINT}/${dataset}`;
 
   beforeAll( () => {
     clientInit = Promise.resolve();
@@ -45,30 +43,16 @@ describe("QueryExecuter class", () => {
       const url = (executor as any).getUrl();
       expect(url).toEqual(restUrl);
     });
-    it("should use query api endpoint for the query reqest", () => {
-      const url = (executor as any).getUrl(true);
-      expect(url).toEqual(queryUrl);
-    });
   });
 
   describe("when calling", () => {
-    it("executeRestMethod() should call getUrl() method without params", (done) => {
+    it("executeRestMethod() should call getUrl() method", (done) => {
       reqAdapterMock = requestAdapterMockFactory().genericSuccesfulExecution();
       const re: any = new RequestExecuter({ projectID } as any, dataset, clientInit, reqAdapterMock, tokenManagerMock);
       spyOn(re, "getUrl");
-      re.executeRestRequest([]);
+      re.executeRequest([]);
       setTimeout(() => {
-        expect(re.getUrl).toHaveBeenCalledWith();
-        done();
-      }, 10);
-    });
-    it("executeQueryMethod() should call getUrl() method with true", (done) => {
-      reqAdapterMock = requestAdapterMockFactory().genericSuccesfulExecution();
-      const re: any = new RequestExecuter({ projectID } as any, dataset, clientInit, reqAdapterMock, tokenManagerMock);
-      spyOn(re, "getUrl");
-      re.executeQueryRequest({action: "action"});
-      setTimeout(() => {
-        expect(re.getUrl).toHaveBeenCalledWith(true);
+        expect(re.getUrl).toHaveBeenCalled();
         done();
       }, 10);
     });
@@ -79,8 +63,8 @@ describe("QueryExecuter class", () => {
       reqAdapterMock = requestAdapterMockFactory().genericSuccesfulExecution();
       const mockBody = {action: "action"};
       const re = new RequestExecuter({ projectID } as any, dataset, clientInit, reqAdapterMock, tokenManagerMock);
-      await re.executeQueryRequest(mockBody);
-      expect(reqAdapterMock.execute).toHaveBeenCalledWith(queryUrl,
+      await re.executeRequest(mockBody);
+      expect(reqAdapterMock.execute).toHaveBeenCalledWith(restUrl,
         { headers: { Authorization: `Bearer ${validToken}` }, body: mockBody, method: Methods.POST });
     });
 
@@ -88,7 +72,7 @@ describe("QueryExecuter class", () => {
       const defer = deferPromise();
       reqAdapterMock = requestAdapterMockFactory().genericSuccesfulExecution();
       const re = new RequestExecuter({} as any, dataset, defer.promise, reqAdapterMock, tokenManagerMock);
-      re.executeQueryRequest({ action: "action" });
+      re.executeRequest({ action: "action" });
       setTimeout(() => {
         expect(reqAdapterMock.execute).not.toHaveBeenCalled();
         done();
@@ -100,7 +84,7 @@ describe("QueryExecuter class", () => {
       reqAdapterMock = requestAdapterMockFactory().genericSuccesfulExecution();
       const re = new RequestExecuter({} as any, dataset, Promise.reject(initError), reqAdapterMock, tokenManagerMock);
       try {
-        await re.executeQueryRequest({ action: "action" });
+        await re.executeRequest({ action: "action" });
         throw new Error("request execution should have throw an error");
       } catch (error) {
         expect(error).toBe(initError);
@@ -114,7 +98,7 @@ describe("QueryExecuter class", () => {
       reqAdapterMock = requestAdapterMockFactory().failedExecution(serverError);
       const mockBody = {action: "select", params: {} };
       const re = new RequestExecuter({ projectID } as any, dataset, clientInit, reqAdapterMock, tokenManagerMock);
-      re.executeQueryRequest(mockBody).then( () => {
+      re.executeRequest(mockBody).then( () => {
         done.fail("request should have failed");
       }).catch( (err: Error) => {
         expect(err.message).toEqual(serverError);

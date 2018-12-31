@@ -38,8 +38,8 @@ describe("QueryRequest class", () => {
   it("should correct execute the query", () => {
     let qe = createRequestExecuterMock(projectID, dataset);
     let subject: any = new DeleteQuery(qe, dataset);
-    spyOn(subject["queryExecuter"], "executeQueryRequest");
+    spyOn(subject["queryExecuter"], "executeRequest");
     subject.execute();
-    expect(subject["queryExecuter"].executeQueryRequest).toHaveBeenLastCalledWith({action: "delete"});
+    expect(subject["queryExecuter"].executeRequest).toHaveBeenLastCalledWith({action: "delete"});
   });
 });

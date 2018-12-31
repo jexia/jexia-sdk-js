@@ -121,6 +121,6 @@ describe("execute method", () => {
   it("should call queryExecuter.executeRestRequest()", () => {
     let { subject, requestExecuterMock } = createSubject({action: QueryAction.select});
     subject.execute();
-    expect(requestExecuterMock.executeRestRequest).toHaveBeenCalled();
+    expect(requestExecuterMock.executeRequest).toHaveBeenCalled();
   });
 });

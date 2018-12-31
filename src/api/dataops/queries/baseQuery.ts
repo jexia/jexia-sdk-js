@@ -80,13 +80,6 @@ export abstract class BaseQuery<T> {
    * @returns Result of this operation with the affected data
    */
   public execute(): Promise<T[]> {
-    /* if it is a select request and it has no query conditions
-        call record (rest) API, otherwise use query API
-     */
-    if (this.compiledRequest.action === QueryAction.select && !this.compiledRequest.params) {
-      return this.queryExecuter.executeRestRequest();
-    } else {
-      return this.queryExecuter.executeQueryRequest(this.compiledRequest);
-    }
+    return this.queryExecuter.executeRequest(this.compiledRequest);
   }
 }

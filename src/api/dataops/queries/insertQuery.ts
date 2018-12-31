@@ -1,5 +1,4 @@
 import { RequestExecuter } from "../../../internal/executer";
-import { Methods } from "../../../internal/requestAdapter";
 import { BaseQuery, QueryAction } from "./baseQuery";
 
 /**
@@ -27,13 +26,5 @@ export class InsertQuery<T, D extends T> extends BaseQuery<T> {
   public constructor(queryExecuter: RequestExecuter, records: T[], dataset: string) {
     super(queryExecuter, QueryAction.insert, dataset);
     this.records = records;
-  }
-
-  /**
-   * Overload parent execute request to call rest API
-   * @returns {Promise<any>}
-   */
-  public execute(): Promise<D[]> {
-    return this.queryExecuter.executeRestRequest<T, D>(Methods.POST, this.records);
   }
 }
