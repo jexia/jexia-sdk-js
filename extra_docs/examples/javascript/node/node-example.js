@@ -8,9 +8,9 @@ const dataSetName = "dataset";
 //Initialize DataOperationsModule
 let dom = dataOperations();
 let credentials = {
-  projectID: "3d53988c-3544-4d27-9782-f05e73e5581b",
-  key: "b9bccc78-8376-4050-a2c1-e814c0d6af4c",
-  secret: "eY0BAYcUPqCZKRzRCan9CSwA4y45/PtWis6YaSKjSaMVzxwO0fjw2kn9uDfYuQBNtXspBJT2YKw9sMCgCHpm7Q=="
+  projectID: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+  key: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+  secret: "a_secret"
 };
 
 //Initialize Client and pass DataOperationsModule to it.
