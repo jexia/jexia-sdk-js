@@ -44,8 +44,8 @@ describe("InsertQuery class", () => {
     let subject: any = new InsertQuery(qe, [{ title: "Another first post", user_id: 1 }], dataset);
     spyOn(subject["queryExecuter"], "executeRequest");
     subject.execute();
-    expect(subject["queryExecuter"].executeRequest).toHaveBeenLastCalledWith({
-      action: "insert", records: subject["records"]
-    });
+    expect(subject["queryExecuter"].executeRequest).toHaveBeenLastCalledWith([{
+      title: "Another first post", user_id: 1
+    }]);
   });
 });

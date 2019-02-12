@@ -68,6 +68,10 @@ export abstract class BaseQuery<T> {
   private get compiledRequest(): ICompiledRequest<T> {
     const compiledQuery = this.query.compile();
 
+    if (this.records && !Object.keys(compiledQuery).length) {
+      return Object.assign(this.records);
+    }
+
     return Object.assign(
       { action: this.action },
       Object.keys(compiledQuery).length && { params: compiledQuery },
