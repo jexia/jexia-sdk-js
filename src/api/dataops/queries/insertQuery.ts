@@ -27,4 +27,12 @@ export class InsertQuery<T, D extends T> extends BaseQuery<T> {
     super(queryExecuter, QueryAction.insert, dataset);
     this.records = records;
   }
+
+  /**
+   * Overload parent execute request to call rest API
+   * @returns {Promise<any>}
+   */
+    public execute(): Promise<D[]> {
+      return this.queryExecuter.executeRequest(this.records);
+    }
 }
