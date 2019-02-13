@@ -17,7 +17,7 @@ let credentials = {
 jexiaClient().init(credentials, dom);
 
   dom.dataset(dataSetName)
-    .insert({ "field": "Some value" })
+    .insert([{ "field": "Some value" },{ "field": "Some value again" }])
     .execute()
     .then((records) => {
       console.log("Records are inserted:\n=======================\n", records);
