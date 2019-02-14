@@ -80,6 +80,6 @@ export abstract class BaseQuery<T> {
    * @returns Result of this operation with the affected data
    */
   public execute(): Promise<T[]> {
-        return this.queryExecuter.executeRequest(this.compiledRequest);
+    return this.queryExecuter.executeRequest(this.compiledRequest);
   }
 }
