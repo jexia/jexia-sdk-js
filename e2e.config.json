@@ -6,5 +6,6 @@
     "ts",
     "js"
   ],
-  "testRegex": "(.e2e).ts?$"
+  "testRegex": "(.e2e).ts?$",
+  "maxConcurrency": 0
 }

@@ -83,7 +83,7 @@ export class Management {
     });
   }
 
-  public createPolicy(dataset, apikey): Promise<any> {
+  public createPolicy(dataset: { id: string }, apikey: { key: string }): Promise<any> {
     return fetch(api.policy.create, {
       method: "POST",
       headers: this.headers,
@@ -92,7 +92,7 @@ export class Management {
         actions: ["read", "create", "update", "delete"],
         effect: "allow",
         subjects: [apikey.key],
-        resources: [dataset.name],
+        resources: [dataset.id],
       })
     })
       .then((response: Response) => response.json());

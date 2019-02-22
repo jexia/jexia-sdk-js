@@ -55,7 +55,7 @@
     ],
     "coverageThreshold": {
       "global": {
-        "branches": 90,
+        "branches": 80,
         "functions": 98,
         "lines": 98,
         "statements": 98
@@ -96,7 +96,7 @@
     "cross-env": "^5.2.0",
     "cz-conventional-changelog": "2.1.0",
     "husky": "^0.14.3",
-    "jest": "^23.6.0",
+    "jest": "^24.1.0",
     "jest-junit": "^3.7.0",
     "joi": "^14.1.0",
     "joi-assert": "0.0.3",
