@@ -58,7 +58,7 @@ export class Dataset<T extends object = any, D extends DatasetInterface<T> = Dat
    */
   public constructor(
     @Inject(DataSetName) private datasetName: string,
-    private requestExecuter: RequestExecuter,
+    private requestExecuter: RequestExecuter
   ) {}
 
   /**

@@ -1,54 +1,18 @@
 import * as Joi from "joi";
-import * as jexiaSDK from "../../src/node";
-import { LogLevel } from "../../src/node";
 import { DatasetRecordSchema } from "../lib/dataset";
-import { Management } from "../management";
-
-const jexiaClient = jexiaSDK.jexiaClient;
-const dataOperations = jexiaSDK.dataOperations;
+import { cleaning, dom, init } from "../teardowns";
 
 // tslint:disable-next-line:no-var-requires
 const joiAssert = require("joi-assert");
 
-let dom = dataOperations();
+beforeAll(async () => init());
+
+afterAll(cleaning);
 
 describe("create record REST API", () => {
-  const management = new Management();
-  let dataset: { name: string, id: string };
-  let apiKey: { id: string, key: string, secret: string };
-  let policy: { id: string };
-
-  beforeAll(async () => {
-
-    await management.login();
-
-    dataset = await management.createDataset("test_dataset");
-
-    await management.createDatasetField(dataset.id, "test_field", {
-      type: "string",
-      validators: {
-        required: true
-      }
-    });
-
-    apiKey = await management.createApiKey();
-    policy = await management.createPolicy(dataset, apiKey);
-
-    await jexiaClient().init({
-      projectID: process.env.E2E_PROJECT_ID as string,
-      key: apiKey.key,
-      secret: apiKey.secret,
-    }, dom, new jexiaSDK.LoggerModule(LogLevel.DEBUG));
-  });
-
-  afterAll(async () => {
-    await management.deleteDataset(dataset.id);
-    await management.deleteApiKey(apiKey.key);
-    await management.deletePolicy(policy.id);
-  });
 
   it("create a record with one no required field should return proper record", async () => {
-    const result = await dom.dataset(dataset.name)
+    const result = await dom.dataset("test_dataset")
       .insert([{test_field: "name"}])
       .execute();
 
@@ -61,7 +25,7 @@ describe("create record REST API", () => {
   });
 
   it("create a several records should return array of created records", async () => {
-    const result = await dom.dataset(dataset.name)
+    const result = await dom.dataset("test_dataset")
       .insert([
         {test_field: "name1"},
         {test_field: "name2"},
@@ -79,7 +43,7 @@ describe("create record REST API", () => {
 
   it("create a record without required field name should return an error", async () => {
     let expected: any;
-    await dom.dataset("test_required")
+    await dom.dataset("test_dataset")
       .insert([{ age: 32 }])
       .execute()
       .catch((error: any) => expected = error);
