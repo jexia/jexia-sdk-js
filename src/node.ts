@@ -25,3 +25,4 @@ export function logger(level: LogLevel, modules?: string[]) {
 }
 
 export * from "./api/logger/public-api";
+export * from "./api/ums/public-api";
