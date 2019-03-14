@@ -49,9 +49,13 @@
       "src/**/*.ts"
     ],
     "coveragePathIgnorePatterns": [
+      "public-api.ts",
+      "index.ts",
       "src/config/",
       "src/browser.ts",
-      "src/node.ts"
+      "src/node.ts",
+      "src/api/core/module.ts",
+      "src/api/core/resource.ts"
     ],
     "coverageThreshold": {
       "global": {
