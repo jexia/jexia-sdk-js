@@ -1,8 +1,10 @@
 // tslint:disable:object-literal-sort-keys
 export const API = {
   AUTH: {
+    // TODO remove user_credentials auth
     USER_CREDENTIALS: "auth",
     API_KEY: "auth",
+    UMS: "auth",
   },
   DATA: {
     ENDPOINT: "ds",
@@ -14,6 +16,9 @@ export const API = {
     ENDPOINT: "/rtc?Authorization=",
     PORT: "",
     PROTOCOL: "wss",
+  },
+  UMS: {
+    ENDPOINT: "/users",
   },
   DOMAIN: "com",
   HOST: "app.jexia",
