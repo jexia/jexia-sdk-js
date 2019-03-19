@@ -28,17 +28,17 @@ ums.signIn({
   email: 'Elon@tesla.com',
   password: 'secret-password',
   default: false, // this auth will be used by default if true
-  auth: 'Elon Musk' // I think we can use 'auth' instead of 'alias', therefore useAuth() method will have more sense
+  auth: 'Elon Musk' // set an alias for this authorization 
 }); /* returns Promise which will contain user id */
 ```
 
 ### If User successfully signed in, his alias can be used to get access to the datasets
 ```javascript
-dom.useAuth('Elon Mask').dataset('rockets').select(); /* any operations that allowed to Elon
+dom.useAuth('Elon Mask').dataset('rockets').select(); /* any operations that are allowed to Elon */
 ```
 
 ### User's email can be used as well as alias (or in case of alias wasn't provided)
-```
+```javascript
 dom.useAuth('Elon@tesla.com').dataset('rockets').select();
 ```
 
@@ -69,7 +69,7 @@ dom.useAuth('basic access').dataset('rockets').select();
 
 ### or we can set default auth
 ```javascript
-ums.setDefault('Elon Mask');  // after this all dataset calls without useAuth() will use Elon auth
+ums.setDefault('Elon Mask');  // after this all dataset calls without useAuth() will use Elon's auth
 ```
 
 ### or reset to the ApiKey auth

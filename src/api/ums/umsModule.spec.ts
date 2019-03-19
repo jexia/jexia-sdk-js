@@ -1,16 +1,16 @@
 // tslint:disable:no-string-literal
-import { ReflectiveInjector } from "injection-js";
-import { createMockFor, SpyObj } from "../../../spec/testUtils";
-import { API } from "../../config";
-import { RequestAdapter } from "../../internal/requestAdapter";
-import { deferPromise } from "../../internal/utils";
-import { Client, ClientInit } from "../core/client";
-import { AuthOptions, TokenManager } from "../core/tokenManager";
-import { UMSModule } from "./umsModule";
+import { ReflectiveInjector } from 'injection-js';
+import { createMockFor, SpyObj } from '../../../spec/testUtils';
+import { API } from '../../config';
+import { RequestAdapter } from '../../internal/requestAdapter';
+import { deferPromise } from '../../internal/utils';
+import { Client, ClientInit } from '../core/client';
+import { AuthOptions, TokenManager } from '../core/tokenManager';
+import { UMSModule } from './umsModule';
 
 describe('UMS Module', () => {
-  const projectID = "projectIDTest";
-  const tokenTest = "tokenTest";
+  const projectID = 'projectIDTest';
+  const tokenTest = 'tokenTest';
   const testUser = {
     email: 'test@email.com',
     password: 'testPassword',
@@ -30,9 +30,9 @@ describe('UMS Module', () => {
     // @ts-ignore
     systemDefer = deferPromise<Client>(),
     systemInitMock = systemDefer.promise,
-    injectorMock = createMockFor(["get"]) as SpyObj<ReflectiveInjector>,
+    injectorMock = createMockFor(['get']) as SpyObj<ReflectiveInjector>,
   } = {}) {
-    (tokenManagerMock as any)["token"] = tokenPromise;
+    (tokenManagerMock as any)['token'] = tokenPromise;
     const injectorMap = new Map<any, any>([
       [TokenManager, tokenManagerMock],
       [RequestAdapter, requestAdapterMock],
