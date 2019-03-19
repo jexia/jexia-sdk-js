@@ -1,7 +1,7 @@
 import { Injectable, InjectionToken } from "injection-js";
 import { DELAY, MESSAGE } from "../../config";
 import { IRequestAdapter, RequestAdapter } from "../../internal/requestAdapter";
-import { apiKeyAuth } from "../auth";
+import { APIKEY_DEFAULT_ALIAS, apiKeyAuth } from "../auth";
 import { TokenStorage } from "./componentStorage";
 
 /**
@@ -25,11 +25,11 @@ export interface IAuthAdapter {
   /**
    * Login at the project
    */
-  login(opts: IAuthOptions, requestAdapter: IRequestAdapter): Promise<IAuthToken>;
+  login(opts: IAuthOptions, requestAdapter: IRequestAdapter): Promise<Tokens>;
   /**
    * Refresh the authorization
    */
-  refresh(tokenPair: Promise<IAuthToken>, requestAdapter: IRequestAdapter, projectID: string): Promise<IAuthToken>;
+  refresh(tokenPair: Promise<IAuthToken>, requestAdapter: IRequestAdapter, projectID: string): Promise<Tokens>;
 }
 
 /**
@@ -41,13 +41,18 @@ export interface IAuthOptions {
    */
   readonly projectID: string;
   /**
+   * Authorization alias. Used for multiple authorization methods at the same time
+   * by default used 'apikey'
+   */
+  auth?: string;
+  /**
    * Project Key
    */
-  readonly key: string;
+  readonly key?: string;
   /**
    * Project Password
    */
-  readonly secret: string;
+  readonly secret?: string;
   /**
    * Token refresh interval
    */
@@ -56,10 +61,6 @@ export interface IAuthOptions {
    * Remember user flag
    */
   readonly remember?: boolean;
-  /**
-   * Auth method to be used
-   */
-  readonly authMethod?: () => IAuthAdapter;
 }
 
 export const AuthOptions = new InjectionToken<IAuthOptions>("IAuthOptions");
@@ -68,6 +69,14 @@ export const AuthOptions = new InjectionToken<IAuthOptions>("IAuthOptions");
  * Internal interface of the authorization token
  */
 export interface IAuthToken {
+  /**
+   * Alias for the token pair
+   */
+  auth: string;
+  /**
+   * Is it default token pair?
+   */
+  default: boolean;
   /**
    * JSON web token
    */
@@ -88,15 +97,15 @@ export class TokenManager {
   /* JWT and refresh tokens */
   private tokens: Promise<IAuthToken>;
 
-  private authMethod: IAuthAdapter;
 
   private storage = TokenStorage.getStorageAPI();
+
   /* do not store key and secret */
   constructor(
     private requestAdapter: RequestAdapter,
   ) {}
 
-  public get token(): Promise<string> {
+  public token(auth?: string): Promise<string> {
     /* only actual token should be exposed (refresh_token should be hidden) */
     if (!this.tokens) {
       return Promise.reject(new Error(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE));
@@ -104,23 +113,26 @@ export class TokenManager {
     return this.tokens.then((tokens: IAuthToken) => tokens.token);
   }
 
+  /**
+   * Initialize Token Manager
+   * should be always initialized with projectID
+   * ApiKey auth is optional
+   * @param opts
+   */
   public init(opts: IAuthOptions): Promise<TokenManager> {
-    this.authMethod = opts.authMethod ? opts.authMethod() : apiKeyAuth();
-    /* check if email/password were provided */
-    if (!opts.key || !opts.secret) {
-      return Promise.reject(new Error("Please provide valid application credentials."));
-    }
     /* check application URL */
     if (!opts.projectID) {
       return Promise.reject(new Error("Please supply a valid Jexia project ID."));
     }
 
-    this.tokens = this.storage.isEmpty() ? this.login(opts) : this.refresh(opts.projectID);
+    let promise = Promise.resolve(this);
 
-    /* make sure that tokens have been successfully received */
-    return this.tokens
-      .then(this.refreshToken(opts))
-      .then(() => this);
+    /* if auth is provided */
+    if (opts.key && opts.secret) {
+      promise = promise.then(() => this.login(apiKeyAuth(), opts));
+    }
+
+    return promise;
   }
 
   public terminate(): void {
@@ -140,14 +152,17 @@ export class TokenManager {
     };
   }
 
-  private login(opts: IAuthOptions): Promise<IAuthToken> {
+  private login(authMethod: IAuthAdapter, opts: IAuthOptions): Promise<this> {
     /* no need to wait for tokens */
-    return this.authMethod.login(opts, this.requestAdapter)
-      .then((tokens: IAuthToken) => this.storage.setTokens(tokens));
+    return authMethod.login(opts, this.requestAdapter)
+      .then((tokens: Tokens) => {
+        this.storage.setTokens(opts.auth || APIKEY_DEFAULT_ALIAS, tokens, true);
+        return this;
+      });
   }
 
-  private refresh(projectID: string): Promise<IAuthToken> {
-    return this.tokens = this.authMethod.refresh(this.storage.getTokens(), this.requestAdapter, projectID)
+  private refresh(authMethod: IAuthAdapter, projectID: string): Promise<IAuthToken> {
+    return this.tokens = authMethod.refresh(this.storage.getTokens(), this.requestAdapter, projectID)
       .then((tokens) => this.storage.setTokens(tokens));
   }
 }

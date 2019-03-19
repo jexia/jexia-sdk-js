@@ -52,7 +52,7 @@ export class UMSModule implements IModule {
     return this.requestAdapter.execute(
       `${API.PROTOCOL}://${this.projectId}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.AUTH.UMS}`,
       { headers: { Authorization: `Bearer ${token}` }, body, method: Methods.POST }
-    ).then((result: { id: string, token: string }) => {
+    ).then((result: { id: string, token: string, refresh_token: string }) => {
 
       // save auth
       // TODO update tokenManager to support multiple auth
