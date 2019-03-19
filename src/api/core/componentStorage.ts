@@ -1,13 +1,33 @@
 // tslint:disable:max-classes-per-file
-import { IAuthToken } from "./tokenManager";
+import { IAuthToken, Tokens } from "./tokenManager";
 
 /**
  * @internal
  */
 export interface IStorageComponent {
   isEmpty(): boolean;
-  setTokens(tokens: IAuthToken): Promise<IAuthToken>;
-  getTokens(): Promise<IAuthToken>;
+
+  /**
+   * Save token pair into the storage
+   * @param auth
+   * @param tokens
+   * @param defaults
+   */
+  setTokens(auth: string, tokens: Tokens, defaults: boolean): void;
+
+  /**
+   * Return token pair by their alias
+   * if alias not provided, returns default pair
+   * @param auth {string} Authentication alias
+   */
+  getTokens(auth?: string): IAuthToken;
+
+  /**
+   * Set default token pair
+   * @param auth
+   */
+  setDefault(auth: string): void;
+
   clear(): Promise<void>;
 }
 
@@ -16,38 +36,53 @@ export interface IStorageComponent {
  */
 export class WebStorageComponent implements IStorageComponent {
 
+  private readonly defaultKey = '__default_auth__';
+
   private storage: Storage;
+
+  private get tokens(): IAuthToken[] {
+    let result = [];
+    for (let i = 0; i < this.storage.length; i++) {
+      const auth = this.storage.key(i);
+      result.push({
+        auth,
+        ...JSON.parse(this.storage.getItem(auth as string) as string)
+      });
+    }
+    return result;
+  }
 
   constructor(remember: boolean, window: any) {
     this.storage = remember ? window.localStorage : window.sessionStorage;
   }
 
   public isEmpty(): boolean {
-    const tokens = this.getToken();
-    return (!tokens.token || !tokens.refreshToken);
+    return !this.tokens.length;
   }
 
-  public setTokens(tokens: IAuthToken): Promise<IAuthToken> {
-    this.storage.setItem("token", tokens.token);
-    this.storage.setItem("refreshToken", tokens.refreshToken);
-    return Promise.resolve(this.getToken());
+  public setDefault(auth: string): void {
+    this.storage.setItem(this.defaultKey, auth);
   }
 
-  public getTokens(): Promise<IAuthToken>  {
-    return Promise.resolve(this.getToken());
+  public setTokens(auth: string, tokens: Tokens, defaults: boolean = false) {
+    this.storage.setItem(auth, JSON.stringify(tokens));
+    if (defaults || this.tokens.length === 1) {
+      this.setDefault(auth);
+    }
+  }
+
+  public getTokens(auth?: string): IAuthToken {
+    auth = auth || this.storage.getItem(this.defaultKey) as string;
+    return {
+      auth,
+      ...JSON.parse(this.storage.getItem(auth) as string)
+    };
   }
 
   public clear(): Promise<void> {
     this.storage.removeItem("token");
     this.storage.removeItem("refreshToken");
     return Promise.resolve();
-  }
-
-  private getToken(): IAuthToken {
-    return <IAuthToken> {
-      refreshToken: this.storage.getItem("refreshToken"),
-      token: this.storage.getItem("token"),
-    };
   }
 }
 
@@ -56,28 +91,33 @@ export class WebStorageComponent implements IStorageComponent {
  */
 export class MemoryStorageComponent implements IStorageComponent {
 
-  private tokens: IAuthToken;
+  private tokens: { [key: string]: Tokens };
+
+  private defaultTokens: string;
 
   public isEmpty(): boolean {
     return typeof this.tokens === "undefined";
   }
 
-  public setTokens(tokens: IAuthToken): Promise<IAuthToken> {
-    this.tokens = tokens;
-    return Promise.resolve(this.getToken());
+  public setDefault(auth: string): void {
+    this.defaultTokens = auth;
   }
 
-  public getTokens(): Promise<IAuthToken>  {
-    return Promise.resolve(this.getToken());
+  public setTokens(auth: string, tokens: Tokens, defaults: boolean = false): void {
+    this.tokens[auth] = tokens;
+    if (defaults || Object.keys(this.tokens).length === 1) {
+      this.setDefault(auth);
+    }
+  }
+
+  public getTokens(auth?: string): IAuthToken  {
+    auth = auth || this.defaultTokens;
+    return { auth, ...this.tokens[auth] };
   }
 
   public clear(): Promise<void> {
     delete this.tokens;
     return Promise.resolve();
-  }
-
-  private getToken(): IAuthToken {
-    return this.tokens;
   }
 }
 
@@ -97,7 +137,7 @@ export class TokenStorage {
     TokenStorage.storage.clear();
   }
 
-  public static setTokens(tokens: IAuthToken): Promise<IAuthToken> {
+  public static setTokens(tokens: IAuthToken): void {
     return TokenStorage.storage.setTokens(tokens);
   }
 

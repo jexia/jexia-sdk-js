@@ -9,14 +9,12 @@ export abstract class BaseAuth implements IAuthAdapter {
 
   protected abstract authUrl: string;
 
-  public login(opts: IAuthOptions, requestAdapter: IRequestAdapter): Promise<IAuthToken> {
+  public login(opts: IAuthOptions, requestAdapter: IRequestAdapter): Promise<Tokens> {
     return requestAdapter
       .execute(this.buildLoginUrl(opts.projectID), {
         body: this.getLoginRequestBody(opts),
         method: Methods.POST,
       })
-      /* convert response to IAuthToken interface */
-      .then(({ token, refresh_token }: Tokens) => ({ token, refreshToken: refresh_token }))
       /* catch login error */
       .catch((err: Error) => {
         /* add specific information to error */
