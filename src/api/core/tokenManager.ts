@@ -1,6 +1,6 @@
 import { Injectable, InjectionToken } from "injection-js";
 import { API, DELAY, MESSAGE } from "../../config";
-import { IRequestAdapter, Methods, RequestAdapter } from "../../internal/requestAdapter";
+import { Methods, RequestAdapter } from "../../internal/requestAdapter";
 import { Logger } from "../logger/logger";
 import { TokenStorage } from "./componentStorage";
 
@@ -19,20 +19,6 @@ export type Tokens = {
    */
   refresh_token: string,
 };
-
-/**
- * Interface used at the client to login at the project
- */
-export interface IAuthAdapter {
-  /**
-   * Login at the project
-   */
-  login(opts: IAuthOptions, requestAdapter: IRequestAdapter): Promise<Tokens>;
-  /**
-   * Refresh the authorization
-   */
-  refresh(tokenPair: Promise<IAuthToken>, requestAdapter: IRequestAdapter, projectID: string): Promise<Tokens>;
-}
 
 /**
  * Authorization options of the project
@@ -66,28 +52,6 @@ export interface IAuthOptions {
 }
 
 export const AuthOptions = new InjectionToken<IAuthOptions>("IAuthOptions");
-
-/**
- * Internal interface of the authorization token
- */
-export interface IAuthToken {
-  /**
-   * Alias for the token pair
-   */
-  auth: string;
-  /**
-   * Is it default token pair?
-   */
-  default: boolean;
-  /**
-   * JSON web token
-   */
-  readonly token: string;
-  /**
-   * Refresh token
-   */
-  readonly refreshToken: string;
-}
 
 /**
  * @internal

@@ -1,6 +1,6 @@
 // tslint:disable:no-string-literal
-// tslint:disable:no-var-requires
-const faker = require('faker');
+// @ts-ignore
+import * as faker from 'faker';
 import {
   MemoryStorageComponent,
   TokenStorage,
