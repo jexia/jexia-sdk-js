@@ -7,11 +7,14 @@ const joiAssert = require("joi-assert");
 
 jest.setTimeout(15000); // for the unstable internet connection
 
-beforeAll(async () => init());
-
-afterAll(cleaning);
-
 describe("Real Time Communication", () => {
+
+  // Unique name because tests could be run in parallel
+  const datasetName = 'rtc_dataset';
+
+  beforeAll(async () => init(datasetName));
+
+  afterAll(async () => cleaning());
 
   let RTCMessage: any;
   let subscription: Subscription;
@@ -26,7 +29,7 @@ describe("Real Time Communication", () => {
     });
 
     it("should be received when new record inserted", (done) => {
-      subscription = dom.dataset("test_dataset")
+      subscription = dom.dataset(datasetName)
         .watch("created")
         .subscribe((message) => {
           RTCMessage = message;
@@ -34,7 +37,7 @@ describe("Real Time Communication", () => {
           done();
         });
 
-      dom.dataset("test_dataset")
+      dom.dataset(datasetName)
         .insert([{test_field: "name"}])
         .execute();
     });
@@ -56,7 +59,7 @@ describe("Real Time Communication", () => {
     });
 
     it("should be received when array has been inserted", (done) => {
-      subscription = dom.dataset("test_dataset")
+      subscription = dom.dataset(datasetName)
         .watch("created")
         .subscribe((message) => {
           RTCMessage = message;
@@ -64,7 +67,7 @@ describe("Real Time Communication", () => {
           done();
         });
 
-      dom.dataset("test_dataset")
+      dom.dataset(datasetName)
         .insert([
           { test_field: "name1" },
           { test_field: "name2" },
@@ -88,7 +91,7 @@ describe("Real Time Communication", () => {
 
     // Insert a record for the updating
     beforeAll(async () => {
-      const records = await dom.dataset("test_dataset")
+      const records = await dom.dataset(datasetName)
         .insert([{test_field: "name"}])
         .execute();
       recordId = records[0].id;
@@ -100,7 +103,7 @@ describe("Real Time Communication", () => {
     });
 
     it("should be received when one record updated", (done) => {
-      subscription = dom.dataset("test_dataset")
+      subscription = dom.dataset(datasetName)
         .watch("updated")
         .subscribe((message) => {
           RTCMessage = message;
@@ -108,7 +111,7 @@ describe("Real Time Communication", () => {
           done();
         });
 
-      dom.dataset("test_dataset")
+      dom.dataset(datasetName)
         .update({test_field: "name_new"})
         .where((field) => field("id").isEqualTo(recordId))
         .execute();
@@ -121,7 +124,7 @@ describe("Real Time Communication", () => {
 
     // Insert a record for deletion
     beforeAll(async () => {
-      const records = await dom.dataset("test_dataset")
+      const records = await dom.dataset(datasetName)
         .insert([{test_field: "name"}])
         .execute();
       recordId = records[0].id;
@@ -133,7 +136,7 @@ describe("Real Time Communication", () => {
     });
 
     it("should be received when one record updated", (done) => {
-      subscription = dom.dataset("test_dataset")
+      subscription = dom.dataset(datasetName)
         .watch("deleted")
         .subscribe((message) => {
           RTCMessage = message;
@@ -141,7 +144,7 @@ describe("Real Time Communication", () => {
           done();
         });
 
-      dom.dataset("test_dataset")
+      dom.dataset(datasetName)
         .delete()
         .where((field) => field("id").isEqualTo(recordId))
         .execute();

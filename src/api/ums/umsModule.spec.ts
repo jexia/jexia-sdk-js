@@ -32,7 +32,7 @@ describe('UMS Module', () => {
     systemInitMock = systemDefer.promise,
     injectorMock = createMockFor(['get']) as SpyObj<ReflectiveInjector>,
   } = {}) {
-    (tokenManagerMock as any)['token'] = tokenPromise;
+    (tokenManagerMock as any)['token'] = () => tokenPromise;
     const injectorMap = new Map<any, any>([
       [TokenManager, tokenManagerMock],
       [RequestAdapter, requestAdapterMock],
@@ -102,7 +102,7 @@ describe('UMS Module', () => {
       await init();
       await subject.signIn(testUser);
       expect(requestAdapterMock.execute).toBeCalledWith(
-        `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.AUTH.UMS}`,
+        `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.AUTH}`,
         {
           body: {
             email: testUser.email,

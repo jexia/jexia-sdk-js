@@ -55,7 +55,7 @@ export class RealTimeModule implements IModule {
 
     Dataset.prototype.watch = datasetWatch.watch;
 
-    return tokenManager.token.then((token) => {
+    return tokenManager.token().then((token) => {
       try {
         this.websocket = this.websocketBuilder(this.buildSocketOpenUri(projectID, token));
       } catch (error) {
@@ -73,7 +73,7 @@ export class RealTimeModule implements IModule {
         this.websocket.onerror = () => reject(new Error(MESSAGE.RTC.CONNECTION_FAILED));
       });
     })
-    .then(() => datasetWatch.start(this.websocket, () => tokenManager.token))
+    .then(() => datasetWatch.start(this.websocket, () => tokenManager.token()))
     .then(() => this);
   }
 

@@ -18,7 +18,7 @@ export class RequestExecuter {
 
   public async executeRequest(request: any): Promise<any> {
     await this.systemInit;
-    const token = await this.tokenManager.token;
+    const token = await this.tokenManager.token();
     return this.requestAdapter.execute(
       this.getUrl(),
       { headers: { Authorization: `Bearer ${token}` }, body: request, method: this.getMethod(request.action) },
