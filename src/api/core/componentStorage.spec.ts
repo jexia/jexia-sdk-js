@@ -1,5 +1,4 @@
 // tslint:disable:no-string-literal
-// @ts-ignore
 import * as faker from 'faker';
 import {
   MemoryStorageComponent,
