@@ -13,8 +13,7 @@ export interface IStorageComponent {
    * @param tokens {Tokens} Token pair to save
    * @param defaults {boolean} Use this token pair by default if true
    */
-  setTokens(auth: string, tokens: Tokens, defaults: boolean): void;
-  setTokens(auth: string, tokens: Tokens): void;
+  setTokens(auth: string, tokens: Tokens, defaults?: boolean): void;
 
   /**
    * Return token pair by their alias
@@ -112,7 +111,7 @@ export class MemoryStorageComponent implements IStorageComponent {
     }
   }
 
-  public getTokens(auth?: string): Tokens  {
+  public getTokens(auth?: string): Tokens {
     auth = auth || this.defaultTokens;
     return this.tokens[auth];
   }
