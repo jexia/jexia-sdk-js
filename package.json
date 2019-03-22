@@ -78,6 +78,7 @@
   },
   "homepage": "https://github.com/jexia/jexia-sdk-js#readme",
   "dependencies": {
+    "@types/faker": "^4.1.5",
     "faker": "^4.1.0",
     "injection-js": "^2.2.1",
     "reflect-metadata": "^0.1.12",
