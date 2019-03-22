@@ -50,7 +50,7 @@ export class UMSModule implements IModule {
     };
 
     return this.requestAdapter.execute(
-      `${API.PROTOCOL}://${this.projectId}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.AUTH.UMS}`,
+      `${API.PROTOCOL}://${this.projectId}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.AUTH}`,
       { headers: { Authorization: `Bearer ${token}` }, body, method: Methods.POST }
     ).then((result: { id: string, token: string, refresh_token: string }) => {
 
@@ -76,6 +76,6 @@ export class UMSModule implements IModule {
    */
   private async getToken(): Promise<string> {
     await this.systemInit;
-    return await this.tokenManager.token;
+    return await this.tokenManager.token();
   }
 }

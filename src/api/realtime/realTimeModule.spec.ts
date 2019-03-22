@@ -20,7 +20,7 @@ describe("Real Time Module", () => {
     tokenManagerMock = createMockFor(TokenManager),
     injectorMock = createMockFor(["get"]) as SpyObj<ReflectiveInjector>,
   } = {}) {
-    (tokenManagerMock as any)["token"] = tokenPromise;
+    (tokenManagerMock as any)["token"] = () => tokenPromise;
     const injectorMap = new Map<any, any>([
       [TokenManager, tokenManagerMock],
       [AuthOptions, { projectID }],
@@ -59,7 +59,7 @@ describe("Real Time Module", () => {
       await moduleInit();
       expect(datasetWatch.start).toHaveBeenCalledWith(webSocketMock, jasmine.any(Function));
       const token = (datasetWatch.start as jasmine.Spy).calls.mostRecent().args[1]();
-      expect(token).toBe(tokenManagerMock.token);
+      expect(token).toBe(tokenManagerMock.token());
     });
 
     it("should not start dataset watch functionality if not initialized", async () => {
@@ -114,7 +114,7 @@ describe("Real Time Module", () => {
     it("should reject the initializing promise when the websocket has an error event", async () => {
       const { subject, webSocketMock, tokenManagerMock, injectorMock } = createSubject();
       const initPromise = subject.init(injectorMock);
-      tokenManagerMock.token.then(() => webSocketMock.onerror("webSocketError"));
+      tokenManagerMock.token().then(() => webSocketMock.onerror("webSocketError"));
       try {
         await initPromise;
         throw new Error(shouldHaveFailed);

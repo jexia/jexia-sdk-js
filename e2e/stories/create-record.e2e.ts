@@ -5,11 +5,13 @@ import { cleaning, dom, init } from "../teardowns";
 // tslint:disable-next-line:no-var-requires
 const joiAssert = require("joi-assert");
 
-beforeAll(async () => init());
+jest.setTimeout(15000); // for the unstable internet connection
 
-afterAll(cleaning);
+describe("create record REST API", async () => {
 
-describe("create record REST API", () => {
+  beforeAll(async () => init());
+
+  afterAll(async () => cleaning());
 
   it("create a record with one no required field should return proper record", async () => {
     const result = await dom.dataset("test_dataset")

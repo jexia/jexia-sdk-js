@@ -1,11 +1,7 @@
 // tslint:disable:object-literal-sort-keys
 export const API = {
-  AUTH: {
-    // TODO remove user_credentials auth
-    USER_CREDENTIALS: "auth",
-    API_KEY: "auth",
-    UMS: "auth",
-  },
+  AUTH: "auth",
+  REFRESH: "refresh",
   DATA: {
     ENDPOINT: "ds",
   },
