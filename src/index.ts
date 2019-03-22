@@ -13,5 +13,4 @@ export {
 } from "./api/dataops/filteringApi";
 export { Dataset } from "./api/dataops/dataset";
 export { IAuthOptions } from "./api/core/tokenManager";
-export * from "./api/auth";
 export * from "./api/realtime/public-api";

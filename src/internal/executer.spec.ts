@@ -17,7 +17,7 @@ describe("QueryExecuter class", () => {
   beforeAll( () => {
     clientInit = Promise.resolve();
     tokenManagerMock = {
-      get token(): Promise<string> {
+      token(): Promise<string> {
         return Promise.resolve(validToken);
       },
     };
