@@ -17,6 +17,9 @@ export type IUMSCredentials = Pick<IUMSSignInOptions, 'email' | 'password'>;
 export interface IUMSUser {
   id: string;
   email: string;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export class UMSModule implements IModule {
@@ -50,7 +53,7 @@ export class UMSModule implements IModule {
     };
 
     return this.requestAdapter.execute(
-      `${API.PROTOCOL}://${this.projectId}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.AUTH}`,
+      this.getUrl(API.AUTH, false),
       { headers: { Authorization: `Bearer ${token}` }, body, method: Methods.POST }
     ).then((result: { id: string, token: string, refresh_token: string }) => {
 
@@ -62,8 +65,18 @@ export class UMSModule implements IModule {
     });
   }
 
+  /**
+   * Create a new UMS user
+   * @param credentials {IUMSCredentials} email and password of created user
+   */
+  public signUp(credentials: IUMSCredentials): Promise<IUMSUser> {
+    return this.requestAdapter.execute<IUMSUser>(
+      this.getUrl(API.UMS.SIGNUP),
+      { body: credentials, method: Methods.POST },
+    );
+  }
+
   /* TODO Interfaces to develop
-  public signUp(credentials: IUMSCredentials): Promise<any> {}
   public setDefault(auth: string): void {}
   public resetDefault(): void {}
   public getUserById(id: string): Promise<IUMSUser> {}
@@ -77,5 +90,18 @@ export class UMSModule implements IModule {
   private async getToken(): Promise<string> {
     await this.systemInit;
     return await this.tokenManager.token();
+  }
+
+  /**
+   * Generate API url
+   * @param api {string} API endpoint
+   * @param ums {boolean} Whether URL is a part of UMS API
+   */
+  private getUrl(api: string, ums = true): string {
+    let url = `${API.PROTOCOL}://${this.projectId}.${API.HOST}.${API.DOMAIN}:${API.PORT}`;
+    if (ums) {
+      url += `/${API.UMS.ENDPOINT}`;
+    }
+    return url + `/${api}`;
   }
 }

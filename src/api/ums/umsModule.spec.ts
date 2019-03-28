@@ -1,4 +1,5 @@
 // tslint:disable:no-string-literal
+import * as faker from 'faker';
 import { ReflectiveInjector } from 'injection-js';
 import { createMockFor, SpyObj } from '../../../spec/testUtils';
 import { API } from '../../config';
@@ -12,10 +13,14 @@ describe('UMS Module', () => {
   const projectID = 'projectIDTest';
   const tokenTest = 'tokenTest';
   const testUser = {
-    email: 'test@email.com',
-    password: 'testPassword',
+    email: faker.internet.email(),
+    password: faker.internet.password(),
     default: false,
     auth: 'testAuth',
+  };
+  const testCredentials = {
+    email: faker.internet.email(),
+    password: faker.internet.password(),
   };
   const signedInResult = {
     id: 'testUserId',
@@ -91,6 +96,26 @@ describe('UMS Module', () => {
       expect(result).toEqual(subject);
     });
 
+  });
+
+  describe('on user sign-up', () => {
+    it('should call correct API with correct data', async () => {
+      const { subject, systemDefer, systemInitMock, requestAdapterMock, init } = createSubject();
+      systemDefer.resolve();
+      await systemInitMock.promise;
+      await init();
+      await subject.signUp(testCredentials);
+      expect(requestAdapterMock.execute).toBeCalledWith(
+        `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.UMS.ENDPOINT}/${API.UMS.SIGNUP}`,
+        {
+          body: {
+            email: testCredentials.email,
+            password: testCredentials.password
+          },
+          method: 'POST'
+        }
+      );
+    });
   });
 
   describe('user sign-in', () => {

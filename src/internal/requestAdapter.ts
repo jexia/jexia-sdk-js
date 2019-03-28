@@ -50,7 +50,7 @@ export class RequestAdapter implements IRequestAdapter {
     this.logger = logger;
   }
 
-  public execute(uri: string, opt: IRequestOptions): Promise<any> {
+  public execute<T = any>(uri: string, opt: IRequestOptions): Promise<T> {
     this.logger.debug("RequestAdapter", `${opt.method} ${uri}`);
     return this.fetch(uri, {body: JSON.stringify(opt.body), headers: opt.headers, method: opt.method})
       /* check response status */
