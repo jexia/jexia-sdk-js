@@ -14,7 +14,8 @@ export const API = {
     PROTOCOL: "wss",
   },
   UMS: {
-    ENDPOINT: "/users",
+    ENDPOINT: "ums",
+    SIGNUP: "signup",
   },
   DOMAIN: "com",
   HOST: "app.jexia",
