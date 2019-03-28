@@ -1,7 +1,9 @@
-import { dataOperations, jexiaClient, LoggerModule, LogLevel, realTime } from "../src/node";
+import { dataOperations, jexiaClient, LoggerModule, LogLevel, realTime, UMSModule } from "../src/node";
 import { Management } from "./management";
 
 export const dom = dataOperations();
+
+export const ums = new UMSModule();
 
 const management = new Management();
 let dataset: { name: string, id: string };
@@ -34,4 +36,12 @@ export const cleaning = async () => {
   await management.deleteDataset(dataset.id);
   await management.deleteApiKey(apiKey.key);
   await management.deletePolicy(policy.id);
+};
+
+export const initWithUMS = async () => {
+  await management.login();
+
+  await jexiaClient().init({
+    projectID: process.env.E2E_PROJECT_ID as string,
+  }, ums, new LoggerModule(LogLevel.DEBUG)); // Change to LogLevel.DEBUG to have more logs
 };
