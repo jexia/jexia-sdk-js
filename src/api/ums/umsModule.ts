@@ -102,6 +102,6 @@ export class UMSModule implements IModule {
     if (ums) {
       url += `/${API.UMS.ENDPOINT}`;
     }
-    return url + `/${api}`;
+    return `${url}/${api}`;
   }
 }
