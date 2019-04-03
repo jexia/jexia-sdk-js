@@ -42,7 +42,9 @@ describe('User Management Service', () => {
 
     describe('when created user sign-in', () => {
 
-      const wrongCredentialsError = new Error('There was an error on the back-end as a result of your request: 400 Bad Request');
+      const wrongCredentialsError = new Error(
+        'There was an error on the back-end as a result of your request: 400 Bad Request',
+        );
 
       it('should get a token', async () => {
         const token = await ums.signIn({ ...credentials, default: true });
