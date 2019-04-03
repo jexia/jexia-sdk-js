@@ -9,7 +9,7 @@ export interface IDatasetFieldValidators {
 
 export interface IDatasetFieldOptions {
   type: DatasetFieldType;
-  validators: IDatasetFieldValidators;
+  validators?: IDatasetFieldValidators;
 }
 
 export class Management {
@@ -83,7 +83,7 @@ export class Management {
     });
   }
 
-  public createPolicy(dataset: { id: string }, apikey: { key: string }): Promise<any> {
+  public createPolicy(dataset: { id: string }, keys: string[]): Promise<any> {
     return fetch(api.policy.create, {
       method: "POST",
       headers: this.headers,
@@ -91,7 +91,7 @@ export class Management {
         description: "test_policy",
         actions: ["read", "create", "update", "delete"],
         effect: "allow",
-        subjects: [apikey.key],
+        subjects: keys,
         resources: [dataset.id],
       })
     })
