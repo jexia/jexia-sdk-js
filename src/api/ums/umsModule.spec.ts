@@ -5,7 +5,7 @@ import { createMockFor, SpyObj } from '../../../spec/testUtils';
 import { API } from '../../config';
 import { RequestAdapter } from '../../internal/requestAdapter';
 import { deferPromise } from '../../internal/utils';
-import { Client, ClientInit } from '../core/client';
+import { Client } from '../core/client';
 import { AuthOptions, TokenManager } from '../core/tokenManager';
 import { UMSModule } from './umsModule';
 
@@ -34,14 +34,12 @@ describe('UMS Module', () => {
     }),
     // @ts-ignore
     systemDefer = deferPromise<Client>(),
-    systemInitMock = systemDefer.promise,
     injectorMock = createMockFor(['get']) as SpyObj<ReflectiveInjector>,
   } = {}) {
     (tokenManagerMock as any)['token'] = () => tokenPromise;
     const injectorMap = new Map<any, any>([
       [TokenManager, tokenManagerMock],
       [RequestAdapter, requestAdapterMock],
-      [ClientInit, systemInitMock],
       [AuthOptions, { projectID }],
     ]);
     injectorMock.get.mockImplementation((key: any) => injectorMap.get(key));
@@ -52,7 +50,6 @@ describe('UMS Module', () => {
       tokenManagerMock,
       requestAdapterMock,
       systemDefer,
-      systemInitMock,
       injectorMock,
       init() {
         return subject.init(injectorMock);
@@ -72,12 +69,6 @@ describe('UMS Module', () => {
       const { subject, requestAdapterMock, init } = createSubject();
       await init();
       expect((subject as any).requestAdapter).toEqual(requestAdapterMock);
-    });
-
-    it('should get systemInit from the injector', async () => {
-      const { subject, systemInitMock, init } = createSubject();
-      await init();
-      expect((subject as any).systemInit).toEqual(systemInitMock);
     });
 
     it('should get project id from the injector', async () => {
@@ -100,9 +91,8 @@ describe('UMS Module', () => {
 
   describe('on user sign-up', () => {
     it('should call correct API with correct data', async () => {
-      const { subject, systemDefer, systemInitMock, requestAdapterMock, init } = createSubject();
+      const { subject, systemDefer, requestAdapterMock, init } = createSubject();
       systemDefer.resolve();
-      await systemInitMock.promise;
       await init();
       await subject.signUp(testCredentials);
       expect(requestAdapterMock.execute).toBeCalledWith(
@@ -121,26 +111,40 @@ describe('UMS Module', () => {
   describe('user sign-in', () => {
 
     it('should call correct API with correct data', async () => {
-      const { subject, systemDefer, systemInitMock, requestAdapterMock, init } = createSubject();
+      const { subject, systemDefer, requestAdapterMock, init } = createSubject();
       systemDefer.resolve();
-      await systemInitMock.promise;
       await init();
       await subject.signIn(testUser);
       expect(requestAdapterMock.execute).toBeCalledWith(
         `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.AUTH}`,
         {
           body: {
+            method: "ums",
             email: testUser.email,
             password: testUser.password
-          },
-          headers: {
-            Authorization: `Bearer ${tokenTest}`
           },
           method: 'POST'
         }
       );
     });
 
+  });
+
+  describe('token management', () => {
+    it('should set default token by alias', () => {
+      const { subject, init, tokenManagerMock } = createSubject();
+      const alias = faker.internet.email();
+      init();
+      subject.setDefault(alias);
+      expect(tokenManagerMock.setDefault).toHaveBeenCalledWith(alias);
+    });
+
+    it('should reset to default token', () => {
+      const { subject, init, tokenManagerMock } = createSubject();
+      init();
+      subject.resetDefault();
+      expect(tokenManagerMock.resetDefault).toHaveBeenCalled();
+    });
   });
 
 });

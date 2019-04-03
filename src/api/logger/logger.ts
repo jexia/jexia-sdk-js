@@ -53,7 +53,7 @@ export class Logger {
 
   private log(l: LogLevel, m: string, message: string) {
     if (l >= this.level && (this.modules.includes("all") || this.modules.includes(m))) {
-      this.output.log(`[${m}]: ${message}`);
+      this.output.log(`[${m} ${Date()}]: ${message}`);
     }
   }
 }

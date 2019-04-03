@@ -125,6 +125,19 @@ export class TokenManager {
     clearInterval(this.refreshInterval);
   }
 
+  public setDefault(auth: string): void {
+    this.storage.setDefault(auth);
+  }
+
+  public resetDefault(): void {
+    this.storage.setDefault(APIKEY_DEFAULT_ALIAS);
+  }
+
+  public addTokens(auth: string, tokens: Tokens, defaults?: boolean) {
+    this.storage.setTokens(auth, tokens, defaults);
+    this.refreshToken(auth);
+  }
+
   private refreshToken(auth: string) {
     this.refreshInterval = setInterval(() => {
       this.logger.debug('tokenManager', `refresh ${auth} token`);
@@ -151,8 +164,7 @@ export class TokenManager {
         method: Methods.POST,
       })
       .then((tokens: Tokens) => {
-        this.storage.setTokens(auth, tokens, true);
-        this.refreshToken(auth);
+        this.addTokens(auth, tokens, true);
         defers.resolve(tokens.token);
         return this;
       })

@@ -53,7 +53,7 @@ describe("Logger", () => {
     it("should print message if level is DEBUG", () => {
       logger.config(LogLevel.DEBUG, ["all"], consoleMock);
       logger.debug("TestModule", "TestMessage");
-      expect(consoleMock.log).toHaveBeenCalledWith("[TestModule]: TestMessage");
+      expect(consoleMock.log).toHaveBeenCalled();
     });
   });
 
@@ -91,13 +91,13 @@ describe("Logger", () => {
       it("DEBUG", () => {
         logger.config(LogLevel.DEBUG, ["all"], consoleMock);
         logger.info("TestModule", "TestMessage");
-        expect(consoleMock.log).toHaveBeenCalledWith("[TestModule]: TestMessage");
+        expect(consoleMock.log).toHaveBeenCalled();
       });
 
       it("INFO", () => {
         logger.config(LogLevel.INFO, ["all"], consoleMock);
         logger.info("TestModule", "TestMessage");
-        expect(consoleMock.log).toHaveBeenCalledWith("[TestModule]: TestMessage");
+        expect(consoleMock.log).toHaveBeenCalled();
       });
     });
   });
@@ -130,19 +130,19 @@ describe("Logger", () => {
       it("DEBUG", () => {
         logger.config(LogLevel.DEBUG, ["all"], consoleMock);
         logger.warn("TestModule", "TestMessage");
-        expect(consoleMock.log).toHaveBeenCalledWith("[TestModule]: TestMessage");
+        expect(consoleMock.log).toHaveBeenCalled();
       });
 
       it("INFO", () => {
         logger.config(LogLevel.INFO, ["all"], consoleMock);
         logger.warn("TestModule", "TestMessage");
-        expect(consoleMock.log).toHaveBeenCalledWith("[TestModule]: TestMessage");
+        expect(consoleMock.log).toHaveBeenCalled();
       });
 
       it("WARN", () => {
         logger.config(LogLevel.WARN, ["all"], consoleMock);
         logger.warn("TestModule", "TestMessage");
-        expect(consoleMock.log).toHaveBeenCalledWith("[TestModule]: TestMessage");
+        expect(consoleMock.log).toHaveBeenCalled();
       });
     });
   });
@@ -166,25 +166,25 @@ describe("Logger", () => {
       it("DEBUG", () => {
         logger.config(LogLevel.DEBUG, ["all"], consoleMock);
         logger.error("TestModule", "TestMessage");
-        expect(consoleMock.log).toHaveBeenCalledWith("[TestModule]: TestMessage");
+        expect(consoleMock.log).toHaveBeenCalled();
       });
 
       it("INFO", () => {
         logger.config(LogLevel.INFO, ["all"], consoleMock);
         logger.error("TestModule", "TestMessage");
-        expect(consoleMock.log).toHaveBeenCalledWith("[TestModule]: TestMessage");
+        expect(consoleMock.log).toHaveBeenCalled();
       });
 
       it("WARN", () => {
         logger.config(LogLevel.WARN, ["all"], consoleMock);
         logger.error("TestModule", "TestMessage");
-        expect(consoleMock.log).toHaveBeenCalledWith("[TestModule]: TestMessage");
+        expect(consoleMock.log).toHaveBeenCalled();
       });
 
       it("ERROR", () => {
         logger.config(LogLevel.ERROR, ["all"], consoleMock);
         logger.error("TestModule", "TestMessage");
-        expect(consoleMock.log).toHaveBeenCalledWith("[TestModule]: TestMessage");
+        expect(consoleMock.log).toHaveBeenCalled();
       });
     });
   });
@@ -194,13 +194,13 @@ describe("Logger", () => {
     it("should print message if modules has 'all' value", () => {
       logger.config(LogLevel.DEBUG, ["all"], consoleMock);
       logger.error("TestModule", "TestMessage");
-      expect(consoleMock.log).toHaveBeenCalledWith("[TestModule]: TestMessage");
+      expect(consoleMock.log).toHaveBeenCalled();
     });
 
     it("should print message if provided module is included in modules", () => {
       logger.config(LogLevel.DEBUG, ["TestModule"], consoleMock);
       logger.error("TestModule", "TestMessage");
-      expect(consoleMock.log).toHaveBeenCalledWith("[TestModule]: TestMessage");
+      expect(consoleMock.log).toHaveBeenCalled();
     });
 
     it("should not print message if neither provided module nor 'all' is not included in modules", () => {

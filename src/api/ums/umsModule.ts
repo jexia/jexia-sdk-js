@@ -1,9 +1,8 @@
 import { ReflectiveInjector } from "injection-js";
 import { API } from "../../config";
 import { Methods, RequestAdapter } from "../../internal/requestAdapter";
-import { Client, ClientInit } from "../core/client";
 import { IModule } from "../core/module";
-import { AuthOptions, TokenManager } from "../core/tokenManager";
+import { AuthOptions, TokenManager, Tokens } from "../core/tokenManager";
 
 export interface IUMSSignInOptions {
   email: string;
@@ -28,14 +27,11 @@ export class UMSModule implements IModule {
 
   private requestAdapter: RequestAdapter;
 
-  private systemInit: Promise<Client>;
-
   private projectId: string;
 
   public init(coreInjector: ReflectiveInjector) {
     this.tokenManager = coreInjector.get(TokenManager);
     this.requestAdapter = coreInjector.get(RequestAdapter);
-    this.systemInit = coreInjector.get(ClientInit);
     this.projectId = coreInjector.get(AuthOptions).projectID;
 
     return Promise.resolve(this);
@@ -45,23 +41,26 @@ export class UMSModule implements IModule {
     return Promise.resolve(this);
   }
 
-  public async signIn(user: IUMSSignInOptions): Promise<{id: string}> {
-    const token = await this.getToken();
+  public async signIn(user: IUMSSignInOptions): Promise<string> {
+
     const body = {
+      method: 'ums',
       email: user.email,
       password: user.password
     };
 
-    return this.requestAdapter.execute(
+    return this.requestAdapter.execute<Tokens>(
       this.getUrl(API.AUTH, false),
-      { headers: { Authorization: `Bearer ${token}` }, body, method: Methods.POST }
-    ).then((result: { id: string, token: string, refresh_token: string }) => {
+      { body, method: Methods.POST }
+    ).then((tokens) => {
 
-      // save auth
-      // TODO update tokenManager to support multiple auth
-      // this.tokenManager.addAuth(token, user.auth, user.default);
+      this.tokenManager.addTokens(
+        user.auth || user.email,
+        tokens,
+        user.default,
+      );
 
-      return result;
+      return tokens.token;
     });
   }
 
@@ -76,21 +75,18 @@ export class UMSModule implements IModule {
     );
   }
 
+  public setDefault(auth: string): void {
+    this.tokenManager.setDefault(auth);
+  }
+
+  public resetDefault(): void {
+    this.tokenManager.resetDefault();
+  }
+
   /* TODO Interfaces to develop
-  public setDefault(auth: string): void {}
-  public resetDefault(): void {}
   public getUserById(id: string): Promise<IUMSUser> {}
   public changePassword() {}
   public deleteUser() {} */
-
-  /**
-   * Wait until client will be initialized and return the actual token
-   * @returns {Promise<string>} token
-   */
-  private async getToken(): Promise<string> {
-    await this.systemInit;
-    return await this.tokenManager.token();
-  }
 
   /**
    * Generate API url
