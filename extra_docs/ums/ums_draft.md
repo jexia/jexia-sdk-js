@@ -34,20 +34,20 @@ ums.signIn({
 
 ### If User successfully signed in, his alias can be used to get access to the datasets
 ```javascript
-dom.useAuth('Elon Mask').dataset('rockets').select(); /* any operations that are allowed to Elon */
+dom.dataset('rockets', 'Elon Mask').select(); /* any operations that are allowed to Elon */
 ```
 
 ### User's email can be used as well as alias (or in case of alias wasn't provided)
 ```javascript
-dom.useAuth('Elon@tesla.com').dataset('rockets').select();
+dom.dataset('rockets', 'Elon@tesla.com').select();
 ```
 
-### without *useAuth()* ApiKey auth is used
+### without second argument ApiKey auth is used
 ```javascript
 dom.dataset('rockets').select(); // ApiKey auth is used
 ```
 
-### if default has been set to true in *signIn()* method *useAuth()* can be skipped
+### if default has been set to true in *signIn()* method, auth argument can be omitted
 ```javascript
 ums.signIn({
   email: 'Elon@tesla.com',
@@ -57,14 +57,14 @@ ums.signIn({
 });
 ```
 
-### Elon can create new rockets with his permissions without calling *useAuth()* method
+### Elon can create new rockets with his permissions by default
 ```javascript
 dom.dataset('rockets').insert([]); // Elon permissions will be used
 ```
 
 ### we can clearly indicate that we are going to use ApiKey auth
 ```javascript
-dom.useAuth('basic access').dataset('rockets').select();
+dom.dataset('rockets', 'basic access').select();
 ```
 
 ### or we can set default auth
