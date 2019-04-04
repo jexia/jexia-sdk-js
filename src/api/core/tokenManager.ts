@@ -85,6 +85,7 @@ export class TokenManager {
   ) {}
 
   public token(auth?: string): Promise<string> {
+    console.log(`[TokenManager] resolve token for ${auth}`);
     return this.resolved
       .then(() => {
         const tokens = this.storage.getTokens(auth);
