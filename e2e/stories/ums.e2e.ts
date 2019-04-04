@@ -139,6 +139,17 @@ describe('User Management Service', () => {
           .length(1));
       });
 
+      it('should be able to use user authorization in dataset request', (done) => {
+        dom.dataset('umsTestDataset', credentials.email)
+          .insert([{ name: 'field' }])
+          .execute()
+          .then(() => done('should not have access to the dataset'))
+          .catch((err) => {
+            expect(err).toEqual(accessError);
+            done();
+          });
+      });
+
       it('should be able to switch back to the user auth', (done) => {
         ums.setDefault(credentials.email);
         dom.dataset('umsTestDataset')
@@ -151,6 +162,18 @@ describe('User Management Service', () => {
           });
       });
 
+      it('should be able to use apikey auth in dataset request', async () => {
+        const records = await dom.dataset('umsTestDataset', 'apikey')
+          .insert([
+            { name: 'testRecord' },
+          ])
+          .execute();
+        joiAssert(records, Joi.array()
+          .items(DatasetRecordSchema.append({
+            name: Joi.string().valid('testRecord').required()
+          }))
+          .length(1));
+      });
     });
   });
 
