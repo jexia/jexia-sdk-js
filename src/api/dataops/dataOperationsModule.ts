@@ -49,10 +49,7 @@ export class DataOperationsModule implements IModule {
   public dataset<T extends object = any>(dataset: string, auth?: string): Dataset<T> {
     let config = this.injector.get(AuthOptions);
     if (auth) {
-      config = {
-        ...config,
-        auth,
-      };
+      config.auth = auth;
     }
     return this.injector.resolveAndCreateChild([
       {
