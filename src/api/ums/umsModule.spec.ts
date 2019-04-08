@@ -3,7 +3,7 @@ import * as faker from 'faker';
 import { ReflectiveInjector } from 'injection-js';
 import { createMockFor, SpyObj } from '../../../spec/testUtils';
 import { API } from '../../config';
-import { RequestAdapter } from '../../internal/requestAdapter';
+import { Methods, RequestAdapter } from '../../internal/requestAdapter';
 import { deferPromise } from '../../internal/utils';
 import { Client } from '../core/client';
 import { AuthOptions, TokenManager } from '../core/tokenManager';
@@ -144,6 +144,93 @@ describe('UMS Module', () => {
       init();
       subject.resetDefault();
       expect(tokenManagerMock.resetDefault).toHaveBeenCalled();
+    });
+  });
+
+  describe('user management', () => {
+
+    describe('get current user', () => {
+      it('should get token from token manager by provided alias', async () => {
+      const { subject, tokenManagerMock, systemDefer, init } = createSubject({
+      });
+      jest.spyOn(tokenManagerMock, 'token');
+      systemDefer.resolve();
+      await init();
+      await subject.getUser(testUser.auth);
+      expect(tokenManagerMock.token).toHaveBeenCalledWith(testUser.auth);
+    });
+
+      it('should call correct API to get current user', async () => {
+      const { subject, requestAdapterMock, systemDefer, init } = createSubject();
+      systemDefer.resolve();
+      await init();
+      await subject.getUser(testUser.auth);
+      expect(requestAdapterMock.execute).toHaveBeenCalledWith(
+        `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.UMS.ENDPOINT}/${API.UMS.USER}`,
+        {
+          headers: { Authorization: `Bearer ${tokenTest}`},
+        },
+      );
+    });
+    });
+
+    describe('update password', () => {
+      it('should get token from token manager by provided alias', async () => {
+        const { subject, tokenManagerMock, systemDefer, init } = createSubject({
+        });
+        jest.spyOn(tokenManagerMock, 'token');
+        systemDefer.resolve();
+        await init();
+        await subject.changePassword(testUser.auth, testUser.password, faker.internet.password());
+        expect(tokenManagerMock.token).toHaveBeenCalledWith(testUser.auth);
+      });
+
+      it('should call correct API to update password', async () => {
+        const { subject, requestAdapterMock, systemDefer, init } = createSubject();
+        const newPassword = faker.internet.password();
+        systemDefer.resolve();
+        await init();
+        await subject.changePassword(testUser.auth, testUser.password, newPassword);
+        expect(requestAdapterMock.execute).toHaveBeenCalledWith(
+          // tslint:disable-next-line
+          `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.UMS.ENDPOINT}/${API.UMS.CHANGEPASSWORD}`,
+          {
+            body: {
+              old_password: testUser.password,
+              new_password: newPassword,
+            },
+            headers: { Authorization: `Bearer ${tokenTest}`},
+            method: Methods.POST,
+          },
+        );
+      });
+    });
+
+    describe('delete current user', () => {
+      it('should get token from token manager by provided alias', async () => {
+        const { subject, tokenManagerMock, systemDefer, init } = createSubject({
+        });
+        jest.spyOn(tokenManagerMock, 'token');
+        systemDefer.resolve();
+        await init();
+        await subject.deleteUser(testUser.auth, testUser.password);
+        expect(tokenManagerMock.token).toHaveBeenCalledWith(testUser.auth);
+      });
+
+      it('should call correct API to delete current user', async () => {
+        const { subject, requestAdapterMock, systemDefer, init } = createSubject();
+        systemDefer.resolve();
+        await init();
+        await subject.deleteUser(testUser.auth, testUser.password);
+        expect(requestAdapterMock.execute).toHaveBeenCalledWith(
+          `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.UMS.ENDPOINT}/${API.UMS.USER}`,
+          {
+            body: { password: testUser.password },
+            headers: { Authorization: `Bearer ${tokenTest}`},
+            method: Methods.DELETE,
+          },
+        );
+      });
     });
   });
 

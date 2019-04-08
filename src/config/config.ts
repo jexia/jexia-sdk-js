@@ -16,6 +16,8 @@ export const API = {
   UMS: {
     ENDPOINT: "ums",
     SIGNUP: "signup",
+    USER: "user",
+    CHANGEPASSWORD: "changepassword",
   },
   DOMAIN: "com",
   HOST: "app.jexia",
