@@ -69,9 +69,13 @@ export class UMSModule implements IModule {
    * @param credentials {IUMSCredentials} email and password of created user
    */
   public signUp(credentials: IUMSCredentials): Promise<IUMSUser> {
+    const body = {
+      email: credentials.email,
+      password: credentials.password
+    };
     return this.requestAdapter.execute<IUMSUser>(
       this.getUrl(API.UMS.SIGNUP),
-      { body: credentials, method: Methods.POST },
+      { body, method: Methods.POST },
     );
   }
 
@@ -83,10 +87,49 @@ export class UMSModule implements IModule {
     this.tokenManager.resetDefault();
   }
 
-  /* TODO Interfaces to develop
-  public getUserById(id: string): Promise<IUMSUser> {}
-  public changePassword() {}
-  public deleteUser() {} */
+  /**
+   * Fetch currently authorized user
+   * @param auth {string} Authorization alias
+   */
+  public getUser(auth: string): Promise<IUMSUser> {
+    return this.tokenManager.token(auth)
+      .then((token) => this.requestAdapter.execute<IUMSUser>(
+        this.getUrl(API.UMS.USER),
+        { headers: { Authorization: `Bearer ${token}` }},
+      ));
+  }
+
+  /**
+   * Change password of the authorized user
+   * @param auth {string} Authorization alias
+   * @param oldPassword {string}
+   * @param newPassword {string}
+   */
+  public changePassword(auth: string, oldPassword: string, newPassword: string): Promise<IUMSUser> {
+    const body = {
+      old_password: oldPassword,
+      new_password: newPassword,
+    };
+    return this.tokenManager.token(auth)
+      .then((token) => this.requestAdapter.execute<IUMSUser>(
+        this.getUrl(API.UMS.CHANGEPASSWORD),
+        { body, headers: { Authorization: `Bearer ${token}` }, method: Methods.POST },
+      ));
+  }
+
+  /**
+   * Delete currently authorized user
+   * @param auth
+   * @param password
+   */
+  public deleteUser(auth: string, password: string): Promise<any> {
+    const body = { password };
+    return this.tokenManager.token(auth)
+      .then((token) => this.requestAdapter.execute(
+        this.getUrl(API.UMS.USER),
+        { body, headers: { Authorization: `Bearer ${token}` }, method: Methods.DELETE },
+      ));
+  }
 
   /**
    * Generate API url
