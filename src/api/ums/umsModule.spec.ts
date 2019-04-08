@@ -151,33 +151,31 @@ describe('UMS Module', () => {
 
     describe('get current user', () => {
       it('should get token from token manager by provided alias', async () => {
-      const { subject, tokenManagerMock, systemDefer, init } = createSubject({
+        const { subject, tokenManagerMock, systemDefer, init } = createSubject();
+        jest.spyOn(tokenManagerMock, 'token');
+        systemDefer.resolve();
+        await init();
+        await subject.getUser(testUser.auth);
+        expect(tokenManagerMock.token).toHaveBeenCalledWith(testUser.auth);
       });
-      jest.spyOn(tokenManagerMock, 'token');
-      systemDefer.resolve();
-      await init();
-      await subject.getUser(testUser.auth);
-      expect(tokenManagerMock.token).toHaveBeenCalledWith(testUser.auth);
-    });
 
       it('should call correct API to get current user', async () => {
-      const { subject, requestAdapterMock, systemDefer, init } = createSubject();
-      systemDefer.resolve();
-      await init();
-      await subject.getUser(testUser.auth);
-      expect(requestAdapterMock.execute).toHaveBeenCalledWith(
-        `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.UMS.ENDPOINT}/${API.UMS.USER}`,
-        {
-          headers: { Authorization: `Bearer ${tokenTest}`},
-        },
-      );
-    });
+        const { subject, requestAdapterMock, systemDefer, init } = createSubject();
+        systemDefer.resolve();
+        await init();
+        await subject.getUser(testUser.auth);
+        expect(requestAdapterMock.execute).toHaveBeenCalledWith(
+          `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.UMS.ENDPOINT}/${API.UMS.USER}`,
+          {
+            headers: { Authorization: `Bearer ${tokenTest}`},
+          },
+        );
+      });
     });
 
     describe('update password', () => {
       it('should get token from token manager by provided alias', async () => {
-        const { subject, tokenManagerMock, systemDefer, init } = createSubject({
-        });
+        const { subject, tokenManagerMock, systemDefer, init } = createSubject();
         jest.spyOn(tokenManagerMock, 'token');
         systemDefer.resolve();
         await init();
@@ -208,8 +206,7 @@ describe('UMS Module', () => {
 
     describe('delete current user', () => {
       it('should get token from token manager by provided alias', async () => {
-        const { subject, tokenManagerMock, systemDefer, init } = createSubject({
-        });
+        const { subject, tokenManagerMock, systemDefer, init } = createSubject();
         jest.spyOn(tokenManagerMock, 'token');
         systemDefer.resolve();
         await init();

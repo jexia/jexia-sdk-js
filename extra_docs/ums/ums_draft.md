@@ -69,7 +69,7 @@ dom.dataset('rockets', 'basic access').select();
 
 ### or we can set default auth
 ```javascript
-ums.setDefault('Elon Mask');  // after this all dataset calls without useAuth() will use Elon's auth
+ums.setDefault('Elon Musk');  // after this all dataset calls without useAuth() will use Elon's auth
 ```
 
 ### or reset to the ApiKey auth
@@ -94,7 +94,7 @@ ums.activate({
 
 ### Fetch user by auth alias (or email)
 ```javascript
-ums.getUser('Elon Mask'); // -> return user or throw an error
+ums.getUser('Elon Musk'); // -> return user or throw an error
 ```
 
 ### Change user password
