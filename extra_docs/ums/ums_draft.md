@@ -92,21 +92,18 @@ ums.activate({
 });
 ```
 
-### Get user by id
+### Fetch user by auth alias (or email)
 ```javascript
-ums.getUserById(userId); // -> return user or throw an error
+ums.getUser('Elon Mask'); // -> return user or throw an error
 ```
 
 ### Change user password
 ```javascript
-ums.changePassword({
-  oldPassword: '', 
-  newPassword: ''
-});
+ums.changePassword('Elon@tesla.com', oldPassword, newPassword);
 ```
 
 ### Delete user 
 ```javascript
-ums.deleteUser();
+ums.deleteUser('Elon@tesla.com', password);
 ```
 

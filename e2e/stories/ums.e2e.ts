@@ -9,6 +9,8 @@ import { UserSchema } from "../lib/ums";
 import { Management } from '../management';
 import { cleaning, dom, init, initWithUMS, terminate, ums } from '../teardowns';
 
+jest.setTimeout(15000);
+
 const management = new Management();
 
 describe('User Management Service', () => {
@@ -16,10 +18,15 @@ describe('User Management Service', () => {
   const credentials = {
     email: faker.internet.email(),
     password: faker.internet.password(),
+    auth: faker.name.firstName(),
   };
   let user: IUMSUser;
 
   describe('initialize without API key', () => {
+
+    const wrongCredentialsError = new Error(
+      'There was an error on the back-end as a result of your request: 400 Bad Request',
+    );
 
     beforeAll(async () => await initWithUMS());
 
@@ -41,10 +48,6 @@ describe('User Management Service', () => {
     });
 
     describe('when created user sign-in', () => {
-
-      const wrongCredentialsError = new Error(
-        'There was an error on the back-end as a result of your request: 400 Bad Request',
-        );
 
       it('should get a token', async () => {
         const token = await ums.signIn({ ...credentials, default: true });
@@ -94,14 +97,50 @@ describe('User Management Service', () => {
           }))
           .length(1));
       });
+
+      it('should fetch himself by alias', async () => {
+        const fetchedUSer = await ums.getUser(credentials.auth);
+        joiAssert(fetchedUSer, UserSchema.keys({
+          email: Joi.string().equal(credentials.email),
+        }));
+      });
+
+      // TODO Does not work until auth/email token key will be developed
+      xit('should fetch himself by email', async () => {
+        const fetchedUSer = await ums.getUser(credentials.email);
+        joiAssert(fetchedUSer, UserSchema);
+      });
+
+      it('should be able to change own password', async () => {
+        const newPassword = faker.internet.password();
+        await ums.changePassword(credentials.auth, credentials.password, newPassword);
+        credentials.password = newPassword;
+        const token = await ums.signIn({ ...credentials, default: true });
+        expect(token).toBeDefined();
+      });
+
+      it('should be able to delete himself', async (done) => {
+        await ums.deleteUser(credentials.auth, credentials.password);
+        try {
+          await ums.signIn(credentials);
+        } catch (error) {
+          expect(error).toEqual(wrongCredentialsError);
+          done();
+          return;
+        }
+        done('should not be able to sign in after self deleting');
+      });
     });
 
   });
 
   describe('initialize with API key', () => {
 
-    beforeAll(async () => await init('umsTestDataset', 'name',
-      [ums, dom, new LoggerModule(LogLevel.DEBUG)]));
+    beforeAll(async () => {
+      await init('umsTestDataset', 'name',
+        [ums, dom, new LoggerModule(LogLevel.DEBUG)]);
+      await ums.signUp(credentials);
+    });
 
     afterAll(async () => await cleaning());
 
@@ -140,7 +179,7 @@ describe('User Management Service', () => {
       });
 
       it('should be able to use user authorization in dataset request', (done) => {
-        dom.dataset('umsTestDataset', credentials.email)
+        dom.dataset('umsTestDataset', credentials.auth)
           .insert([{ name: 'field' }])
           .execute()
           .then(() => done('should not have access to the dataset'))
@@ -151,7 +190,7 @@ describe('User Management Service', () => {
       });
 
       it('should be able to switch back to the user auth', (done) => {
-        ums.setDefault(credentials.email);
+        ums.setDefault(credentials.auth);
         dom.dataset('umsTestDataset')
           .insert([{ name: 'field' }])
           .execute()
