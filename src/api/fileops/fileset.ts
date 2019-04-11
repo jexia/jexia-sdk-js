@@ -6,7 +6,7 @@ import { FileUploader } from '../fileops/fileUploader';
 import { FilesetMultipart, IFileUploadStatus } from './fileops.interfaces';
 
 /**
- * Fileset object is used for manipulate files
+ * Fileset object is used for manipulating files
  *
  * @template <T> fileset user fields
  * @template <D> user + default fields
