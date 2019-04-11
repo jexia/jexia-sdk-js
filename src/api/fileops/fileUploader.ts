@@ -13,12 +13,20 @@ export class FileUploader<T, F> {
     private tokenManager: TokenManager,
   ) {}
 
+  /**
+   * Upload an array of files by splitting it to the separate streams
+   * @param files {Array<FilesetMultipart<T, F>>}
+   */
   public upload(files: Array<FilesetMultipart<T, F>>): Observable<IFileUploadStatus> {
     return merge(
       ...files.map((file) => this.uploadFile(file)),
     );
   }
 
+  /**
+   * Upload one file to the fileset
+   * @param file {FilesetMultipart<T, F>}
+   */
   private uploadFile(file: FilesetMultipart<T, F>): Observable<IFileUploadStatus> {
     return new Observable((observer) => {
       // TODO Subscribe to the FS RTC events
@@ -41,6 +49,11 @@ export class FileUploader<T, F> {
     });
   }
 
+  /**
+   * Execute REST request
+   * @param token {string} Auth token
+   * @param file {FilesetMultipart<T, F>} File data
+   */
   private execute(token: string, file: FilesetMultipart<T, F>): Promise<IFileUploadStatus> {
     return this.requestAdapter.execute<IFileUploadStatus>(
       this.getUrl(),
