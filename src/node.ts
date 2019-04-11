@@ -4,6 +4,7 @@ import fetch from "node-fetch";
 import * as NodeWebSocket from "ws";
 import { Client } from "./api/core/client";
 import { DataOperationsModule } from "./api/dataops/dataOperationsModule";
+import { FileOperationsModule } from "./api/fileops/fileOperationsModule";
 import { LoggerModule, LogLevel } from "./api/logger/public-api";
 import { IWebSocketBuilder } from "./api/realtime/realTime.interfaces";
 import { RealTimeModule } from "./api/realtime/realTimeModule";
@@ -14,6 +15,11 @@ export function jexiaClient(fetchFunc: Fetch = fetch as any): Client {
 
 export function dataOperations(): DataOperationsModule {
   return new DataOperationsModule();
+}
+
+export type IFile = Buffer;
+export function fileOpearations(): FileOperationsModule<IFile> {
+  return new FileOperationsModule();
 }
 
 export function realTime(webSocketBuilder: IWebSocketBuilder = (appUrl) => new NodeWebSocket(appUrl)): RealTimeModule {

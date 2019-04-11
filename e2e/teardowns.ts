@@ -1,10 +1,21 @@
 import { IModule } from "../src/api/core/module";
-import { Client, dataOperations, jexiaClient, LoggerModule, LogLevel, realTime, UMSModule } from "../src/node";
+import {
+  Client,
+  dataOperations,
+  fileOpearations,
+  jexiaClient,
+  LoggerModule,
+  LogLevel,
+  realTime,
+  UMSModule
+} from "../src/node";
 import { Management } from "./management";
 
 export const dom = dataOperations();
 
 export const ums = new UMSModule();
+
+export const jfs = fileOpearations();
 
 const management = new Management();
 let client: Client;
