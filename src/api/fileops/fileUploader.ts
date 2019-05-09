@@ -1,17 +1,26 @@
 import { Inject, Injectable } from 'injection-js';
 import { merge, Observable } from 'rxjs';
-import { Methods, RequestAdapter } from '../../internal/requestAdapter';
+import { API } from '../../config';
+import { RequestAdapter } from '../../internal/requestAdapter';
 import { AuthOptions, IAuthOptions, TokenManager } from '../core/tokenManager';
-import { FilesetMultipart, IFileUploadStatus } from './fileops.interfaces';
+import { FilesetMultipart, FilesetName, IFileUploadStatus, IFormData } from './fileops.interfaces';
 
 @Injectable()
-export class FileUploader<T, F> {
+export class FileUploader<FormDataType extends IFormData<F>, T, F> {
+
+  private formData: FormDataType;
 
   constructor(
     @Inject(AuthOptions) private config: IAuthOptions,
-    private requestAdapter: RequestAdapter,
+    @Inject(FilesetName) private filesetName: string,
     private tokenManager: TokenManager,
+    private requestAdapter: RequestAdapter,
   ) {}
+
+  public provideFormData(formData: FormDataType) {
+    // @ts-ignore reset form data
+    this.formData = new formData.constructor();
+  }
 
   /**
    * Upload an array of files by splitting it to the separate streams
@@ -28,23 +37,20 @@ export class FileUploader<T, F> {
    * @param file {FilesetMultipart<T, F>}
    */
   private uploadFile(file: FilesetMultipart<T, F>): Observable<IFileUploadStatus> {
+
+    // TODO Append field values here
+    this.formData.append('data', '{}');
+
+    this.formData.append('file', file.file);
+
     return new Observable((observer) => {
-      // TODO Subscribe to the FS RTC events
       this.tokenManager
         .token(this.config.auth)
-        .then((token) => this.execute(token, file))
-        .then((status) => {
-          switch (status.status) {
-            case 'loaded':
-              observer.complete();
-              break;
-            case 'loading':
-              observer.next(status);
-              break;
-            case 'error':
-            default:
-              observer.error(status.message);
-          }
+        .then((token) => this.execute(token))
+        .then((res) => {
+          // TODO Subscribe to the FS RTC events (if RTC module is available?)
+          observer.next(res);
+          observer.complete();
         });
     });
   }
@@ -52,27 +58,29 @@ export class FileUploader<T, F> {
   /**
    * Execute REST request
    * @param token {string} Auth token
-   * @param file {FilesetMultipart<T, F>} File data
    */
-  private execute(token: string, file: FilesetMultipart<T, F>): Promise<IFileUploadStatus> {
-    return this.requestAdapter.execute<IFileUploadStatus>(
-      this.getUrl(),
-      {
-        body: {
-          // TODO Convert file to multipart form
-          file,
-        },
-        headers: {
-          'Authorization': token,
-          'Content-Type': 'multipart/form-data',
-        },
-        method: Methods.POST,
-      },
-    );
+  private execute(token: string): Promise<any> {
+
+    const headers = {
+      Authorization: `${token}`,
+    };
+
+    /* this method is available only under NodeJs */
+    if (this.formData.getHeaders) {
+      Object.assign(headers, this.formData.getHeaders());
+    }
+
+    return this.requestAdapter.upload(this.getUrl(), headers, this.formData);
   };
 
-  // TODO Provide correct url
+  /**
+   * Provide fileset URL
+   */
   private getUrl() {
-    return '';
+    return [
+      `${API.PROTOCOL}://${this.config.projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}`,
+      API.FILES.ENDPOINT,
+      this.filesetName,
+    ].join('/');
   }
 }

@@ -49,9 +49,8 @@ export function dataOperations(): DataOperationsModule {
   return new DataOperationsModule();
 }
 
-export type IFile = ArrayBuffer;
-export function fileOpearations(): FileOperationsModule<IFile> {
-  return new FileOperationsModule();
+export function fileOperations(): FileOperationsModule<FormData, Blob> {
+  return new FileOperationsModule(new FormData());
 }
 
 export function realTime(webSocketBuilder: IWebSocketBuilder = (appUrl) => new WebSocket(appUrl)): RealTimeModule {

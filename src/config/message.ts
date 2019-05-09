@@ -21,4 +21,7 @@ export const MESSAGE = {
   TokenManager: {
     TOKEN_NOT_AVAILABLE: "You need to log in before you can access the token.",
   },
+  FILESET: {
+    UPLOADING_FILE_ERROR: "Couldn't upload a file: ",
+  }
 };

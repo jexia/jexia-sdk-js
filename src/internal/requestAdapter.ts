@@ -63,4 +63,24 @@ export class RequestAdapter implements IRequestAdapter {
       /* convert body to JSON */
       .then(json);
   }
+
+  /**
+   * Upload a file
+   * @param uri
+   * @param headers
+   * @param body
+   */
+  public upload(uri: string, headers: {[header: string]: string}, body: any): Promise<any> {
+    let logMessage = `(REQUEST) UPLOAD ${uri}`;
+    return this.fetch(uri, { body, headers, method: Methods.POST })
+      .then((response) => {
+        logMessage += `(RESPONSE) ${response.status} ${response.statusText}`;
+        this.logger.debug("RequestAdapter", logMessage);
+        return response;
+      })
+      /* check response status */
+      .then(status)
+      /* convert body to JSON */
+      .then(json);
+  }
 }
