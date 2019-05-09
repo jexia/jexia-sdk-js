@@ -2,6 +2,11 @@ import { InjectionToken } from "injection-js";
 
 export const FilesetName = new InjectionToken<string>('FilesetName');
 
+export interface IFormData<F> {
+  append: (name: string, value: string | F, filename?: string) => void;
+  getHeaders?: () => { [key: string]: string };
+}
+
 /**
  * Fields that each fileset has
  */
@@ -23,7 +28,7 @@ export type FilesetInterface<T> = T & DefaultFilesetInterface;
  * Represent one file for upload, file buffer alongside with user-defined fields
  */
 export type FilesetMultipart<T, F> = {
-  record: FilesetInterface<T>;
+  data: FilesetInterface<T>;
   file: F;
 };
 

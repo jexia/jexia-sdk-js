@@ -1,4 +1,6 @@
 export * from "./index";
+import * as FormData from 'form-data';
+import { ReadStream } from 'fs';
 import { Fetch } from "jexia-sdk-js/internal/requestAdapter";
 import fetch from "node-fetch";
 import * as NodeWebSocket from "ws";
@@ -17,9 +19,8 @@ export function dataOperations(): DataOperationsModule {
   return new DataOperationsModule();
 }
 
-export type IFile = Buffer;
-export function fileOpearations(): FileOperationsModule<IFile> {
-  return new FileOperationsModule();
+export function fileOperations(): FileOperationsModule<FormData, ReadStream> {
+  return new FileOperationsModule(new FormData());
 }
 
 export function realTime(webSocketBuilder: IWebSocketBuilder = (appUrl) => new NodeWebSocket(appUrl)): RealTimeModule {

@@ -1,19 +1,30 @@
+import * as fs from 'fs';
+import * as Joi from 'joi';
+// @ts-ignore
+import * as joiAssert from 'joi-assert';
 import "reflect-metadata";
-import { LogLevel } from "../../src/api/logger/logger";
-import { LoggerModule } from "../../src/api/logger/loggerModule";
-import { cleaning, init, jfs } from "../teardowns";
+import { FilesetRecordSchema } from "../lib/fileset";
+import { cleaning, initWithJFS, jfs } from "../teardowns";
 
-jest.setTimeout(15000);
+jest.setTimeout(30000);
+
+beforeAll(async () => await initWithJFS());
+
+afterAll(async () => await cleaning());
 
 describe('Fileset Module', () => {
-  beforeAll(async () => {
-    await init('umsTestDataset', 'name',
-      [jfs, new LoggerModule(LogLevel.DEBUG)]);
-  });
 
   it('should be able to get fileset name', () => {
-    expect(jfs.fileset('filesetName').name).toEqual('filesetName');
+    expect(jfs.fileset('testFileset').name).toEqual('testFileset');
   });
 
-  afterAll(async () => await cleaning());
+  it('should upload a file', (done) => {
+    jfs.fileset('testFileset').upload([{
+      data: {},
+      file: fs.createReadStream('e2e/resources/bee-32x32.png'),
+    }]).subscribe((result) => {
+      joiAssert(result, Joi.array().items(FilesetRecordSchema).length(1));
+      done();
+    });
+  });
 });

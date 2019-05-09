@@ -1,25 +1,34 @@
 import { ReflectiveInjector } from 'injection-js';
-import { RequestExecuter } from '../../internal/executer';
 import { IModule } from '../core/module';
 import { AuthOptions } from '../core/tokenManager';
-import { FilesetInterface, FilesetName } from './fileops.interfaces';
+import { FilesetInterface, FilesetName, IFormData } from './fileops.interfaces';
 import { Fileset } from './fileset';
 import { FileUploader } from './fileUploader';
 
-export class FileOperationsModule<F> implements IModule {
+export class FileOperationsModule<FormDataType extends IFormData<F>, F> implements IModule {
   private injector: ReflectiveInjector;
 
+  constructor(private formData: FormDataType) {}
+
   public init(coreInjector: ReflectiveInjector): Promise<this> {
-    this.injector = coreInjector;
+    this.injector = coreInjector.resolveAndCreateChild([]);
     return Promise.resolve(this);
   }
 
-  public fileset<T extends object = any>(fileset: string, auth?: string): Fileset<T, FilesetInterface<T>, F> {
+  /**
+   * Returns fileset class which can handle fileset operations
+   * @param fileset {string} Fileset name
+   * @param auth {string} optional auth alias
+   */
+  public fileset<T extends object = any>(fileset: string, auth?: string):
+    Fileset<FormDataType, T, FilesetInterface<T>, F> {
+
     let config = this.injector.get(AuthOptions);
     if (auth) {
       config.auth = auth;
     }
-    return this.injector.resolveAndCreateChild([
+
+    const injector = this.injector.resolveAndCreateChild([
       {
         provide: FilesetName,
         useValue: fileset,
@@ -28,10 +37,13 @@ export class FileOperationsModule<F> implements IModule {
         provide: AuthOptions,
         useValue: config,
       },
-      RequestExecuter,
       FileUploader,
       Fileset,
-    ]).get(Fileset);
+    ]);
+
+    injector.get(FileUploader).provideFormData(this.formData);
+
+    return injector.get(Fileset);
   }
 
   public terminate(): Promise<this> {
