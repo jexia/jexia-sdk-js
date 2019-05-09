@@ -2,7 +2,7 @@ import { IModule } from "../src/api/core/module";
 import {
   Client,
   dataOperations,
-  fileOpearations,
+  fileOperations,
   jexiaClient,
   LoggerModule,
   LogLevel,
@@ -15,11 +15,12 @@ export const dom = dataOperations();
 
 export const ums = new UMSModule();
 
-export const jfs = fileOpearations();
+export const jfs = fileOperations();
 
 const management = new Management();
 let client: Client;
 let dataset: { name: string, id: string };
+let fileset: { name: string, id: string };
 let apiKey: { id: string, key: string, secret: string };
 let policy: { id: string };
 
@@ -50,16 +51,40 @@ export const init = async (
 };
 
 export const cleaning = async () => {
-  await management.deleteDataset(dataset.id);
-  await management.deleteApiKey(apiKey.key);
-  await management.deletePolicy(policy.id);
-  await client.terminate();
+  if (dataset) {
+    await management.deleteDataset(dataset.id);
+  }
+  if (fileset) {
+    await management.deleteFileset(fileset.id);
+  }
+  if (apiKey) {
+    await management.deleteApiKey(apiKey.key);
+  }
+  if (policy) {
+    await management.deletePolicy(policy.id);
+  }
+  if (client) {
+    await client.terminate();
+  }
 };
 
 export const initWithUMS = async () => {
   client = await jexiaClient().init({
     projectID: process.env.E2E_PROJECT_ID as string,
   }, ums, dom, new LoggerModule(LogLevel.DEBUG)); // Change to LogLevel.DEBUG to have more logs
+};
+
+export const initWithJFS = async (filesetName: string = 'testFileset') => {
+  await management.login();
+  fileset = await management.createFileset(filesetName);
+  apiKey = await management.createApiKey();
+  policy = await management.createPolicy(fileset, [`apk:${apiKey.key}`]);
+
+  client = await jexiaClient().init({
+    projectID: process.env.E2E_PROJECT_ID as string,
+    key: apiKey.key,
+    secret: apiKey.secret,
+  }, jfs, new LoggerModule(LogLevel.DEBUG));
 };
 
 export const terminate = async () => {
