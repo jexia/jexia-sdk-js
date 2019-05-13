@@ -33,15 +33,17 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
   }
 
   /**
-   * Upload one file to the fileset
-   * @param file {FilesetMultipart<T, F>}
+   * Upload one record to the fileset
+   * @param record {FilesetMultipart<T, F>}
    */
-  private uploadFile(file: FilesetMultipart<T, F>): Observable<IFileUploadStatus> {
+  private uploadFile(record: FilesetMultipart<T, F>): Observable<IFileUploadStatus> {
 
     // TODO Append field values here
     this.formData.append('data', '{}');
 
-    this.formData.append('file', file.file);
+    if (record.file) {
+      this.formData.append('file', record.file);
+    }
 
     return new Observable((observer) => {
       this.tokenManager
