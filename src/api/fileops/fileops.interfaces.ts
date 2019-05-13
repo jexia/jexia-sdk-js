@@ -28,8 +28,8 @@ export type FilesetInterface<T> = T & DefaultFilesetInterface;
  * Represent one file for upload, file buffer alongside with user-defined fields
  */
 export type FilesetMultipart<T, F> = {
-  data: FilesetInterface<T>;
-  file: F;
+  data?: FilesetInterface<T>;
+  file?: F;
 };
 
 export type IFileStatus = 'loading' | 'loaded' | 'error';

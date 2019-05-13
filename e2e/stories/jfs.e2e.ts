@@ -1,3 +1,4 @@
+import * as faker from 'faker';
 import * as fs from 'fs';
 import * as Joi from 'joi';
 // @ts-ignore
@@ -8,19 +9,40 @@ import { cleaning, initWithJFS, jfs } from "../teardowns";
 
 jest.setTimeout(30000);
 
-beforeAll(async () => await initWithJFS());
+const filesetName = 'testFileset';
+
+beforeAll(async () => await initWithJFS(filesetName, [{
+  name: 'testField1',
+  type: 'string',
+}, {
+  name: 'testField2',
+  type: 'integer',
+}]));
 
 afterAll(async () => await cleaning());
 
 describe('Fileset Module', () => {
 
   it('should be able to get fileset name', () => {
-    expect(jfs.fileset('testFileset').name).toEqual('testFileset');
+    expect(jfs.fileset(filesetName).name).toEqual(filesetName);
   });
 
   it('should upload a file', (done) => {
-    jfs.fileset('testFileset').upload([{
-      data: {},
+    jfs.fileset(filesetName).upload([{
+      // data: {},
+      file: fs.createReadStream('e2e/resources/bee-32x32.png'),
+    }]).subscribe((result) => {
+      joiAssert(result, Joi.array().items(FilesetRecordSchema).length(1));
+      done();
+    });
+  });
+
+  it('should upload a file with custom fields', (done) => {
+    jfs.fileset(filesetName).upload([{
+      data: {
+        testField1: faker.lorem.sentence(5),
+        testField2: faker.random.boolean().toString(),
+      },
       file: fs.createReadStream('e2e/resources/bee-32x32.png'),
     }]).subscribe((result) => {
       joiAssert(result, Joi.array().items(FilesetRecordSchema).length(1));

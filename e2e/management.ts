@@ -3,18 +3,16 @@ import chalk from "chalk";
 import { default as fetch, Response } from "node-fetch";
 import { api } from "./config";
 
-export type DatasetFieldType = "boolean" | "date" | "datetime" | "float" | "integer" | "json" | "string" | "uuid";
+export type FieldType = "boolean" | "date" | "datetime" | "float" | "integer" | "json" | "string" | "uuid";
 
-export interface IDatasetFieldValidators {
+export interface IFieldValidators {
   required: boolean;
 }
 
-export interface IDatasetFieldOptions {
-  type: DatasetFieldType;
-  validators?: IDatasetFieldValidators;
+export interface IFieldOptions {
+  type: FieldType;
+  validators?: IFieldValidators;
 }
-
-const RECAPTCHA_TOKEN = 'E2E.Tests.Recaptcha.Token';
 
 /* Get AWS credentials for fileset */
 const { AWS_KEY, AWS_SECRET, AWS_BUCKET } = process.env;
@@ -70,7 +68,7 @@ export class Management {
       body: JSON.stringify({
         email: process.env.E2E_EMAIL,
         password: process.env.E2E_PASSWORD,
-        recaptchaToken: RECAPTCHA_TOKEN,
+        recaptchaToken: process.env.RECAPTCHA_TOKEN,
       })
     }).then((res: any) => res.json())
       .then((tokens: { access_token: string, refresh_token: string}) => {
@@ -94,7 +92,7 @@ export class Management {
     });
   }
 
-  public createDatasetField(datasetId: string, name: string, options: IDatasetFieldOptions): Promise<any> {
+  public createDatasetField(datasetId: string, name: string, options: IFieldOptions): Promise<any> {
     return this.fetch(api.dataset.field.create.replace("{dataset_id}", datasetId), {
       method: "POST",
       headers: this.headers,
@@ -169,6 +167,18 @@ export class Management {
       method: "DELETE",
       headers: this.headers
     });
+  }
+
+  public createFilesetField(filesetId: string, name: string, options: IFieldOptions): Promise<any> {
+    return this.fetch(api.fileset.field.create.replace("{fileset_id}", filesetId), {
+      method: "POST",
+      headers: this.headers,
+      body: JSON.stringify({
+        name,
+        ...options
+      })
+    })
+      .then((response: Response) => response.json());
   }
 
   private fetch(url: string, init: any = {}): Promise<Response> {
