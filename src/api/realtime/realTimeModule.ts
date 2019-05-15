@@ -13,7 +13,7 @@ import * as setWatch from "./watch";
  * List of resources that will be extended by RTC module
  * by providing a watch() method to their prototypes
  */
-const RTCResources: Array<{ new(): IResource }> = [Dataset, Fileset];
+const RTCResources: Array<{ new(...args: any[]): IResource }> = [Dataset, Fileset];
 
 /**
  * Real Time Module used to work with realtime events from datasets and filesets.
