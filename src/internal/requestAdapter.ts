@@ -70,7 +70,7 @@ export class RequestAdapter implements IRequestAdapter {
    * @param headers
    * @param body
    */
-  public upload(uri: string, headers: {[header: string]: string}, body: any): Promise<any> {
+  public upload<T = any>(uri: string, headers: {[header: string]: string}, body: any): Promise<T> {
     let logMessage = `(REQUEST) UPLOAD ${uri}`;
     return this.fetch(uri, { body, headers, method: Methods.POST })
       .then((response) => {

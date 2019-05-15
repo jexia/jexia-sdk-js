@@ -1,13 +1,22 @@
 import { ReflectiveInjector } from "injection-js";
+import { IResource } from "jexia-sdk-js/api/core/resource";
 import { API, MESSAGE } from "../../config";
 import { IModule } from "../core/module";
 import { AuthOptions, IAuthOptions, TokenManager } from "../core/tokenManager";
 import { Dataset } from "../dataops/dataset";
-import * as datasetWatch from "./datasetWatch";
+import { IFormData } from "../fileops/fileops.interfaces";
+import { Fileset } from "../fileops/fileset";
 import { IWebSocket, IWebSocketBuilder, WebSocketState } from "./realTime.interfaces";
+import * as setWatch from "./watch";
 
 /**
- * Real Time Module used to work with realtime events from datasets.
+ * List of resources that will be extended by RTC module
+ * by providing a watch() method to their prototypes
+ */
+const RTCResources: Array<{ new(): IResource }> = [Dataset, Fileset];
+
+/**
+ * Real Time Module used to work with realtime events from datasets and filesets.
  * This object must be build from the helper functions, never to be instantiated direct.
  *
  * @example
@@ -30,7 +39,15 @@ declare module "../dataops/dataset" {
   // tslint:disable-next-line:interface-name
   interface Dataset<T> {
     webSocket: IWebSocket;
-    watch: typeof datasetWatch.watch;
+    watch: typeof setWatch.watch;
+  }
+}
+
+declare module "../fileops/fileset" {
+  // tslint:disable-next-line:interface-name
+  interface Fileset<FormDataType extends IFormData<F>, T, D, F> {
+    webSocket: IWebSocket;
+    watch: typeof setWatch.watch;
   }
 }
 
@@ -53,7 +70,7 @@ export class RealTimeModule implements IModule {
     const tokenManager: TokenManager = coreInjector.get(TokenManager);
     const { projectID }: IAuthOptions = coreInjector.get(AuthOptions);
 
-    Dataset.prototype.watch = datasetWatch.watch;
+    RTCResources.forEach((resource) => resource.prototype.watch = setWatch.watch);
 
     return tokenManager.token().then((token) => {
       try {
@@ -66,14 +83,14 @@ export class RealTimeModule implements IModule {
         throw new Error(MESSAGE.RTC.BAD_WEBSOCKET_CREATION_CALLBACK);
       }
 
-      Dataset.prototype.webSocket = this.websocket;
+      Dataset.prototype.webSocket = Fileset.prototype.webSocket = this.websocket;
 
       return new Promise((resolve, reject) => {
         this.websocket.onopen = resolve;
         this.websocket.onerror = () => reject(new Error(MESSAGE.RTC.CONNECTION_FAILED));
       });
     })
-    .then(() => datasetWatch.start(this.websocket, () => tokenManager.token()))
+    .then(() => setWatch.start(this.websocket, () => tokenManager.token()))
     .then(() => this);
   }
 

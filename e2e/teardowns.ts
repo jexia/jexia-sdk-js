@@ -92,7 +92,7 @@ export const initWithJFS = async (filesetName: string = 'testFileset',
     projectID: process.env.E2E_PROJECT_ID as string,
     key: apiKey.key,
     secret: apiKey.secret,
-  }, jfs, new LoggerModule(LogLevel.DEBUG));
+  }, jfs, realTime(), new LoggerModule(LogLevel.DEBUG));
 };
 
 export const terminate = async () => {

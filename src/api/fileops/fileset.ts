@@ -1,9 +1,9 @@
 import { Inject, Injectable } from "injection-js";
 import { Observable } from 'rxjs';
-import { IResource } from '../core/resource';
+import { IResource, ResourceType } from '../core/resource';
 import { FilesetName, IFormData } from '../fileops/fileops.interfaces';
 import { FileUploader } from '../fileops/fileUploader';
-import { FilesetMultipart, IFileUploadStatus } from './fileops.interfaces';
+import { FilesetMultipart } from './fileops.interfaces';
 
 /**
  * Fileset object is used for manipulating files
@@ -30,10 +30,17 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
   }
 
   /**
+   * Resource type of the fileset
+   */
+  public get resourceType(): ResourceType {
+    return ResourceType.Fileset;
+  }
+
+  /**
    * Upload files and create records in the fileset
    * @param files {Array<FilesetMultipart<T, F>>} list of files with record data
    */
-  public upload(files: Array<FilesetMultipart<T, F>>): Observable<IFileUploadStatus> {
+  public upload(files: Array<FilesetMultipart<T, F>>): Observable<T> {
     return this.fileUploader.upload(files);
   }
 

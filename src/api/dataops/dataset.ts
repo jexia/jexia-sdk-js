@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "injection-js";
 import { RequestExecuter } from "../../internal/executer";
-import { IResource } from "../core/resource";
+import { IResource, ResourceType } from "../core/resource";
 import { DataSetName } from "./dataops.tokens";
 import { DeleteQuery } from "./queries/deleteQuery";
 import { InsertQuery } from "./queries/insertQuery";
@@ -66,6 +66,13 @@ export class Dataset<T extends object = any, D extends DatasetInterface<T> = Dat
    */
   public get name(): string {
     return this.datasetName;
+  }
+
+  /**
+   * Resource type of the dataset
+   */
+  public get resourceType(): ResourceType {
+    return ResourceType.Dataset;
   }
 
   /**

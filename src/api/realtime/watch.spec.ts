@@ -6,8 +6,8 @@ import { EventSubscriptionType } from "src";
 import { createMockFor, deepFreeze, SpyObj } from "../../../spec/testUtils";
 import { MESSAGE } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
+import { ResourceType } from "../core/resource";
 import { Dataset } from "../dataops/dataset";
-import * as datasetWatch from "./datasetWatch";
 import {
   CommandError,
   CommandErrorCodes,
@@ -18,8 +18,8 @@ import {
   RealTimeEventMessage,
   RealTimeMessage,
   RealTimeMessageTypes,
-  ResourceType,
 } from "./realTime.interfaces";
+import * as datasetWatch from "./watch";
 
 const tokenTest = "tokenTest";
 const datasetName = "test-dataset";
