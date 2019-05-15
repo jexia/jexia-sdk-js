@@ -83,7 +83,7 @@ export class RealTimeModule implements IModule {
         throw new Error(MESSAGE.RTC.BAD_WEBSOCKET_CREATION_CALLBACK);
       }
 
-      Dataset.prototype.webSocket = Fileset.prototype.webSocket = this.websocket;
+      RTCResources.forEach((resource) => resource.prototype.webSocket = this.websocket);
 
       return new Promise((resolve, reject) => {
         this.websocket.onopen = resolve;
