@@ -3,6 +3,8 @@
 /**
  * WebSocket states from `readyState`
  */
+import { ResourceType } from "../core/resource";
+
 export enum WebSocketState {
   CONNECTING = 0,
   OPEN = 1,
@@ -221,13 +223,6 @@ export interface Resource {
    * Resource name
    */
   name: string;
-}
-
-/**
- * Resource types
- */
-export enum ResourceType {
-  Dataset = "ds",
 }
 
 /**

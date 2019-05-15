@@ -4,7 +4,6 @@ export {
   IWebSocketBuilder,
   RealTimeEventMessage,
   EventSubscriptionType,
-  ResourceType,
   Resource,
   Modifier,
 } from "./realTime.interfaces";
