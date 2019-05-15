@@ -54,7 +54,7 @@ describe("Real Time Module", () => {
 
     it("should start dataset watch functionality after initialized with correct parameters", async () => {
       const { webSocketMock, moduleInit, tokenManagerMock } = createSubject();
-      const datasetWatch = require("./datasetWatch");
+      const datasetWatch = require("./watch");
       spyOn(datasetWatch, "start");
       await moduleInit();
       expect(datasetWatch.start).toHaveBeenCalledWith(webSocketMock, jasmine.any(Function));
@@ -64,7 +64,7 @@ describe("Real Time Module", () => {
 
     it("should not start dataset watch functionality if not initialized", async () => {
       const { moduleInit, websocketBuilder } = createSubject();
-      const datasetWatch = require("./datasetWatch");
+      const datasetWatch = require("./watch");
       spyOn(datasetWatch, "start");
       websocketBuilder.and.callFake(() => { throw new Error("builderError"); });
       try {

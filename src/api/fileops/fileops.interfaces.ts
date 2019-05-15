@@ -13,10 +13,21 @@ export interface IFormData<F> {
 export type DefaultFilesetFields = 'id' | 'size' | 'name' | 'created_at' | 'updated_at';
 
 /**
+ * File upload statuses
+ */
+export enum IFileStatus {
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
+  ERROR = 'error'
+}
+
+/**
  * Fileset interface type
  */
 export type DefaultFilesetInterface = {
   [P in DefaultFilesetFields]: string;
+} & {
+  status: IFileStatus;
 };
 
 /**
@@ -31,11 +42,3 @@ export type FilesetMultipart<T, F> = {
   data?: FilesetInterface<T>;
   file?: F;
 };
-
-export type IFileStatus = 'loading' | 'loaded' | 'error';
-
-export interface IFileUploadStatus {
-  id: string;
-  status: IFileStatus;
-  message?: string;
-}

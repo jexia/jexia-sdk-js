@@ -3,7 +3,7 @@ import { merge, Observable } from 'rxjs';
 import { API } from '../../config';
 import { RequestAdapter } from '../../internal/requestAdapter';
 import { AuthOptions, IAuthOptions, TokenManager } from '../core/tokenManager';
-import { FilesetMultipart, FilesetName, IFileUploadStatus, IFormData } from './fileops.interfaces';
+import { FilesetMultipart, FilesetName, IFormData } from './fileops.interfaces';
 
 @Injectable()
 export class FileUploader<FormDataType extends IFormData<F>, T, F> {
@@ -26,7 +26,7 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
    * Upload an array of files by splitting it to the separate streams
    * @param files {Array<FilesetMultipart<T, F>>}
    */
-  public upload(files: Array<FilesetMultipart<T, F>>): Observable<IFileUploadStatus> {
+  public upload(files: Array<FilesetMultipart<T, F>>): Observable<T> {
     return merge(
       ...files.map((file) => this.uploadFile(file)),
     );
@@ -36,7 +36,7 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
    * Upload one record to the fileset
    * @param record {FilesetMultipart<T, F>}
    */
-  private uploadFile(record: FilesetMultipart<T, F>): Observable<IFileUploadStatus> {
+  private uploadFile(record: FilesetMultipart<T, F>): Observable<T> {
 
     // TODO Append field values here
     this.formData.append('data', '{}');
@@ -49,11 +49,11 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
       this.tokenManager
         .token(this.config.auth)
         .then((token) => this.execute(token))
-        .then((res) => {
-          // TODO Subscribe to the FS RTC events (if RTC module is available?)
-          observer.next(res);
+        .then((res: T[]) => {
+          observer.next(res[0]);
           observer.complete();
-        });
+        })
+        .catch((error) => observer.error(error));
     });
   }
 
@@ -61,7 +61,7 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
    * Execute REST request
    * @param token {string} Auth token
    */
-  private execute(token: string): Promise<any> {
+  private execute(token: string): Promise<T[]> {
 
     const headers = {
       Authorization: `${token}`,
@@ -72,7 +72,7 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
       Object.assign(headers, this.formData.getHeaders());
     }
 
-    return this.requestAdapter.upload(this.getUrl(), headers, this.formData);
+    return this.requestAdapter.upload<T[]>(this.getUrl(), headers, this.formData);
   };
 
   /**
