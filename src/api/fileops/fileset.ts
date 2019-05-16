@@ -15,6 +15,10 @@ import { FilesetMultipart } from './fileops.interfaces';
  */
 @Injectable()
 export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IResource {
+  /**
+   * Resource type of the fileset
+   */
+  public readonly resourceType: ResourceType = ResourceType.Fileset;
 
   constructor(
     @Inject(FilesetName) private filesetName: string,
@@ -27,13 +31,6 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
    */
   public get name(): string {
     return this.filesetName;
-  }
-
-  /**
-   * Resource type of the fileset
-   */
-  public get resourceType(): ResourceType {
-    return ResourceType.Fileset;
   }
 
   /**
