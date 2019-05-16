@@ -8,7 +8,7 @@ import { TokenStorage } from "./componentStorage";
 import { TokenManager } from "./tokenManager";
 
 const validProjectID = "validProjectID";
-const defaultToken = Object.freeze({ token: "token", refresh_token: "refreshToken" });
+const defaultToken = Object.freeze({ access_token: "accessToken", refresh_token: "refreshToken" });
 
 const validOpts = () => ({ projectID: validProjectID, key: "validKey", refreshInterval: 500, secret: "validSecret" });
 
@@ -67,7 +67,7 @@ describe("Class: TokenManager", () => {
 
     it("should have valid token and refresh token if authorization succeeded", async () => {
       const token = await tm.init(validOpts()).then((out: TokenManager) => out.token());
-      expect(token).toBe("token");
+      expect(token).toBe(defaultToken.access_token);
     });
 
     it("should throw an error if the token is accessed before login", (done) => {
@@ -131,7 +131,7 @@ describe("Class: TokenManager", () => {
     });
 
     it('should take refresh token from storage and use it to make a request', () => {
-      tm['storage'].setTokens('testRefresh', { token: 'token', refresh_token: 'refresh_token' });
+      tm['storage'].setTokens('testRefresh', { access_token: 'access_token', refresh_token: 'refresh_token' });
       tm['refresh']('testRefresh');
       expect((tm as any).requestAdapter.execute.mock.calls[0][1]).toEqual({
         body: { refresh_token: 'refresh_token' },
@@ -140,7 +140,7 @@ describe("Class: TokenManager", () => {
     });
 
     it('should reject promise if there is no token for specific auth', (done) => {
-      tm['storage'].setTokens('testRefresh', { token: 'token', refresh_token: 'refresh_token' });
+      tm['storage'].setTokens('testRefresh', { access_token: 'access_token', refresh_token: 'refresh_token' });
       tm['refresh']('randomAuth')
         .then(() => done.fail('should reject promise with error'))
         .catch((error) => {
@@ -154,7 +154,7 @@ describe("Class: TokenManager", () => {
         requestAdapterMockFactory().failedExecution('refresh error'),
         new Logger()
       );
-      tokenManager['storage'].setTokens('testRefresh', { token: 'token', refresh_token: 'refresh_token' });
+      tokenManager['storage'].setTokens('testRefresh', { access_token: 'access_token', refresh_token: 'refresh_token' });
       tokenManager['refresh']('testRefresh')
         .then(() => done.fail('should fail with refresh token error'))
         .catch((error) => {

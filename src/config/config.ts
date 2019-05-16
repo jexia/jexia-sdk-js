@@ -9,7 +9,7 @@ export const API = {
     ENDPOINT: "fs",
   },
   REAL_TIME: {
-    ENDPOINT: "/rtc?Authorization=",
+    ENDPOINT: "/rtc",
     PORT: "",
     PROTOCOL: "wss",
   },

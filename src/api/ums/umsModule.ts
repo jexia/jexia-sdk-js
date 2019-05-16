@@ -60,7 +60,7 @@ export class UMSModule implements IModule {
         user.default,
       );
 
-      return tokens.token;
+      return tokens.access_token;
     });
   }
 

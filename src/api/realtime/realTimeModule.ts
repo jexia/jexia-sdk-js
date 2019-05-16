@@ -115,7 +115,7 @@ export class RealTimeModule implements IModule {
     // needed and include : or / along with the actual values, when they are needed.
     // See /config/config.ts vs. /config/config.prod.ts for actual values.
     let result = `${API.REAL_TIME.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}` +
-      `${API.REAL_TIME.PORT || ""}${API.REAL_TIME.ENDPOINT}${token}`;
+      `${API.REAL_TIME.PORT || ""}${API.REAL_TIME.ENDPOINT}?access_token=${token}`;
     // temporary variable used for devenv debugging purposes
     return result;
   }
