@@ -52,6 +52,10 @@ export type DatasetInterface<T> = T & DefaultDatasetInterface;
  */
 @Injectable()
 export class Dataset<T extends object = any, D extends DatasetInterface<T> = DatasetInterface<T>> implements IResource {
+  /**
+   * Resource type of the dataset
+   */
+  public readonly resourceType: ResourceType = ResourceType.Dataset;
 
   /**
    * @internal
@@ -66,13 +70,6 @@ export class Dataset<T extends object = any, D extends DatasetInterface<T> = Dat
    */
   public get name(): string {
     return this.datasetName;
-  }
-
-  /**
-   * Resource type of the dataset
-   */
-  public get resourceType(): ResourceType {
-    return ResourceType.Dataset;
   }
 
   /**

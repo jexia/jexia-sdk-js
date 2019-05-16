@@ -1,7 +1,7 @@
 import { ReflectiveInjector } from "injection-js";
-import { IResource } from "jexia-sdk-js/api/core/resource";
 import { API, MESSAGE } from "../../config";
 import { IModule } from "../core/module";
+import { IResource } from "../core/resource";
 import { AuthOptions, IAuthOptions, TokenManager } from "../core/tokenManager";
 import { Dataset } from "../dataops/dataset";
 import { IFormData } from "../fileops/fileops.interfaces";
