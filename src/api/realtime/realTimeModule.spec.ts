@@ -49,7 +49,7 @@ describe("Real Time Module", () => {
       await moduleInit();
       expect(websocketBuilder).toHaveBeenCalledWith(
         `${API.REAL_TIME.PROTOCOL}://projectIDTest.${API.HOST}.${API.DOMAIN}` +
-        `${API.REAL_TIME.PORT || ""}${API.REAL_TIME.ENDPOINT}tokenTest`);
+        `${API.REAL_TIME.PORT || ""}${API.REAL_TIME.ENDPOINT}?access_token=tokenTest`);
     });
 
     it("should start dataset watch functionality after initialized with correct parameters", async () => {

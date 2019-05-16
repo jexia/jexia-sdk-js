@@ -13,7 +13,7 @@ export type Tokens = {
   /**
    * JSON web token
    */
-  token: string,
+  access_token: string,
   /**
    * Refresh token
    */
@@ -91,7 +91,7 @@ export class TokenManager {
         if (!tokens) {
           throw new Error(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
         }
-        return tokens.token;
+        return tokens.access_token;
       });
   }
 
@@ -165,7 +165,7 @@ export class TokenManager {
       })
       .then((tokens: Tokens) => {
         this.addTokens(auth, tokens, true);
-        defers.resolve(tokens.token);
+        defers.resolve(tokens.access_token);
         return this;
       })
       .catch((err: Error) => {
@@ -193,7 +193,7 @@ export class TokenManager {
       })
       .then((refreshedTokens: Tokens) => {
         this.storage.setTokens(auth, refreshedTokens);
-        defers.resolve(tokens.token);
+        defers.resolve(tokens.access_token);
         return this;
       })
       .catch((err: Error) => {
