@@ -93,14 +93,18 @@ export class Dataset<T extends object = any, D extends DatasetInterface<T> = Dat
 
   /**
    * Creates an Insert query.
-   * @param records An array of dictionaries that contains the key:value pairs for
-   * the fields that you want to store at this dataset
+   * @param data A dictionary that contains the key:value pairs for
+   * the fields you want to store at this dataset or an array of those.
    * @returns Query object specialized for insert statements
    * If saving into a strict schema dataset, you need to provide values for the
    * required fields for that particular dataset.
    */
-  public insert(records: T[]): InsertQuery<T, D> {
-    return new InsertQuery<T, D>(this.requestExecuter, records, this.datasetName);
+  public insert(data: T[] | T): InsertQuery<T, D> {
+    return new InsertQuery<T, D>(
+      this.requestExecuter,
+      Array.isArray(data) ? data : [data],
+      this.datasetName,
+    );
   }
 
   /**
