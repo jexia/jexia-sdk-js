@@ -283,17 +283,32 @@ posts.select().relation(comments).execute().then( (records) => {
 
 ### Inserting records
 
+Records can be inserted to a dataset either by sending an array or a single one. The response will always be an array though.
+
 ``` Javascript
 [..]
-let posts = dataModule.dataset("posts");
-posts.insert([ {title: "New Post", content:"content here"}, 
-               {title: "Another Post", content:"some more content"} 
-]).execute().then( (records) => {
-  // you will be able to access the newly inserted records here
-  // complete with their generated IDs
-}).catch( (error) => {
-  // you can see the error info here, if something goes wrong
+const posts = dataModule.dataset("posts");
+
+// Multiple records
+const insertQuery = posts.insert([
+  { title: "New Post", content: "content here" },
+  { title: "Another Post", content: "some more content" },
+]);
+
+// Single record
+const insertQuery = posts.insert({
+  title: "New Post",
+  content: "content here",
 });
+
+// Either way, the response will be an array
+insertQuery
+  .execute()
+  .then((records) => {
+    // you will always get an array of created records even when inserting a single record
+  }).catch((error) => {
+    // you can see the error info here, if something goes wrong
+  });
 [..]
 ```
 
