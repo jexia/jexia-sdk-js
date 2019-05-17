@@ -37,9 +37,14 @@ describe("Dataset class", () => {
     expect(dataset.update({}) instanceof UpdateQuery).toBeTruthy();
   });
 
-  it("should be able start a insert query", () => {
+  it("should be able start a insert query with an array of records", () => {
     const dataset = new Dataset("test", createMockFor(RequestExecuter));
     expect(dataset.insert([{}]) instanceof InsertQuery).toBeTruthy();
+  });
+
+  it("should be able start a insert query with a single record", () => {
+    const dataset = new Dataset("test", createMockFor(RequestExecuter));
+    expect(dataset.insert({}) instanceof InsertQuery).toBeTruthy();
   });
 
   it("should be able start a delete query", () => {
