@@ -146,15 +146,18 @@ export function deepClone<T>(obj: T): T {
   return clone;
 }
 
-export const validClientOpts = Object.freeze({
+export const validClientOpts = {
   key: "validKey",
   projectID: "validProjectID",
   refreshInterval: 500,
   secret: "validSecret",
-});
+};
 
 export const fetchWithRequestMockOk = (uri: string, opts?: IRequestOptions): Promise<IHTTPResponse> => {
   return Promise.resolve({
-    json: () => Promise.resolve({ token: "token", refresh_token: "refresh_token" }), ok: true, status: 200,
+    json: () => Promise.resolve({
+      access_token: "access_token",
+      refresh_token: "refresh_token"
+    }), ok: true, status: 200,
   } as IHTTPResponse);
 };
