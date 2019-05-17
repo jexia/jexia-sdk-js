@@ -305,7 +305,7 @@ const insertQuery = posts.insert({
 insertQuery
   .execute()
   .then((records) => {
-    // you will be able to access the newly inserted records with their generated IDs
+    // you will always get an array of created records even when inserting a single record
   }).catch((error) => {
     // you can see the error info here, if something goes wrong
   });
