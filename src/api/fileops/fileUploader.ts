@@ -38,8 +38,7 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
    */
   private uploadFile(record: FilesetMultipart<T, F>): Observable<T> {
 
-    // TODO Append field values here
-    this.formData.append('data', '{}');
+    this.formData.append('data', record.data ? JSON.stringify(record.data) : '{}');
 
     if (record.file) {
       this.formData.append('file', record.file);
@@ -64,7 +63,7 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
   private execute(token: string): Promise<T[]> {
 
     const headers = {
-      Authorization: `${token}`,
+      Authorization: `Bearer ${token}`,
     };
 
     /* this method is available only under NodeJs */
