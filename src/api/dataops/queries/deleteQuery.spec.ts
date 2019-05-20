@@ -1,10 +1,11 @@
-// tslint:disable:no-string-literal
-import { createMockFor, createRequestExecuterMock } from "../../../../spec/testUtils";
+import * as faker from "faker";
+import { createMockFor } from "../../../../spec/testUtils";
 import { RequestExecuter } from "../../../internal/executer";
+import { QueryAction } from "./baseQuery";
 import { DeleteQuery } from "./deleteQuery";
 
-let createSubject = ({
-  datasetName = "dataset",
+const createSubject = ({
+  datasetName = faker.random.word(),
   requestExecuterMock = createMockFor(RequestExecuter),
 } = {}) => {
   const subject = new DeleteQuery(requestExecuterMock, datasetName);
@@ -16,15 +17,7 @@ let createSubject = ({
   };
 };
 
-describe("QueryRequest class", () => {
-  let projectID: string;
-  let dataset: string;
-
-  beforeAll(() => {
-    dataset = "dataset";
-    projectID = "projectID";
-  });
-
+describe("DeleteQuery class", () => {
   it("should be created", () => {
     const { subject } = createSubject();
     expect(subject).toBeDefined();
@@ -35,11 +28,8 @@ describe("QueryRequest class", () => {
     expect((subject as any).queryExecuter).toEqual(requestExecuterMock);
   });
 
-  it("should correct execute the query", () => {
-    let qe = createRequestExecuterMock(projectID, dataset);
-    let subject: any = new DeleteQuery(qe, dataset);
-    spyOn(subject["queryExecuter"], "executeRequest");
-    subject.execute();
-    expect(subject["queryExecuter"].executeRequest).toHaveBeenLastCalledWith({action: "delete"});
+  it("should contain delete as requet", () => {
+    const { subject } = createSubject();
+    expect(subject.action).toBe(QueryAction.delete);
   });
 });

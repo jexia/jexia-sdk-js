@@ -1,6 +1,7 @@
-import { IAggField } from "jexia-sdk-js/internal/query";
-import { createMockFor } from "../../../../spec/testUtils";
+import * as faker from "faker";
+import { createMockFor, getRandomQueryAction } from "../../../../spec/testUtils";
 import { RequestExecuter } from "../../../internal/executer";
+import { IAggField } from "../../../internal/query";
 import { BaseQuery, QueryAction } from "./baseQuery";
 
 interface IUser {
@@ -9,9 +10,12 @@ interface IUser {
   age: number;
 }
 
-let createSubject = ({
-  action = QueryAction.select,
-  datasetName = "dataset",
+const DATASET_NAME = faker.random.word();
+const DEFAULT_ACTION = getRandomQueryAction();
+
+const createSubject = ({
+  action = DEFAULT_ACTION,
+  datasetName = DATASET_NAME,
   requestExecuterMock = createMockFor(RequestExecuter),
 } = {}) => {
   // Declare child class as long as BaseQuery class is abstract
@@ -30,7 +34,7 @@ let createSubject = ({
   };
 };
 
-describe("QueryRequest class", () => {
+describe("BaseQuery class", () => {
   const { subject } = createSubject();
 
   it("should be created", () => {
@@ -41,16 +45,16 @@ describe("QueryRequest class", () => {
     expect((subject as any).queryExecuter).toBeDefined();
   });
 
-  it("action should equal 'select' action", () => {
-    expect((subject as any).action).toEqual(QueryAction.select);
+  it("action should equal passed action", () => {
+    expect((subject as any).action).toEqual(DEFAULT_ACTION);
   });
 
   it("Query should be defined", () => {
     expect((subject as any).query).toBeDefined();
   });
 
-  it("Query dataset should be set to 'dataset'", () => {
-    expect((subject as any).query.dataset).toEqual("dataset");
+  it("Query dataset should be set to the passed one", () => {
+    expect((subject as any).query.dataset).toEqual(DATASET_NAME);
   });
 });
 
@@ -109,17 +113,41 @@ describe("fields method", () => {
 });
 
 describe("compiledRequest method", () => {
-  let { subject } = createSubject();
-  it("should return compiled object", () => {
-    expect((subject as any).compiledRequest).toEqual({
-      action: QueryAction.select,
+  let subject: any;
+
+  beforeEach(() => {
+    ({ subject } = createSubject());
+  });
+
+  it("should contain correct action key", () => {
+    expect(subject.compiledRequest).toEqual({
+      action: DEFAULT_ACTION,
+      body: jasmine.anything(),
+    });
+  });
+
+  it("should contain empty body by default", () => {
+    expect(subject.compiledRequest).toEqual({
+      action: jasmine.anything(),
+      body: [],
+    });
+  });
+
+  it("should contain records in body", () => {
+    subject.records = [
+      faker.random.objectElement(),
+      faker.random.objectElement(),
+    ];
+    expect(subject.compiledRequest).toEqual({
+      action: jasmine.anything(),
+      body: subject.records,
     });
   });
 });
 
 describe("execute method", () => {
   it("should call queryExecuter.executeRestRequest()", () => {
-    let { subject, requestExecuterMock } = createSubject({action: QueryAction.select});
+    let { subject, requestExecuterMock } = createSubject();
     subject.execute();
     expect(requestExecuterMock.executeRequest).toHaveBeenCalled();
   });

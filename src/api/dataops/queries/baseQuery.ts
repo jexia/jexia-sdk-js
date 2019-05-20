@@ -1,11 +1,6 @@
 import { RequestExecuter } from "../../../internal/executer";
-import { IAggField, ICompiledQuery, Query } from "../../../internal/query";
-
-interface ICompiledRequest<T> {
-  action: QueryAction;
-  params?: Partial<ICompiledQuery<T>>;
-  records?: T[];
-}
+import { IAggField, Query } from "../../../internal/query";
+import { IRequestExecuterData } from "./../../../internal/executer.interfaces";
 
 /**
  * @internal
@@ -40,7 +35,7 @@ export abstract class BaseQuery<T> {
 
   protected constructor(
       protected queryExecuter: RequestExecuter,
-      private readonly action: QueryAction,
+      public readonly action: QueryAction,
       readonly dataset: string,
   ) {
     this.query = new Query<T>(dataset);
@@ -62,17 +57,16 @@ export abstract class BaseQuery<T> {
 
   /**
    * Prepare compiled request before execute it
-   * @template <T> Generic type of dataset model
-   * @returns {ICompiledRequest<T>}
+   * @returns {IRequestExecuterData}
    */
-  private get compiledRequest(): ICompiledRequest<T> {
-    const compiledQuery = this.query.compile();
+  private get compiledRequest(): IRequestExecuterData {
+    // const compiledQuery = this.query.compile();
 
-    return Object.assign(
-      { action: this.action },
-      Object.keys(compiledQuery).length && { params: compiledQuery },
-      this.records && { records: this.records },
-    );
+    return {
+      action: this.action,
+      body: this.records || [],
+      // queryParams: compiledQuery, // TODO: introduce queryParams
+    };
   }
 
   /**
