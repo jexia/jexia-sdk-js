@@ -79,6 +79,13 @@ describe('UMS Module', () => {
 
   });
 
+  describe("when gets a module config", () => {
+    it("should return an empty config", () => {
+      const { subject } = createSubject();
+      expect(subject.getConfig()).toEqual({ ums: {} });
+    });
+  });
+
   describe('on terminate', () => {
 
     it('should return resolved promise of itself', async () => {
