@@ -1,7 +1,7 @@
 import { ReflectiveInjector } from "injection-js";
 import { API } from "../../config";
 import { Methods, RequestAdapter } from "../../internal/requestAdapter";
-import { IModule } from "../core/module";
+import { IModule, ModuleConfiguration } from "../core/module";
 import { AuthOptions, TokenManager, Tokens } from "../core/tokenManager";
 
 export interface IUMSSignInOptions {
@@ -35,6 +35,13 @@ export class UMSModule implements IModule {
     this.projectId = coreInjector.get(AuthOptions).projectID;
 
     return Promise.resolve(this);
+  }
+
+  /**
+   * Return configuration
+   */
+  public getConfig(): { [moduleName: string]: ModuleConfiguration } {
+    return { ums: {} };
   }
 
   public terminate() {

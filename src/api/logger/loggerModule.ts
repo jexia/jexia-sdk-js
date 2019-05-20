@@ -1,5 +1,5 @@
 import { ReflectiveInjector } from "injection-js";
-import { IModule } from "../core/module";
+import { IModule, ModuleConfiguration } from "../core/module";
 import { Logger, LogLevel } from "./logger";
 
 export class LoggerModule implements IModule {
@@ -15,6 +15,18 @@ export class LoggerModule implements IModule {
     logger.config(this.level, this.module);
 
     return Promise.resolve(this);
+  }
+
+  /**
+   * Return configuration
+   */
+  public getConfig(): { [moduleName: string]: ModuleConfiguration } {
+    return {
+      logger: {
+        level: this.level,
+        module: this.module,
+      }
+    };
   }
 
   public terminate() {

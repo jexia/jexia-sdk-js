@@ -1,6 +1,6 @@
 import { ReflectiveInjector } from "injection-js";
 import { API, MESSAGE } from "../../config";
-import { IModule } from "../core/module";
+import { IModule, ModuleConfiguration } from "../core/module";
 import { IResource } from "../core/resource";
 import { AuthOptions, IAuthOptions, TokenManager } from "../core/tokenManager";
 import { Dataset } from "../dataops/dataset";
@@ -92,6 +92,13 @@ export class RealTimeModule implements IModule {
     })
     .then(() => setWatch.start(this.websocket, () => tokenManager.token()))
     .then(() => this);
+  }
+
+  /**
+   * Return configuration
+   */
+  public getConfig(): { [moduleName: string]: ModuleConfiguration } {
+    return { rtc: {} };
   }
 
   /**

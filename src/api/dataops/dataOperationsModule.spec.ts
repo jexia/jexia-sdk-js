@@ -49,6 +49,14 @@ describe("Real Time Module", () => {
 
   });
 
+  describe("when gets a module config", () => {
+
+    it("should return an empty config", () => {
+      const { subject } = createSubject();
+      expect(subject.getConfig()).toEqual({ dataOperations: {} });
+    });
+  });
+
   describe("when terminating", () => {
 
     it("should resolve automatically", async () => {

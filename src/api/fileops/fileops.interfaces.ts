@@ -1,4 +1,13 @@
 import { InjectionToken } from "injection-js";
+import { ModuleConfiguration } from "../core/module";
+
+export type FileOperationsConfig = ModuleConfiguration & {
+  /* Use RTC module to subscribe for the fileset events and wait until file
+     will be successfully uploaded. Needs RTC module to be activated
+     default: false
+   */
+  subscribeForTheFileUploading: boolean
+};
 
 export const FilesetName = new InjectionToken<string>('FilesetName');
 
