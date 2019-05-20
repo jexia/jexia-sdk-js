@@ -2,13 +2,18 @@ import { InjectionToken, ReflectiveInjector } from "injection-js";
 import { Fetch, RequestAdapter } from "../../internal/requestAdapter";
 import { deferPromise } from "../../internal/utils";
 import { Logger } from "../logger/logger";
-import { IModule } from "./module";
+import { IModule, ModuleConfiguration } from "./module";
 import { AuthOptions, IAuthOptions, TokenManager } from "./tokenManager";
 
 /**
  * @internal
  */
 export const ClientInit = new InjectionToken<Promise<Client>>("SystemInit");
+
+/**
+ * @internal
+ */
+export const ClientConfiguration = new InjectionToken("ClientConfiguration");
 
 /**
  * Jexia main client fo the JavaScript SDK, used to initialize the necessary modules with your project information.
@@ -46,6 +51,10 @@ export class Client {
       {
         provide: ClientInit,
         useValue: systemDefer.promise,
+      },
+      {
+        provide: ClientConfiguration,
+        useFactory: () => this.collectConfiguration(modules),
       },
       {
         provide: AuthOptions,
@@ -100,6 +109,14 @@ export class Client {
     return Promise.all(promises)
       /* Make the client still available (not initialized) after terminated */
       .then(() => this);
+  }
+
+  /**
+   * Collect all module configurations into one configuration object
+   * @param modules
+   */
+  private collectConfiguration(modules: IModule[]): { [moduleName: string]: ModuleConfiguration } {
+    return Object.assign({}, ...modules.map((module) => module.getConfig()));
   }
 
 }

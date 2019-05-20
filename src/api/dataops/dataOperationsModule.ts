@@ -1,6 +1,6 @@
 import { ReflectiveInjector } from "injection-js";
 import { RequestExecuter } from "../../internal/executer";
-import { IModule } from "../core/module";
+import { IModule, ModuleConfiguration } from "../core/module";
 import { AuthOptions } from "../core/tokenManager";
 import { DataSetName } from "./dataops.tokens";
 import { Dataset } from "./dataset";
@@ -36,6 +36,13 @@ export class DataOperationsModule implements IModule {
       Dataset,
     ]);
     return Promise.resolve(this);
+  }
+
+  /**
+   * Return configuration
+   */
+  public getConfig(): { [moduleName: string]: ModuleConfiguration } {
+    return { dataOperations: {} };
   }
 
   /**

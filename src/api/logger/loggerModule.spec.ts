@@ -22,6 +22,18 @@ describe("LoggerModule", () => {
     expect([logger["level"], logger["modules"]]).toEqual([LogLevel.INFO, ["TestModule"]]);
   });
 
+  describe("when gets a module config", () => {
+    it("should return correct config", () => {
+      loggerModule = new LoggerModule(LogLevel.INFO, ["TestModule"]);
+      expect(loggerModule.getConfig()).toEqual({
+        logger: {
+          level: LogLevel.INFO,
+          module: ["TestModule"]
+        }
+      });
+    });
+  });
+
   describe("when terminating", () => {
 
     it("should resolve automatically", async () => {

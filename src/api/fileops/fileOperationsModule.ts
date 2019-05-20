@@ -1,18 +1,39 @@
 import { ReflectiveInjector } from 'injection-js';
-import { IModule } from '../core/module';
+import { ClientConfiguration } from "../core/client";
+import { IModule, ModuleConfiguration } from '../core/module';
 import { AuthOptions } from '../core/tokenManager';
-import { FilesetInterface, FilesetName, IFormData } from './fileops.interfaces';
+import { FileOperationsConfig, FilesetInterface, FilesetName, IFormData } from './fileops.interfaces';
 import { Fileset } from './fileset';
 import { FileUploader } from './fileUploader';
 
+const defaultConfiguration: FileOperationsConfig = {
+  subscribeForTheFileUploading: false
+};
+
 export class FileOperationsModule<FormDataType extends IFormData<F>, F> implements IModule {
   private injector: ReflectiveInjector;
+  private readonly config: FileOperationsConfig;
 
-  constructor(private formData: FormDataType) {}
+  constructor(private formData: FormDataType, config: Partial<FileOperationsConfig>) {
+    this.config = Object.assign(defaultConfiguration, config);
+  }
 
   public init(coreInjector: ReflectiveInjector): Promise<this> {
     this.injector = coreInjector.resolveAndCreateChild([]);
+
+    /* Check for RTC module if file upload subscription is activated */
+    if (this.config.subscribeForTheFileUploading) {
+      const isRTCModuleActive = Boolean(this.injector.get(ClientConfiguration).rtc);
+      if (!isRTCModuleActive) {
+        return Promise.reject('RTC module needs to be activated for automatic file uploading subscription');
+      }
+    }
+
     return Promise.resolve(this);
+  }
+
+  public getConfig(): ModuleConfiguration {
+    return { fileOperations: this.config };
   }
 
   /**

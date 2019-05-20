@@ -3,6 +3,7 @@ import { Client } from "./api/core/client";
 import { TokenStorage, WebStorageComponent } from "./api/core/componentStorage";
 import { DataOperationsModule } from "./api/dataops/dataOperationsModule";
 import { FileOperationsModule } from "./api/fileops/fileOperationsModule";
+import { FileOperationsConfig } from "./api/fileops/fileops.interfaces";
 import { LoggerModule, LogLevel } from "./api/logger/public-api";
 import { IWebSocketBuilder } from "./api/realtime/realTime.interfaces";
 import { RealTimeModule } from "./api/realtime/realTimeModule";
@@ -49,8 +50,8 @@ export function dataOperations(): DataOperationsModule {
   return new DataOperationsModule();
 }
 
-export function fileOperations(): FileOperationsModule<FormData, Blob> {
-  return new FileOperationsModule(new FormData());
+export function fileOperations(config: Partial<FileOperationsConfig> = {}): FileOperationsModule<FormData, Blob> {
+  return new FileOperationsModule(new FormData(), config);
 }
 
 export function realTime(webSocketBuilder: IWebSocketBuilder = (appUrl) => new WebSocket(appUrl)): RealTimeModule {

@@ -125,6 +125,13 @@ describe("Real Time Module", () => {
 
   });
 
+  describe("when gets a module config", () => {
+    it("should return an empty config", () => {
+      const { subject } = createSubject();
+      expect(subject.getConfig()).toEqual({ rtc: {} });
+    });
+  });
+
   describe("when terminating", () => {
 
     it("should resolve the terminating promise immediately if the websocket is closed already", async () => {
