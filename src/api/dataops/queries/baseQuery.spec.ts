@@ -120,17 +120,15 @@ describe("compiledRequest method", () => {
   });
 
   it("should contain correct action key", () => {
-    expect(subject.compiledRequest).toEqual({
-      action: DEFAULT_ACTION,
-      body: jasmine.anything(),
-    });
+    expect(subject.compiledRequest).toEqual(
+      expect.objectContaining({ action: DEFAULT_ACTION })
+    );
   });
 
   it("should contain empty body by default", () => {
-    expect(subject.compiledRequest).toEqual({
-      action: jasmine.anything(),
-      body: [],
-    });
+    expect(subject.compiledRequest).toEqual(
+      expect.objectContaining({ body: [] })
+    );
   });
 
   it("should contain records in body", () => {
@@ -138,10 +136,9 @@ describe("compiledRequest method", () => {
       faker.random.objectElement(),
       faker.random.objectElement(),
     ];
-    expect(subject.compiledRequest).toEqual({
-      action: jasmine.anything(),
-      body: subject.records,
-    });
+    expect(subject.compiledRequest).toEqual(
+      expect.objectContaining({ body: subject.records })
+    );
   });
 });
 
