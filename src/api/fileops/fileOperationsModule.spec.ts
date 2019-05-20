@@ -6,7 +6,7 @@ import { jexiaClient } from '../../node';
 import { FileOperationsModule } from './fileOperationsModule';
 import { Fileset } from './fileset';
 
-fdescribe('File Operations Module', () => {
+describe('File Operations Module', () => {
 
   const createSubject = ({
     formDataMock = createMockFor(FormData),
