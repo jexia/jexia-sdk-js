@@ -36,9 +36,6 @@ describe("Query class", () => {
     it("undefined offset", () => {
       expect(query.offset).toBeUndefined();
     });
-    it("undefined data", () => {
-      expect(query.data).toBeUndefined();
-    });
     it("empty relations array", () => {
       expect((query as any).relations).toEqual([]);
     });
@@ -156,12 +153,7 @@ describe("Query class", () => {
         orders: [sort1, sort2],
       });
     });
-    it("data option", () => {
-      query.data = "test";
-      expect(query.compile()).toEqual({
-        data: "test",
-      });
-    });
+
     it("relations option", () => {
       query.addRelation(query1);
       query.addRelation(query2);
