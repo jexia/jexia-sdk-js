@@ -60,12 +60,12 @@ export abstract class BaseQuery<T> {
    * @returns {IRequestExecuterData}
    */
   private get compiledRequest(): IRequestExecuterData {
-    // const compiledQuery = this.query.compile();
+    const compiledQuery = this.query.compile();
 
     return {
       action: this.action,
       body: this.records || [],
-      // queryParams: compiledQuery, // TODO: introduce queryParams
+      queryParams: compiledQuery,
     };
   }
 
