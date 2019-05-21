@@ -4,7 +4,7 @@ import { AuthOptions, IAuthOptions, TokenManager } from "../api/core/tokenManage
 import { DataSetName } from "../api/dataops/dataops.tokens";
 import { QueryAction } from "../api/dataops/queries/baseQuery";
 import { API } from "../config";
-import { IRequestExecuterData } from "./executer.interfaces";
+import { IRequestExecuterData, QueryParam } from "./executer.interfaces";
 import { Methods, RequestAdapter } from "./requestAdapter";
 
 @Injectable()
@@ -21,7 +21,7 @@ export class RequestExecuter {
     await this.systemInit;
     const token = await this.tokenManager.token(this.config.auth);
     return this.requestAdapter.execute(
-      this.getUrl(),
+      this.getURI(request.queryParams || []),
       {
         headers: { Authorization: `Bearer ${token}` },
         body: request.body || {},
@@ -38,6 +38,37 @@ export class RequestExecuter {
       case QueryAction.select: return Methods.GET;
       case QueryAction.update: return Methods.PUT;
     }
+  }
+
+  /**
+   * Gets the URL concatenated with query params, when available.
+   *
+   * @param  {QueryParam[]} queryParams
+   * @returns string
+   */
+  private getURI(queryParams: QueryParam[]): string {
+    return this.getUrl() + this.parseQueryParams(queryParams);
+  }
+
+  /**
+   * Parses query params elements into query string format
+   *
+   * @param  {QueryParam[]} queryParams
+   * @returns string
+   */
+  private parseQueryParams(queryParams: QueryParam[]): string {
+    if (!queryParams.length) {
+      return "";
+    }
+
+    const encodeValue = (v: any) => encodeURIComponent(
+      typeof v === "string" ? v : JSON.stringify(v)
+    );
+    const toQueryParam = ({ key, value }: QueryParam) => `${key}=${encodeValue(value)}`;
+
+    return "?" + queryParams
+      .map(toQueryParam)
+      .join("&");
   }
 
   private getUrl(): string {

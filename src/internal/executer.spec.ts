@@ -58,13 +58,112 @@ describe("QueryExecuter class", () => {
   describe("when calling", () => {
     let subject: any;
 
-    it("executeRestMethod() should call getUrl() method", async () => {
+    it("executeRestMethod() should call method to get URL", async () => {
       ({ subject } = createSubject({
         reqAdapterMock: requestAdapterMockFactory().genericSuccesfulExecution()
       }));
-      spyOn(subject, "getUrl");
+      spyOn(subject, "getURI");
       await subject.executeRequest([]);
-      expect(subject.getUrl).toHaveBeenCalled();
+      expect(subject.getURI).toHaveBeenCalled();
+    });
+
+    describe("getURI method", () => {
+      beforeEach(() => {
+        ({ subject } = createSubject());
+      });
+
+      it("should call method to get url", () => {
+        spyOn(subject, "getUrl");
+        subject.getURI([]);
+
+        expect(subject.getUrl).toHaveBeenCalled();
+      });
+
+      it("should call method to parse params", () => {
+        const queryParams = [];
+
+        spyOn(subject, "parseQueryParams");
+        subject.getURI(queryParams);
+
+        expect(subject.parseQueryParams).toHaveBeenCalledWith(queryParams);
+      });
+
+      it("should concatenate URL + query params ", () => {
+        const queryParams = [];
+
+        expect(subject.getURI(queryParams)).toEqual(
+          subject.getUrl() + subject.parseQueryParams(queryParams)
+        );
+      });
+    });
+
+    describe("parseQueryParams method", () => {
+      beforeEach(() => {
+        ({ subject } = createSubject());
+      });
+
+      it("should return empty string when argument is empty", () => {
+        expect(subject.parseQueryParams([])).toBe("");
+      });
+
+      it("should parse to the correct format for non-string values", () => {
+        const key = faker.random.word();
+        const value = faker.helpers.randomize([
+          [],
+          faker.random.number(),
+          {},
+          faker.random.boolean(),
+        ]);
+
+        const queryParams = [
+          { key, value },
+        ];
+
+        const encodeValue = (v: any) => encodeURIComponent(JSON.stringify(v));
+        const expectedParams = `?${key}=${encodeValue(value)}`;
+
+        expect(subject.parseQueryParams(queryParams)).toEqual(expectedParams);
+      });
+
+      it("should parse to the correct format for string values", () => {
+        const key = faker.random.word();
+        const value = faker.random.words();
+
+        const queryParams = [
+          { key, value },
+        ];
+
+        const encodeValue = (v: any) => encodeURIComponent(v);
+
+        const expectedParams = `?${key}=${encodeValue(value)}`;
+
+        expect(subject.parseQueryParams(queryParams)).toEqual(expectedParams);
+      });
+
+      it("should separate params by ampersand", () => {
+        const key1 = faker.random.word();
+        const key2 = faker.random.word();
+        const key3 = faker.random.word();
+
+        const queryParams = [
+          { key: key1, value: faker.random.number() },
+          { key: key2, value: faker.random.number() },
+          { key: key3, value: faker.random.number() },
+        ];
+
+        const result: string = subject.parseQueryParams(queryParams);
+
+        expect(result.match(/&/g).length).toEqual(queryParams.length - 1);
+      });
+
+      it("should concatenate URL + query params ", () => {
+        const queryParams = [];
+        ({ subject } = createSubject());
+
+        expect(subject.getURI(queryParams)).toEqual(
+          subject.getUrl() + subject.parseQueryParams(queryParams)
+        );
+      });
     });
   });
 
