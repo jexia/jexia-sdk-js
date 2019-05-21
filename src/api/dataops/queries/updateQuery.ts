@@ -5,7 +5,7 @@ import { FilterableQuery } from "./filterableQuery";
 /**
  * Query object specialized for update statements.
  * For TypeScript users it implements a generic type T that represents your dataset, default to any.
- * This object is generated automatically from the Dataset object, never to be instantiated direct.
+ * This object is generated automatically from the Dataset object, never to be instantiated directly.
  *
  * @example
  * ```typescript
