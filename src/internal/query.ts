@@ -1,6 +1,7 @@
 import { IFilteringCriterion } from "../api/dataops/filteringApi";
 import { ICondition } from "../api/dataops/filteringCondition";
 import { MESSAGE } from "../config";
+import { QueryParam } from './executer.interfaces';
 
 /* Sort direction
  */
@@ -117,6 +118,28 @@ export class Query<T = any> {
     }
 
     return compiledQueryOptions;
+  }
+
+  /**
+   * Gets the compiled query transformed into query params format.
+   *
+   * @returns QueryParams[]
+   */
+  public compileToQueryParams(): QueryParam[] {
+    const compiled = this.compile();
+    const params = [];
+
+    if (compiled.order) {
+      params.push(
+        ...compiled.order.map((value: any) => ({ key: 'order', value }))
+      );
+    }
+
+    const otherParams = Object.entries(compiled)
+      .filter(([key]) => key !== 'order')
+      .map(([key, value]) => ({ key, value }));
+
+    return params.concat(otherParams);
   }
 
   /**
