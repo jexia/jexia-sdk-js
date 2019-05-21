@@ -35,7 +35,7 @@ type SortedFields<T> = Array<ISort<KeyOfObject<T>>>;
 
 export interface ICompiledQuery<T> {
   conditions: Array<object>;
-  fields: string[];
+  outputs: string[];
   order: SortedFields<T>;
   range: { limit?: number, offset?: number };
   relations: {[key: string]: Partial<ICompiledQuery<T>>};
@@ -45,7 +45,6 @@ export class Query<T = any> {
   public fields: Array<KeyOfObject<T> | IAggField<T>>;
   public limit: number;
   public offset: number;
-  public data: T;
 
   private filteringConditions: ICondition;
   private orders: SortedFields<T> = [];
@@ -98,8 +97,9 @@ export class Query<T = any> {
     /* Compile fields
      */
     if (this.fields) {
-      compiledQueryOptions.fields = this.fields.map((field) => typeof field === "object"
-        ? this.compileAggregation(field) : field);
+      compiledQueryOptions.outputs = this.fields.map(
+        (field) => typeof field === "object" ? this.compileAggregation(field) : field
+      );
     }
 
     /* Compile sort options
