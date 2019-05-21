@@ -54,6 +54,7 @@
       "src/config/",
       "src/browser.ts",
       "src/node.ts",
+      "src/internal/executer.interfaces.ts",
       "src/api/core/module.ts",
       "src/api/core/resource.ts",
       "src/api/fileops"

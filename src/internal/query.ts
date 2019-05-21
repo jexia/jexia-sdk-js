@@ -34,7 +34,6 @@ interface ISort<K> {
 type SortedFields<T> = Array<ISort<KeyOfObject<T>>>;
 
 export interface ICompiledQuery<T> {
-  data: T;
   conditions: Array<object>;
   fields: string[];
   orders: SortedFields<T>;
@@ -107,12 +106,6 @@ export class Query<T = any> {
      */
     if (this.orders.length) {
       compiledQueryOptions.orders = this.orders;
-    }
-
-    /* Compile data
-     */
-    if (this.data) {
-      compiledQueryOptions.data = this.data;
     }
 
     /* Compile relations
