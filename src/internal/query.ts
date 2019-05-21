@@ -34,7 +34,7 @@ interface ISort<K> {
 type SortedFields<T> = Array<ISort<KeyOfObject<T>>>;
 
 export interface ICompiledQuery<T> {
-  conditions: Array<object>;
+  cond: Array<object>;
   outputs: string[];
   order: SortedFields<T>;
   range: { limit?: number, offset?: number };
@@ -82,7 +82,7 @@ export class Query<T = any> {
     /* Compile conditions
      */
     if (this.filteringConditions) {
-      compiledQueryOptions.conditions = [this.filteringConditions.compile()];
+      compiledQueryOptions.cond = [this.filteringConditions.compile()];
     }
 
     /* Compile limit and offset options
