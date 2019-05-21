@@ -33,6 +33,9 @@ export class InsertQuery<T, D extends T> extends BaseQuery<T> {
    * @returns {Promise<any>}
    */
     public execute(): Promise<D[]> {
-      return this.queryExecuter.executeRequest(this.records);
+      return this.queryExecuter.executeRequest({
+        action: this.action,
+        body: this.records,
+      });
     }
 }
