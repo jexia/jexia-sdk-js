@@ -85,6 +85,7 @@ describe("Query class", () => {
     it("empty query to empty object", () => {
       expect(query.compile()).toEqual({});
     });
+
     it("filtering conditions", () => {
       query.setFilterCriteria(filteringCriterion);
       expect(query.compile()).toEqual({
@@ -150,7 +151,7 @@ describe("Query class", () => {
       query.addSortCondition(sort1.direction, ...sort1.fields);
       query.addSortCondition(sort2.direction, ...sort2.fields);
       expect(query.compile()).toEqual({
-        orders: [sort1, sort2],
+        order: [sort1, sort2],
       });
     });
 

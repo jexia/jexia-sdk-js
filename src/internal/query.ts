@@ -36,7 +36,7 @@ type SortedFields<T> = Array<ISort<KeyOfObject<T>>>;
 export interface ICompiledQuery<T> {
   conditions: Array<object>;
   fields: string[];
-  orders: SortedFields<T>;
+  order: SortedFields<T>;
   range: { limit?: number, offset?: number };
   relations: {[key: string]: Partial<ICompiledQuery<T>>};
 }
@@ -63,7 +63,7 @@ export class Query<T = any> {
     this.filteringConditions = (filter as any).lowLevelCondition;
   }
 
-  public addSortCondition<K extends Extract<keyof T, string>>(direction: "asc" | "desc", ...fields: K[]) {
+  public addSortCondition<K extends Extract<keyof T, string>>(direction: Direction, ...fields: K[]) {
     if (fields.length === 0) {
       throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
     }
@@ -105,7 +105,7 @@ export class Query<T = any> {
     /* Compile sort options
      */
     if (this.orders.length) {
-      compiledQueryOptions.orders = this.orders;
+      compiledQueryOptions.order = this.orders;
     }
 
     /* Compile relations
