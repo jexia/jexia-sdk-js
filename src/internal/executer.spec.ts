@@ -111,7 +111,7 @@ describe("QueryExecuter class", () => {
       });
       expect(reqAdapterMock.execute).toHaveBeenCalledWith(
         restUrl,
-        jasmine.objectContaining({
+        expect.objectContaining({
           body: fakeBody,
         }),
       );

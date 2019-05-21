@@ -35,7 +35,7 @@ export abstract class BaseQuery<T> {
 
   protected constructor(
       protected queryExecuter: RequestExecuter,
-      public readonly action: QueryAction,
+      protected readonly action: QueryAction,
       readonly dataset: string,
   ) {
     this.query = new Query<T>(dataset);

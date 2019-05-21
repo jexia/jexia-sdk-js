@@ -120,15 +120,11 @@ describe("compiledRequest method", () => {
   });
 
   it("should contain correct action key", () => {
-    expect(subject.compiledRequest).toEqual(
-      expect.objectContaining({ action: DEFAULT_ACTION })
-    );
+    expect(subject.compiledRequest.action).toEqual(DEFAULT_ACTION);
   });
 
   it("should contain empty body by default", () => {
-    expect(subject.compiledRequest).toEqual(
-      expect.objectContaining({ body: [] })
-    );
+    expect(subject.compiledRequest.body).toEqual([]);
   });
 
   it("should contain records in body", () => {
@@ -136,9 +132,7 @@ describe("compiledRequest method", () => {
       faker.random.objectElement(),
       faker.random.objectElement(),
     ];
-    expect(subject.compiledRequest).toEqual(
-      expect.objectContaining({ body: subject.records })
-    );
+    expect(subject.compiledRequest.body).toEqual(subject.records);
   });
 });
 

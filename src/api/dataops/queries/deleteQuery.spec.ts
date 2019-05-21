@@ -28,7 +28,7 @@ describe("DeleteQuery class", () => {
     expect((subject as any).queryExecuter).toEqual(requestExecuterMock);
   });
 
-  it("should contain delete as requet", () => {
+  it("should contain delete as request", () => {
     const { subject } = createSubject();
     expect(subject.action).toBe(QueryAction.delete);
   });

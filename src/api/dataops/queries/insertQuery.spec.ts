@@ -24,16 +24,14 @@ describe("InsertQuery class", () => {
   });
 
   describe("when instantiating a insertQuery object directly", () => {
-    it("should be able to return required object", (done) => {
+    it("should be able to return required object", () => {
       expect(subject).toBeDefined();
-      done();
     });
   });
 
   describe("when instantiating a insertQuery object from client", () => {
-    it("should be able to invoke methods exposed by it", (done) => {
+    it("should be able to invoke methods exposed by it", () => {
       expect(typeof subject.execute).toBe("function");
-      done();
     });
   });
 
