@@ -19,23 +19,27 @@ import { BaseQuery, QueryAction } from "./baseQuery";
  * @template D Extended dataset type with default fields (i.e id, created_at, updated_at)
  */
 export class InsertQuery<T, D extends T> extends BaseQuery<T> {
+  /**
+   * @inheritdoc
+   */
+  protected readonly body: T[];
 
   /**
    * @internal
    */
   public constructor(queryExecuter: RequestExecuter, records: T[], dataset: string) {
     super(queryExecuter, QueryAction.insert, dataset);
-    this.records = records;
+    this.body = records;
   }
 
   /**
    * Overload parent execute request to call rest API
-   * @returns {Promise<any>}
+   * @returns {Promise<D[]>}
    */
-    public execute(): Promise<D[]> {
-      return this.queryExecuter.executeRequest({
-        action: this.action,
-        body: this.records,
-      });
-    }
+  public execute(): Promise<D[]> {
+    return this.queryExecuter.executeRequest({
+      action: this.action,
+      body: this.body,
+    });
+  }
 }

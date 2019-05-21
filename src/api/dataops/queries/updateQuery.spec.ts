@@ -1,16 +1,19 @@
 // tslint:disable:no-string-literal
-import { createMockFor, createRequestExecuterMock } from "../../../../spec/testUtils";
+import * as faker from "faker";
+import { createMockFor, createRequestExecuterMock, SpyObj } from "../../../../spec/testUtils";
 import { RequestExecuter } from "../../../internal/executer";
 import { UpdateQuery } from "./updateQuery";
 
-let createSubject = ({
-  datasetName = "dataset",
+const createSubject = ({
+  datasetName = faker.random.word(),
+  data = {},
   requestExecuterMock = createMockFor(RequestExecuter),
 } = {}) => {
-  const subject = new UpdateQuery(requestExecuterMock, {}, datasetName);
+  const subject = new UpdateQuery(requestExecuterMock, data, datasetName);
 
   return {
     datasetName,
+    data,
     subject,
     requestExecuterMock,
   };
@@ -30,16 +33,17 @@ describe("QueryRequest class", () => {
     expect((subject as any).queryExecuter).toEqual(requestExecuterMock);
   });
 
-  it("data should be saved", () => {
-    const { subject } = createSubject();
-    expect((subject as any).query.data).toEqual({});
+  it("should assign data to body", () => {
+    const { data, subject } = createSubject();
+    expect(subject.body).toEqual(data);
   });
 
   it("should correct execute the query", () => {
-    let qe = createRequestExecuterMock(projectID, dataset);
-    let subject: any = new UpdateQuery(qe, [{ title: "Another first post", user_id: 1 }], dataset);
-    spyOn(subject["queryExecuter"], "executeRequest");
+    const { requestExecuterMock, subject} = createSubject({
+      requestExecuterMock: createRequestExecuterMock(projectID, dataset) as SpyObj<RequestExecuter>,
+    });
+    spyOn(requestExecuterMock, "executeRequest");
     subject.execute();
-    expect(subject["queryExecuter"].executeRequest).toHaveBeenLastCalledWith(subject.compiledRequest);
+    expect(requestExecuterMock.executeRequest).toHaveBeenLastCalledWith(subject["compiledRequest"]);
   });
 });
