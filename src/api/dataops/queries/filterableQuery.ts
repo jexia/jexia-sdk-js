@@ -17,6 +17,11 @@ import { SelectQuery } from "./selectQuery";
  */
 export abstract class FilterableQuery<T> extends BaseQuery<T> {
   /**
+   * @internal
+   */
+  protected readonly body: T | null = null;
+
+  /**
    * Filter the dataset rows with some conditions where the operation will be applied
    * @param filter Filtering criteria or a callback that returns a filtering criteria with the conditions
    */

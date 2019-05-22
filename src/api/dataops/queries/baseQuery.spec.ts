@@ -20,6 +20,7 @@ const createSubject = ({
 } = {}) => {
   // Declare child class as long as BaseQuery class is abstract
   class BaseQueryChild<T> extends BaseQuery<T> {
+    protected readonly body = null;
     constructor(r: RequestExecuter, a: QueryAction, d: string) {
       super(r, a, d);
     }
@@ -124,15 +125,15 @@ describe("compiledRequest method", () => {
   });
 
   it("should contain empty body by default", () => {
-    expect(subject.compiledRequest.body).toEqual([]);
+    expect(subject.compiledRequest.body).toEqual({});
   });
 
-  it("should contain records in body", () => {
-    subject.records = [
+  it("should contain body", () => {
+    subject.body = [
       faker.random.objectElement(),
       faker.random.objectElement(),
     ];
-    expect(subject.compiledRequest.body).toEqual(subject.records);
+    expect(subject.compiledRequest.body).toEqual(subject.body);
   });
 });
 

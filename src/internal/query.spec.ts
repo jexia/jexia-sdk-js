@@ -85,10 +85,11 @@ describe("Query class", () => {
     it("empty query to empty object", () => {
       expect(query.compile()).toEqual({});
     });
+
     it("filtering conditions", () => {
       query.setFilterCriteria(filteringCriterion);
       expect(query.compile()).toEqual({
-        conditions: [(query as any).filteringConditions.compile()],
+        cond: [(query as any).filteringConditions.compile()],
       });
     });
     it("limit option", () => {
@@ -115,28 +116,28 @@ describe("Query class", () => {
       it("simple string fields", () => {
         query.fields = ["field1", "field2"];
         expect(query.compile()).toEqual({
-          fields: ["field1", "field2"],
+          outputs: ["field1", "field2"],
         });
       });
       it("aggregation method", () => {
         const aggField: IAggField<any> = { fn: "MAX", col: "field1"};
         query.fields = [aggField];
         expect(query.compile()).toEqual({
-          fields: ["MAX(field1)"],
+          outputs: ["MAX(field1)"],
         });
       });
       it("aggregation method with asterisk to id", () => {
         const aggField: IAggField<any> = { fn: "COUNT", col: "*"};
         query.fields = [aggField];
         expect(query.compile()).toEqual({
-          fields: ["COUNT(id)"],
+          outputs: ["COUNT(id)"],
         });
       });
       it("mixed fields", () => {
         const aggField: IAggField<any> = { fn: "MAX", col: "field3"};
         query.fields = ["field1", "field2", aggField, "field4"];
         expect(query.compile()).toEqual({
-          fields: ["field1", "field2", "MAX(field3)", "field4"],
+          outputs: ["field1", "field2", "MAX(field3)", "field4"],
         });
       });
       it("wrong * usage to throwing an error", () => {
@@ -150,7 +151,7 @@ describe("Query class", () => {
       query.addSortCondition(sort1.direction, ...sort1.fields);
       query.addSortCondition(sort2.direction, ...sort2.fields);
       expect(query.compile()).toEqual({
-        orders: [sort1, sort2],
+        order: [sort1, sort2],
       });
     });
 

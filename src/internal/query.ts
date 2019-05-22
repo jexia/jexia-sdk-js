@@ -34,9 +34,9 @@ interface ISort<K> {
 type SortedFields<T> = Array<ISort<KeyOfObject<T>>>;
 
 export interface ICompiledQuery<T> {
-  conditions: Array<object>;
-  fields: string[];
-  orders: SortedFields<T>;
+  cond: Array<object>;
+  outputs: string[];
+  order: SortedFields<T>;
   range: { limit?: number, offset?: number };
   relations: {[key: string]: Partial<ICompiledQuery<T>>};
 }
@@ -45,7 +45,6 @@ export class Query<T = any> {
   public fields: Array<KeyOfObject<T> | IAggField<T>>;
   public limit: number;
   public offset: number;
-  public data: T;
 
   private filteringConditions: ICondition;
   private orders: SortedFields<T> = [];
@@ -63,7 +62,7 @@ export class Query<T = any> {
     this.filteringConditions = (filter as any).lowLevelCondition;
   }
 
-  public addSortCondition<K extends Extract<keyof T, string>>(direction: "asc" | "desc", ...fields: K[]) {
+  public addSortCondition<K extends Extract<keyof T, string>>(direction: Direction, ...fields: K[]) {
     if (fields.length === 0) {
       throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
     }
@@ -83,7 +82,7 @@ export class Query<T = any> {
     /* Compile conditions
      */
     if (this.filteringConditions) {
-      compiledQueryOptions.conditions = [this.filteringConditions.compile()];
+      compiledQueryOptions.cond = [this.filteringConditions.compile()];
     }
 
     /* Compile limit and offset options
@@ -98,14 +97,15 @@ export class Query<T = any> {
     /* Compile fields
      */
     if (this.fields) {
-      compiledQueryOptions.fields = this.fields.map((field) => typeof field === "object"
-        ? this.compileAggregation(field) : field);
+      compiledQueryOptions.outputs = this.fields.map(
+        (field) => typeof field === "object" ? this.compileAggregation(field) : field
+      );
     }
 
     /* Compile sort options
      */
     if (this.orders.length) {
-      compiledQueryOptions.orders = this.orders;
+      compiledQueryOptions.order = this.orders;
     }
 
     /* Compile relations
