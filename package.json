@@ -22,7 +22,7 @@
     "preexample": "npm run build:main",
     "example": "node extra_docs/examples/javascript/node/node-example.js",
     "predocs": "npm run cleanup:docs",
-    "docs": "compodoc src/api -p tsconfig.json --disableSourceCode --disablePrivate --disableProtected --disableInternal --name \"Jexia Javascript SDK\" --output docs --includes extra_docs --includesName Guides -a extra_docs/assets",
+    "docs": "compodoc src/api -p tsconfig.json --disableSourceCode --disablePrivate --disableProtected --disableInternal --name \"Jexia Javascript SDK\" --output docs --includes extra_docs --includesName Guides -a extra_docs/assets --theme material",
     "docs:deploy": "npm run tsnode -- build/api-docs-publish",
     "build": "npm-run-all -l cleanup:dist -p build:*",
     "build:main": "tsc -p ./build/tsconfig.main.json",
