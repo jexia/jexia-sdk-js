@@ -130,13 +130,14 @@ export class Query<T = any> {
     const params = [];
 
     if (compiled.order) {
+      // order should be multiple key/value entries instead of a single order=[]
       params.push(
         ...compiled.order.map((value: any) => ({ key: 'order', value }))
       );
     }
 
     const otherParams = Object.entries(compiled)
-      .filter(([key]) => key !== 'order')
+      .filter(([key]) => key !== 'order') // ignore order
       .map(([key, value]) => ({ key, value }));
 
     return params.concat(otherParams);
