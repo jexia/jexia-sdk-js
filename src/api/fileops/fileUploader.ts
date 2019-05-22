@@ -24,7 +24,7 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
 
   /**
    * Upload an array of files by splitting it to the separate streams
-   * @param files {Array<FilesetMultipart<T, F>>}
+   * @param files Files to be uploaded
    */
   public upload(files: Array<FilesetMultipart<T, F>>): Observable<FilesetInterface<T>> {
     return merge(
@@ -34,7 +34,7 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
 
   /**
    * Upload one record to the fileset
-   * @param record {FilesetMultipart<T, F>}
+   * @param record One file to be uploaded
    */
   private uploadFile(record: FilesetMultipart<T, F>): Observable<FilesetInterface<T>> {
 
@@ -58,7 +58,7 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
 
   /**
    * Execute REST request
-   * @param token {string} Auth token
+   * @param token Auth token
    */
   private execute(token: string): Promise<Array<FilesetInterface<T>>> {
 

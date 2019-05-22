@@ -44,7 +44,7 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
 
   /**
    * Upload files and create records in the fileset
-   * @param files {Array<FilesetMultipart<T, F>>} list of files with record data
+   * @param files list of files with record data
    */
   public upload(files: Array<FilesetMultipart<T, F>>): Observable<FilesetInterface<T>> {
 
@@ -67,8 +67,8 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
   /**
    * Subscribe for the RTC records
    * update file record with a status
-   * @param uploadingProcess {Observable<FilesetInterface<T>>} Observable of the uploading files process
-   * @param filesUploaded {number} The number of files to be uploaded
+   * @param uploadingProcess Observable of the uploading files process
+   * @param filesUploaded The number of files to be uploaded
    */
   private getFileUpdates(uploadingProcess: Observable<FilesetInterface<T>>, filesUploaded: number):
     Observable<FilesetInterface<T>> {
