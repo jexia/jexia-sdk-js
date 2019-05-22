@@ -4,15 +4,15 @@ import { FilterableQuery } from "./filterableQuery";
 
 /**
  * Query object specialized for delete statements.
- * For TypeScript users it implements a generic type T that represents your dataset, default to any.
- * This object is generated automatically from the Dataset object, never to be instantiated direct.
+ * For TypeScript users it implements a generic type `T` that represents your dataset (defaults to `any`).
+ * This object is generated automatically from the Dataset object, never to be instantiated directly.
  *
- * @example
+ * ### Example
  * ```typescript
- * const posts = dataModule.dataset("posts");
- * posts.delete()
+ * dataModule.dataset("posts")
+ *  .delete()
  *  .where(field => field("title").isLike("test"))
- *  .execute()
+ *  .execute();
  * ```
  *
  * @template T Generic type of your dataset inhereted from dataset class

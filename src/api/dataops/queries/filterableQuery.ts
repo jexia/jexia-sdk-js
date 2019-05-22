@@ -4,9 +4,9 @@ import { BaseQuery } from "./baseQuery";
 import { SelectQuery } from "./selectQuery";
 
 /**
- * Extend BaseQuery with where() and relation() methods. Used by SELECT, UPDATE and DELETE queries.
+ * Extend `BaseQuery` and overrides `where()` and `relation()` methods. Used by `SELECT`, `UPDATE` and `DELETE` queries.
  *
- * @example
+ * ### Example
  * ```typescript
  * dataModule.dataset("posts")
  *   .select()

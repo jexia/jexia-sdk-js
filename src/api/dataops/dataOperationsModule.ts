@@ -7,15 +7,15 @@ import { Dataset } from "./dataset";
 
 /**
  * Data Operation Module used to retrieve the dataset objects.
- * This object must be build from the helper functions, never to be instantiated direct.
+ * This object must be build from the helper functions, never to be instantiated directly.
  *
- * @example
+ * ### Example
  * ```typescript
  * import { jexiaClient, dataOperations } from "jexia-sdk-js/node";
  *
  * const dataModule = dataOperations();
  *
- * jexiaClient().init({projectID: "your Jexia App URL", key: "username", secret: "password"}, dataModule);
+ * jexiaClient().init(credentials, dataModule);
  * ```
  */
 export class DataOperationsModule implements IModule {
@@ -47,7 +47,7 @@ export class DataOperationsModule implements IModule {
 
   /**
    * Generates a dataset object of given name.
-   * For TypeScript users it implements a generic type T that represents your dataset, default to any.
+   * For TypeScript users it implements a generic type `T` that represents your dataset (defaults to `any`).
    * @template T Generic type of your dataset, default to any
    * @param dataset name of the dataset
    * @param auth use specific authorization
