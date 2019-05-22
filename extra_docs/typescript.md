@@ -4,7 +4,7 @@ The JS SDK is written in TypeScript, even through it is transpiled to pure JavaS
 
 ## Typed Datasets
 
-Datasets have a generic type, which is default to any, but can accept your on type interface with information of your own, as the example bellow:
+Datasets accepts your type/interface definition (otherwise defaults to `any`). See example below:
 
 ``` typescript
 interface Post {
@@ -12,10 +12,8 @@ interface Post {
   published: boolean;
 }
 
-const posts = dom.dataset<Post>("posts");
+const posts: Dataset<Post> = dom.dataset<Post>("posts");
 ```
-
-Following the last example, your dataset gonna have the type `Dataset<Post>`, and this information will be used in different moments to give you extra validations and better intelecense, depending on your IDE.
 
 ### Fields Validation
 
