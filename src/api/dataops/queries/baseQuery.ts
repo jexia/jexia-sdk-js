@@ -23,15 +23,14 @@ export enum QueryAction {
  */
 export abstract class BaseQuery<T> {
   /**
-   * Used for INSERT query. Should be in base class by the reason of
-   * compiledRequest getter takes it here
-   */
-  protected records: T[];
-
-  /**
    * @internal
    */
   protected query: Query<T>;
+  /**
+   * Body of request
+   * @returns T | T[]
+   */
+  protected abstract get body(): T | T[] | null;
 
   protected constructor(
       protected queryExecuter: RequestExecuter,
@@ -60,12 +59,12 @@ export abstract class BaseQuery<T> {
    * @returns {IRequestExecuterData}
    */
   private get compiledRequest(): IRequestExecuterData {
-    // const compiledQuery = this.query.compile();
+    const compiledQuery = this.query.compile();
 
     return {
       action: this.action,
-      body: this.records || [],
-      // queryParams: compiledQuery, // TODO: introduce queryParams
+      body: this.body || {},
+      queryParams: compiledQuery,
     };
   }
 
