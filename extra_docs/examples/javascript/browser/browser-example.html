@@ -11,14 +11,16 @@
         }
 
         //Initialize dataOperationsModule
-        let dom = jexia.dataOperations();
-        let credentials = {
+        const dataModule = jexia.dataOperations();
+        const credentials = {
           projectID: "test",
           key: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
           secret: "a_secret"
         };
-        let jexiaClient = jexia.jexiaClient().init(credentials, dom);
-        dom.dataset("posts")
+
+        jexia.jexiaClient().init(credentials, dataModule);
+
+        dataModule.dataset("posts")
           .select()
           .execute()
           .then(data => {

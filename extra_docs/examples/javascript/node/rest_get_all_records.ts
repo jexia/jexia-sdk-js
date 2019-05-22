@@ -11,17 +11,17 @@ interface Post {
 }
 
 // Initialize DataOperationsModule
-let dom = dataOperations();
+const dataModule = dataOperations();
 
 // Initialize Client and pass DataOperationsModule to it.
 jexiaClient().init({
   projectID: "_projectId_",
   key: "_key_",
   secret: "_secret_"
-}, dom);
+}, dataModule);
 
 // Use your data module with an optional generic type
-dom.dataset<Post>("posts")
+dataModule.dataset<Post>("posts")
   .select()
   .execute()
   .then((records) => {
