@@ -1,7 +1,15 @@
 import { Inject, Injectable } from "injection-js";
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
+import { concatMap, filter, map, shareReplay, takeUntil, tap } from "rxjs/operators";
+import { ClientConfiguration } from "../core/client";
 import { IResource, ResourceType } from '../core/resource';
-import { FilesetName, IFormData } from '../fileops/fileops.interfaces';
+import {
+  FileOperationsConfig,
+  FilesetInterface,
+  FilesetName,
+  IFileStatus,
+  IFormData
+} from '../fileops/fileops.interfaces';
 import { FileUploader } from '../fileops/fileUploader';
 import { FilesetMultipart } from './fileops.interfaces';
 
@@ -22,6 +30,7 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
 
   constructor(
     @Inject(FilesetName) private filesetName: string,
+    @Inject(ClientConfiguration) private clientConfig: { fileOperations: FileOperationsConfig },
     private fileUploader: FileUploader<FormDataType, T, F>,
   ) {}
 
@@ -37,8 +46,15 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
    * Upload files and create records in the fileset
    * @param files {Array<FilesetMultipart<T, F>>} list of files with record data
    */
-  public upload(files: Array<FilesetMultipart<T, F>>): Observable<T> {
-    return this.fileUploader.upload(files);
+  public upload(files: Array<FilesetMultipart<T, F>>): Observable<FilesetInterface<T>> {
+
+    let fileUploadObservable = this.fileUploader.upload(files);
+
+    if (this.clientConfig.fileOperations.subscribeForTheFileUploading) {
+      return this.getFileUpdates(fileUploadObservable, files.length);
+    } else {
+      return fileUploadObservable;
+    }
   }
 
   /** TODO API to develop (make these APIs shared with dataset)
@@ -47,4 +63,44 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
    * public update(data: T): UpdateQuery<T> {}
    * public delete(): DeleteQuery<D> {}
    */
+
+  /**
+   * Subscribe for the RTC records
+   * update file record with a status
+   * @param uploadingProcess
+   * @param filesUploaded
+   */
+  private getFileUpdates(uploadingProcess: Observable<FilesetInterface<T>>, filesUploaded: number):
+    Observable<FilesetInterface<T>> {
+
+    let filesCompleted = 0;
+    const allFilesCompleted = new Subject();
+    const sharedUploadingProcess = uploadingProcess.pipe(
+      shareReplay()
+    );
+
+    sharedUploadingProcess.subscribe();
+
+    return this.watch().pipe(
+      takeUntil(allFilesCompleted),
+      filter((event) => event.action === 'updated'),
+      /* for each event looking through all uploaded files to find that same, proper file */
+      concatMap((event) => sharedUploadingProcess.pipe(
+        filter((fileRecord) => fileRecord.id === event.data[0].id),
+        map((fileRecord) => {
+          /* just make it COMPLETED atm
+             TODO Analyze event, it can be failure
+          */
+          fileRecord.status = IFileStatus.COMPLETED;
+          filesCompleted++;
+          return fileRecord;
+        })
+      )),
+      tap(() => {
+        if (filesCompleted === filesUploaded) {
+          allFilesCompleted.complete();
+        }
+      })
+    );
+  }
 }

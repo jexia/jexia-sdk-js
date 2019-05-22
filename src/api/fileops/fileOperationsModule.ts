@@ -7,7 +7,8 @@ import { Fileset } from './fileset';
 import { FileUploader } from './fileUploader';
 
 const defaultConfiguration: FileOperationsConfig = {
-  subscribeForTheFileUploading: false
+  subscribeForTheFileUploading: false,
+  uploadTimeout: 120000
 };
 
 export class FileOperationsModule<FormDataType extends IFormData<F>, F> implements IModule {
