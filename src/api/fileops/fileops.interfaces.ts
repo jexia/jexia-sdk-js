@@ -7,6 +7,10 @@ export type FileOperationsConfig = ModuleConfiguration & {
      default: false
    */
   subscribeForTheFileUploading: boolean
+  /* Timeout for uploading files
+     default: 120000
+   */
+  uploadTimeout: number
 };
 
 export const FilesetName = new InjectionToken<string>('FilesetName');

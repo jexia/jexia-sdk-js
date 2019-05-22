@@ -3,7 +3,7 @@ import { merge, Observable } from 'rxjs';
 import { API } from '../../config';
 import { RequestAdapter } from '../../internal/requestAdapter';
 import { AuthOptions, IAuthOptions, TokenManager } from '../core/tokenManager';
-import { FilesetMultipart, FilesetName, IFormData } from './fileops.interfaces';
+import { FilesetInterface, FilesetMultipart, FilesetName, IFormData } from './fileops.interfaces';
 
 @Injectable()
 export class FileUploader<FormDataType extends IFormData<F>, T, F> {
@@ -26,7 +26,7 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
    * Upload an array of files by splitting it to the separate streams
    * @param files {Array<FilesetMultipart<T, F>>}
    */
-  public upload(files: Array<FilesetMultipart<T, F>>): Observable<T> {
+  public upload(files: Array<FilesetMultipart<T, F>>): Observable<FilesetInterface<T>> {
     return merge(
       ...files.map((file) => this.uploadFile(file)),
     );
@@ -36,7 +36,7 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
    * Upload one record to the fileset
    * @param record {FilesetMultipart<T, F>}
    */
-  private uploadFile(record: FilesetMultipart<T, F>): Observable<T> {
+  private uploadFile(record: FilesetMultipart<T, F>): Observable<FilesetInterface<T>> {
 
     this.formData.append('data', record.data ? JSON.stringify(record.data) : '{}');
 
@@ -48,7 +48,7 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
       this.tokenManager
         .token(this.config.auth)
         .then((token) => this.execute(token))
-        .then((res: T[]) => {
+        .then((res: Array<FilesetInterface<T>>) => {
           observer.next(res[0]);
           observer.complete();
         })
@@ -60,7 +60,7 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
    * Execute REST request
    * @param token {string} Auth token
    */
-  private execute(token: string): Promise<T[]> {
+  private execute(token: string): Promise<Array<FilesetInterface<T>>> {
 
     const headers = {
       Authorization: `Bearer ${token}`,
@@ -71,7 +71,7 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
       Object.assign(headers, this.formData.getHeaders());
     }
 
-    return this.requestAdapter.upload<T[]>(this.getUrl(), headers, this.formData);
+    return this.requestAdapter.upload<Array<FilesetInterface<T>>>(this.getUrl(), headers, this.formData);
   };
 
   /**
