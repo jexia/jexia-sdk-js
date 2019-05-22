@@ -52,9 +52,9 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
 
     if (this.clientConfig.fileOperations.subscribeForTheFileUploading) {
       return this.getFileUpdates(fileUploadObservable, files.length);
-    } else {
-      return fileUploadObservable;
     }
+
+    return fileUploadObservable;
   }
 
   /** TODO API to develop (make these APIs shared with dataset)
@@ -67,8 +67,8 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
   /**
    * Subscribe for the RTC records
    * update file record with a status
-   * @param uploadingProcess
-   * @param filesUploaded
+   * @param uploadingProcess {Observable<FilesetInterface<T>>} Observable of the uploading files process
+   * @param filesUploaded {number} The number of files to be uploaded
    */
   private getFileUpdates(uploadingProcess: Observable<FilesetInterface<T>>, filesUploaded: number):
     Observable<FilesetInterface<T>> {
