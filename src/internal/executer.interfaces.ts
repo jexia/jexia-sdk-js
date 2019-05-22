@@ -1,9 +1,10 @@
 import { QueryAction } from "../api/dataops/queries/baseQuery";
+import { ICompiledQuery } from './query';
 
-// type QueryParam = Partial<ICompiledQuery<T>>;
+export type QueryParams = Partial<ICompiledQuery<any>>;
 
 export interface IRequestExecuterData {
   action: QueryAction;
   body?: any;
-  // queryParams?: QueryParam[];
+  queryParams?: QueryParams;
 }
