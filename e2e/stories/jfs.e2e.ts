@@ -72,12 +72,10 @@ describe('Fileset Module', () => {
             if (event.action !== 'updated') {
               finishTest(`second event should have updated action, but it has ${event.action}`);
             }
+            finishTest();
             break;
           default:
             finishTest('Wrong action received');
-        }
-        if (messagesReceived === 2) {
-          finishTest();
         }
       },
       (error) => {
