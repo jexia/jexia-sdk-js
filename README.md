@@ -14,13 +14,13 @@ npm install jexia-sdk-js --save
 
 ```javascript
 // Node application
-const jexiaSDK = require('jexia-sdk-js/node');
+const jexiaSDK = require("jexia-sdk-js/node");
 const dataModule = jexiaSDK.dataOperations();
 
-var credentials = {
-  projectID: "test",
-  key: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-  secret: "a_secret"
+const credentials = {
+  projectID: "<your-project-uuid>",
+  key: "<app-key>",
+  secret: "<app-secret>"
 };
 
 jexiaSDK.jexiaClient().init(credentials, dataModule);
