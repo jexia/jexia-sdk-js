@@ -2,6 +2,7 @@ import * as faker from "faker";
 import { getRandomQueryAction, requestAdapterMockFactory } from "../../spec/testUtils";
 import { TokenManager } from "../api/core/tokenManager";
 import { API } from "../config/config";
+import { IRequestExecuterData } from './../../dist/internal/executer.interfaces.d';
 import { QueryAction } from "./../api/dataops/queries/baseQuery";
 import { RequestExecuter } from "./executer";
 import { Methods } from "./requestAdapter";
@@ -184,7 +185,7 @@ describe("QueryExecuter class", () => {
   });
 
   describe("when calling execute() method", () => {
-    const mockRequest = { action: QUERY_ACTION };
+    const mockRequest: IRequestExecuterData = { action: QUERY_ACTION };
 
     it("should pass default params down to the request adapter", async () => {
       const { subject, reqAdapterMock } = createSubject();
@@ -193,7 +194,7 @@ describe("QueryExecuter class", () => {
         restUrl,
         {
           headers: { Authorization: `Bearer ${validToken}` },
-          body: {},
+          body: mockRequest.body,
           method: subject.getMethod(QUERY_ACTION),
         },
       );

@@ -21,10 +21,10 @@ export class RequestExecuter {
     await this.systemInit;
     const token = await this.tokenManager.token(this.config.auth);
     return this.requestAdapter.execute(
-      this.getURI(request.queryParams || []),
+      this.getURI(request.queryParams),
       {
         headers: { Authorization: `Bearer ${token}` },
-        body: request.body || {},
+        body: request.body,
         method: this.getMethod(request.action)
       },
     );
@@ -43,17 +43,17 @@ export class RequestExecuter {
   /**
    * Gets the URL concatenated with query params, when available.
    *
-   * @param  {QueryParam[]} queryParams
+   * @param  queryParams
    * @returns string
    */
-  private getURI(queryParams: QueryParam[]): string {
+  private getURI(queryParams: QueryParam[] = []): string {
     return this.getUrl() + this.parseQueryParams(queryParams);
   }
 
   /**
    * Parses query params elements into query string format
    *
-   * @param  {QueryParam[]} queryParams
+   * @param  queryParams
    * @returns string
    */
   private parseQueryParams(queryParams: QueryParam[]): string {
