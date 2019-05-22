@@ -15,26 +15,6 @@ import * as setWatch from "./watch";
  */
 const RTCResources: Array<{ new(...args: any[]): IResource }> = [Dataset, Fileset];
 
-/**
- * Real Time Module used to work with realtime events from datasets and filesets.
- * This object must be build from the helper functions, never to be instantiated direct.
- *
- * @example
- * ```typescript
- * import { jexiaClient, dataOperations, realTime } from "jexia-sdk-js/node";
- *
- * const dataModule = dataOperations();
- * const realTimeModule = realTime();
- *
- * jexiaClient().init({projectID: "your Jexia App URL", key: "username", secret: "password"},
- *   dataModule, realTimeModule);
- *
- * dataModule.dataset("posts")
- *   .watch()
- *   .subscribe(e => console.log(e));
- * ```
- */
-
 declare module "../dataops/dataset" {
   // tslint:disable-next-line:interface-name
   interface Dataset<T> {
@@ -51,6 +31,24 @@ declare module "../fileops/fileset" {
   }
 }
 
+/**
+ * Real Time Module used to work with realtime events from datasets and filesets.
+ * This object must be build from the helper functions, never to be instantiated directly.
+ *
+ * ### Example
+ * ```typescript
+ * import { jexiaClient, dataOperations, realTime } from "jexia-sdk-js/node";
+ *
+ * const dataModule = dataOperations();
+ * const realTimeModule = realTime();
+ *
+ * jexiaClient().init(credentials, dataModule, realTimeModule);
+ *
+ * dataModule.dataset("posts")
+ *   .watch()
+ *   .subscribe(e => console.log(e));
+ * ```
+ */
 export class RealTimeModule implements IModule {
   private websocket: IWebSocket;
 

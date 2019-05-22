@@ -10,17 +10,17 @@ interface Post {
 }
 
 // Initialize DataOperationsModule
-let dom = dataOperations();
+const dataModule = dataOperations();
 
 // Initialize Client and pass the data operations and real time modules to it.
 jexiaClient().init({
   projectID: "anemo002",
   key: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
   secret: "a_secret",
-}, dom, realTime());
+}, dataModule, realTime());
 
 // Use your data module with an optional generic type
-dom.dataset<Post>("posts")
+dataModule.dataset<Post>("posts")
   // Chose the events you wanna watch
   .watch("created", "deleted")
   .subscribe(

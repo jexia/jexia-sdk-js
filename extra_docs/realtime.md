@@ -6,17 +6,13 @@ To use real time notifications, `RealTimeModule` has to be initialized alongside
 
 ``` javascript
 // import dependencies from jexia SDK bundle
-import { jexiaClient, dataOperations, realTime } from 'jexia-sdk-js/node';
+import { jexiaClient, dataOperations, realTime } from "jexia-sdk-js/node";
 
 // Initialize DataOperationsModule
-let dom = dataOperations();
+const dataModule = dataOperations();
 
 // initialize jexia client
-jexiaClient().init({
-  projectID: 'your-project-id',
-  key: 'your-project-key',
-  secret: 'your-project-secret'
-}, dom, realTime());
+jexiaClient().init(credentials, dataModule, realTime());
 ```
 
 ### Subscribe for notifications
@@ -32,8 +28,8 @@ Allowed values are:
 Here is an example of usage:
 
 ``` javascript
-let subscription = dom.dataset('posts')
-  .watch('created', 'deleted')
+const subscription = dataModule.dataset("posts")
+  .watch("created", "deleted")
   .subscribe((messageObject) => {
     console.log("Realtime message received:", messageObject.data.title);
   }, (error) => {

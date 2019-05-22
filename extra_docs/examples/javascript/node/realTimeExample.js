@@ -2,17 +2,17 @@
 const { dataOperations, realTime, jexiaClient } = require("jexia-sdk-js/node");
 
 // Initialize DataOperationsModule
-let dom = dataOperations();
+const dataModule = dataOperations();
 
 // Initialize Client and pass the data operations and real time modules to it.
 jexiaClient().init({
   projectID: "anemo002",
   key: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
   secret: "a_secret",
-}, dom, realTime());
+}, dataModule, realTime());
 
 // Use your data module
-dom.dataset("posts")
+dataModule.dataset("posts")
   // Chose the events you wanna watch
   .watch("created", "deleted")
   .subscribe(
