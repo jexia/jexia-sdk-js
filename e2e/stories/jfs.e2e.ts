@@ -37,6 +37,23 @@ describe('Fileset Module', () => {
     });
   });
 
+  it('should upload multiple files', (done) => {
+    const paths = [
+      'e2e/resources/badge-facebook.png',
+      'e2e/resources/badge-linkedin.png',
+      'e2e/resources/badge-twitter.png',
+    ];
+    const files = paths.map((path) => ({ file: fs.createReadStream(path) }));
+    let filesUploaded = 0;
+    jfs.fileset(filesetName).upload(files).subscribe((result) => {
+      joiAssert(result, FilesetRecordSchema);
+      filesUploaded++;
+    }, done, () => {
+      expect(filesUploaded).toEqual(files.length);
+      done();
+    });
+  });
+
   it('should upload a file with custom fields', (done) => {
     const data = {
       stringField: faker.lorem.sentence(5),
@@ -103,6 +120,23 @@ describe('Fileset Module', () => {
         file: fs.createReadStream('e2e/resources/bee-32x32.png'),
       }]).subscribe((result) => {
         expect(result.status).toEqual('completed');
+        done();
+      });
+    });
+
+    it('should subscribe to the file status automatically for the several files', (done) => {
+      const paths = [
+        'e2e/resources/badge-facebook.png',
+        'e2e/resources/badge-linkedin.png',
+        'e2e/resources/badge-twitter.png',
+      ];
+      const files = paths.map((path) => ({ file: fs.createReadStream(path) }));
+      let filesUploaded = 0;
+      jfs.fileset(filesetName).upload(files).subscribe((result) => {
+        expect(result.status).toEqual('completed');
+        filesUploaded++;
+      }, done, () => {
+        expect(filesUploaded).toEqual(files.length);
         done();
       });
     });
