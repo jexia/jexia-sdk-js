@@ -55,8 +55,7 @@
       "src/browser.ts",
       "src/node.ts",
       "src/api/core/module.ts",
-      "src/api/core/resource.ts",
-      "src/api/fileops"
+      "src/api/core/resource.ts"
     ],
     "coverageThreshold": {
       "global": {
