@@ -1,17 +1,17 @@
-const jexiaSDK = require('jexia-sdk-js/node');
-
-const jexiaClient = jexiaSDK.jexiaClient;
-const dataOperations = jexiaSDK.dataOperations;
+const { jexiaClient, dataOperations } = require('jexia-sdk-js/node');
 
 //Initialize DataOperationsModule
 const dataModule = dataOperations();
+
 //Initialize Client and pass DataOperationsModule to it.
 const credentials = {
-  projectID: "test",
-  key: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-  secret: "a_secret"
+  projectID: "<your-project-id>",
+  key: "<your-project-api-key>",
+  secret: "<your-project-api-secret>",
 };
+
 jexiaClient().init(credentials, dataModule);
+
 //select Posts
 function selectPosts(){
   dataModule.dataset("posts")

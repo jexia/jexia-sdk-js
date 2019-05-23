@@ -50,9 +50,9 @@ import { jexiaClient } from "jexia-sdk-js/node";
 
 const clientPromise: Promise<Client> = jexiaClient()
   .init({
-    projectID: "<your-project-uuid>",
-    key: "<app-key>",
-    secret: "<app-secret>",
+    projectID: "<your-project-id>",
+    key: "<your-project-api-key>",
+    secret: "<your-project-api-secret>",
   });
 
 clientPromise.then((client: Client) => {

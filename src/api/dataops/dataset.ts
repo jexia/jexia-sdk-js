@@ -43,7 +43,7 @@ export type DatasetInterface<T> = T & DefaultDatasetInterface;
  *   .then((data) => {
  *     // you have been succesfully logged in!
  *     // you can start using the dataModule variable to operate on records here
- *   }).catch( (error) => {
+ *   }).catch((error) => {
  *     // uh-oh, there was a problem logging in, check the error.message for more info
  *   });
  * ```
