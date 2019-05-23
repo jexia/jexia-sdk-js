@@ -1,3 +1,4 @@
+import * as faker from "faker";
 import { FilteringCriterion } from "../api/dataops/filteringApi";
 import { FilteringCondition } from "../api/dataops/filteringCondition";
 import { IAggField, Query } from "./query";
@@ -164,6 +165,53 @@ describe("Query class", () => {
           "dataset2": query2.compile(),
         },
       });
+    });
+  });
+
+  describe("should compile to query params", () => {
+    it("empty query to empty array", () => {
+      expect(query.compileToQueryParams()).toEqual([]);
+    });
+
+    it("should transform all compiled entries", () => {
+      const fakeCompiled = {
+        key1: faker.random.word(),
+        key2: faker.random.word(),
+      };
+      spyOn(query, "compile").and.returnValue(fakeCompiled);
+
+      expect(query.compileToQueryParams().length)
+        .toEqual(Object.keys(fakeCompiled).length);
+    });
+
+    it("should transform any entry to the correct format", () => {
+      const keyArray = faker.helpers.randomize(['field', 'populate', 'cond']);
+      const fakeCompiled = {
+        [keyArray]: [
+          faker.random.number(),
+          faker.random.objectElement(),
+        ],
+      };
+      spyOn(query, "compile").and.returnValue(fakeCompiled);
+
+      expect(query.compileToQueryParams()).toEqual([
+        { key: keyArray, value: fakeCompiled[keyArray] },
+      ]);
+    });
+
+    it("should transform 'order' entry to the correct format", () => {
+      const fakeCompiled = {
+        order: [
+          faker.random.word(),
+          faker.random.word(),
+        ],
+      };
+      spyOn(query, "compile").and.returnValue(fakeCompiled);
+
+      expect(query.compileToQueryParams()).toEqual([
+        { key: 'order', value: fakeCompiled.order[0] },
+        { key: 'order', value: fakeCompiled.order[1] },
+      ]);
     });
   });
 });
