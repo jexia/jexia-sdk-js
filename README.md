@@ -18,9 +18,9 @@ const jexiaSDK = require("jexia-sdk-js/node");
 const dataModule = jexiaSDK.dataOperations();
 
 const credentials = {
-  projectID: "<your-project-uuid>",
-  key: "<app-key>",
-  secret: "<app-secret>"
+  projectID: "<your-project-id>",
+  key: "<your-project-api-key>",
+  secret: "<your-project-api-secret>",
 };
 
 jexiaSDK.jexiaClient().init(credentials, dataModule);
