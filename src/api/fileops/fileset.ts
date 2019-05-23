@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "injection-js";
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, Subscriber } from 'rxjs';
 import { concatMap, filter, map, shareReplay, takeUntil, tap } from "rxjs/operators";
 import { ClientConfiguration } from "../core/client";
 import { IResource, ResourceType } from '../core/resource';
@@ -78,10 +78,7 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
     const sharedUploadingProcess = uploadingProcess.pipe(
       shareReplay()
     );
-
-    sharedUploadingProcess.subscribe();
-
-    return this.watch().pipe(
+    const watcher = this.watch().pipe(
       takeUntil(allFilesCompleted),
       filter((event) => event.action === 'updated'),
       /* for each event looking through all uploaded files to find that same, proper file */
@@ -98,9 +95,19 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
       )),
       tap(() => {
         if (filesCompleted === filesUploaded) {
+          allFilesCompleted.next();
           allFilesCompleted.complete();
         }
       })
     );
+
+    /* Subscribe to watcher before starting to upload files in order to not
+       miss any events
+     */
+    return Observable.create((subscriber: Subscriber<FilesetInterface<T>>) => {
+      const watcherSubscription = watcher.subscribe(subscriber);
+      sharedUploadingProcess.subscribe();
+      return () => watcherSubscription.unsubscribe();
+    });
   }
 }
