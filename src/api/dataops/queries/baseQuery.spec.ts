@@ -130,10 +130,23 @@ describe("compiledRequest method", () => {
 
   it("should contain body", () => {
     subject.body = [
-      faker.random.objectElement(),
-      faker.random.objectElement(),
+      faker.random.word(),
     ];
-    expect(subject.compiledRequest.body).toEqual(subject.body);
+    expect(subject.compiledRequest.body).toBe(subject.body);
+  });
+
+  it("should contain queryParams", () => {
+    const queryParams = [];
+    spyOn(subject.query, "compileToQueryParams").and.returnValue(queryParams);
+
+    expect(subject.compiledRequest.queryParams).toBe(queryParams);
+  });
+
+  it("should contain empty array for queryParams when its nullable", () => {
+    const queryParams = faker.helpers.randomize([null, undefined]);
+    spyOn(subject.query, "compileToQueryParams").and.returnValue(queryParams);
+
+    expect(subject.compiledRequest.queryParams).toEqual([]);
   });
 });
 
