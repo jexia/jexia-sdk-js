@@ -11,8 +11,12 @@ describe('File Operations Module', () => {
   const createSubject = ({
     formDataMock = createMockFor(FormData),
     client = jexiaClient(fetchWithRequestMockOk),
+    config = {
+      subscribeForTheFileUploading: false,
+      uploadTimeout: 120000
+    }
   } = {}) => {
-    const subject = new FileOperationsModule(formDataMock);
+    const subject = new FileOperationsModule(formDataMock, config);
     return {
       subject,
       formDataMock,
