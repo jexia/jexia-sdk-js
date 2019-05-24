@@ -22,17 +22,13 @@ export type LogicalOperator = "and" | "or";
  * @internal
  */
 export class FilteringCondition<U> implements ICondition {
-  private field: string;
-  private operator: string;
-  private value: U[] | U;
-  private logicalOperatorType: LogicalOperator;
+  private logicalOperatorType: LogicalOperator =  "and";
 
-  constructor(field: string, operator: string, value: U[] | U) {
-    this.logicalOperatorType = "and";
-    this.field = field;
-    this.operator = operator;
-    this.value = value;
-  }
+  constructor(
+    readonly field: string,
+    readonly operator: string,
+    readonly value: U[] | U,
+  ) { }
 
   public get type(): LogicalOperator {
     return this.logicalOperatorType;
