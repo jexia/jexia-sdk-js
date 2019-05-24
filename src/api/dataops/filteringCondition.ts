@@ -76,11 +76,13 @@ export class CompositeFilteringCondition implements ICondition {
   }
 
   public or(condition: ICondition): CompositeFilteringCondition {
-    return this.appendCondition(condition, "or");
+    this.appendCondition(condition, "or");
+    return this;
   }
 
   public and(condition: ICondition): CompositeFilteringCondition {
-    return this.appendCondition(condition, "and");
+    this.appendCondition(condition, "and");
+    return this;
   }
 
   public compile() {
@@ -109,11 +111,10 @@ export class CompositeFilteringCondition implements ICondition {
     return appendNestedConditions();
   }
 
-  private appendCondition(condition: ICondition, operator: LogicalOperator): this {
+  private appendCondition(condition: ICondition, operator: LogicalOperator): void {
     const newCondition = clone(condition); // do not mutate original condition object
     newCondition.type = operator;
 
     this.conditions.push(newCondition);
-    return this;
   }
 }
