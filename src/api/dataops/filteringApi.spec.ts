@@ -32,7 +32,7 @@ describe("FieldFilter class", () => {
       ({ subject, fieldName } = createSubject());
 
       const criterion: IFilteringCriterion<string> = getCriterion(subject);
-      filteringCondition = <FilteringCondition<string>>criterion.condition;
+      filteringCondition = <FilteringCondition<string>> criterion.condition;
     });
 
     it("assigns proper field", () => {
