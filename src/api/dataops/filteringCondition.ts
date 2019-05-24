@@ -4,7 +4,7 @@
  * @internal
  */
 export interface ICondition {
-  Type: string;
+  type: LogicalOperator;
   or(condition: ICondition): ICondition;
   and(condition: ICondition): ICondition;
 
@@ -32,11 +32,11 @@ export class FilteringCondition<U> implements ICondition {
     this.values = values;
   }
 
-  public get Type(): LogicalOperator {
+  public get type(): LogicalOperator {
     return this.logicalOperatorType;
   }
 
-  public set Type(type: LogicalOperator) {
+  public set type(type: LogicalOperator) {
     this.logicalOperatorType = type;
   }
 
@@ -57,7 +57,7 @@ export class FilteringCondition<U> implements ICondition {
  * @internal
  */
 export class CompositeFilteringCondition implements ICondition {
-  private logicalOperatorType: string;
+  private logicalOperatorType: LogicalOperator;
   private conditions: ICondition[];
 
   constructor(filteringCondition: ICondition, logicalOperatorType: string) {
@@ -66,11 +66,11 @@ export class CompositeFilteringCondition implements ICondition {
     this.logicalOperatorType = logicalOperatorType;
   }
 
-  public get Type(): string{
+  public get type(): LogicalOperator {
     return this.logicalOperatorType;
   }
 
-  public set Type(type: string) {
+  public set type(type: LogicalOperator) {
     this.logicalOperatorType = type;
   }
 
