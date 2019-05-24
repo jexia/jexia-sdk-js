@@ -10,5 +10,9 @@
   {
     "title": "Code of Conduct",
     "file": "../CODE_OF_CONDUCT.md"
+  },
+  {
+    "title": "Fileset Operations",
+    "file": "jfs/README.md"
   }
 ]
