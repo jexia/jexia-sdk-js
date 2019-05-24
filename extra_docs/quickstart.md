@@ -235,23 +235,21 @@ posts.select()
 
 ### [Filtering records](#filtering-records)
 
-You can use the filtering feature to select what records a certain query will operate on.
+You can use the filtering to select what records a certain query will operate on.
 
-In order to define a filter, you need to use the appropriate filtering objects. They can be created using the exposed methods `field` and `combineCriteria`. `combineCriteria` is something very specific that provides another way to create nested logical conditions. You're probably not going to use that much, but it's useful to know that it exists.
+In order to define a filter, uo can use the exposed methods `field` or `combineCriteria`. `combineCriteria` is something very specific that provides another way to create nested logical conditions. You're probably not going to use that much, but it's useful to know that it exists.
 
-``` Javascript
+``` Typescript
 import { field } from "jexia-sdk-js/node";
 
-const simpleCriterion = field("username").isEqualTo("Tom");
-const combinedCriteria = simpleCriterion.or(field("username").isEqualTo("Dick"));
-```
+const isUsernameTom = field("username").isEqualTo("Tom");
+const isUsernameDick = field("username").isEqualTo("Dick");
+const isUsernameTomOrDick = isUsernameTom.or(isUsernameDick);
 
-In order to use these conditions, they need to be added to a query using the `.where` method
+// In order to use these conditions, they need to be added to a query through `.where` method
 
-``` Javascript
-[..]
-posts.select()
-  .where(field("username").isEqualTo("Harry"));
+posts.select().where(isUsernameTomOrDick);
+
 [..]
 ```
 
@@ -259,8 +257,8 @@ The `.where` method also accepts a lazy callback, that receives the `field` meth
 
 ``` Javascript
 [..]
-posts.select().
-  where(field => field("username").isEqualTo("Harry"));
+posts.select()
+  .where(field => field("username").isEqualTo("Harry"));
 [..]
 ```
 
@@ -271,30 +269,31 @@ Filtering conditions can be nested at any level.
 ``` Javascript
 [..]
 // Filtering in a flat way
-const flatFilter = field("first_name")
+const isTomAndOlderThan18 = field("first_name")
   .isEqualTo("Tom")
-  .or(field("first_name").isEqualTo("Dick"))
-  .or(field("first_name").isEqualTo("Harry"));
+  .and(field("age").isGreaterThan(18));
 
 // Filtering with one nested level
 const isDickHarry = field("first_name")
   .isEqualTo("Dick")
-  .and(field("middle_name").isEqualTo("Harry"));
+  .and(field("last_name").isEqualTo("Harry"));
 
-const nestedFilter = field("first_name")
-  .isEqualTo("Tom")
-  .or(isDickHarry);
-
-// Filtering with multiple nested levels
-const isDick = field("first_name").isEqualTo("Dick");
-const isHarryOrLarry = field("middle_name")
-  .isEqualTo("Harry")
-  .or(field("middle_name").isEqualTo("Larry"));
-
-const anotherNestedFilter = field("first_name")
+const isTomOrIsDickHarry = field("first_name")
   .isEqualTo("Tom")
   .or(
-    isDick.and(isHarryOrLarry)
+    isDickHarry // nested level
+  );
+
+// Filtering with multiple nested levels
+const isDutch = field("country").isEqualTo("NL");
+const isKidOrSenior = field("age")
+  .isGreaterThan(64)
+  .or(field("age").isLessThan(16));
+
+const isTomOr = field("first_name")
+  .isEqualTo("Tom")
+  .and(
+    isDutch.or(isKidOrSenior)
   );
 [..]
 ```
@@ -348,7 +347,7 @@ const insertQuery = posts.insert({
 insertQuery
   .execute()
   .then((records) => {
-    // you will always get an array of created records even when inserting a single record
+    // you will always get an array of created records, including their generated IDs (even when inserting a single record)
   }).catch((error) => {
     // you can see the error info here, if something goes wrong
   });
