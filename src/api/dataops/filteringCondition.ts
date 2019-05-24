@@ -1,3 +1,5 @@
+import { clone } from "../../internal/utils";
+
 // tslint:disable:max-classes-per-file
 
 /**
@@ -8,7 +10,7 @@ export interface ICondition {
   or(condition: ICondition): ICondition;
   and(condition: ICondition): ICondition;
 
-  compile(): object;
+  compile(): any[];
 }
 
 /**
@@ -22,14 +24,14 @@ export type LogicalOperator = "and" | "or";
 export class FilteringCondition<U> implements ICondition {
   private field: string;
   private operator: string;
-  private values: U[];
+  private value: U[] | U;
   private logicalOperatorType: LogicalOperator;
 
-  constructor(field: string, operator: string, values: U[]) {
+  constructor(field: string, operator: string, value: U[] | U) {
     this.logicalOperatorType = "and";
     this.field = field;
     this.operator = operator;
-    this.values = values;
+    this.value = value;
   }
 
   public get type(): LogicalOperator {
@@ -49,7 +51,11 @@ export class FilteringCondition<U> implements ICondition {
   }
 
   public compile() {
-    return { field: this.field, operator: this.operator, values: this.values, type: this.Type };
+    return [
+      { field: this.field },
+      this.operator,
+      this.value,
+    ];
   }
 }
 
@@ -60,9 +66,8 @@ export class CompositeFilteringCondition implements ICondition {
   private logicalOperatorType: LogicalOperator;
   private conditions: ICondition[];
 
-  constructor(filteringCondition: ICondition, logicalOperatorType: string) {
-    this.conditions = [];
-    this.conditions.push(filteringCondition);
+  constructor(filteringCondition: ICondition, logicalOperatorType: LogicalOperator) {
+    this.conditions = [filteringCondition];
     this.logicalOperatorType = logicalOperatorType;
   }
 
@@ -75,21 +80,44 @@ export class CompositeFilteringCondition implements ICondition {
   }
 
   public or(condition: ICondition): CompositeFilteringCondition {
-    condition.Type = "or";
-    this.conditions.push(condition);
-    return this;
+    return this.appendCondition(condition, "or");
   }
 
   public and(condition: ICondition): CompositeFilteringCondition {
-    condition.Type = "and";
-    this.conditions.push(condition);
-    return this;
+    return this.appendCondition(condition, "and");
   }
 
   public compile() {
-    return {
-      conditions: this.conditions.map( (condition: ICondition) => condition.compile()),
-      type: this.logicalOperatorType,
-     };
+    return this.conditions.reduce(this.toCompiledConditions, []);
+  }
+
+  private toCompiledConditions(expressions: any[], condition: ICondition) {
+    const appendNestedConditions = () => {
+      const compiledCondition = condition.compile();
+      const SINGLE_CONDITION_LENGTH = 3;
+
+      if (compiledCondition.length === SINGLE_CONDITION_LENGTH) {
+        expressions.push(...compiledCondition);
+      } else {
+        expressions.push(compiledCondition);
+      }
+
+      return expressions;
+    };
+
+    if (expressions.length) {
+      // append connector
+      expressions.push(condition.type);
+    }
+
+    return appendNestedConditions();
+  }
+
+  private appendCondition(condition: ICondition, operator: LogicalOperator): this {
+    const newCondition = clone(condition); // do not mutate original condition object
+    newCondition.type = operator;
+
+    this.conditions.push(newCondition);
+    return this;
   }
 }
