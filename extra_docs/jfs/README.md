@@ -73,7 +73,7 @@ If you already set up a fileset, you are able to upload files. One or multiple f
 returns an observable and you need to call `subscribe()` to start uploading process. Each uploaded file will emit a 
 *fileRecord*, which contains *id* and *status*. of uploaded file.
 ```typescript
-jfs.fileset('my_awesome_fileset').upload([
+jfs.fileset('fileset_name').upload([
   record1, record2, ...
 ]).subscribe(fileRecord => {
    console.log(fileRecord);
@@ -107,7 +107,7 @@ status automatically.
 
 Use `realTimeModule`:
 ```typescript
-import { jexiaClient, fileOperations, realTime } from 'jexia-sdk-js';
+import { jexiaClient, fileOperations, realTime } from 'jexia-sdk-js/node';
 
 const jfs = fileOperations();
 
@@ -117,9 +117,16 @@ jexiaClient().init({
   secret: 'your-project-secret'
 }, jfs, realTime());
 
-const fileset = jfs.fileset('my_awesome_fileset');
+const fileset = jfs.fileset('fileset_name');
 
-fileset.upload(record).pipe(
+const records = [{
+  data: {
+    description: 'just a file'
+  },
+  file: fs.createReadStream('../assets/logo.png')
+}];
+
+fileset.upload(records).pipe(
   concatMap(fileRecord => fileset.watch().pipe(
     filter(event => event.data[0].id === fileRecord.id),
     takeWhile(event => event.data[0].status !== 'completed', true),
@@ -135,7 +142,8 @@ all events from the fileset), unsubscribing from watch observable with `takeWhil
 
 Use `subscribeForTheFileUploading` config property (notice that you still need to activate realTimeModule):
 ```typescript
-import { jexiaClient, fileOperations, realTime } from 'jexia-sdk-js';
+import { jexiaClient, fileOperations, realTime } from 'jexia-sdk-js/node';
+import * as fs from 'fs';
 
 const jfs = fileOperations({
   subscribeForTheFileUploading: true    
@@ -147,9 +155,16 @@ jexiaClient().init({
   secret: 'your-project-secret'
 }, jfs, realTime());
 
-const fileset = jfs.fileset('my_awesome_fileset');
+const fileset = jfs.fileset('fileset_name');
 
-fileset.upload(record).subscribe(fileRecord => {
+const records = [{
+  data: {
+    description: 'just a file'
+  },
+  file: fs.createReadStream('../assets/logo.png')
+}];
+
+fileset.upload(records).subscribe(fileRecord => {
   console.log(fileRecord);
   /* output:
     { id: '11a12f17-8367-4114-a588-ae98a6cb3cda',
@@ -167,7 +182,7 @@ fileset.upload(record).subscribe(fileRecord => {
 ### [Fileset CRUD operations](#crud)
 It's possible to query filesets in the same way as datasets, file records will be returned
 ```typescript
-const files = await jfs.fileset('my_awesome_fileset')
+const files = await jfs.fileset('fileset_name')
   .select('name', 'url')
   .where(field => field('size').isGreaterThan(1024000))
   .execute();
@@ -178,14 +193,14 @@ const files = await jfs.fileset('my_awesome_fileset')
 Update fileset in the same way as dataset. Updating a fileset record with new file is impossible ATM
 
 ```typescript
-await jfs.fileset('my_awesome_fileset')
+await jfs.fileset('fileset_name')
   .update({ 'name': 'newFileName' })
   .where(field => field('name').isEqualTo('oldFileName'))
   .execute();
 ```
 and delete records:
 ```typescript
-await jfs.fileset('my_awesome_fileset')
+await jfs.fileset('fileset_name')
   .delete()
   .where(field => field('size').isGreaterThan(1024000))
   .execute();
