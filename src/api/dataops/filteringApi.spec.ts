@@ -1,240 +1,258 @@
 // tslint:disable:no-string-literal
-import { combineCriteria, field, IFilteringCriterion } from "./filteringApi";
-import { CompositeFilteringCondition } from "./filteringCondition";
+import * as faker from "faker";
+import {
+  combineCriteria,
+  field,
+  FieldFilter,
+  FilteringCriterion,
+  IFilteringCriterion,
+} from "./filteringApi";
+import { CompositeFilteringCondition, FilteringCondition } from "./filteringCondition";
 
 describe("FieldFilter class", () => {
-  describe("when building a filter with one condition and greater than operator", () => {
-    it("compiles to the proper JSON", () => {
-      let filter: IFilteringCriterion = field("name").isGreaterThan("value");
-      let jsonResult: object = (filter as any).lowLevelCondition.compile();
-      expect(jsonResult as any).toEqual({ field: "name", operator: ">", values: [ "value" ], type: "and" });
+  function createSubject({
+    fieldName = faker.random.word(),
+  } = {}) {
+    return {
+      fieldName,
+      subject: new FieldFilter<any>(fieldName),
+    };
+  }
+
+  function testParams<T>({ operator, getCriterion, value }: {
+    operator: string;
+    value: T;
+    getCriterion: (subject) => IFilteringCriterion<T>;
+  }) {
+    let filteringCondition: FilteringCondition<string>;
+    let fieldName;
+    let subject;
+
+    beforeEach(() => {
+      ({ subject, fieldName } = createSubject());
+
+      const criterion: IFilteringCriterion<string> = getCriterion(subject);
+      filteringCondition = <FilteringCondition<string>>criterion.condition;
     });
-  });
-  describe("when building a filter with one condition and less than operator", () => {
-    it("compiles to the proper JSON", () => {
-      let filter: IFilteringCriterion = field("name").isLessThan("value");
-      let jsonResult: object = (filter as any).lowLevelCondition.compile();
-      expect(jsonResult as any).toEqual({ field: "name", operator: "<", values: [ "value" ], type: "and" });
+
+    it("assigns proper field", () => {
+      expect(filteringCondition.field).toEqual(fieldName);
     });
-  });
-  describe("when building a filter with one condition and equal to operator", () => {
-    it("compiles to the proper JSON", () => {
-      let filter: IFilteringCriterion = field("name").isEqualTo("value");
-      let jsonResult: object = (filter as any).lowLevelCondition.compile();
-      expect(jsonResult as any).toEqual({ field: "name", operator: "=", values: [ "value" ], type: "and" });
+
+    it("assigns proper operator", () => {
+      expect(filteringCondition.operator).toEqual(operator);
     });
-  });
-  describe("when building a filter with one condition and not equal to operator", () => {
-    it("compiles to the proper JSON", () => {
-      let filter: IFilteringCriterion = field("name").isDifferentFrom("value");
-      let jsonResult: object = (filter as any).lowLevelCondition.compile();
-      expect(jsonResult as any).toEqual({ field: "name", operator: "<>", values: [ "value" ], type: "and" });
+
+    it("assigns proper value", () => {
+      expect(filteringCondition.value).toEqual(value);
     });
-  });
-  describe("when building a filter with one condition and equal-or-more-than operator", () => {
-    it("compiles to the proper JSON", () => {
-      let filter: IFilteringCriterion = field("name").isEqualOrGreaterThan("value");
-      let jsonResult: object = (filter as any).lowLevelCondition.compile();
-      expect(jsonResult as any).toEqual({ field: "name", operator: ">=", values: [ "value" ], type: "and" });
+  }
+
+  describe("when building a filter", () => {
+
+    describe("with greater than operator", () => {
+      const value = faker.random.word();
+
+      testParams({
+        value,
+        operator: ">",
+        getCriterion: (subject) => subject.isGreaterThan(value)
+      });
     });
-  });
-  describe("when building a filter with one condition and equal-or-less-than operator", () => {
-    it("compiles to the proper JSON", () => {
-      let filter: IFilteringCriterion = field("name").isEqualOrLessThan("value");
-      let jsonResult: object = (filter as any).lowLevelCondition.compile();
-      expect(jsonResult as any).toEqual({ field: "name", operator: "<=", values: [ "value" ], type: "and" });
+
+    describe("with less than operator", () => {
+      const value = faker.random.word();
+
+      testParams({
+        value,
+        operator: "<",
+        getCriterion: (subject) => subject.isLessThan(value)
+      });
     });
-  });
-  describe("when building a filter with one condition and is null operator", () => {
-    it("compiles to the proper JSON", () => {
-      let filter: IFilteringCriterion = field("name").isNull();
-      let jsonResult: object = (filter as any).lowLevelCondition.compile();
-      expect(jsonResult as any).toEqual({ field: "name", operator: "IS_NULL", values: [], type: "and" });
+
+    describe("with equal to operator", () => {
+      const value = faker.random.word();
+
+      testParams({
+        value,
+        operator: "=",
+        getCriterion: (subject) => subject.isEqualTo(value)
+      });
     });
-  });
-  describe("when building a filter with one condition and is null operator", () => {
-    it("compiles to the proper JSON", () => {
-      let filter: IFilteringCriterion = field("name").isNotNull();
-      let jsonResult: object = (filter as any).lowLevelCondition.compile();
-      expect(jsonResult as any).toEqual({ field: "name", operator: "IS_NOT_NULL", values: [ ], type: "and" });
+
+    describe("with not equal to operator", () => {
+      const value = faker.random.word();
+
+      testParams({
+        value,
+        operator: "!=",
+        getCriterion: (subject) => subject.isDifferentFrom(value)
+      });
     });
-  });
-  describe("when building a filter with one condition and is-in operator", () => {
-    it("compiles to the proper JSON", () => {
-      let values = ["1", "2", "3"];
-      let filter: IFilteringCriterion = field("name").isInArray(values);
-      let jsonResult: object = (filter as any).lowLevelCondition.compile();
-      expect(jsonResult as any).toEqual({ field: "name", operator: "IN", values, type: "and" });
+
+    describe("with equal-or-more-than operator", () => {
+      const value = faker.random.word();
+
+      testParams({
+        value,
+        operator: ">=",
+        getCriterion: (subject) => subject.isEqualOrGreaterThan(value)
+      });
     });
-  });
-  describe("when building a filter with one condition and is-not-in operator", () => {
-    it("compiles to the proper JSON", () => {
-      let values = ["1", "2", "3"];
-      let filter: IFilteringCriterion = field("name").isNotInArray(values);
-      let jsonResult: object = (filter as any).lowLevelCondition.compile();
-      expect(jsonResult as any).toEqual({ field: "name", operator: "NOT_IN", values, type: "and" });
+
+    describe("with equal-or-less-than operator", () => {
+      const value = faker.random.word();
+
+      testParams({
+        value,
+        operator: "<=",
+        getCriterion: (subject) => subject.isEqualOrLessThan(value)
+      });
     });
-  });
-  describe("when building a filter with one condition and between operator", () => {
-    it("compiles to the proper JSON", () => {
-      let start = "1";
-      let end = "2";
-      let filter: IFilteringCriterion = field("name").isBetween(start, end);
-      let jsonResult: object = (filter as any).lowLevelCondition.compile();
-      expect(jsonResult as any).toEqual({ field: "name", operator: "BETWEEN", values: [start, end], type: "and" });
+
+    describe("with is null operator", () => {
+      testParams({
+        value: true,
+        operator: "null",
+        getCriterion: (subject) => subject.isNull()
+      });
     });
-  });
-  describe("when building a filter with one condition and like operator", () => {
-    it("compiles to the proper JSON", () => {
-      let filter: IFilteringCriterion = field("name").isLike("value");
-      let jsonResult: object = (filter as any).lowLevelCondition.compile();
-      expect(jsonResult as any).toEqual({ field: "name", operator: "LIKE", values: [ "value" ], type: "and" });
+
+    describe("with is null operator", () => {
+      testParams({
+        value: false,
+        operator: "null",
+        getCriterion: (subject) => subject.isNotNull()
+      });
     });
-  });
-  describe("when building a filter with one condition and like operator", () => {
-    it("compiles to the proper JSON", () => {
-      let regexp = "regexp";
-      let filter: IFilteringCriterion = field("name").satisfiesRegexp(regexp);
-      let jsonResult: object = (filter as any).lowLevelCondition.compile();
-      expect(jsonResult as any).toEqual({ field: "name", operator: "REGEXP", values: [ regexp ], type: "and" });
+
+    describe("with is-in operator", () => {
+      const value = [faker.random.number(), faker.random.number()];
+      testParams({
+        value,
+        operator: "in",
+        getCriterion: (subject) => subject.isInArray(value),
+      });
     });
-  });
-  describe("when building a filter with multiple conditions on a single nesting level", () => {
-    it("compiles to the correct JSON", () => {
-      let filter: IFilteringCriterion = field("field").isDifferentFrom("value")
-                                          .and(field("field").isDifferentFrom("value2"))
-                                          .or(field("field").isDifferentFrom("value3"));
-      let result: object = (filter as any).lowLevelCondition.compile();
-      let expected = { conditions: [
-          { field: "field", operator: "<>", values: ["value"], type: "and" },
-          { field: "field", operator: "<>", values: ["value2"], type: "and" },
-          { field: "field", operator: "<>", values: ["value3"], type: "or" }],
-        type: "and" };
-      expect(result).toEqual(expected);
+
+    describe("with is-not-in operator", () => {
+      const value = [faker.random.number(), faker.random.number()];
+      testParams({
+        value,
+        operator: "not in",
+        getCriterion: (subject) => subject.isNotInArray(value),
+      });
     });
+
+    describe("with like operator", () => {
+      const value = faker.random.word();
+      testParams({
+        value,
+        operator: "like",
+        getCriterion: (subject) => subject.isLike(value),
+      });
+    });
+
+    describe("with regexp operator", () => {
+      const value = faker.random.word();
+      testParams({
+        value,
+        operator: "regexp",
+        getCriterion: (subject) => subject.satisfiesRegexp(value),
+      });
+    });
+
+    describe("with between operator", () => {
+      const value = [faker.random.number(), faker.random.number()];
+      const [start, end] = value;
+      testParams({
+        value,
+        operator: "between",
+        getCriterion: (subject) => subject.isBetween(start, end),
+      });
+    });
+
   });
-  describe("when building a filter with multiple conditions on two nesting levels", () => {
-    it("compiles to the correct JSON", () => {
-      let filter: IFilteringCriterion = field("field").isDifferentFrom("value")
-                                          .and(field("field").isDifferentFrom("value2")
-                                                .or(field("field").isDifferentFrom("value3")));
-      let result: object = (filter as any).lowLevelCondition.compile();
-      let expected = { conditions: [
-          { field: "field", operator: "<>", values: ["value"], type: "and" },
-          { conditions:
-            [ { field: "field", operator: "<>", values: [ "value2" ], type: "and" },
-              { field: "field", operator: "<>", values: [ "value3" ], type: "or" } ],
-            type: "and" } ],
-        type: "and" };
-      expect(result).toEqual(expected);
+
+});
+
+describe("FilteringCriterion class", () => {
+  function createSubject({
+    fieldName = faker.random.alphaNumeric(10),
+    operator = faker.random.alphaNumeric(3),
+    value = faker.random.word(),
+    lowLevelCondition = new FilteringCondition(fieldName, operator, value),
+    highLevelCriteria = null,
+  } = {}) {
+    return {
+      fieldName,
+      operator,
+      value,
+      lowLevelCondition,
+      highLevelCriteria,
+      subject: new FilteringCriterion(lowLevelCondition, highLevelCriteria),
+    };
+  }
+
+  it("should throw an error when no condition is provided", () => {
+    expect(createSubject.bind(null, ({ lowLevelCondition: null }))).toThrowError();
+  });
+
+  it("should assign the proper condition", () => {
+    const { subject, lowLevelCondition } = createSubject();
+
+    expect(subject.condition).toEqual(lowLevelCondition);
+  });
+
+  describe("for high level criteria", () => {
+    it("should create an instance of CompositeFilteringCondition", () => {
+      const highLevelCriteria = createSubject().subject;
+      const { subject } = createSubject({
+        highLevelCriteria,
+      });
+
+      expect(subject.condition).toBeInstanceOf(CompositeFilteringCondition);
+    });
+
+    it("should add the condition using AND operator", () => {
+      const highLevelCriteria = createSubject().subject;
+      const { subject } = createSubject({
+        highLevelCriteria,
+      });
+
+      expect(subject.condition.type).toBe("and");
     });
   });
 
-  describe("when combining criteria", () => {
+});
 
-    it("should combine with high level criteria", () => {
-      const filter: any = field("name").isEqualTo("value");
-      const condition: any = combineCriteria(filter);
-      expect(condition["lowLevelCondition"]).toEqual(
-        new CompositeFilteringCondition(filter["lowLevelCondition"], "AND"));
-    });
+describe("when using field helper", () => {
 
-    it("should fail without parameter", () => {
-      expect(() => combineCriteria(undefined as any)).toThrow();
-    });
-
+  it("should return the proper instance", () => {
+    const filter = field(faker.random.word());
+    expect(filter).toBeInstanceOf(FieldFilter);
   });
 
-  describe("when building a filter with number type value", () => {
-    describe("greater than operator", () => {
-      it("should compile to the proper JSON", () => {
-        let filter = field("name").isGreaterThan(100);
-        let jsonResult: object = (filter as any).lowLevelCondition.compile();
-        expect(jsonResult as any).toEqual({ field: "name", operator: ">", values: [ 100 ], type: "and" });
-      });
-    });
-    describe("less than operator", () => {
-      it("should compile to the proper JSON", () => {
-        let filter = field("name").isLessThan(100);
-        let jsonResult: object = (filter as any).lowLevelCondition.compile();
-        expect(jsonResult as any).toEqual({ field: "name", operator: "<", values: [ 100 ], type: "and" });
-      });
-    });
-    describe("is equal to operator", () => {
-      it("should compile to the proper JSON", () => {
-        let filter = field("name").isEqualTo(100);
-        let jsonResult: object = (filter as any).lowLevelCondition.compile();
-        expect(jsonResult as any).toEqual({ field: "name", operator: "=", values: [ 100 ], type: "and" });
-      });
-    });
+  it("should assign the name to the filter", () => {
+    const fieldName = faker.random.word();
+    const filter = field(fieldName);
+
+    expect(filter.fieldName).toBe(fieldName);
   });
 
-  describe("when building a filter with boolean type value", () => {
-    describe("is equal to operator", () => {
-      it("should compile to the proper JSON", () => {
-        let filter = field("name").isEqualTo(true);
-        let jsonResult: object = (filter as any).lowLevelCondition.compile();
-        expect(jsonResult as any).toEqual({ field: "name", operator: "=", values: [ true ], type: "and" });
-      });
-    });
-    describe("is not equal to operator", () => {
-      it("should compile to the proper JSON", () => {
-        let filter = field("name").isDifferentFrom(false);
-        let jsonResult: object = (filter as any).lowLevelCondition.compile();
-        expect(jsonResult as any).toEqual({ field: "name", operator: "<>", values: [ false ], type: "and" });
-      });
-    });
+});
+
+describe("when combining criteria", () => {
+
+  it("should combine with high level criteria", () => {
+    const filter: any = field("name").isEqualTo("value");
+    const condition: any = combineCriteria(filter);
+    expect(condition["lowLevelCondition"]).toEqual(
+      new CompositeFilteringCondition(filter["lowLevelCondition"], "and"));
   });
 
-  describe("when building a filter with Date type value", () => {
-    let date = new Date();
-    describe("greater than operator", () => {
-      it("should compile to the proper JSON", () => {
-        let filter = field("name").isGreaterThan(date);
-        let jsonResult: object = (filter as any).lowLevelCondition.compile();
-        expect(jsonResult as any).toEqual({ field: "name", operator: ">", values: [ date ], type: "and" });
-      });
-    });
-    describe("less than operator", () => {
-      it("should compile to the proper JSON", () => {
-        let filter = field("name").isLessThan(date);
-        let jsonResult: object = (filter as any).lowLevelCondition.compile();
-        expect(jsonResult as any).toEqual({ field: "name", operator: "<", values: [ date ], type: "and" });
-      });
-    });
-    describe("is equal to operator", () => {
-      it("should compile to the proper JSON", () => {
-        let filter = field("name").isEqualTo(date);
-        let jsonResult: object = (filter as any).lowLevelCondition.compile();
-        expect(jsonResult as any).toEqual({ field: "name", operator: "=", values: [ date ], type: "and" });
-      });
-    });
-    describe("is between operator", () => {
-      it("should compile to the proper JSON", () => {
-        let date2 = new Date();
-        let filter = field("name").isBetween(date, date2);
-        let jsonResult: object = (filter as any).lowLevelCondition.compile();
-        expect(jsonResult as any).toEqual({ field: "name", operator: "BETWEEN", values: [ date, date2 ], type: "and" });
-      });
-    });
+  it("should fail without parameter", () => {
+    expect(() => combineCriteria(undefined as any)).toThrow();
   });
 
-  describe("when building a filter with object type value", () => {
-    describe("is equal to operator", () => {
-      it("should compile to the proper JSON", () => {
-        let filter = field("name").isEqualTo({ name: "Peter Jackson" });
-        let jsonResult: object = (filter as any).lowLevelCondition.compile();
-        expect(jsonResult as any)
-          .toEqual({ field: "name", operator: "=", values: [ { name: "Peter Jackson" } ], type: "and" });
-      });
-    });
-    describe("is not equal to operator", () => {
-      it("should compile to the proper JSON", () => {
-        let filter = field("name").isDifferentFrom({ name: "Peter Jackson" });
-        let jsonResult: object = (filter as any).lowLevelCondition.compile();
-        expect(jsonResult as any)
-          .toEqual({ field: "name", operator: "<>", values: [ { name: "Peter Jackson" } ], type: "and" });
-      });
-    });
-  });
 });
