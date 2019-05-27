@@ -11,7 +11,7 @@ describe('Fileset', () => {
 
   function createSubject({
     filesetName = faker.random.word(),
-    fsConfig = { subscribeForTheFileUploading: false, uploadTimeout: 120000 },
+    fsConfig = { uploadWaitForCompleted: false, uploadTimeout: 120000 },
     // @ts-ignore
     fileUploadReturnValue = of({}),
     fileUploaderMock = createMockFor(FileUploader, { returnValue: fileUploadReturnValue }),
@@ -67,7 +67,7 @@ describe('Fileset', () => {
     describe('if auto subscription to upload status is off', () => {
       it('should subscribe to upload events', () => {
         const { subject, fileUploadReturnValue } = createSubject({
-          fsConfig: { subscribeForTheFileUploading: true, uploadTimeout: 0 },
+          fsConfig: { uploadWaitForCompleted: true, uploadTimeout: 0 },
         });
         const filesLength = faker.random.number(5);
         spyOn(subject as any, 'getFileUpdates');
@@ -80,7 +80,7 @@ describe('Fileset', () => {
 
       it('should return file statuses observable', () => {
         const { subject } = createSubject({
-          fsConfig: { subscribeForTheFileUploading: true, uploadTimeout: 0 },
+          fsConfig: { uploadWaitForCompleted: true, uploadTimeout: 0 },
         });
         const watchObservable = of({});
         spyOn(subject as any, 'getFileUpdates').and.returnValue(watchObservable);
