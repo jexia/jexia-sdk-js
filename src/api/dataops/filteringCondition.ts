@@ -6,6 +6,7 @@ import { clone } from "../../internal/utils";
  * @internal
  */
 export interface ICondition {
+  readonly isSingle: boolean;
   type: LogicalOperator;
   or(condition: ICondition): ICondition;
   and(condition: ICondition): ICondition;
@@ -22,6 +23,7 @@ export type LogicalOperator = "and" | "or";
  * @internal
  */
 export class FilteringCondition<U> implements ICondition {
+  public readonly isSingle = true;
   private logicalOperatorType: LogicalOperator =  "and";
 
   constructor(
@@ -59,6 +61,7 @@ export class FilteringCondition<U> implements ICondition {
  * @internal
  */
 export class CompositeFilteringCondition implements ICondition {
+  public readonly isSingle = false;
   private logicalOperatorType: LogicalOperator;
   private conditions: ICondition[];
 
@@ -90,25 +93,20 @@ export class CompositeFilteringCondition implements ICondition {
   }
 
   private toCompiledConditions(expressions: any[], condition: ICondition) {
-    const appendNestedConditions = () => {
-      const compiledCondition = condition.compile();
-      const SINGLE_CONDITION_LENGTH = 3;
-
-      if (compiledCondition.length === SINGLE_CONDITION_LENGTH) {
-        expressions.push(...compiledCondition);
-      } else {
-        expressions.push(compiledCondition);
-      }
-
-      return expressions;
-    };
-
-    if (expressions.length) {
       // append connector
+    if (expressions.length) {
       expressions.push(condition.type);
     }
 
-    return appendNestedConditions();
+    const compiledCondition = condition.compile();
+
+    if (condition.isSingle) {
+      expressions.push(...compiledCondition);
+    } else {
+      expressions.push(compiledCondition);
+    }
+
+    return expressions;
   }
 
   private appendCondition(condition: ICondition, operator: LogicalOperator): void {

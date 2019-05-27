@@ -105,21 +105,11 @@ describe("CompositeFilteringCondition class", () => {
 
   describe("when calling or()", () => {
     it("should not mutate condition", () => {
-      const { compositeSubject, field, operator, value } = createCompositeSubject();
+      const { compositeSubject } = createCompositeSubject();
       const { subject: condition } = createSubject();
       condition.type = "and";
 
       compositeSubject.or(condition);
-
-      expect(condition.type).toEqual("and");
-    });
-
-    it("should not mutate condition", () => {
-      const { compositeSubject, field, operator, value } = createCompositeSubject();
-      const { subject: condition } = createSubject();
-      condition.type = "and";
-
-      const orCondition = compositeSubject.or(condition);
 
       expect(condition.type).toEqual("and");
     });
