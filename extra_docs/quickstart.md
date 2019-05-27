@@ -237,7 +237,7 @@ posts.select()
 
 You can use the filtering to select what records a certain query will operate on.
 
-In order to define a filter, uo can use the exposed methods `field` or `combineCriteria`. `combineCriteria` is something very specific that provides another way to create nested logical conditions. You're probably not going to use that much, but it's useful to know that it exists.
+In order to define a filter, you can use the exposed method `field`.
 
 ``` Typescript
 import { field } from "jexia-sdk-js/node";
