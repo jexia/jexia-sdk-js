@@ -5,7 +5,7 @@ import { DataSetName } from "../api/dataops/dataops.tokens";
 import { QueryAction } from "../api/dataops/queries/baseQuery";
 import { API } from "../config";
 import { IRequestExecuterData, QueryParam } from "./executer.interfaces";
-import { Methods, RequestAdapter } from "./requestAdapter";
+import { IRequestOptions, Methods, RequestAdapter } from "./requestAdapter";
 
 @Injectable()
 export class RequestExecuter {
@@ -19,15 +19,11 @@ export class RequestExecuter {
 
   public async executeRequest(request: IRequestExecuterData): Promise<any> {
     await this.systemInit;
-    const token = await this.tokenManager.token(this.config.auth);
-    return this.requestAdapter.execute(
-      this.getURI(request.queryParams),
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        body: request.body,
-        method: this.getMethod(request.action)
-      },
-    );
+
+    const URI = this.getURI(request.queryParams);
+    const options = await this.getRequestOptions(request);
+
+    return this.requestAdapter.execute(URI, options);
   }
 
   public getMethod(action: QueryAction): Methods {
@@ -38,6 +34,25 @@ export class RequestExecuter {
       case QueryAction.select: return Methods.GET;
       case QueryAction.update: return Methods.PATCH;
     }
+  }
+
+  private async getRequestOptions(request: IRequestExecuterData): Promise<IRequestOptions> {
+    const token = await this.tokenManager.token(this.config.auth);
+
+    const options: IRequestOptions = {
+      headers: { Authorization: `Bearer ${token}` },
+      method: this.getMethod(request.action)
+    };
+
+    if (this.hasBody(request)) {
+      options.body = request.body;
+    }
+
+    return options;
+  }
+
+  private hasBody(request: IRequestExecuterData): boolean {
+    return ![Methods.GET, Methods.DELETE].includes(this.getMethod(request.action));
   }
 
   /**
