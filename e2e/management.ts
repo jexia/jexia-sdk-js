@@ -5,13 +5,13 @@ import { api } from "./config";
 
 export type FieldType = "boolean" | "date" | "datetime" | "float" | "integer" | "json" | "string" | "uuid";
 
-export interface IFieldValidators {
-  required: boolean;
+export interface IFieldConstraints {
+  type?: "required";
 }
 
 export interface IFieldOptions {
   type: FieldType;
-  validators?: IFieldValidators;
+  constraints?: IFieldConstraints[];
 }
 
 /* Get AWS credentials for fileset */

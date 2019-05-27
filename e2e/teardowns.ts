@@ -35,9 +35,9 @@ export const init = async (
 
   await management.createDatasetField(dataset.id, fieldName, {
     type: "string",
-    validators: {
-      required: true
-    }
+    constraints: [
+      { type: "required" },
+    ]
   });
 
   apiKey = await management.createApiKey();
