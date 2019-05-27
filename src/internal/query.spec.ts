@@ -90,7 +90,7 @@ describe("Query class", () => {
     it("filtering conditions", () => {
       query.setFilterCriteria(filteringCriterion);
       expect(query.compile()).toEqual({
-        cond: [(query as any).filteringConditions.compile()],
+        cond: (query as any).filteringConditions.compile(),
       });
     });
     it("limit option", () => {
