@@ -36,7 +36,7 @@ export class RequestExecuter {
       case QueryAction.insert: return Methods.POST;
       case QueryAction.delete: return Methods.DELETE;
       case QueryAction.select: return Methods.GET;
-      case QueryAction.update: return Methods.PUT;
+      case QueryAction.update: return Methods.PATCH;
     }
   }
 

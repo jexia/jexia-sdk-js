@@ -173,7 +173,7 @@ describe("QueryExecuter class", () => {
       { action: QueryAction.insert, expected: Methods.POST },
       { action: QueryAction.delete, expected: Methods.DELETE },
       { action: QueryAction.select, expected: Methods.GET },
-      { action: QueryAction.update, expected: Methods.PUT },
+      { action: QueryAction.update, expected: Methods.PATCH },
     ];
 
     actions.forEach(({ action, expected }) => {
