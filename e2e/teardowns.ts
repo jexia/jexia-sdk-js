@@ -24,9 +24,11 @@ let fileset: { name: string, id: string };
 let apiKey: { id: string, key: string, secret: string };
 let policy: { id: string };
 
+export const DEFAULT_DATASET = { NAME: "test_dataset", FIELD: "test_field" };
+
 export const init = async (
-  datasetName = "test_dataset",
-  fieldName = "test_field",
+  datasetName = DEFAULT_DATASET.NAME,
+  fieldName = DEFAULT_DATASET.FIELD,
   modules: IModule[] = [dom, realTime(), new LoggerModule(LogLevel.ERROR)]) => {
 
   await management.login();
