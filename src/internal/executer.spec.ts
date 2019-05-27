@@ -168,14 +168,14 @@ describe("QueryExecuter class", () => {
     });
   });
 
-  describe("on calling getMethod()", () => {
-    const actions = [
-      { action: QueryAction.insert, expected: Methods.POST },
-      { action: QueryAction.delete, expected: Methods.DELETE },
-      { action: QueryAction.select, expected: Methods.GET },
-      { action: QueryAction.update, expected: Methods.PATCH },
-    ];
+  const actions = [
+    { action: QueryAction.insert, expected: Methods.POST, hasBody: true },
+    { action: QueryAction.delete, expected: Methods.DELETE, hasBody: false },
+    { action: QueryAction.select, expected: Methods.GET, hasBody: false },
+    { action: QueryAction.update, expected: Methods.PATCH, hasBody: true },
+  ];
 
+  describe("on calling getMethod()", () => {
     actions.forEach(({ action, expected }) => {
       it(`should return ${expected} for ${action}`, async () => {
         const { subject } = createSubject();
@@ -194,27 +194,54 @@ describe("QueryExecuter class", () => {
         restUrl,
         {
           headers: { Authorization: `Bearer ${validToken}` },
-          body: mockRequest.body,
           method: subject.getMethod(QUERY_ACTION),
         },
       );
     });
 
-    it("should pass the proper options down to the request adapter", async () => {
-      const { subject, reqAdapterMock } = createSubject();
-      const fakeBody = {
-        someObject: faker.random.objectElement(),
-      };
-      await subject.executeRequest({
-        action: QUERY_ACTION,
-        body: fakeBody,
+    const withoutBody = actions.filter((action) => !action.hasBody);
+
+    withoutBody.forEach(({ action, expected }) => {
+      it("should pass no body for GET requests", async () => {
+        const { subject, reqAdapterMock } = createSubject();
+
+        await subject.executeRequest({
+          action,
+          body: {},
+        });
+
+        expect(reqAdapterMock.execute).toHaveBeenCalledWith(
+          restUrl,
+          {
+            headers: { Authorization: `Bearer ${validToken}` },
+            method: expected,
+          },
+        );
       });
-      expect(reqAdapterMock.execute).toHaveBeenCalledWith(
-        restUrl,
-        expect.objectContaining({
+    });
+
+    const withBody = actions.filter((action) => action.hasBody);
+
+    withBody.forEach(({ action, expected }) => {
+      it("should pass the proper options down to the request adapter", async () => {
+        const { subject, reqAdapterMock } = createSubject();
+        const fakeBody = {
+          someObject: faker.random.number(),
+        };
+        await subject.executeRequest({
+          action,
           body: fakeBody,
-        }),
-      );
+        });
+
+        expect(reqAdapterMock.execute).toHaveBeenCalledWith(
+          restUrl,
+          {
+            headers: { Authorization: `Bearer ${validToken}` },
+            body: fakeBody,
+            method: expected,
+          }
+        );
+      });
     });
 
     it("should wait the system initialization before execute the query", async (done) => {
