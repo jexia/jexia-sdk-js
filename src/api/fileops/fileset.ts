@@ -50,7 +50,7 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
 
     let fileUploadObservable = this.fileUploader.upload(files);
 
-    if (this.clientConfig.fileOperations.subscribeForTheFileUploading) {
+    if (this.clientConfig.fileOperations.uploadWaitForCompleted) {
       return this.getFileUpdates(fileUploadObservable, files.length);
     }
 
