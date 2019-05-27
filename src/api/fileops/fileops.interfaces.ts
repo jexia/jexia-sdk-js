@@ -6,7 +6,7 @@ export type FileOperationsConfig = ModuleConfiguration & {
      will be successfully uploaded. Needs RTC module to be activated
      default: false
    */
-  subscribeForTheFileUploading: boolean
+  uploadWaitForCompleted: boolean
   /* Timeout for uploading files
      default: 120000
    */
