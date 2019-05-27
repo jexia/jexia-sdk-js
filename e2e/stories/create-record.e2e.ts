@@ -43,6 +43,21 @@ describe("create record REST API", async () => {
     );
   });
 
+  it("create a record with single object notation return array with proper record", async () => {
+    const result = await dom.dataset("test_dataset")
+      .insert({
+        test_field: "name",
+      })
+      .execute();
+
+    joiAssert(result, Joi.array()
+      .items(DatasetRecordSchema.append({
+        test_field: Joi.string().valid("name").required()
+      }))
+      .length(1)
+    );
+  });
+
   it("create a record without required field name should return an error", async () => {
     let expected: any;
     await dom.dataset("test_dataset")
