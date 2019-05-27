@@ -1,14 +1,17 @@
+import { clone } from "../../internal/utils";
+
 // tslint:disable:max-classes-per-file
 
 /**
  * @internal
  */
 export interface ICondition {
-  Type: string;
+  readonly isSingle: boolean;
+  type: LogicalOperator;
   or(condition: ICondition): ICondition;
   and(condition: ICondition): ICondition;
 
-  compile(): object;
+  compile(): any[];
 }
 
 /**
@@ -20,23 +23,20 @@ export type LogicalOperator = "and" | "or";
  * @internal
  */
 export class FilteringCondition<U> implements ICondition {
-  private field: string;
-  private operator: string;
-  private values: U[];
-  private logicalOperatorType: LogicalOperator;
+  public readonly isSingle = true;
+  private logicalOperatorType: LogicalOperator =  "and";
 
-  constructor(field: string, operator: string, values: U[]) {
-    this.logicalOperatorType = "and";
-    this.field = field;
-    this.operator = operator;
-    this.values = values;
-  }
+  constructor(
+    readonly field: string,
+    readonly operator: string,
+    readonly value: U[] | U,
+  ) { }
 
-  public get Type(): LogicalOperator {
+  public get type(): LogicalOperator {
     return this.logicalOperatorType;
   }
 
-  public set Type(type: LogicalOperator) {
+  public set type(type: LogicalOperator) {
     this.logicalOperatorType = type;
   }
 
@@ -49,7 +49,11 @@ export class FilteringCondition<U> implements ICondition {
   }
 
   public compile() {
-    return { field: this.field, operator: this.operator, values: this.values, type: this.Type };
+    return [
+      { field: this.field },
+      this.operator,
+      this.value,
+    ];
   }
 }
 
@@ -57,39 +61,58 @@ export class FilteringCondition<U> implements ICondition {
  * @internal
  */
 export class CompositeFilteringCondition implements ICondition {
-  private logicalOperatorType: string;
+  public readonly isSingle = false;
+  private logicalOperatorType: LogicalOperator;
   private conditions: ICondition[];
 
-  constructor(filteringCondition: ICondition, logicalOperatorType: string) {
-    this.conditions = [];
-    this.conditions.push(filteringCondition);
+  constructor(filteringCondition: ICondition, logicalOperatorType: LogicalOperator) {
+    this.conditions = [filteringCondition];
     this.logicalOperatorType = logicalOperatorType;
   }
 
-  public get Type(): string{
+  public get type(): LogicalOperator {
     return this.logicalOperatorType;
   }
 
-  public set Type(type: string) {
+  public set type(type: LogicalOperator) {
     this.logicalOperatorType = type;
   }
 
   public or(condition: ICondition): CompositeFilteringCondition {
-    condition.Type = "or";
-    this.conditions.push(condition);
+    this.appendCondition(condition, "or");
     return this;
   }
 
   public and(condition: ICondition): CompositeFilteringCondition {
-    condition.Type = "and";
-    this.conditions.push(condition);
+    this.appendCondition(condition, "and");
     return this;
   }
 
   public compile() {
-    return {
-      conditions: this.conditions.map( (condition: ICondition) => condition.compile()),
-      type: this.logicalOperatorType,
-     };
+    return this.conditions.reduce(this.toCompiledConditions, []);
+  }
+
+  private toCompiledConditions(expressions: any[], condition: ICondition) {
+      // append connector
+    if (expressions.length) {
+      expressions.push(condition.type);
+    }
+
+    const compiledCondition = condition.compile();
+
+    if (condition.isSingle) {
+      expressions.push(...compiledCondition);
+    } else {
+      expressions.push(compiledCondition);
+    }
+
+    return expressions;
+  }
+
+  private appendCondition(condition: ICondition, operator: LogicalOperator): void {
+    const newCondition = clone(condition); // do not mutate original condition object
+    newCondition.type = operator;
+
+    this.conditions.push(newCondition);
   }
 }

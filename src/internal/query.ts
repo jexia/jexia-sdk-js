@@ -60,7 +60,7 @@ export class Query<T = any> {
    * logic for compiling filters into JSON (ICondition).
    */
   public setFilterCriteria(filter: IFilteringCriterion) {
-    this.filteringConditions = (filter as any).lowLevelCondition;
+    this.filteringConditions = filter.condition;
   }
 
   public addSortCondition<K extends Extract<keyof T, string>>(direction: Direction, ...fields: K[]) {
@@ -78,12 +78,12 @@ export class Query<T = any> {
    * to pass it to the API. Some conditionals can be skipped
    */
   public compile(): Partial<ICompiledQuery<T>> {
-    let compiledQueryOptions: Partial<ICompiledQuery<T>> = {};
+    const compiledQueryOptions: Partial<ICompiledQuery<T>> = {};
 
     /* Compile conditions
      */
     if (this.filteringConditions) {
-      compiledQueryOptions.cond = [this.filteringConditions.compile()];
+      compiledQueryOptions.cond = this.filteringConditions.compile();
     }
 
     /* Compile limit and offset options
