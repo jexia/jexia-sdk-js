@@ -43,7 +43,7 @@ describe("create record REST API", async () => {
     );
   });
 
-  it("create a record with single object notation return array with proper record", async () => {
+  it("should return array of records when creating a record with single object notation ", async () => {
     const result = await dom.dataset("test_dataset")
       .insert({
         test_field: "name",

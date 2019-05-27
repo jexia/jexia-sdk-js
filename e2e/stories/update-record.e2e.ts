@@ -10,21 +10,24 @@ const joiAssert = Joi.assert;
 jest.setTimeout(15000); // for the unstable internet connection
 
 describe("update record REST API", async () => {
-  const getDataSet = () => dom.dataset(DEFAULT_DATASET.NAME);
   const BAD_REQUEST = new Error(`${MESSAGE.CORE.BACKEND_ERROR}400 Bad Request`);
+  let dataset;
 
-  beforeAll(async () => init());
+  beforeAll(async () => {
+    await init();
+    dataset = dom.dataset(DEFAULT_DATASET.NAME);
+  });
 
   afterAll(async () => cleaning());
 
-  it("updates single record by id", async () => {
+  it("should return array of records when updating single record by id", async () => {
     const newName = faker.lorem.sentence(3);
 
-    const [record] = await getDataSet()
+    const [record] = await dataset
       .insert({ [DEFAULT_DATASET.FIELD]: faker.name.findName() })
       .execute();
 
-    const updateResult = await getDataSet()
+    const updateResult = await dataset
       .update({ [DEFAULT_DATASET.FIELD]: newName })
       .where(field("id").isEqualTo(record.id))
       .execute();
@@ -37,19 +40,19 @@ describe("update record REST API", async () => {
     );
   });
 
-  it("updates single record by a field name", async () => {
+  it("should return array of records when updating single record by a field name", async () => {
     const originalName = faker.name.findName();
     const randomField = faker.random.arrayElement(["some_field", "another_field", "last_field"]);
     const newRandomValue = faker.lorem.sentence(5);
 
-    await getDataSet()
+    await dataset
       .insert({
         [DEFAULT_DATASET.FIELD]: originalName,
         [randomField]: faker.lorem.sentence(4),
       })
       .execute();
 
-    const updateResult = await getDataSet()
+    const updateResult = await dataset
       .update({
         [DEFAULT_DATASET.FIELD]: originalName,
         [randomField]: newRandomValue,
@@ -69,12 +72,12 @@ describe("update record REST API", async () => {
   it("should throw error under invalid where condition", async () => {
     const originalName = faker.name.findName();
 
-    await getDataSet()
+    await dataset
       .insert({ [DEFAULT_DATASET.FIELD]: originalName })
       .execute();
 
     try {
-      await getDataSet()
+      await dataset
         .update({ [DEFAULT_DATASET.FIELD]: faker.lorem.sentence(4) })
         .where(field("id").isEqualTo("invalid"))
         .execute();
