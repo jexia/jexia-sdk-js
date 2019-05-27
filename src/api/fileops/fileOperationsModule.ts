@@ -23,7 +23,7 @@ export class FileOperationsModule<FormDataType extends IFormData<F>, F> implemen
     this.injector = coreInjector.resolveAndCreateChild([]);
 
     /* Check for RTC module if file upload subscription is activated */
-    if (this.config.subscribeForTheFileUploading) {
+    if (this.config.uploadWaitForCompleted) {
       const isRTCModuleActive = Boolean(this.injector.get(ClientConfiguration).rtc);
       if (!isRTCModuleActive) {
         return Promise.reject('RTC module needs to be activated for automatic file uploading subscription');

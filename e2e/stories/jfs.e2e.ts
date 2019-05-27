@@ -110,9 +110,9 @@ describe('Fileset Module', () => {
     }]).subscribe();
   });
 
-  describe('if subscribeForTheFileUploading config value is set to true', () => {
+  describe('if uploadWaitForCompleted config value is set to true', () => {
     beforeAll(() => {
-      (jfs as any).config.subscribeForTheFileUploading = true;
+      (jfs as any).config.uploadWaitForCompleted = true;
     });
 
     it('should subscribe to the file status automatically and return result when completed', (done) => {
