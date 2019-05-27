@@ -28,12 +28,12 @@ describe("delete record REST API", async () => {
       .where(isRecord)
       .execute();
 
-    const updateResult = await getDataSet()
+    const result = await getDataSet()
       .select()
       .where(isRecord)
       .execute();
 
-    joiAssert(updateResult, Joi.array().length(0));
+    joiAssert(result, Joi.empty());
   });
 
   it("should throw error under invalid where condition", async () => {
