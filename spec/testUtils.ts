@@ -167,7 +167,7 @@ export const fetchWithRequestMockOk = (uri: string, opts?: IRequestOptions): Pro
 };
 
 export const mockFilesList = (n: number = 1): Array<FilesetMultipart<any, any>> => {
-  return new Array(n).map(() => ({}));
+  return new Array(n).fill({});
 };
 
 export const mockFileRecord = (status: IFileStatus): FilesetInterface<{}> => ({
