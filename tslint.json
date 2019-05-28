@@ -8,6 +8,9 @@
           "esSpecCompliant": true
         }
       ],
-      "quotemark": false
+      "quotemark": [
+        true,
+        "double"
+      ]
     }
 }

@@ -1,6 +1,6 @@
 export * from "./index";
-import * as FormData from 'form-data';
-import { ReadStream } from 'fs';
+import * as FormData from "form-data";
+import { ReadStream } from "fs";
 import fetch from "node-fetch";
 import * as NodeWebSocket from "ws";
 import { Client } from "./api/core/client";

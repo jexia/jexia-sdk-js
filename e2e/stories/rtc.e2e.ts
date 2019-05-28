@@ -10,7 +10,7 @@ jest.setTimeout(15000); // for the unstable internet connection
 describe("Real Time Communication", () => {
 
   // Unique name because tests could be run in parallel
-  const datasetName = 'rtc_dataset';
+  const datasetName = "rtc_dataset";
 
   beforeAll(async () => init(datasetName));
 

@@ -38,8 +38,8 @@ export interface IStorageComponent {
  * @internal
  */
 export class WebStorageComponent implements IStorageComponent {
-  private readonly storageKey = '__jexia_tokens__';
-  private readonly defaultKey = '__default_auth__';
+  private readonly storageKey = "__jexia_tokens__";
+  private readonly defaultKey = "__default_auth__";
 
   private storage: Storage;
 

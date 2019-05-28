@@ -13,7 +13,7 @@ export type FileOperationsConfig = ModuleConfiguration & {
   uploadTimeout: number
 };
 
-export const FilesetName = new InjectionToken<string>('FilesetName');
+export const FilesetName = new InjectionToken<string>("FilesetName");
 
 export interface IFormData<F> {
   append: (name: string, value: string | F, filename?: string) => void;
@@ -23,15 +23,15 @@ export interface IFormData<F> {
 /**
  * Fields that each fileset has
  */
-export type DefaultFilesetFields = 'id' | 'size' | 'name' | 'created_at' | 'updated_at';
+export type DefaultFilesetFields = "id" | "size" | "name" | "created_at" | "updated_at";
 
 /**
  * File upload statuses
  */
 export enum IFileStatus {
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  ERROR = 'error'
+  IN_PROGRESS = "in_progress",
+  COMPLETED = "completed",
+  ERROR = "error"
 }
 
 /**

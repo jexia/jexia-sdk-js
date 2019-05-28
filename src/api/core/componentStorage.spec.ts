@@ -1,5 +1,5 @@
 // tslint:disable:no-string-literal
-import * as faker from 'faker';
+import * as faker from "faker";
 import {
   MemoryStorageComponent,
   TokenStorage,
@@ -47,8 +47,8 @@ describe("ComponentStorage", ()  => {
       });
 
       it("should return the expected saved token pair by alias", () => {
-        instanceComponent.setTokens('testAlias', tokenOne);
-        expect(instanceComponent.getTokens('testAlias')).toEqual(tokenOne);
+        instanceComponent.setTokens("testAlias", tokenOne);
+        expect(instanceComponent.getTokens("testAlias")).toEqual(tokenOne);
       });
 
       it("should return default token if there is only one", () => {
@@ -56,8 +56,8 @@ describe("ComponentStorage", ()  => {
       });
 
       it("should save second token", () => {
-        instanceComponent.setTokens('anotherAlias', tokenTwo);
-        expect(instanceComponent.getTokens('anotherAlias')).toEqual(tokenTwo);
+        instanceComponent.setTokens("anotherAlias", tokenTwo);
+        expect(instanceComponent.getTokens("anotherAlias")).toEqual(tokenTwo);
       });
 
       it("should return first token by default", () => {
@@ -65,13 +65,13 @@ describe("ComponentStorage", ()  => {
       });
 
       it("should set default token and return it", () => {
-        instanceComponent.setDefault('anotherAlias');
+        instanceComponent.setDefault("anotherAlias");
         expect(instanceComponent.getTokens()).toEqual(tokenTwo);
       });
 
       it("should add token with default flag and return it by default", () => {
         const tokens = generateTokens();
-        instanceComponent.setTokens('defaultTokens', tokens, true);
+        instanceComponent.setTokens("defaultTokens", tokens, true);
         expect(instanceComponent.getTokens()).toEqual(tokens);
       });
 
@@ -98,7 +98,7 @@ describe("ComponentStorage", ()  => {
       });
       const tokens = generateTokens();
       spyOn(localStorageMock, "setItem");
-      webStorageComponent.setTokens('alias', tokens);
+      webStorageComponent.setTokens("alias", tokens);
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
         "__jexia_tokens__",
         JSON.stringify({ alias: tokens })
