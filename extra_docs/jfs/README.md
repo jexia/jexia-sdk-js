@@ -2,8 +2,8 @@
 
 JFS is used for uploading, fetching and manipulating files as any other user data. Basically, fileset is a dataset, 
 but provides a way to maintain large data objects (files).  
-Before uploading any file you need to manually create a fileset with web management application 
-[app.jexia.com](https://app.jexia.com).
+Before uploading any file you need to manually create a fileset with
+[Web Management Application](https://docs.jexia.com/getting-started/user-management/).
 You can also set AWS bucket and credentials so that your files will be automatically uploaded to your Amazon storage.
 
 ### [Initialize](#init) 
@@ -16,9 +16,9 @@ import { jexiaClient, fileOperations } from "jexia-sdk-js/node"; // "jexia-sdk-j
 const jfs = fileOperations();
 
 jexiaClient().init({
-  projectID: "your-project-id",
-  key: "your-project-key",
-  secret: "your-project-secret"
+  projectID: "your-project-id",  
+  key: "your-api-key",  
+  secret: "your-api-secret"  
 }, jfs);
 ```
 
