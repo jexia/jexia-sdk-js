@@ -1,11 +1,11 @@
 # Jexia User Management System Module (UMS)
 UMS provides an ability to create user accounts, sign-in to the Jexia project with these accounts and perform 
-data changes on behalf of any authorized user. Users can be created either 
+data changes with permissions of any authorized user. Users can be created either 
 with [Web Management Application](https://docs.jexia.com/getting-started/user-management/) or 
 with `signup()` method of this module.  
 
 #### Return values
-Those module methods that requre backend operations always return `Promise` type. 
+Module methods that require backend operations always return `Promise` type. 
 To obtain a value from it you can use either `then()` method or async function call. 
 All further examples are written with `async`.
 
@@ -35,7 +35,7 @@ UMS uses email and password as user credentials. User account should exist in a 
 Additional options (both are optional):
 - **default**
   if true, this user account will be used for all further data operations by default
-- **auth**
+- **alias**
   account alias. You can use it to clarify which account is going to be used to perform data operation
  
 ```javascript  
@@ -43,7 +43,7 @@ const user = await ums.signIn({
   email: 'Elon@tesla.com',  
   password: 'secret-password',  
   default: false, 
-  auth: 'Elon Musk'
+  alias: 'Elon Musk'
 );
 ```  
   
@@ -101,7 +101,7 @@ const user = await ums.signUp({
 } */
 ```  
   
-### Fetch user by auth alias (or email)  
+### Fetch user by alias alias (or email)  
 ```javascript  
 const user = await ums.getUser('Elon Musk'); 
 ```  
