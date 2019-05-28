@@ -28,19 +28,25 @@ export const DEFAULT_DATASET = { NAME: "test_dataset", FIELD: "test_field" };
 
 export const init = async (
   datasetName = DEFAULT_DATASET.NAME,
-  fieldName = DEFAULT_DATASET.FIELD,
+  fields: Array<{ name: string, type: FieldType }> = [],
   modules: IModule[] = [dom, realTime(), new LoggerModule(LogLevel.ERROR)]) => {
 
   await management.login();
 
   dataset = await management.createDataset(datasetName);
 
-  await management.createDatasetField(dataset.id, fieldName, {
-    type: "string",
-    constraints: [
-      { type: "required" },
-    ]
-  });
+  if (!fields.length) {
+    await management.createDatasetField(dataset.id, DEFAULT_DATASET.FIELD, {
+      type: "string",
+      constraints: [
+        { type: "required" },
+      ]
+    });
+  } else {
+    fields.forEach(async (field) => await management.createDatasetField(dataset.id, field.name, {
+      type: field.type,
+    }));
+  }
 
   apiKey = await management.createApiKey();
   policy = await management.createPolicy(dataset, [`apk:${apiKey.key}`]);
