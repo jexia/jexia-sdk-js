@@ -11,6 +11,7 @@
     "cleanup": "run-p cleanup:*",
     "cleanup:dist": "shx rm -rf dist",
     "cleanup:docs": "shx rm -rf docs",
+    "cross-env": "cross-env",
     "commit": "git-cz",
     "commitmsg": "commitlint -e $GIT_PARAMS",
     "lint": "tslint \"src/**/*.ts\" \"spec/**/*.ts\" \"e2e/**/*.ts\"",
