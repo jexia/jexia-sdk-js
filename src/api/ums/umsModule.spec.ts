@@ -1,29 +1,29 @@
 // tslint:disable:no-string-literal
-import * as faker from 'faker';
-import { ReflectiveInjector } from 'injection-js';
-import { createMockFor, SpyObj } from '../../../spec/testUtils';
-import { API } from '../../config';
-import { Methods, RequestAdapter } from '../../internal/requestAdapter';
-import { deferPromise } from '../../internal/utils';
-import { Client } from '../core/client';
-import { AuthOptions, TokenManager } from '../core/tokenManager';
-import { UMSModule } from './umsModule';
+import * as faker from "faker";
+import { ReflectiveInjector } from "injection-js";
+import { createMockFor, SpyObj } from "../../../spec/testUtils";
+import { API } from "../../config";
+import { Methods, RequestAdapter } from "../../internal/requestAdapter";
+import { deferPromise } from "../../internal/utils";
+import { Client } from "../core/client";
+import { AuthOptions, TokenManager } from "../core/tokenManager";
+import { UMSModule } from "./umsModule";
 
-describe('UMS Module', () => {
-  const projectID = 'projectIDTest';
-  const tokenTest = 'tokenTest';
+describe("UMS Module", () => {
+  const projectID = "projectIDTest";
+  const tokenTest = "tokenTest";
   const testUser = {
     email: faker.internet.email(),
     password: faker.internet.password(),
     default: false,
-    auth: 'testAuth',
+    auth: "testAuth",
   };
   const testCredentials = {
     email: faker.internet.email(),
     password: faker.internet.password(),
   };
   const signedInResult = {
-    id: 'testUserId',
+    id: "testUserId",
   };
 
   function createSubject({
@@ -34,9 +34,9 @@ describe('UMS Module', () => {
     }),
     // @ts-ignore
     systemDefer = deferPromise<Client>(),
-    injectorMock = createMockFor(['get']) as SpyObj<ReflectiveInjector>,
+    injectorMock = createMockFor(["get"]) as SpyObj<ReflectiveInjector>,
   } = {}) {
-    (tokenManagerMock as any)['token'] = () => tokenPromise;
+    (tokenManagerMock as any)["token"] = () => tokenPromise;
     const injectorMap = new Map<any, any>([
       [TokenManager, tokenManagerMock],
       [RequestAdapter, requestAdapterMock],
@@ -57,21 +57,21 @@ describe('UMS Module', () => {
     };
   }
 
-  describe('on initialize', () => {
+  describe("on initialize", () => {
 
-    it('should get tokenManager from the injector', async () => {
+    it("should get tokenManager from the injector", async () => {
       const { subject, tokenManagerMock, init } = createSubject();
       await init();
       expect((subject as any).tokenManager).toEqual(tokenManagerMock);
     });
 
-    it('should get requestAdapter from the injector', async () => {
+    it("should get requestAdapter from the injector", async () => {
       const { subject, requestAdapterMock, init } = createSubject();
       await init();
       expect((subject as any).requestAdapter).toEqual(requestAdapterMock);
     });
 
-    it('should get project id from the injector', async () => {
+    it("should get project id from the injector", async () => {
       const { subject, init } = createSubject();
       await init();
       expect((subject as any).projectId).toEqual(projectID);
@@ -86,9 +86,9 @@ describe('UMS Module', () => {
     });
   });
 
-  describe('on terminate', () => {
+  describe("on terminate", () => {
 
-    it('should return resolved promise of itself', async () => {
+    it("should return resolved promise of itself", async () => {
       const { subject } = createSubject();
       const result = await subject.terminate();
       expect(result).toEqual(subject);
@@ -96,8 +96,8 @@ describe('UMS Module', () => {
 
   });
 
-  describe('on user sign-up', () => {
-    it('should call correct API with correct data', async () => {
+  describe("on user sign-up", () => {
+    it("should call correct API with correct data", async () => {
       const { subject, systemDefer, requestAdapterMock, init } = createSubject();
       systemDefer.resolve();
       await init();
@@ -109,15 +109,15 @@ describe('UMS Module', () => {
             email: testCredentials.email,
             password: testCredentials.password
           },
-          method: 'POST'
+          method: "POST"
         }
       );
     });
   });
 
-  describe('user sign-in', () => {
+  describe("user sign-in", () => {
 
-    it('should call correct API with correct data', async () => {
+    it("should call correct API with correct data", async () => {
       const { subject, systemDefer, requestAdapterMock, init } = createSubject();
       systemDefer.resolve();
       await init();
@@ -130,15 +130,15 @@ describe('UMS Module', () => {
             email: testUser.email,
             password: testUser.password
           },
-          method: 'POST'
+          method: "POST"
         }
       );
     });
 
   });
 
-  describe('token management', () => {
-    it('should set default token by alias', () => {
+  describe("token management", () => {
+    it("should set default token by alias", () => {
       const { subject, init, tokenManagerMock } = createSubject();
       const alias = faker.internet.email();
       init();
@@ -146,7 +146,7 @@ describe('UMS Module', () => {
       expect(tokenManagerMock.setDefault).toHaveBeenCalledWith(alias);
     });
 
-    it('should reset to default token', () => {
+    it("should reset to default token", () => {
       const { subject, init, tokenManagerMock } = createSubject();
       init();
       subject.resetDefault();
@@ -154,19 +154,19 @@ describe('UMS Module', () => {
     });
   });
 
-  describe('user management', () => {
+  describe("user management", () => {
 
-    describe('get current user', () => {
-      it('should get token from token manager by provided alias', async () => {
+    describe("get current user", () => {
+      it("should get token from token manager by provided alias", async () => {
         const { subject, tokenManagerMock, systemDefer, init } = createSubject();
-        jest.spyOn(tokenManagerMock, 'token');
+        jest.spyOn(tokenManagerMock, "token");
         systemDefer.resolve();
         await init();
         await subject.getUser(testUser.auth);
         expect(tokenManagerMock.token).toHaveBeenCalledWith(testUser.auth);
       });
 
-      it('should call correct API to get current user', async () => {
+      it("should call correct API to get current user", async () => {
         const { subject, requestAdapterMock, systemDefer, init } = createSubject();
         systemDefer.resolve();
         await init();
@@ -180,17 +180,17 @@ describe('UMS Module', () => {
       });
     });
 
-    describe('update password', () => {
-      it('should get token from token manager by provided alias', async () => {
+    describe("update password", () => {
+      it("should get token from token manager by provided alias", async () => {
         const { subject, tokenManagerMock, systemDefer, init } = createSubject();
-        jest.spyOn(tokenManagerMock, 'token');
+        jest.spyOn(tokenManagerMock, "token");
         systemDefer.resolve();
         await init();
         await subject.changePassword(testUser.auth, testUser.password, faker.internet.password());
         expect(tokenManagerMock.token).toHaveBeenCalledWith(testUser.auth);
       });
 
-      it('should call correct API to update password', async () => {
+      it("should call correct API to update password", async () => {
         const { subject, requestAdapterMock, systemDefer, init } = createSubject();
         const newPassword = faker.internet.password();
         systemDefer.resolve();
@@ -211,17 +211,17 @@ describe('UMS Module', () => {
       });
     });
 
-    describe('delete current user', () => {
-      it('should get token from token manager by provided alias', async () => {
+    describe("delete current user", () => {
+      it("should get token from token manager by provided alias", async () => {
         const { subject, tokenManagerMock, systemDefer, init } = createSubject();
-        jest.spyOn(tokenManagerMock, 'token');
+        jest.spyOn(tokenManagerMock, "token");
         systemDefer.resolve();
         await init();
         await subject.deleteUser(testUser.auth, testUser.password);
         expect(tokenManagerMock.token).toHaveBeenCalledWith(testUser.auth);
       });
 
-      it('should call correct API to delete current user', async () => {
+      it("should call correct API to delete current user", async () => {
         const { subject, requestAdapterMock, systemDefer, init } = createSubject();
         systemDefer.resolve();
         await init();

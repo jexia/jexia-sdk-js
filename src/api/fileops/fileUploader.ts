@@ -1,9 +1,9 @@
-import { Inject, Injectable } from 'injection-js';
-import { merge, Observable } from 'rxjs';
-import { API } from '../../config';
-import { RequestAdapter } from '../../internal/requestAdapter';
-import { AuthOptions, IAuthOptions, TokenManager } from '../core/tokenManager';
-import { FilesetInterface, FilesetMultipart, FilesetName, IFormData } from './fileops.interfaces';
+import { Inject, Injectable } from "injection-js";
+import { merge, Observable } from "rxjs";
+import { API } from "../../config";
+import { RequestAdapter } from "../../internal/requestAdapter";
+import { AuthOptions, IAuthOptions, TokenManager } from "../core/tokenManager";
+import { FilesetInterface, FilesetMultipart, FilesetName, IFormData } from "./fileops.interfaces";
 
 @Injectable()
 export class FileUploader<FormDataType extends IFormData<F>, T, F> {
@@ -44,10 +44,10 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
 
     const formData = this.resetFormData();
 
-    formData.append('data', record.data ? JSON.stringify(record.data) : '{}');
+    formData.append("data", record.data ? JSON.stringify(record.data) : "{}");
 
     if (record.file) {
-      formData.append('file', record.file);
+      formData.append("file", record.file);
     }
 
     return new Observable((observer) => {
@@ -89,7 +89,7 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
       `${API.PROTOCOL}://${this.config.projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}`,
       API.FILES.ENDPOINT,
       this.filesetName,
-    ].join('/');
+    ].join("/");
   }
 
   /**

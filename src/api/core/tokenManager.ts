@@ -4,7 +4,7 @@ import { Methods, RequestAdapter } from "../../internal/requestAdapter";
 import { Logger } from "../logger/logger";
 import { TokenStorage } from "./componentStorage";
 
-const APIKEY_DEFAULT_ALIAS = 'apikey';
+const APIKEY_DEFAULT_ALIAS = "apikey";
 
 /**
  * API interface of the authorization token
@@ -140,10 +140,10 @@ export class TokenManager {
 
   private refreshToken(auth: string) {
     this.refreshInterval = setInterval(() => {
-      this.logger.debug('tokenManager', `refresh ${auth} token`);
+      this.logger.debug("tokenManager", `refresh ${auth} token`);
       this.refresh(auth)
         .catch((err: Error) => {
-          this.logger.error('tokenManager', err.message);
+          this.logger.error("tokenManager", err.message);
           this.terminate();
         });
     }, DELAY);
@@ -157,7 +157,7 @@ export class TokenManager {
     return this.requestAdapter
       .execute(this.authUrl, {
         body: {
-          method: 'apk',
+          method: "apk",
           key,
           secret,
         },
@@ -170,7 +170,7 @@ export class TokenManager {
       })
       .catch((err: Error) => {
         defers.reject(err);
-        this.logger.error('tokenManager', err.message);
+        this.logger.error("tokenManager", err.message);
         throw new Error(`Unable to authenticate: ${err.message}`);
       });
   }
@@ -198,7 +198,7 @@ export class TokenManager {
       })
       .catch((err: Error) => {
         defers.reject(err);
-        this.logger.error('tokenManager', err.message);
+        this.logger.error("tokenManager", err.message);
         throw new Error(`Unable to refresh token: ${err.message}`);
       });
   }

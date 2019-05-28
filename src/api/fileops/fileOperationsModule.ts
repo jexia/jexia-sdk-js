@@ -1,10 +1,10 @@
-import { ReflectiveInjector } from 'injection-js';
+import { ReflectiveInjector } from "injection-js";
 import { ClientConfiguration } from "../core/client";
-import { IModule, ModuleConfiguration } from '../core/module';
-import { AuthOptions } from '../core/tokenManager';
-import { FileOperationsConfig, FilesetInterface, FilesetName, IFormData } from './fileops.interfaces';
-import { Fileset } from './fileset';
-import { FileUploader } from './fileUploader';
+import { IModule, ModuleConfiguration } from "../core/module";
+import { AuthOptions } from "../core/tokenManager";
+import { FileOperationsConfig, FilesetInterface, FilesetName, IFormData } from "./fileops.interfaces";
+import { Fileset } from "./fileset";
+import { FileUploader } from "./fileUploader";
 
 const defaultConfiguration: FileOperationsConfig = {
   uploadWaitForCompleted: false,
@@ -26,7 +26,7 @@ export class FileOperationsModule<FormDataType extends IFormData<F>, F> implemen
     if (this.config.uploadWaitForCompleted) {
       const isRTCModuleActive = Boolean(this.injector.get(ClientConfiguration).rtc);
       if (!isRTCModuleActive) {
-        return Promise.reject('RTC module needs to be activated for automatic file uploading subscription');
+        return Promise.reject("RTC module needs to be activated for automatic file uploading subscription");
       }
     }
 

@@ -1,13 +1,13 @@
-import * as faker from 'faker';
-import { of, Subject } from 'rxjs';
-import { createMockFor, mockFileEvent, mockFileRecord, mockFilesList } from '../../../spec/testUtils';
-import { ResourceType } from '../core/resource';
-import { RealTimeEventMessage } from '../realtime/realTime.interfaces';
-import { FilesetInterface, IFileStatus } from './fileops.interfaces';
-import { Fileset } from './fileset';
-import { FileUploader } from './fileUploader';
+import * as faker from "faker";
+import { of, Subject } from "rxjs";
+import { createMockFor, mockFileEvent, mockFileRecord, mockFilesList } from "../../../spec/testUtils";
+import { ResourceType } from "../core/resource";
+import { RealTimeEventMessage } from "../realtime/realTime.interfaces";
+import { FilesetInterface, IFileStatus } from "./fileops.interfaces";
+import { Fileset } from "./fileset";
+import { FileUploader } from "./fileUploader";
 
-describe('Fileset', () => {
+describe("Fileset", () => {
 
   function createSubject({
     filesetName = faker.random.word(),
@@ -25,25 +25,25 @@ describe('Fileset', () => {
     };
   }
 
-  describe('on init', () => {
-    it('should have correct resource type', () => {
+  describe("on init", () => {
+    it("should have correct resource type", () => {
       const { subject } = createSubject();
       expect(subject.resourceType).toEqual(ResourceType.Fileset);
     });
 
-    it('should have name', () => {
+    it("should have name", () => {
       const { subject, filesetName } = createSubject();
       expect(subject.name).toEqual(filesetName);
     });
 
-    it('should have file uploader as a dependency', () => {
+    it("should have file uploader as a dependency", () => {
       const { subject, fileUploaderMock } = createSubject();
       expect((subject as any).fileUploader).toEqual(fileUploaderMock);
     });
   });
 
-  describe('upload files', () => {
-    it('should call file uploader with list of files', () => {
+  describe("upload files", () => {
+    it("should call file uploader with list of files", () => {
       const { subject, fileUploaderMock } = createSubject();
       const files = mockFilesList(
         faker.random.number(5),
@@ -52,25 +52,25 @@ describe('Fileset', () => {
       expect(fileUploaderMock.upload).toHaveBeenCalledWith(files);
     });
 
-    it('should return file uploader observable', () => {
+    it("should return file uploader observable", () => {
       const { subject, fileUploadReturnValue } = createSubject();
       expect(subject.upload(mockFilesList())).toEqual(fileUploadReturnValue);
     });
 
-    it('should not subscribe to the upload events', () => {
+    it("should not subscribe to the upload events", () => {
       const { subject } = createSubject();
-      spyOn(subject as any, 'getFileUpdates');
+      spyOn(subject as any, "getFileUpdates");
       subject.upload(mockFilesList());
       expect((subject as any).getFileUpdates).not.toHaveBeenCalled();
     });
 
-    describe('if auto subscription to upload status is off', () => {
-      it('should subscribe to upload events', () => {
+    describe("if auto subscription to upload status is off", () => {
+      it("should subscribe to upload events", () => {
         const { subject, fileUploadReturnValue } = createSubject({
           fsConfig: { uploadWaitForCompleted: true, uploadTimeout: 0 },
         });
         const filesLength = faker.random.number(5);
-        spyOn(subject as any, 'getFileUpdates');
+        spyOn(subject as any, "getFileUpdates");
         subject.upload(mockFilesList(filesLength));
         expect((subject as any).getFileUpdates).toHaveBeenCalledWith(
           fileUploadReturnValue,
@@ -78,19 +78,19 @@ describe('Fileset', () => {
         );
       });
 
-      it('should return file statuses observable', () => {
+      it("should return file statuses observable", () => {
         const { subject } = createSubject({
           fsConfig: { uploadWaitForCompleted: true, uploadTimeout: 0 },
         });
         const watchObservable = of({});
-        spyOn(subject as any, 'getFileUpdates').and.returnValue(watchObservable);
+        spyOn(subject as any, "getFileUpdates").and.returnValue(watchObservable);
         expect(subject.upload(mockFilesList())).toEqual(watchObservable);
       });
     });
   });
 
-  describe('subscription to the file uploading events', () => {
-    describe('for one file', () => {
+  describe("subscription to the file uploading events", () => {
+    describe("for one file", () => {
       let fileRecord: FilesetInterface<{}>;
       let createdEvent: RealTimeEventMessage;
       let updatedEvent: RealTimeEventMessage;
@@ -100,8 +100,8 @@ describe('Fileset', () => {
 
       beforeEach(() => {
         fileRecord = mockFileRecord(IFileStatus.IN_PROGRESS);
-        createdEvent = mockFileEvent(fileRecord.id, 'created');
-        updatedEvent = mockFileEvent(fileRecord.id, 'updated');
+        createdEvent = mockFileEvent(fileRecord.id, "created");
+        updatedEvent = mockFileEvent(fileRecord.id, "updated");
         watchSubject = new Subject();
         uploadSubject = new Subject();
         ({ subject } = createSubject({
@@ -110,7 +110,7 @@ describe('Fileset', () => {
         subject.watch = jest.fn(() => watchSubject);
       });
 
-      it('should handle flow: [uploaded] -> [created event] -> [updated event]', (done) => {
+      it("should handle flow: [uploaded] -> [created event] -> [updated event]", (done) => {
         (subject as any).getFileUpdates(uploadSubject, 1).subscribe(
           (result: any) => expect(result.status).toEqual(IFileStatus.COMPLETED),
           done,
@@ -122,7 +122,7 @@ describe('Fileset', () => {
         watchSubject.next(updatedEvent);
       });
 
-      it('should handle flow: [created event] -> [uploaded] -> [updated event]', (done) => {
+      it("should handle flow: [created event] -> [uploaded] -> [updated event]", (done) => {
         (subject as any).getFileUpdates(uploadSubject, 1).subscribe(
           (result: any) => expect(result.status).toEqual(IFileStatus.COMPLETED),
           done,
@@ -134,7 +134,7 @@ describe('Fileset', () => {
         watchSubject.next(updatedEvent);
       });
 
-      it('should handle flow: [created event] -> [updated event] -> [uploaded]', (done) => {
+      it("should handle flow: [created event] -> [updated event] -> [uploaded]", (done) => {
         (subject as any).getFileUpdates(uploadSubject, 1).subscribe(
           (result: any) => expect(result.status).toEqual(IFileStatus.COMPLETED),
           done,
@@ -147,7 +147,7 @@ describe('Fileset', () => {
       });
     });
 
-    describe('for several files', () => {
+    describe("for several files", () => {
       let fileRecords: Array<FilesetInterface<{}>>;
       let createdEvents: RealTimeEventMessage[];
       let updatedEvents: RealTimeEventMessage[];
@@ -158,8 +158,8 @@ describe('Fileset', () => {
       beforeEach(() => {
         const files = faker.random.number({ min: 3, max: 10 });
         fileRecords = new Array(files).fill(null).map(() => mockFileRecord(IFileStatus.IN_PROGRESS));
-        createdEvents = fileRecords.map((file) => mockFileEvent(file.id, 'created'));
-        updatedEvents = fileRecords.map((file) => mockFileEvent(file.id, 'updated'));
+        createdEvents = fileRecords.map((file) => mockFileEvent(file.id, "created"));
+        updatedEvents = fileRecords.map((file) => mockFileEvent(file.id, "updated"));
         watchSubject = new Subject();
         uploadSubject = new Subject();
         ({ subject } = createSubject({
@@ -168,7 +168,7 @@ describe('Fileset', () => {
         subject.watch = jest.fn(() => watchSubject);
       });
 
-      it('should handle flow: [all uploaded events] -> [all created events] -> [all updated events]', (done) => {
+      it("should handle flow: [all uploaded events] -> [all created events] -> [all updated events]", (done) => {
         (subject as any).getFileUpdates(uploadSubject, fileRecords.length).subscribe(
           (result: any) => expect(result.status).toEqual(IFileStatus.COMPLETED),
           done,
@@ -180,7 +180,7 @@ describe('Fileset', () => {
         uploadSubject.complete();
       });
 
-      it('should handle flow: [all created events] -> [all uploaded events] -> [all updated events]', (done) => {
+      it("should handle flow: [all created events] -> [all uploaded events] -> [all updated events]", (done) => {
         (subject as any).getFileUpdates(uploadSubject, fileRecords.length).subscribe(
           (result: any) => expect(result.status).toEqual(IFileStatus.COMPLETED),
           done,
@@ -192,7 +192,7 @@ describe('Fileset', () => {
         uploadSubject.complete();
       });
 
-      it('should handle flow: [all created events] -> [all updated events] -> [all uploaded events]', (done) => {
+      it("should handle flow: [all created events] -> [all updated events] -> [all uploaded events]", (done) => {
         (subject as any).getFileUpdates(uploadSubject, fileRecords.length).subscribe(
           (result: any) => expect(result.status).toEqual(IFileStatus.COMPLETED),
           done,

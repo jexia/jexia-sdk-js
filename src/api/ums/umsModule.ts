@@ -11,7 +11,7 @@ export interface IUMSSignInOptions {
   auth?: string;
 }
 
-export type IUMSCredentials = Pick<IUMSSignInOptions, 'email' | 'password'>;
+export type IUMSCredentials = Pick<IUMSSignInOptions, "email" | "password">;
 
 export interface IUMSUser {
   id: string;
@@ -51,7 +51,7 @@ export class UMSModule implements IModule {
   public async signIn(user: IUMSSignInOptions): Promise<string> {
 
     const body = {
-      method: 'ums',
+      method: "ums",
       email: user.email,
       password: user.password
     };

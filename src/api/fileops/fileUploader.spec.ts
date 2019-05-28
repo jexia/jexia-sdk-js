@@ -1,10 +1,10 @@
-import * as faker from 'faker';
-import { Subject } from 'rxjs';
-import { createMockFor, mockFilesList } from '../../../spec/testUtils';
-import { RequestAdapter } from '../../internal/requestAdapter';
-import { TokenManager } from '../core/tokenManager';
-import { IFormData } from './fileops.interfaces';
-import { FileUploader } from './fileUploader';
+import * as faker from "faker";
+import { Subject } from "rxjs";
+import { createMockFor, mockFilesList } from "../../../spec/testUtils";
+import { RequestAdapter } from "../../internal/requestAdapter";
+import { TokenManager } from "../core/tokenManager";
+import { IFormData } from "./fileops.interfaces";
+import { FileUploader } from "./fileUploader";
 
 let formDataAppendSpy: jasmine.Spy;
 
@@ -28,7 +28,7 @@ class TestFormDataWithHeaders extends TestFormData {
   }
 }
 
-describe('fileUploader', () => {
+describe("fileUploader", () => {
   function createSubject({
     // @ts-ignore
     projectID = faker.random.uuid(),
@@ -41,7 +41,7 @@ describe('fileUploader', () => {
     FormDataMock = TestFormData,
   } = {}) {
     const subject = new FileUploader(config, filesetName, tokenManagerMock, requestAdapterMock);
-    formDataAppendSpy = jasmine.createSpy('append');
+    formDataAppendSpy = jasmine.createSpy("append");
     subject.provideFormData(new FormDataMock());
     return {
       projectID,
@@ -54,34 +54,34 @@ describe('fileUploader', () => {
     };
   }
 
-  describe('on init', () => {
-    it('should have provided config', () => {
+  describe("on init", () => {
+    it("should have provided config", () => {
       const { subject, config } = createSubject();
       expect((subject as any).config).toEqual(config);
     });
 
-    it('should have provided fileset name', () => {
+    it("should have provided fileset name", () => {
       const { subject, filesetName } = createSubject();
       expect((subject as any).filesetName).toEqual(filesetName);
     });
   });
 
-  describe('when providing a form data object', () => {
-    it('should create it from constructor', () => {
+  describe("when providing a form data object", () => {
+    it("should create it from constructor", () => {
       const { subject } = createSubject();
       expect((subject as any).formData.createdAutomatically).toBeTruthy();
     });
   });
 
-  describe('upload method', () => {
-    it('should return merged observable of every file uploading process', (done) => {
+  describe("upload method", () => {
+    it("should return merged observable of every file uploading process", (done) => {
       const { subject } = createSubject();
       const files = mockFilesList(faker.random.number({min: 1, max: 5}));
       const fileUploads = files.map(() => ({
         result: faker.random.word(),
         subject: new Subject()
       }));
-      spyOn(subject as any, 'uploadFile').and.returnValues(...fileUploads.map((f) => f.subject));
+      spyOn(subject as any, "uploadFile").and.returnValues(...fileUploads.map((f) => f.subject));
 
       const results: any[] = [];
       subject.upload(files).subscribe(
@@ -99,45 +99,45 @@ describe('fileUploader', () => {
     });
   });
 
-  describe('upload a file', () => {
-    it('should append all custom fields to the form data as `data` property', () => {
+  describe("upload a file", () => {
+    it("should append all custom fields to the form data as `data` property", () => {
       const { subject } = createSubject();
       const data = {
         customField: faker.lorem.sentence(5)
       };
       (subject as any).uploadFile({ data });
-      expect(formDataAppendSpy).toHaveBeenCalledWith('data', JSON.stringify(data));
+      expect(formDataAppendSpy).toHaveBeenCalledWith("data", JSON.stringify(data));
     });
 
-    it('should append an empty object if there is no custom fields', () => {
+    it("should append an empty object if there is no custom fields", () => {
       const { subject } = createSubject();
       (subject as any).uploadFile({});
-      expect(formDataAppendSpy).toHaveBeenCalledWith('data', '{}');
+      expect(formDataAppendSpy).toHaveBeenCalledWith("data", "{}");
     });
 
-    it('should append a file', () => {
+    it("should append a file", () => {
       const { subject } = createSubject();
       const file = faker.internet.avatar();
       (subject as any).uploadFile({ file });
-      expect(formDataAppendSpy).toHaveBeenCalledWith('file', file);
+      expect(formDataAppendSpy).toHaveBeenCalledWith("file", file);
     });
 
-    it('should pick a token according to config auth options', (done) => {
+    it("should pick a token according to config auth options", (done) => {
       const { subject, tokenManagerMock } = createSubject({
-        config: { auth: 'auth' } as any
+        config: { auth: "auth" } as any
       });
       (subject as any).uploadFile({}).subscribe({
         error: done,
         complete: () => {
-          expect(tokenManagerMock.token).toHaveBeenCalledWith('auth');
+          expect(tokenManagerMock.token).toHaveBeenCalledWith("auth");
           done();
         }
       });
     });
 
-    it('should execute request with correct token', (done) => {
+    it("should execute request with correct token", (done) => {
       const { subject, token } = createSubject();
-      spyOn(subject as any, 'execute').and.callThrough();
+      spyOn(subject as any, "execute").and.callThrough();
       (subject as any).uploadFile({}).subscribe({
         error: done,
         complete: () => {
@@ -147,7 +147,7 @@ describe('fileUploader', () => {
       });
     });
 
-    it('it take headers from form data if it has them', (done) => {
+    it("it take headers from form data if it has them", (done) => {
       const {
         subject,
         requestAdapterMock,
@@ -168,7 +168,7 @@ describe('fileUploader', () => {
       });
     });
 
-    it('should make a correct API request', (done) => {
+    it("should make a correct API request", (done) => {
       const { subject, token, requestAdapterMock } = createSubject();
       (subject as any).uploadFile({}).subscribe({
         error: done,
@@ -185,8 +185,8 @@ describe('fileUploader', () => {
       });
     });
 
-    it('should return an error in case of file upload error', (done) => {
-      const uploadError = 'Upload file error';
+    it("should return an error in case of file upload error", (done) => {
+      const uploadError = "Upload file error";
       const { subject } = createSubject({
         requestAdapterMock: createMockFor(RequestAdapter, { returnValue: Promise.reject(uploadError) })
       });
@@ -195,7 +195,7 @@ describe('fileUploader', () => {
           expect(error).toEqual(uploadError);
           done();
         },
-        complete: () => done('uploading file has completed without throwing an error')
+        complete: () => done("uploading file has completed without throwing an error")
       });
     });
 

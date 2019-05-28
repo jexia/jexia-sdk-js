@@ -74,7 +74,7 @@ export const initWithUMS = async () => {
   }, ums, dom, new LoggerModule(LogLevel.DEBUG)); // Change to LogLevel.DEBUG to have more logs
 };
 
-export const initWithJFS = async (filesetName: string = 'testFileset',
+export const initWithJFS = async (filesetName: string = "testFileset",
                                   fields?: Array<{name: string, type: FieldType}>) => {
   await management.login();
   fileset = await management.createFileset(filesetName);

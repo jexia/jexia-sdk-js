@@ -1,6 +1,6 @@
-import * as Joi from 'joi';
+import * as Joi from "joi";
 
-export const FileUploadStatuses = ['in_progress', 'failed'];
+export const FileUploadStatuses = ["in_progress", "failed"];
 
 export const FilesetRecordSchema = Joi.object({
   id: Joi.string().uuid().required(),
