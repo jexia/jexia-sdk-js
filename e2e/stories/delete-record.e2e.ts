@@ -2,7 +2,7 @@ import * as faker from "faker";
 import * as Joi from "joi";
 import { field } from "../../src";
 import { cleaning, DEFAULT_DATASET, dom, init } from "../teardowns";
-import { MESSAGE } from './../../src/config/message';
+import { MESSAGE } from "./../../src/config/message";
 
 const joiAssert = Joi.assert;
 

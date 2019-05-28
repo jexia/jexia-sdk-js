@@ -2,7 +2,7 @@ import * as faker from "faker";
 import { getRandomQueryAction, requestAdapterMockFactory } from "../../spec/testUtils";
 import { TokenManager } from "../api/core/tokenManager";
 import { API } from "../config/config";
-import { IRequestExecuterData } from './../../dist/internal/executer.interfaces.d';
+import { IRequestExecuterData } from "./../../dist/internal/executer.interfaces.d";
 import { QueryAction } from "./../api/dataops/queries/baseQuery";
 import { RequestExecuter } from "./executer";
 import { Methods } from "./requestAdapter";
