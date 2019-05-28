@@ -185,7 +185,7 @@ describe("Query class", () => {
     });
 
     it("should transform any entry to the correct format", () => {
-      const keyArray = faker.helpers.randomize(['field', 'populate', 'cond']);
+      const keyArray = faker.helpers.randomize(["field", "populate", "cond"]);
       const fakeCompiled = {
         [keyArray]: [
           faker.random.number(),
@@ -209,8 +209,8 @@ describe("Query class", () => {
       spyOn(query, "compile").and.returnValue(fakeCompiled);
 
       expect(query.compileToQueryParams()).toEqual([
-        { key: 'order', value: fakeCompiled.order[0] },
-        { key: 'order', value: fakeCompiled.order[1] },
+        { key: "order", value: fakeCompiled.order[0] },
+        { key: "order", value: fakeCompiled.order[1] },
       ]);
     });
   });

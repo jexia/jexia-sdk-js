@@ -47,7 +47,7 @@ describe("FilteringCondition class", () => {
       expect(compCondition instanceof CompositeFilteringCondition).toBeTruthy();
     });
 
-    describe('when compiling', () => {
+    describe("when compiling", () => {
       it("returns the correct format when using the OR operator", () => {
         const {
           field: anotherField,
