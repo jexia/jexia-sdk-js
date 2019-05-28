@@ -164,7 +164,7 @@ describe("User Management Service", () => {
           });
       });
 
-      it("should be able to switch to the api key alias", async () => {
+      it("should be able to switch to the api key auth", async () => {
         ums.resetDefault();
         const records = await dom.dataset("umsTestDataset")
           .insert([
@@ -189,7 +189,7 @@ describe("User Management Service", () => {
           });
       });
 
-      it("should be able to switch back to the user alias", (done) => {
+      it("should be able to switch back to the user auth", (done) => {
         ums.setDefault(credentials.alias);
         dom.dataset("umsTestDataset")
           .insert([{ name: "field" }])
@@ -201,7 +201,7 @@ describe("User Management Service", () => {
           });
       });
 
-      it("should be able to use apikey alias in dataset request", async () => {
+      it("should be able to use apikey auth in dataset request", async () => {
         const records = await dom.dataset("umsTestDataset", "apikey")
           .insert([
             { name: "testRecord" },
