@@ -17,9 +17,13 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
     private requestAdapter: RequestAdapter,
   ) {}
 
+  /**
+   * @internal
+   * @param formData
+   */
   public provideFormData(formData: FormDataType) {
     // @ts-ignore reset form data
-    this.formData = new formData.constructor();
+    this.formData = this.resetFormData(formData);
   }
 
   /**
@@ -38,16 +42,18 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
    */
   private uploadFile(record: FilesetMultipart<T, F>): Observable<FilesetInterface<T>> {
 
-    this.formData.append('data', record.data ? JSON.stringify(record.data) : '{}');
+    const formData = this.resetFormData();
+
+    formData.append('data', record.data ? JSON.stringify(record.data) : '{}');
 
     if (record.file) {
-      this.formData.append('file', record.file);
+      formData.append('file', record.file);
     }
 
     return new Observable((observer) => {
       this.tokenManager
         .token(this.config.auth)
-        .then((token) => this.execute(token))
+        .then((token) => this.execute(token, formData))
         .then((res: Array<FilesetInterface<T>>) => {
           observer.next(res[0]);
           observer.complete();
@@ -59,19 +65,20 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
   /**
    * Execute REST request
    * @param token Auth token
+   * @param formData FormData
    */
-  private execute(token: string): Promise<Array<FilesetInterface<T>>> {
+  private execute(token: string, formData: FormDataType): Promise<Array<FilesetInterface<T>>> {
 
     const headers = {
       Authorization: `Bearer ${token}`,
     };
 
     /* this method is available only under NodeJs */
-    if (this.formData.getHeaders) {
-      Object.assign(headers, this.formData.getHeaders());
+    if (formData.getHeaders) {
+      Object.assign(headers, formData.getHeaders());
     }
 
-    return this.requestAdapter.upload<Array<FilesetInterface<T>>>(this.getUrl(), headers, this.formData);
+    return this.requestAdapter.upload<Array<FilesetInterface<T>>>(this.getUrl(), headers, formData);
   };
 
   /**
@@ -83,5 +90,14 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
       API.FILES.ENDPOINT,
       this.filesetName,
     ].join('/');
+  }
+
+  /**
+   * @internal
+   * @param formData
+   */
+  private resetFormData(formData: FormDataType = this.formData): FormDataType {
+    // @ts-ignore
+    return new formData.constructor();
   }
 }
