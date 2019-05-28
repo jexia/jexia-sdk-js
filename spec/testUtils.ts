@@ -1,10 +1,10 @@
 // tslint:disable:no-string-literal
-import * as faker from 'faker';
-import { ResourceType } from '../src/api/core/resource';
-import { FilesetInterface, FilesetMultipart, IFileStatus } from '../src/api/fileops/fileops.interfaces';
-import { EventSubscriptionType, RealTimeEventMessage } from '../src/api/realtime/realTime.interfaces';
-import { RequestExecuter } from '../src/internal/executer';
-import { IHTTPResponse, IRequestOptions, RequestAdapter } from '../src/internal/requestAdapter';
+import * as faker from "faker";
+import { ResourceType } from "../src/api/core/resource";
+import { FilesetInterface, FilesetMultipart, IFileStatus } from "../src/api/fileops/fileops.interfaces";
+import { EventSubscriptionType, RealTimeEventMessage } from "../src/api/realtime/realTime.interfaces";
+import { RequestExecuter } from "../src/internal/executer";
+import { IHTTPResponse, IRequestOptions, RequestAdapter } from "../src/internal/requestAdapter";
 
 export class RequestAdapterMockFactory {
   public genericSuccesfulExecution(): RequestAdapter {
@@ -174,15 +174,15 @@ export const mockFileRecord = (status: IFileStatus): FilesetInterface<{}> => ({
   id: faker.random.uuid(),
   created_at: new Date().toDateString(),
   updated_at: new Date().toDateString(),
-  name: '',
-  size: '',
+  name: "",
+  size: "",
   status,
 });
 
 export const mockFileEvent = (id: string, action: EventSubscriptionType): RealTimeEventMessage => ({
   action,
-  resource: { type: ResourceType.Fileset, name: '' },
-  modifier: { type: '', id: '' },
+  resource: { type: ResourceType.Fileset, name: "" },
+  modifier: { type: "", id: "" },
   timestamp: new Date().toDateString(),
   data: [ { id }],
 });

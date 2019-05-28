@@ -91,7 +91,7 @@ describe("Class: Client", () => {
       expect(authOptions).toBe(validClientOpts);
     });
 
-    it('should inject collected configuration from all the modules', async () => {
+    it("should inject collected configuration from all the modules", async () => {
       let injector: ReflectiveInjector | undefined;
       spyOn(mockModuleSuccess, "init").and.callFake((i: ReflectiveInjector) => {
         injector = i;

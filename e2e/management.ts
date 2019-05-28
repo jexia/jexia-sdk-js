@@ -23,15 +23,15 @@ const { AWS_KEY, AWS_SECRET, AWS_BUCKET } = process.env;
 export class ManagementError extends Error {
 
   public static formatError(res: Response): string {
-    const title = chalk.yellow('There is an error happened during server request: ') +
-      chalk.redBright(res.status.toString() + ' ' + res.statusText);
-    const lane = new Array(title.length).fill('-').join('');
+    const title = chalk.yellow("There is an error happened during server request: ") +
+      chalk.redBright(res.status.toString() + " " + res.statusText);
+    const lane = new Array(title.length).fill("-").join("");
     return [
       title,
       chalk.gray(lane),
-      chalk.cyan('url: ') + chalk.yellowBright(res.url),
-      chalk.cyan('Response body:') + ' ' + chalk.redBright(res.body.read() as string),
-    ].join('\n');
+      chalk.cyan("url: ") + chalk.yellowBright(res.url),
+      chalk.cyan("Response body:") + " " + chalk.redBright(res.body.read() as string),
+    ].join("\n");
   }
 
   constructor(private response: Response) {
@@ -149,12 +149,12 @@ export class Management {
       body: JSON.stringify({
         name,
         provider: {
-          id: 'aws-s3',
-          name: 'AWS',
+          id: "aws-s3",
+          name: "AWS",
           options: [
-            { key: 'key', value: AWS_KEY },
-            { key: 'secret', value: AWS_SECRET },
-            { key: 'bucket', value: AWS_BUCKET },
+            { key: "key", value: AWS_KEY },
+            { key: "secret", value: AWS_SECRET },
+            { key: "bucket", value: AWS_BUCKET },
           ]
         }
       })

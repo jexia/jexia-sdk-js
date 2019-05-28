@@ -1,17 +1,17 @@
 import { Inject, Injectable } from "injection-js";
-import { Observable, Subject, Subscriber } from 'rxjs';
+import { Observable, Subject, Subscriber } from "rxjs";
 import { concatMap, filter, map, shareReplay, takeUntil, tap } from "rxjs/operators";
 import { ClientConfiguration } from "../core/client";
-import { IResource, ResourceType } from '../core/resource';
+import { IResource, ResourceType } from "../core/resource";
 import {
   FileOperationsConfig,
   FilesetInterface,
   FilesetName,
   IFileStatus,
   IFormData
-} from '../fileops/fileops.interfaces';
-import { FileUploader } from '../fileops/fileUploader';
-import { FilesetMultipart } from './fileops.interfaces';
+} from "../fileops/fileops.interfaces";
+import { FileUploader } from "../fileops/fileUploader";
+import { FilesetMultipart } from "./fileops.interfaces";
 
 /**
  * Fileset object is used for manipulating files
@@ -80,7 +80,7 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
     );
     const watcher = this.watch().pipe(
       takeUntil(allFilesCompleted),
-      filter((event) => event.action === 'updated'),
+      filter((event) => event.action === "updated"),
       /* for each event looking through all uploaded files to find that same, proper file */
       concatMap((event) => sharedUploadingProcess.pipe(
         filter((fileRecord) => fileRecord.id === event.data[0].id),
