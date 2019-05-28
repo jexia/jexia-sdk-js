@@ -2,6 +2,7 @@ import * as faker from "faker";
 import * as Joi from "joi";
 import { field } from "../../src";
 import { cleaning, DEFAULT_DATASET, dom, init } from "../teardowns";
+import { IFilteringCriterion } from './../../dist/api/dataops/filteringApi';
 import { MESSAGE } from "./../../src/config/message";
 
 const joiAssert = Joi.assert;
@@ -9,7 +10,7 @@ const joiAssert = Joi.assert;
 jest.setTimeout(15000); // for unstable internet connection
 
 describe("filter records REST API", async () => {
-  const getDataSet = () => dom.dataset(DEFAULT_DATASET.NAME);
+  let dataset;
   const BAD_REQUEST = new Error(`${MESSAGE.CORE.BACKEND_ERROR}400 Bad Request`);
 
   const FIELD = {
@@ -19,23 +20,23 @@ describe("filter records REST API", async () => {
     STRING: "string_field",
   };
 
-  function testLength(title: string, where, expectedLength: number) {
+  function testLength(title: string, condition: IFilteringCriterion, expectedLength: number) {
     it(`should select records by "${title}"`, async () => {
-      const selectResult = await getDataSet()
+      const selectResult = await dataset
         .select()
-        .where(where)
+        .where(condition)
         .execute();
 
       joiAssert(selectResult, Joi.array().length(expectedLength));
     });
   }
 
-  function testError(title: string, where) {
+  function testError(title: string, condition) {
     it(`should throw error when selecting records by "${title}"`, async () => {
       try {
-        await getDataSet()
+        await dataset
           .select()
-          .where(where)
+          .where(condition)
           .execute();
       } catch (e) {
         joiAssert(e, BAD_REQUEST);
@@ -43,25 +44,40 @@ describe("filter records REST API", async () => {
     });
   }
 
-  function test(successTests, failTests) {
-    successTests.forEach(({ title, where, expectedLength }) => {
-      testLength(title, where, expectedLength);
+  function test(testData, successTests, failTests) {
+    beforeAll(async () => {
+      await dataset
+        .insert(testData)
+        .execute();
     });
 
-    failTests.forEach(({ title, where }) => {
-      testError(title, where);
+    afterAll(async () => {
+      await dataset
+        .delete()
+        .execute();
+    });
+
+    successTests.forEach(({ title, condition, expectedLength }) => {
+      testLength(title, condition, expectedLength);
+    });
+
+    failTests.forEach(({ title, condition }) => {
+      testError(title, condition);
     });
   }
 
-  beforeAll(async () => init(
-    DEFAULT_DATASET.NAME,
-    [
-      { name: FIELD.BOOLEAN, type: "boolean" },
-      { name: FIELD.INTEGER, type: "integer" },
-      { name: FIELD.FLOAT, type: "float" },
-      { name: FIELD.STRING, type: "string" },
-    ],
-  ));
+  beforeAll(async () => {
+    await init(
+      DEFAULT_DATASET.NAME,
+      [
+        { name: FIELD.BOOLEAN, type: "boolean" },
+        { name: FIELD.INTEGER, type: "integer" },
+        { name: FIELD.FLOAT, type: "float" },
+        { name: FIELD.STRING, type: "string" },
+      ],
+    );
+    dataset = dom.dataset(DEFAULT_DATASET.NAME);
+  });
 
   afterAll(async () => cleaning());
 
@@ -71,32 +87,32 @@ describe("filter records REST API", async () => {
     const successTests = [
       {
         title: "isEqualTo",
-        where: field(fieldName).isEqualTo(true),
+        condition: field(fieldName).isEqualTo(true),
         expectedLength: 2,
       },
       {
         title: "isDifferentFrom",
-        where: field(fieldName).isDifferentFrom(true),
+        condition: field(fieldName).isDifferentFrom(true),
         expectedLength: 1,
       },
       {
         title: "isInArray",
-        where: field(fieldName).isInArray([false]),
+        condition: field(fieldName).isInArray([false]),
         expectedLength: 1,
       },
       {
         title: "isNotInArray",
-        where: field(fieldName).isNotInArray([false]),
+        condition: field(fieldName).isNotInArray([false]),
         expectedLength: 3,
       },
       {
         title: "isNull",
-        where: field(fieldName).isNull(),
+        condition: field(fieldName).isNull(),
         expectedLength: 1,
       },
       {
         title: "isNotNull",
-        where: field(fieldName).isNotNull(),
+        condition: field(fieldName).isNotNull(),
         expectedLength: 3,
       },
     ];
@@ -104,42 +120,38 @@ describe("filter records REST API", async () => {
     const failTests = [
       {
         title: "isGreaterThan",
-        where: field(fieldName).isGreaterThan(true),
+        condition: field(fieldName).isGreaterThan(true),
       },
       {
         title: "isLessThan",
-        where: field(fieldName).isLessThan(true),
+        condition: field(fieldName).isLessThan(true),
       },
       {
         title: "isEqualOrGreaterThan",
-        where: field(fieldName).isEqualOrGreaterThan(false),
+        condition: field(fieldName).isEqualOrGreaterThan(false),
       },
       {
         title: "isEqualOrLessThan",
-        where: field(fieldName).isEqualOrLessThan(true),
+        condition: field(fieldName).isEqualOrLessThan(true),
       },
       {
         title: "isLike",
-        where: field(fieldName).isLike("true"),
+        condition: field(fieldName).isLike("true"),
       },
       {
         title: "isBetween",
-        where: field(fieldName).isBetween(true, false),
+        condition: field(fieldName).isBetween(true, false),
       },
     ];
 
-    beforeAll(async () => {
-      await getDataSet()
-        .insert([
-          { [fieldName]: null },
-          { [fieldName]: true },
-          { [fieldName]: true },
-          { [fieldName]: false },
-        ])
-        .execute();
-    });
+    const testData = [
+      { [fieldName]: null },
+      { [fieldName]: true },
+      { [fieldName]: true },
+      { [fieldName]: false },
+    ];
 
-    test(successTests, failTests);
+    test(testData, successTests, failTests);
   });
 
   describe("when filtering integer types", () => {
@@ -148,47 +160,47 @@ describe("filter records REST API", async () => {
     const successTests = [
       {
         title: "isEqualTo",
-        where: field(fieldName).isEqualTo(1),
+        condition: field(fieldName).isEqualTo(1),
         expectedLength: 1,
       },
       {
         title: "isDifferentFrom",
-        where: field(fieldName).isDifferentFrom(2),
-        expectedLength: 4,
+        condition: field(fieldName).isDifferentFrom(2),
+        expectedLength: 3,
       },
       {
         title: "isGreaterThan",
-        where: field(fieldName).isGreaterThan(1),
+        condition: field(fieldName).isGreaterThan(1),
         expectedLength: 3,
       },
       {
         title: "isLessThan",
-        where: field(fieldName).isLessThan(2),
+        condition: field(fieldName).isLessThan(2),
         expectedLength: 1,
       },
       {
         title: "isEqualOrGreaterThan",
-        where: field(fieldName).isEqualOrGreaterThan(1),
+        condition: field(fieldName).isEqualOrGreaterThan(1),
         expectedLength: 4,
       },
       {
         title: "isEqualOrLessThan",
-        where: field(fieldName).isEqualOrLessThan(3),
+        condition: field(fieldName).isEqualOrLessThan(3),
         expectedLength: 3,
       },
       {
         title: "isBetween",
-        where: field(fieldName).isBetween(1, 4),
-        expectedLength: 2,
+        condition: field(fieldName).isBetween(2, 4),
+        expectedLength: 3,
       },
       {
         title: "isNull",
-        where: field(fieldName).isNull(),
+        condition: field(fieldName).isNull(),
         expectedLength: 1,
       },
       {
         title: "isNotNull",
-        where: field(fieldName).isNotNull(),
+        condition: field(fieldName).isNotNull(),
         expectedLength: 4,
       },
     ];
@@ -196,23 +208,18 @@ describe("filter records REST API", async () => {
     const failTests = [
       {
         title: "isLike",
-        where: field(fieldName).isLike("1"),
+        condition: field(fieldName).isLike("1"),
       },
     ];
 
-    beforeAll(async () => {
-      await getDataSet()
-        .insert([
-          { [fieldName]: null },
-          { [fieldName]: 1 },
-          { [fieldName]: 2 },
-          { [fieldName]: 3 },
-          { [fieldName]: 4 },
-        ])
-        .execute();
-    });
+    const testData = [{ [fieldName]: null },
+      { [fieldName]: 1 },
+      { [fieldName]: 2 },
+      { [fieldName]: 3 },
+      { [fieldName]: 4 },
+    ];
 
-    test(successTests, failTests);
+    test(testData, successTests, failTests);
   });
 
   describe("when filtering float types", () => {
@@ -221,47 +228,47 @@ describe("filter records REST API", async () => {
     const successTests = [
       {
         title: "isEqualTo",
-        where: field(fieldName).isEqualTo(6.7),
+        condition: field(fieldName).isEqualTo(6.7),
         expectedLength: 1,
       },
       {
         title: "isDifferentFrom",
-        where: field(fieldName).isDifferentFrom(6.7),
-        expectedLength: 4,
+        condition: field(fieldName).isDifferentFrom(6.7),
+        expectedLength: 3,
       },
       {
         title: "isGreaterThan",
-        where: field(fieldName).isGreaterThan(2.0),
+        condition: field(fieldName).isGreaterThan(2.0),
         expectedLength: 3,
       },
       {
         title: "isLessThan",
-        where: field(fieldName).isLessThan(6),
+        condition: field(fieldName).isLessThan(6),
         expectedLength: 3,
       },
       {
         title: "isEqualOrGreaterThan",
-        where: field(fieldName).isEqualOrGreaterThan(4.6),
+        condition: field(fieldName).isEqualOrGreaterThan(4.6),
         expectedLength: 2,
       },
       {
         title: "isEqualOrLessThan",
-        where: field(fieldName).isEqualOrLessThan(2.4),
+        condition: field(fieldName).isEqualOrLessThan(2.4),
         expectedLength: 2,
       },
       {
         title: "isBetween",
-        where: field(fieldName).isBetween(1, 2),
+        condition: field(fieldName).isBetween(1, 3),
         expectedLength: 2,
       },
       {
         title: "isNull",
-        where: field(fieldName).isNull(),
+        condition: field(fieldName).isNull(),
         expectedLength: 1,
       },
       {
         title: "isNotNull",
-        where: field(fieldName).isNotNull(),
+        condition: field(fieldName).isNotNull(),
         expectedLength: 4,
       },
     ];
@@ -269,23 +276,19 @@ describe("filter records REST API", async () => {
     const failTests = [
       {
         title: "isLike",
-        where: field(fieldName).isLike("1"),
+        condition: field(fieldName).isLike("1"),
       },
     ];
 
-    beforeAll(async () => {
-      await getDataSet()
-        .insert([
-          { [fieldName]: null },
-          { [fieldName]: 1.5 },
-          { [fieldName]: 2.4 },
-          { [fieldName]: 4.6 },
-          { [fieldName]: 6.7 },
-        ])
-        .execute();
-    });
+    const testData = [
+      { [fieldName]: null },
+      { [fieldName]: 1.5 },
+      { [fieldName]: 2.4 },
+      { [fieldName]: 4.6 },
+      { [fieldName]: 6.7 },
+    ];
 
-    test(successTests, failTests);
+    test(testData, successTests, failTests);
   });
 
   describe("when filtering string types", () => {
@@ -294,78 +297,73 @@ describe("filter records REST API", async () => {
     const successTests = [
       {
         title: "isEqualTo",
-        where: field(fieldName).isEqualTo("1st"),
+        condition: field(fieldName).isEqualTo("1st"),
         expectedLength: 1,
       },
       {
         title: "isDifferentFrom",
-        where: field(fieldName).isDifferentFrom("1st"),
-        expectedLength: 4,
+        condition: field(fieldName).isDifferentFrom("1st"),
+        expectedLength: 3,
       },
       {
         title: "isLike",
-        where: field(fieldName).isLike("th"),
+        condition: field(fieldName).isLike("%th"),
         expectedLength: 1,
       },
       {
         title: "isInArray",
-        where: field(fieldName).isInArray(["3rd", "4th"]),
+        condition: field(fieldName).isInArray(["3rd", "4th"]),
         expectedLength: 2,
       },
       {
         title: "isNotInArray",
-        where: field(fieldName).isNotInArray(["4rd", "4th"]),
+        condition: field(fieldName).isNotInArray(["4rd", "4th"]),
         expectedLength: 3,
       },
       {
         title: "isNull",
-        where: field(fieldName).isNull(),
+        condition: field(fieldName).isNull(),
         expectedLength: 1,
       },
       {
         title: "isNotNull",
-        where: field(fieldName).isNotNull(),
-        expectedLength: 3,
+        condition: field(fieldName).isNotNull(),
+        expectedLength: 4,
       },
     ];
 
     const failTests = [
       {
         title: "isGreaterThan",
-        where: field(fieldName).isGreaterThan("1"),
+        condition: field(fieldName).isGreaterThan("1"),
       },
       {
         title: "isEqualOrGreaterThan",
-        where: field(fieldName).isEqualOrGreaterThan("1"),
+        condition: field(fieldName).isEqualOrGreaterThan("1"),
       },
       {
         title: "isLessThan",
-        where: field(fieldName).isLessThan("4"),
+        condition: field(fieldName).isLessThan("4"),
       },
       {
         title: "isEqualOrLessThan",
-        where: field(fieldName).isEqualOrLessThan("4"),
+        condition: field(fieldName).isEqualOrLessThan("4"),
       },
       {
         title: "isBetween",
-        where: field(fieldName).isBetween("1", "4"),
+        condition: field(fieldName).isBetween("1", "4"),
       },
     ];
 
-    beforeAll(async () => {
-      await getDataSet()
-        .insert([
-          { [fieldName]: null },
-          { [fieldName]: "1st" },
-          { [fieldName]: "2nd" },
-          { [fieldName]: "3rd" },
-          { [fieldName]: "4th" },
-        ])
-        .execute();
-    });
+    const testData = [
+      { [fieldName]: null },
+      { [fieldName]: "1st" },
+      { [fieldName]: "2nd" },
+      { [fieldName]: "3rd" },
+      { [fieldName]: "4th" },
+    ];
 
-    test(successTests, failTests);
-
+    test(testData, successTests, failTests);
   });
 
 });
