@@ -18,7 +18,7 @@ describe("User Management Service", () => {
   const credentials = {
     email: faker.internet.email(),
     password: faker.internet.password(),
-    auth: faker.name.firstName(),
+    alias: faker.name.firstName(),
   };
   let user: IUMSUser;
 
@@ -99,13 +99,13 @@ describe("User Management Service", () => {
       });
 
       it("should fetch himself by alias", async () => {
-        const fetchedUSer = await ums.getUser(credentials.auth);
+        const fetchedUSer = await ums.getUser(credentials.alias);
         joiAssert(fetchedUSer, UserSchema.keys({
           email: Joi.string().equal(credentials.email),
         }));
       });
 
-      // TODO Does not work until auth/email token key will be developed
+      // TODO Does not work until alias/email token key will be developed
       xit("should fetch himself by email", async () => {
         const fetchedUSer = await ums.getUser(credentials.email);
         joiAssert(fetchedUSer, UserSchema);
@@ -113,14 +113,14 @@ describe("User Management Service", () => {
 
       it("should be able to change own password", async () => {
         const newPassword = faker.internet.password();
-        await ums.changePassword(credentials.auth, credentials.password, newPassword);
+        await ums.changePassword(credentials.alias, credentials.password, newPassword);
         credentials.password = newPassword;
         const token = await ums.signIn({ ...credentials, default: true });
         expect(token).toBeDefined();
       });
 
       it("should be able to delete himself", async (done) => {
-        await ums.deleteUser(credentials.auth, credentials.password);
+        await ums.deleteUser(credentials.alias, credentials.password);
         try {
           await ums.signIn(credentials);
         } catch (error) {
@@ -179,7 +179,7 @@ describe("User Management Service", () => {
       });
 
       it("should be able to use user authorization in dataset request", (done) => {
-        dom.dataset("umsTestDataset", credentials.auth)
+        dom.dataset("umsTestDataset", credentials.alias)
           .insert([{ name: "field" }])
           .execute()
           .then(() => done("should not have access to the dataset"))
@@ -190,7 +190,7 @@ describe("User Management Service", () => {
       });
 
       it("should be able to switch back to the user auth", (done) => {
-        ums.setDefault(credentials.auth);
+        ums.setDefault(credentials.alias);
         dom.dataset("umsTestDataset")
           .insert([{ name: "field" }])
           .execute()

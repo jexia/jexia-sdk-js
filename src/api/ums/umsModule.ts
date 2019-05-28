@@ -8,7 +8,7 @@ export interface IUMSSignInOptions {
   email: string;
   password: string;
   default?: boolean;
-  auth?: string;
+  alias?: string;
 }
 
 export type IUMSCredentials = Pick<IUMSSignInOptions, "email" | "password">;
@@ -62,7 +62,7 @@ export class UMSModule implements IModule {
     ).then((tokens) => {
 
       this.tokenManager.addTokens(
-        user.auth || user.email,
+        user.alias || user.email,
         tokens,
         user.default,
       );
@@ -86,8 +86,8 @@ export class UMSModule implements IModule {
     );
   }
 
-  public setDefault(auth: string): void {
-    this.tokenManager.setDefault(auth);
+  public setDefault(alias: string): void {
+    this.tokenManager.setDefault(alias);
   }
 
   public resetDefault(): void {
@@ -96,10 +96,10 @@ export class UMSModule implements IModule {
 
   /**
    * Fetch currently authorized user
-   * @param auth {string} Authorization alias
+   * @param alias {string} Authorization alias
    */
-  public getUser(auth: string): Promise<IUMSUser> {
-    return this.tokenManager.token(auth)
+  public getUser(alias: string): Promise<IUMSUser> {
+    return this.tokenManager.token(alias)
       .then((token) => this.requestAdapter.execute<IUMSUser>(
         this.getUrl(API.UMS.USER),
         { headers: { Authorization: `Bearer ${token}` }},
@@ -108,16 +108,16 @@ export class UMSModule implements IModule {
 
   /**
    * Change password of the authorized user
-   * @param auth {string} Authorization alias
+   * @param alias {string} Authorization alias
    * @param oldPassword {string}
    * @param newPassword {string}
    */
-  public changePassword(auth: string, oldPassword: string, newPassword: string): Promise<IUMSUser> {
+  public changePassword(alias: string, oldPassword: string, newPassword: string): Promise<IUMSUser> {
     const body = {
       old_password: oldPassword,
       new_password: newPassword,
     };
-    return this.tokenManager.token(auth)
+    return this.tokenManager.token(alias)
       .then((token) => this.requestAdapter.execute<IUMSUser>(
         this.getUrl(API.UMS.CHANGEPASSWORD),
         { body, headers: { Authorization: `Bearer ${token}` }, method: Methods.POST },
@@ -126,12 +126,12 @@ export class UMSModule implements IModule {
 
   /**
    * Delete currently authorized user
-   * @param auth
+   * @param alias
    * @param password
    */
-  public deleteUser(auth: string, password: string): Promise<any> {
+  public deleteUser(alias: string, password: string): Promise<any> {
     const body = { password };
-    return this.tokenManager.token(auth)
+    return this.tokenManager.token(alias)
       .then((token) => this.requestAdapter.execute(
         this.getUrl(API.UMS.USER),
         { body, headers: { Authorization: `Bearer ${token}` }, method: Methods.DELETE },

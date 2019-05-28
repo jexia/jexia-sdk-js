@@ -16,7 +16,7 @@ describe("UMS Module", () => {
     email: faker.internet.email(),
     password: faker.internet.password(),
     default: false,
-    auth: "testAuth",
+    alias: "testAuth",
   };
   const testCredentials = {
     email: faker.internet.email(),
@@ -162,15 +162,15 @@ describe("UMS Module", () => {
         jest.spyOn(tokenManagerMock, "token");
         systemDefer.resolve();
         await init();
-        await subject.getUser(testUser.auth);
-        expect(tokenManagerMock.token).toHaveBeenCalledWith(testUser.auth);
+        await subject.getUser(testUser.alias);
+        expect(tokenManagerMock.token).toHaveBeenCalledWith(testUser.alias);
       });
 
       it("should call correct API to get current user", async () => {
         const { subject, requestAdapterMock, systemDefer, init } = createSubject();
         systemDefer.resolve();
         await init();
-        await subject.getUser(testUser.auth);
+        await subject.getUser(testUser.alias);
         expect(requestAdapterMock.execute).toHaveBeenCalledWith(
           `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.UMS.ENDPOINT}/${API.UMS.USER}`,
           {
@@ -186,8 +186,8 @@ describe("UMS Module", () => {
         jest.spyOn(tokenManagerMock, "token");
         systemDefer.resolve();
         await init();
-        await subject.changePassword(testUser.auth, testUser.password, faker.internet.password());
-        expect(tokenManagerMock.token).toHaveBeenCalledWith(testUser.auth);
+        await subject.changePassword(testUser.alias, testUser.password, faker.internet.password());
+        expect(tokenManagerMock.token).toHaveBeenCalledWith(testUser.alias);
       });
 
       it("should call correct API to update password", async () => {
@@ -195,7 +195,7 @@ describe("UMS Module", () => {
         const newPassword = faker.internet.password();
         systemDefer.resolve();
         await init();
-        await subject.changePassword(testUser.auth, testUser.password, newPassword);
+        await subject.changePassword(testUser.alias, testUser.password, newPassword);
         expect(requestAdapterMock.execute).toHaveBeenCalledWith(
           // tslint:disable-next-line
           `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.UMS.ENDPOINT}/${API.UMS.CHANGEPASSWORD}`,
@@ -217,15 +217,15 @@ describe("UMS Module", () => {
         jest.spyOn(tokenManagerMock, "token");
         systemDefer.resolve();
         await init();
-        await subject.deleteUser(testUser.auth, testUser.password);
-        expect(tokenManagerMock.token).toHaveBeenCalledWith(testUser.auth);
+        await subject.deleteUser(testUser.alias, testUser.password);
+        expect(tokenManagerMock.token).toHaveBeenCalledWith(testUser.alias);
       });
 
       it("should call correct API to delete current user", async () => {
         const { subject, requestAdapterMock, systemDefer, init } = createSubject();
         systemDefer.resolve();
         await init();
-        await subject.deleteUser(testUser.auth, testUser.password);
+        await subject.deleteUser(testUser.alias, testUser.password);
         expect(requestAdapterMock.execute).toHaveBeenCalledWith(
           `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.UMS.ENDPOINT}/${API.UMS.USER}`,
           {
