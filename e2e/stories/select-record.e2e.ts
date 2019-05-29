@@ -2,15 +2,17 @@ import * as faker from "faker";
 import * as Joi from "joi";
 import { field } from "../../src";
 import { cleaning, DEFAULT_DATASET, dom, init } from "../teardowns";
-import { IFilteringCriterion } from "./../../dist/api/dataops/filteringApi";
+import { Dataset } from "./../../src/api/dataops/dataset";
+import { IFilteringCriterion, IFilteringCriterionCallback } from "./../../src/api/dataops/filteringApi";
 import { MESSAGE } from "./../../src/config/message";
+import { DatasetRecordSchema } from "./../lib/dataset";
 
 const joiAssert = Joi.assert;
 
 jest.setTimeout(15000); // for unstable internet connection
 
 describe("filter records REST API", async () => {
-  let dataset;
+  let dataset: Dataset<any>;
   const BAD_REQUEST = new Error(`${MESSAGE.CORE.BACKEND_ERROR}400 Bad Request`);
 
   const FIELD = {
@@ -19,8 +21,9 @@ describe("filter records REST API", async () => {
     FLOAT: "float_field",
     STRING: "string_field",
   };
+  type Condition = IFilteringCriterion<any> | IFilteringCriterionCallback<any>;
 
-  function testLength(title: string, condition: IFilteringCriterion, expectedLength: number) {
+  function testLength(title: string, condition: Condition, expectedLength: number) {
     it(`should select records by "${title}"`, async () => {
       const selectResult = await dataset
         .select()
@@ -31,7 +34,7 @@ describe("filter records REST API", async () => {
     });
   }
 
-  function testError(title: string, condition) {
+  function testError(title: string, condition: Condition) {
     it(`should throw error when selecting records by "${title}"`, async () => {
       try {
         await dataset
@@ -44,7 +47,7 @@ describe("filter records REST API", async () => {
     });
   }
 
-  function test(testData, successTests, failTests) {
+  function setupData(testData: any[]) {
     beforeAll(async () => {
       await dataset
         .insert(testData)
@@ -56,6 +59,10 @@ describe("filter records REST API", async () => {
         .delete()
         .execute();
     });
+  }
+
+  function test(testData: any[], successTests, failTests) {
+    setupData(testData);
 
     successTests.forEach(({ title, condition, expectedLength }) => {
       testLength(title, condition, expectedLength);
@@ -375,6 +382,122 @@ describe("filter records REST API", async () => {
     ];
 
     test(testData, successTests, failTests);
+  });
+
+  describe("when setting range", () => {
+    const testData = [
+      { [FIELD.STRING]: "1st" },
+      { [FIELD.STRING]: "2nd" },
+      { [FIELD.STRING]: "3rd" },
+      { [FIELD.STRING]: "4th" },
+      { [FIELD.STRING]: "5th" },
+      { [FIELD.STRING]: "6th" },
+    ];
+
+    // init beforeAll/AfterAll hooks
+    setupData(testData);
+
+    it("should return less items when limit is lower than total of results", async () => {
+      const result = await dataset
+        .select()
+        .limit(2)
+        .execute();
+
+      joiAssert(result, Joi.array().length(2));
+    });
+
+    it("should return all items when limit is higher than total of results", async () => {
+      const result = await dataset
+        .select()
+        .limit(10)
+        .execute();
+
+      joiAssert(result, Joi.array().length(testData.length));
+    });
+
+    it(`should split results when setting limit/offset`, async () => {
+      const limit = 2;
+      const result = await dataset
+        .select()
+        .limit(limit)
+        .offset(1)
+        .execute();
+
+      const expectedSchema = Joi
+        .array()
+        .items(DatasetRecordSchema.append({
+          [FIELD.STRING]: Joi.string().valid("2nd", "3rd"),
+          [FIELD.BOOLEAN]: Joi.empty(),
+          [FIELD.INTEGER]: Joi.empty(),
+          [FIELD.FLOAT]: Joi.empty(),
+          [FIELD.STRING]: Joi.empty(),
+        }))
+        .length(limit);
+
+      joiAssert(result, expectedSchema);
+    });
+  });
+
+  describe("when sorting", () => {
+    const testData = Array.from(
+      { length: 5 },
+      (v, index) => ({
+        [FIELD.STRING]: faker.name.findName(),
+        [FIELD.INTEGER]: faker.random.number({ min: index }),
+      })
+    );
+    let sortField;
+
+    // init beforeAll/AfterAll hooks
+    setupData(testData);
+
+    function byFieldAsc(a, b) {
+      if (a[sortField] > b[sortField]) { return 1; }
+      if (a[sortField] < b[sortField]) { return -1; }
+      return 0;
+    }
+
+    function byFieldDesc(a, b) {
+      if (a[sortField] < b[sortField]) { return 1; }
+      if (a[sortField] > b[sortField]) { return -1; }
+      return 0;
+    }
+
+    async function testSorting(fn: "sortAsc" | "sortDesc", sortFn: (a, b) => number) {
+      sortField = faker.random.arrayElement([FIELD.STRING, FIELD.INTEGER]);
+
+      const result = await dataset
+        .select()
+        [fn](sortField)
+        .execute();
+
+      const orderedSchemas = testData
+        .slice(0) // copy array
+        .sort(sortFn)
+        .map((record) => ({
+          [FIELD.STRING]: Joi.string().equal(record[FIELD.STRING]),
+          [FIELD.BOOLEAN]: Joi.empty(),
+          [FIELD.INTEGER]: Joi.number().integer().equal(record[FIELD.INTEGER]),
+          [FIELD.FLOAT]: Joi.empty(),
+          [FIELD.STRING]: Joi.empty(),
+        }))
+        .map((schema) => DatasetRecordSchema.append(schema));
+
+      const expectedSchema = Joi
+        .array()
+        .ordered(...orderedSchemas);
+
+      joiAssert(result, expectedSchema);
+    }
+
+    it("should return ascending sorted results", async () => {
+      await testSorting("sortAsc", byFieldAsc);
+    });
+
+    it("should return descending sorted results", async () => {
+      await testSorting("sortDesc", byFieldDesc);
+    });
+
   });
 
 });
