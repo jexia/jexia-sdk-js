@@ -1,12 +1,12 @@
 // tslint:disable:no-string-literal
 import { createMockFor } from "../../../spec/testUtils";
 import { RequestExecuter } from "../../internal/executer";
+import { DeleteQuery } from "../core/queries/deleteQuery";
+import { InsertQuery } from "../core/queries/insertQuery";
+import { SelectQuery } from "../core/queries/selectQuery";
+import { UpdateQuery } from "../core/queries/updateQuery";
 import { ResourceType } from "../core/resource";
 import { Dataset } from "./dataset";
-import { DeleteQuery } from "./queries/deleteQuery";
-import { InsertQuery } from "./queries/insertQuery";
-import { SelectQuery } from "./queries/selectQuery";
-import { UpdateQuery } from "./queries/updateQuery";
 
 describe("Dataset class", () => {
   describe("after initiating", () => {

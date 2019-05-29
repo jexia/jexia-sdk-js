@@ -2,7 +2,7 @@ import { Inject, Injectable } from "injection-js";
 import { ClientInit } from "../api/core/client";
 import { AuthOptions, IAuthOptions, TokenManager } from "../api/core/tokenManager";
 import { DataSetName } from "../api/dataops/dataops.tokens";
-import { QueryAction } from "../api/dataops/queries/baseQuery";
+import { QueryAction } from "../api/core/queries/baseQuery";
 import { API } from "../config";
 import { IRequestExecuterData, QueryParam } from "./executer.interfaces";
 import { IRequestOptions, Methods, RequestAdapter } from "./requestAdapter";

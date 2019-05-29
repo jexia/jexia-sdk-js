@@ -3,7 +3,7 @@ import { getRandomQueryAction, requestAdapterMockFactory } from "../../spec/test
 import { TokenManager } from "../api/core/tokenManager";
 import { API } from "../config/config";
 import { IRequestExecuterData } from "./../../dist/internal/executer.interfaces.d";
-import { QueryAction } from "./../api/dataops/queries/baseQuery";
+import { QueryAction } from "../api/core/queries/baseQuery";
 import { RequestExecuter } from "./executer";
 import { Methods } from "./requestAdapter";
 import { deferPromise } from "./utils";

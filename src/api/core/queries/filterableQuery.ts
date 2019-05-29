@@ -1,5 +1,5 @@
-import { Dataset, DatasetInterface } from "../dataset";
-import { FieldFilter, IFilteringCriterion, IFilteringCriterionCallback } from "../filteringApi";
+import { Dataset, DatasetInterface } from "../../dataops/dataset";
+import { FieldFilter, IFilteringCriterion, IFilteringCriterionCallback } from "../../dataops/filteringApi";
 import { BaseQuery } from "./baseQuery";
 import { SelectQuery } from "./selectQuery";
 

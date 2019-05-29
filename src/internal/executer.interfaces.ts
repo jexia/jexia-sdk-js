@@ -1,4 +1,4 @@
-import { QueryAction } from "../api/dataops/queries/baseQuery";
+import { QueryAction } from "../api/core/queries/baseQuery";
 
 export type QueryParam = { key: string; value: any; };
 

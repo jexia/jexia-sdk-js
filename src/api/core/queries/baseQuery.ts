@@ -1,6 +1,6 @@
 import { RequestExecuter } from "../../../internal/executer";
 import { IAggField, Query } from "../../../internal/query";
-import { IRequestExecuterData } from "./../../../internal/executer.interfaces";
+import { IRequestExecuterData } from "../../../internal/executer.interfaces";
 
 /**
  * @internal

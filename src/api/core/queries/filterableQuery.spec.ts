@@ -2,7 +2,7 @@ import { Dataset } from "../../..";
 import { createMockFor } from "../../../../spec/testUtils";
 import { RequestExecuter } from "../../../internal/executer";
 import { Query } from "../../../internal/query";
-import { field } from "../filteringApi";
+import { field } from "../../dataops/filteringApi";
 import { QueryAction } from "./baseQuery";
 import { FilterableQuery } from "./filterableQuery";
 
