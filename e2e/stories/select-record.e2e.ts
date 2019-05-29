@@ -93,7 +93,7 @@ describe("filter records REST API", async () => {
       {
         title: "isDifferentFrom",
         condition: field(fieldName).isDifferentFrom(true),
-        expectedLength: 1,
+        expectedLength: 2,
       },
       {
         title: "isInArray",
@@ -103,7 +103,7 @@ describe("filter records REST API", async () => {
       {
         title: "isNotInArray",
         condition: field(fieldName).isNotInArray([false]),
-        expectedLength: 3,
+        expectedLength: 2, // doesn't include null values
       },
       {
         title: "isNull",
@@ -166,7 +166,7 @@ describe("filter records REST API", async () => {
       {
         title: "isDifferentFrom",
         condition: field(fieldName).isDifferentFrom(2),
-        expectedLength: 3,
+        expectedLength: 4,
       },
       {
         title: "isGreaterThan",
@@ -194,6 +194,16 @@ describe("filter records REST API", async () => {
         expectedLength: 3,
       },
       {
+        title: "isInArray",
+        condition: field(fieldName).isInArray([2, 4]),
+        expectedLength: 2,
+      },
+      {
+        title: "isNotInArray",
+        condition: field(fieldName).isNotInArray([2, 4]),
+        expectedLength: 2, // doesn't include null values
+      },
+      {
         title: "isNull",
         condition: field(fieldName).isNull(),
         expectedLength: 1,
@@ -212,7 +222,8 @@ describe("filter records REST API", async () => {
       },
     ];
 
-    const testData = [{ [fieldName]: null },
+    const testData = [
+      { [fieldName]: null },
       { [fieldName]: 1 },
       { [fieldName]: 2 },
       { [fieldName]: 3 },
@@ -234,7 +245,7 @@ describe("filter records REST API", async () => {
       {
         title: "isDifferentFrom",
         condition: field(fieldName).isDifferentFrom(6.7),
-        expectedLength: 3,
+        expectedLength: 4,
       },
       {
         title: "isGreaterThan",
@@ -303,7 +314,7 @@ describe("filter records REST API", async () => {
       {
         title: "isDifferentFrom",
         condition: field(fieldName).isDifferentFrom("1st"),
-        expectedLength: 3,
+        expectedLength: 4,
       },
       {
         title: "isLike",
@@ -317,8 +328,8 @@ describe("filter records REST API", async () => {
       },
       {
         title: "isNotInArray",
-        condition: field(fieldName).isNotInArray(["4rd", "4th"]),
-        expectedLength: 3,
+        condition: field(fieldName).isNotInArray(["3rd", "4th"]),
+        expectedLength: 2, // doesn't include null values
       },
       {
         title: "isNull",
