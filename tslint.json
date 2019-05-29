@@ -11,6 +11,11 @@
       "quotemark": [
         true,
         "double"
-      ]
+      ],
+      "linterOptions": {
+        "exclude": [
+          "./extra_docs/*"
+        ]
+      }
     }
 }

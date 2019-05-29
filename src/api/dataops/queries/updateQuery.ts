@@ -4,17 +4,17 @@ import { FilterableQuery } from "./filterableQuery";
 
 /**
  * Query object specialized for update statements.
- * For TypeScript users it implements a generic type T that represents your dataset, default to any.
+ * For TypeScript users it implements a generic type `T` that represents your dataset (defaults to `any`).
  * This object is generated automatically from the Dataset object, never to be instantiated directly.
  *
- * @example
+ * ### Example
  * ```typescript
- * const posts = dataModule.dataset("posts");
- * posts.update({
- *    title: 'My Updated Title'
+ * dataModule.dataset("posts")
+ *  .update({
+ *    title: "My Updated Title"
  *  })
  *  .where(field => field("title").isLike("old title"))
- *  .execute()
+ *  .execute();
  * ```
  *
  * @template T Generic type of your dataset, default to any

@@ -28,28 +28,41 @@ Please keep in mind that this quick start guide uses Javascript 2017 syntax.
 
 The examples are made with a simple data schema in mind: think a basic social media platform where `users` can write `posts` and/or `comments` to `posts`. A `post` can be related to any number of `comments`, while each `post` and each `comment` has a `user` as author.
 
-### Importing the SDK into your JS project
+### [Importing the SDK into your JS project](#importing-sdk)
 
+#### In a NodeJS application:
 ``` Javascript
-import { jexiaClient } from "Anemo SDK location";
+import { jexiaClient } from "jexia-sdk-js/node";
 ```
 
-### Initialization and Authentication
-
-The `jexiaClient()` function will return an instance of the `Client` class. You can provide a custom `fetch` standard compliant function as a parameter, as default we are using are using `node-fetch` package at NodeJS, and the native `fetch` implementation on at the browser.
-
+#### In the browser:
 ``` Javascript
-import { jexiaClient } from "Anemo SDK location";
+import { jexiaClient } from "jexia-sdk-js/browser";
+```
 
-let initializedClientPromise = jexiaClient().init({projectID: "your Jexia App URL", key: "username", secret: "password"});
-initializedClientPromise.then( (initializedClient) => {
+### [Initialization and Authentication](#init-sdk)
+
+The `jexiaClient()` function will return a a `Promise` of the `Client` class. You can provide a custom `fetch` standard compliant function as a parameter, as default we are using are using `node-fetch` package at NodeJS, and the native browser's `fetch` implementation.
+
+``` Typescript
+import { Client } from "jexia-sdk-js";
+import { jexiaClient } from "jexia-sdk-js/node";
+
+const clientPromise: Promise<Client> = jexiaClient()
+  .init({
+    projectID: "<your-project-id>",
+    key: "<your-project-api-key>",
+    secret: "<your-project-api-secret>",
+  });
+
+clientPromise.then((client: Client) => {
   // you have been succesfully logged in!
-}).catch( (error) => {
-  // uh-oh, there was a problem logging in, check the error.message for more info
+}).catch((error: Error) => {
+  // uh-oh, there was a problem logging in, check error.message for more info
 });
 ```
 
-### The Module system
+### [The Module system](#the-module-system)
 
 The Jexia SDK is built as a set of modules (or plugins) structured around a core entity (the `Client` class used above).
 In order to use a module you need to:
@@ -62,30 +75,29 @@ Probably the most useful module is the Data Operation Module (`DataOperationsMod
 The modules await the client initialization before make any operation that depends on it, so you don't need to manually await the client initialization promise.
 
 ``` Javascript
-import { jexiaClient, dataOperations } from "Anemo SDK Location";
+import { jexiaClient, dataOperations } from "jexia-sdk-js/node";
 
-let dataModule = dataOperations();
-
-jexiaClient().init({projectID: "your Jexia App URL", key: "username", secret: "password"}, dataModule);
+const dataModule = dataOperations();
+jexiaClient().init(credentials, dataModule);
 
 dataModule.dataset("posts")
   .select()
   .execute()
-  .then( (data) => {
+  .then((data) => {
     // you have been succesfully logged in!
     // you can start using the dataModule variable to operate on records here
-  }).catch( (error) => {
+  }).catch((error) => {
     // uh-oh, there was a problem logging in, check the error.message for more info
   });
 ```
 
-### Dataset objects and Query objects
+### [Dataset and Query objects](#dataset-query-objects)
 
 Using an initialized `DataOperationsModule` object, you can instantiate `Dataset` objects like so:
 
 ``` Javascript
 [..]
-let postsDataset = dataModule.dataset("posts");
+const postsDataset = dataModule.dataset("posts");
 [..]
 ```
 
@@ -93,10 +105,10 @@ Using a `Datase` object, you can instantiate a `Query` object, depending on the 
 
 ``` Javascript
 [..]
-let selectQuery = postsDataset.select();
-let insertQuery = postsDataset.insert( [ post1, post2 ] );
-let updateQuery = postsDataset.update( [ title: "Updated title" ] );
-let deleteQuery = postsDataset.delete();
+const selectQuery = postsDataset.select();
+const insertQuery = postsDataset.insert([post1, post2]);
+const updateQuery = postsDataset.update([{ title: "Updated title" }]);
+const deleteQuery = postsDataset.delete();
 [..]
 ```
 
@@ -104,21 +116,21 @@ Any `Query` can be executed by calling `.execute()` on it. This results in a `Pr
 
 Each different `Query` type has different support for the query options (filtering, sorting, etc.). E.g. you cannot apply filtering to insert queries, as the method isn't defined on the `InsertQuery` object.
 
-### Our first query: selecting all records in a dataset
+### [Our first query: selecting all records in a dataset](#select-all-dataset-records)
 
 Using all the temporary variables in this example is for demonstration purposes, mostly to point out the different objects and functionality involved when working with records.
 
 ``` Javascript
 [..]
-jexiaClient(fetch).init({projectID: "your Jexia App URL", key: "username", secret: "password"}, dataModule);
+jexiaClient(fetch).init(credentials, dataModule);
 
-let postsDataset = dataModule.dataset("posts");
-let unexecutedQuery = postsDataset.select();
-let executedQueryPromise = unexecutedQuery.execute();
+const postsDataset = dataModule.dataset("posts");
+const unexecutedQuery = postsDataset.select();
+const executedQueryPromise = unexecutedQuery.execute();
 
-executedQueryPromise.then( (records) => {
+executedQueryPromise.then((records) => {
   // you can start iterating through the posts here
-}).catch( (error) => {
+}).catch((error) => {
   // there was a problem retrieving the records
 });
 [..]
@@ -128,14 +140,14 @@ If you watch closely, the API is chainable, so you can rewrite the query in a mu
 
 ``` Javascript
 [..]
-jexiaClient(fetch).init({projectID: "your Jexia App URL", key: "username", secret: "password"}, dataModule);
+jexiaClient(fetch).init(credentials, dataModule);
 
 dataModule.dataset("posts")
   .select()
   .execute()
-  .then( (records) => {
+  .then((records) => {
     // you can start iterating through the posts here
-  }).catch( (error) => {
+  }).catch((error) => {
     // there was a problem retrieving the records
   });
 [..]
@@ -143,91 +155,69 @@ dataModule.dataset("posts")
 
 But at the very least, defining dataset variables could come in handy when executing multiple different queries on the same dataset.
 
-### Sorting records
+### [Sorting records](#sorting-records)
 
 To activate sorting, you need to call `.sortAsc` or `.sortDesc` on a `Query` object and pass as string the name of the field you want to sort by.
 
 ``` Javascript
 [..]
-posts.select().sortAsc("id").execute().then( (records) => {
-  // operate on your sorted records here
-});
+posts.select()
+  .sortAsc("id")
+  .execute()
+  .then((records) => {
+    // operate on your sorted records here
+  });
 [..]
 ```
 
-### Limit and offset
+### [Limit and offset](#limit-offset)
 
-You can use `.limit` and `.offset` on a `Query` object for these options. They can be used separately or together. Only setting the limit (to a value X) will make the query operate on the first X records. Only setting the offset will make the query operate on the last Y records, starting from the offset value. 
+You can use `.limit` and `.offset` on a `Query` object for these options. They can be used separately or together. Only setting the limit (to a value X) will make the query operate on the first X records. Only setting the `offset` will make the query operate on the last Y records, starting from the `offset` value.
 
 ``` Javascript
 [..]
-posts.select().limit(2).offset(5).execute().then( (records) => {
-  // records will be an array of 2 records, starting from position 5 in the Dataset
-});
+posts.select()
+  .limit(2)
+  .offset(5)
+  .execute()
+  .then((records) => {
+    // records will be an array of 2 records, starting from position 5 in the Dataset
+  });
 [..]
 ```
 
-### Only retrieving certain fields
+### [Only retrieving certain fields](#retrieve-certain-fields)
 
 You can use the `.fields` method to define what fields you want to retrieve.
 
 ``` Javascript
 [..]
-posts.select().fields("id", "title").execute().then( (records) => {
-  // the individual record objects will only have the two properties defined above
-});
+posts.select()
+  .fields("id", "title")
+  .execute()
+  .then((records) => {
+    // the individual record objects will only have the two properties defined above
+  });
 [..]
 ```
 
-### Aggregation functions
+### [Filtering records](#filtering-records)
 
-You can also use following aggregation functions with `.fields` method:
-- MAX
-- MIN
-- AVG
-- SUM
-- EVERY
-- COUNT
+You can use the filtering to select what records a certain query will operate on.
 
-There is a special object that you need to use for aggregation:
-```
-{ fn: <AGG_FUNCTION>, col: <DATASET_FIELD> }
-```
+In order to define a filter, you can use the exposed method `field`.
 
-Example:
-``` Javascript
-[..]
-posts.select().fields({ fn: "MAX", col: "likes" });
-[..]
-```
+``` Typescript
+import { field } from "jexia-sdk-js/node";
 
-For `COUNT` function you can provide asterisk (`*`) as a field name. Also you can combine
-field names with aggregation functions to get more complicated results:
-``` Javascript
-[..]
-posts.select().fields("date", "author", { fn: "COUNT", col: "*" });
-[..]
-``` 
+const isUsernameTom = field("username").isEqualTo("Tom");
+const isUsernameDick = field("username").isEqualTo("Dick");
+const isUsernameTomOrDick = isUsernameTom.or(isUsernameDick);
 
+// In order to use these conditions, they need to be added to a query through `.where` method
 
-### Filtering records
+posts.select().where(isUsernameTomOrDick);
 
-You can use the filtering feature to select what records a certain query will operate on.
-
-In order to define a filter, you need to use the appropriate filtering objects. They can be created using the exposed methods `field` and `combineCriteria`. `combineCriteria` is something very specific that provides another way to create nested logical conditions. You're probably not going to use that much, but it's useful to know that it exists.
-
-``` Javascript
-import { field } from "Anemo SDK location";
-
-let simpleCriterion = field("username").isEqualTo("Tom");
-let combinedCriteria = simpleCriterion.or(field("username").isEqualTo("Dick"));
-```
-
-In order to use these conditions, they need to be added to a query using the `.where` method
-
-``` Javascript
-[..]
-posts.select().where(field("username").isEqualTo("Harry"));
 [..]
 ```
 
@@ -235,7 +225,8 @@ The `.where` method also accepts a lazy callback, that receives the `field` meth
 
 ``` Javascript
 [..]
-posts.select().where(field => field("username").isEqualTo("Harry"));
+posts.select()
+  .where(field => field("username").isEqualTo("Harry"));
 [..]
 ```
 
@@ -245,26 +236,41 @@ Filtering conditions can be nested at any level.
 
 ``` Javascript
 [..]
-let flatFilter = field("first_name").isEqualTo("Tom")
-                 .or( field("first_name").isEqualTo("Dick"))
-                 .or( field("first_name").isEqualTo("Harry"));
+// Filtering in a flat way
+const isTomAndOlderThan18 = field("first_name")
+  .isEqualTo("Tom")
+  .and(field("age").isGreaterThan(18));
 
-let nestedFilter = field("first_name").isEqualTo("Tom")
-                   .or( field("first_name").isEqualTo("Dick")
-                        .and( field("middle_name").isEqualTo("Harry")));
+// Filtering with one nested level
+const isDickHarry = field("first_name")
+  .isEqualTo("Dick")
+  .and(field("last_name").isEqualTo("Harry"));
 
-let anotherNestedFilter = field("first_name").isEqualTo("Tom")
-                   .or( field("first_name").isEqualTo("Dick")
-                        .and( field("middle_name").isEqualTo("Harry")
-                              .or( field("middle_name").isEqualTo("Larry"))));
+const isTomOrIsDickHarry = field("first_name")
+  .isEqualTo("Tom")
+  .or(
+    isDickHarry // nested level
+  );
+
+// Filtering with multiple nested levels
+const isDutch = field("country").isEqualTo("NL");
+const isKidOrSenior = field("age")
+  .isGreaterThan(64)
+  .or(field("age").isLessThan(16));
+
+const isTomOr = field("first_name")
+  .isEqualTo("Tom")
+  .and(
+    isDutch.or(isKidOrSenior)
+  );
 [..]
 ```
 
-### Filtering operator list and examples
+### [Filtering operator list and examples](#filtering-operator-list)
 
 You can find a complete list of the operators supported for filtering in the API reference document.
 
-### Defining relations
+### [Defining relations](#defining-relations)
 
 Relations can be added to a query in order to have the query apply not only to the main dataset the query is created from, but also to related records from other datasets.
 
@@ -272,16 +278,20 @@ Retrieving relations:
 
 ``` Javascript
 [..]
-let posts = dataModule.dataset("posts");
-let comments = dataModule.dataset("comments");
-posts.select().relation(comments).execute().then( (records) => {
-  // objects in the records array will now contain a property called "comments"
-  // which will be an array holding the comments related to a particular post.
-});
+const posts = dataModule.dataset("posts");
+const comments = dataModule.dataset("comments");
+
+posts.select()
+  .relation(comments)
+  .execute()
+  .then((records) => {
+    // objects in the records array will now contain a property called "comments"
+    // which will be an array holding the comments related to a particular post.
+  });
 [..]
 ```
 
-### Inserting records
+### [Inserting records](#inserting-records)
 
 Records can be inserted to a dataset either by sending an array or a single one. The response will always be an array though.
 
@@ -305,55 +315,64 @@ const insertQuery = posts.insert({
 insertQuery
   .execute()
   .then((records) => {
-    // you will always get an array of created records even when inserting a single record
+    // you will always get an array of created records, including their generated IDs (even when inserting a single record)
   }).catch((error) => {
     // you can see the error info here, if something goes wrong
   });
 [..]
 ```
 
-### Updating records
+### [Updating records](#updating-records)
 
 The `update` method is used to modify records, it always has to be used with the `where` method and a filter criteria.
 
 ``` Javascript
 [..]
-let posts = dataModule.dataset("posts");
 const filter = field("id").isInArray([1, 2]);
-posts.update({
-  title: "Changing title",
-}).where(filter).execute().then(() => {
-  // the elements that fill the criteria now have been changed
-}).catch( (error) => {
-  // you can see the error info here, if something goes wrong
-});
+
+dataModule.dataset("posts")
+  .update({
+    title: "Changing title",
+  })
+  .where(filter)
+  .execute()
+  .then(() => {
+    // the elements that fill the criteria now have been changed
+  }).catch((error) => {
+    // you can see the error info here, if something goes wrong
+  });
 ```
 
-### Deleting records
+### [Deleting records](#deleting-records)
 
 ``` Javascript
 [..]
-let posts = dataModule.dataset("posts");
-posts.delete().where(field("title").isLike("test")).execute().then( (records) => {
-  // you will be able to access the deleted records here
-  // they won't be stored in the DB anymore, but maybe you
-  // want to display a visual confirmation of what got deleted
-}).catch( (error) => {
-  // you can see the error info here, if something goes wrong
-});
+dataModule.dataset("posts")
+  .delete()
+  .where(field("title").isLike("test"))
+  .execute()
+  .then((records) => {
+    // you will be able to access the deleted records here
+    // they won't be stored in the DB anymore, but maybe you
+    // want to display a visual confirmation of what got deleted
+  }).catch((error) => {
+    // you can see the error info here, if something goes wrong
+  });
 [..]
 ```
 
-## Logging off and cleanup
+### [Logging off and cleanup](#logging-off)
 
 The `Client` class exposes a method called `.terminate()` which returns a `Promise` with the terminated `Client` instance. Use this to clear up resources used by the `Client` class and any modules you initialized along with it (you don't have to pass the modules along, the `Client` will terminate any modules you supplied on initialization.)
 
 ``` Javascript
 [..]
-client.terminate().then( (terminatedClient) => {
-  // everything has been cleared
-}).catch( (err)=>{
-  // something went wrong when cleaning up
-});
+client
+  .terminate()
+  .then((terminatedClient) => {
+    // everything has been cleared
+  }).catch((error)=>{
+    // something went wrong when cleaning up
+  });
 [..]
 ```

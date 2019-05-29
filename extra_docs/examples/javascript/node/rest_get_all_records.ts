@@ -1,5 +1,3 @@
-// tslint:disable:no-console
-// tslint:disable:interface-name
 // Node application
 import { dataOperations, jexiaClient } from "jexia-sdk-js/node";
 
@@ -11,17 +9,18 @@ interface Post {
 }
 
 // Initialize DataOperationsModule
-let dom = dataOperations();
+const dataModule = dataOperations();
+const credentials = {
+  projectID: "<your-project-id>",
+  key: "<your-project-api-key>",
+  secret: "<your-project-api-secret>",
+};
 
 // Initialize Client and pass DataOperationsModule to it.
-jexiaClient().init({
-  projectID: "_projectId_",
-  key: "_key_",
-  secret: "_secret_"
-}, dom);
+jexiaClient().init(credentials, dataModule);
 
 // Use your data module with an optional generic type
-dom.dataset<Post>("posts")
+dataModule.dataset<Post>("posts")
   .select()
   .execute()
   .then((records) => {
@@ -29,7 +28,7 @@ dom.dataset<Post>("posts")
     process.exit();
   })
   .catch((error) => {
-    // there was a problem retrieving the records
+    // there was a problem retrieving records
     console.log(error);
     process.exit();
   });

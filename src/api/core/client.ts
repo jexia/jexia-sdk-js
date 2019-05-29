@@ -17,13 +17,13 @@ export const ClientConfiguration = new InjectionToken("ClientConfiguration");
 
 /**
  * Jexia main client fo the JavaScript SDK, used to initialize the necessary modules with your project information.
- * This object must be build from the helper functions, never to be instantiated direct.
+ * This object must be build from the helper functions, never to be instantiated directly.
  *
- * @example
+ * ### Example
  * ```typescript
  * import { jexiaClient } from "jexia-sdk-js/node";
  *
- * jexiaClient().init({projectID: "your Jexia App URL", key: "username", secret: "password"}, arrayOfJexiaModules);
+ * jexiaClient().init(credentials, arrayOfJexiaModules);
  * ```
  */
 export class Client {

@@ -10,16 +10,18 @@ interface Post {
 }
 
 // Initialize DataOperationsModule
-let dom = dataOperations();
+const dataModule = dataOperations();
+const credentials = {
+  projectID: "<your-project-id>",
+  key: "<your-project-api-key>",
+  secret: "<your-project-api-secret>",
+};
+
 // Initialize Client and pass DataOperationsModule to it.
-jexiaClient().init({
-  projectID: "anemo002",
-  key: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-  secret: "a_secret",
-}, dom);
+jexiaClient().init(credentials, dataModule);
 
 // Use your data module with an optional generic type
-dom.dataset<Post>("posts")
+dataModule.dataset<Post>("posts")
   .select()
   .where((field) => field("title").isEqualTo("My first post"))
   .execute()

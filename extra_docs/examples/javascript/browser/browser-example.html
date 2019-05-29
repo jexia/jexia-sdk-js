@@ -1,33 +1,41 @@
 <html>
   <head>
-      <script src="../../../../dist/bundle/browser.js"></script>
+    <script src="../../../../dist/bundle/browser.js"></script>
   </head>
   <body>
     <i>loading...</i>
+    <ul></ul>
     <script type="text/javascript">
       window.onload = function(){
-        if(!jexia) {
+        if (!jexia) {
           throw new Error("Please run `npm run build` task before run this example.");
         }
 
         //Initialize dataOperationsModule
-        let dom = jexia.dataOperations();
-        let credentials = {
-          projectID: "test",
-          key: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-          secret: "a_secret"
+        const dataModule = jexia.dataOperations();
+        const credentials = {
+          projectID: "<your-project-id>",
+          key: "<your-project-api-key>",
+          secret: "<your-project-api-secret>",
         };
-        let jexiaClient = jexia.jexiaClient().init(credentials, dom);
-        dom.dataset("posts")
+
+        jexia.jexiaClient().init(credentials, dataModule);
+        const postsList = document.querySelector("ul");
+
+        dataModule.dataset("posts")
           .select()
           .execute()
-          .then(data => {
-            for (const item of data) {
-              document.write("<ul><li>" + item.title + "</li></ul>");
-            }
+          .then((posts) => {
+            posts.forEach((post) => {
+              const postTitle = document.createElement("li");
+
+              postTitle.innerText(post.title);
+
+              postsList.appendChild(postTitle);
+            });
+
           })
-          .catch(error => {
-            document.write(error);
+          .catch((error) => {
             console.log(error);
           });
       }

@@ -26,28 +26,27 @@ export type DatasetInterface<T> = T & DefaultDatasetInterface;
 
 /**
  * Dataset object used to fetch and modify data at your datasets.
- * For TypeScript users it implements a generic type T that represents your dataset, default to any.
- * This object must be build from the data operations module, never to be instantiated direct.
+ * For TypeScript users it implements a generic type `T` that represents your dataset, default to any.
+ * This object must be build from the data operations module, never to be instantiated directly.
  *
- * @example
+ * ### Example
  * ```typescript
  * import { jexiaClient, dataOperations } from "jexia-sdk-js/node";
  *
  * const dataModule = dataOperations();
  *
- * jexiaClient().init({projectID: "your Jexia App URL", key: "username", secret: "password"}, dataModule);
+ * jexiaClient().init(credentials, dataModule);
  *
  * dataModule.dataset("posts")
  *   .select()
  *   .execute()
- *   .then( (data) => {
+ *   .then((data) => {
  *     // you have been succesfully logged in!
  *     // you can start using the dataModule variable to operate on records here
- *   }).catch( (error) => {
+ *   }).catch((error) => {
  *     // uh-oh, there was a problem logging in, check the error.message for more info
  *   });
  * ```
- *
  * @template T Generic type of your dataset, default to any
  */
 @Injectable()
