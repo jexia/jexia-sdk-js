@@ -2,6 +2,9 @@ import * as faker from "faker";
 import { of, Subject } from "rxjs";
 import { createMockFor, mockFileEvent, mockFileRecord, mockFilesList } from "../../../spec/testUtils";
 import { RequestExecuter } from "../../internal/executer";
+import { DeleteQuery } from "../core/queries/deleteQuery";
+import { SelectQuery } from "../core/queries/selectQuery";
+import { UpdateQuery } from "../core/queries/updateQuery";
 import { ResourceType } from "../core/resource";
 import { RealTimeEventMessage } from "../realtime/realTime.interfaces";
 import { FilesetInterface, IFileStatus } from "./fileops.interfaces";
@@ -205,6 +208,28 @@ describe("Fileset", () => {
         fileRecords.forEach((fileRecord) => uploadSubject.next(fileRecord));
         uploadSubject.complete();
       });
+    });
+  });
+
+  describe("CRUD operations", () => {
+    it("should be able start a select query", () => {
+      const { subject } = createSubject();
+      expect(subject.select() instanceof SelectQuery).toBeTruthy();
+    });
+
+    it("should be able start a update query", () => {
+      const { subject } = createSubject();
+      expect(subject.update({}) instanceof UpdateQuery).toBeTruthy();
+    });
+
+    it("should throw an error if try to run insert query", () => {
+      const { subject } = createSubject();
+      expect(() => subject.insert()).toThrow();
+    });
+
+    it("should be able start a delete query", () => {
+      const { subject } = createSubject();
+      expect(subject.delete() instanceof DeleteQuery).toBeTruthy();
     });
   });
 });

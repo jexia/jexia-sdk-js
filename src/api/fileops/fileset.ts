@@ -4,7 +4,6 @@ import { concatMap, filter, map, shareReplay, takeUntil, tap } from "rxjs/operat
 import { RequestExecuter } from "../../internal/executer";
 import { ClientConfiguration } from "../core/client";
 import { DeleteQuery } from "../core/queries/deleteQuery";
-import { InsertQuery } from "../core/queries/insertQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
 import { IResource, ResourceType } from "../core/resource";
@@ -84,20 +83,10 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
   }
 
   /**
-   * Creates an Insert query.
-   * @param data A dictionary that contains the key:value pairs for
-   * the fields you want to store at this dataset or an array of those.
-   * @returns Query object specialized for insert statements
-   * If saving into a strict schema dataset, you need to provide values for the
-   * required fields for that particular dataset.
+   * insert() does not implemented
    */
-  public insert(data: T[] | T): InsertQuery<T, FilesetInterface<T>> {
-    return new InsertQuery(
-      this.requestExecuter,
-      Array.isArray(data) ? data : [data],
-      ResourceType.Fileset,
-      this.filesetName,
-    );
+  public insert(): never {
+    throw new Error("Fileset does not have INSERT, please use upload() instead");
   }
 
   /**
