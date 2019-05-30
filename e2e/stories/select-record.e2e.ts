@@ -20,6 +20,8 @@ describe("filter records REST API", async () => {
     INTEGER: "integer_field",
     FLOAT: "float_field",
     STRING: "string_field",
+    DATE: "date_field",
+    DATETIME: "datetime_field",
   };
   type Condition = IFilteringCriterion<any> | IFilteringCriterionCallback<any>;
 
@@ -81,6 +83,8 @@ describe("filter records REST API", async () => {
         { name: FIELD.INTEGER, type: "integer" },
         { name: FIELD.FLOAT, type: "float" },
         { name: FIELD.STRING, type: "string" },
+        { name: FIELD.DATE, type: "date" },
+        { name: FIELD.DATETIME, type: "datetime" },
       ],
     );
     dataset = dom.dataset(DEFAULT_DATASET.NAME);
@@ -382,6 +386,112 @@ describe("filter records REST API", async () => {
     ];
 
     test(testData, successTests, failTests);
+  });
+
+  describe("when filtering date related types", () => {
+    type MinMax = { min: number, max: number };
+    const fakeNumber = (options: MinMax) => faker.random.number(options);
+    const fakePastDatetime = (yearsAgo: MinMax) => faker.date.past(fakeNumber(yearsAgo)).toISOString();
+    const fakeFutureDatetime = (yearsFromNow: MinMax) => faker.date.future(fakeNumber(yearsFromNow)).toISOString();
+
+    function testDate({
+      fieldName,
+      fakePastDate,
+      fakeFutureDate
+    }) {
+      const testData = [
+        { [fieldName]: null },
+        { [fieldName]: fakePastDate({ min: 11, max: 30 }) },
+        { [fieldName]: fakePastDate({ min: 0, max: 10 }) },
+        { [fieldName]: fakeFutureDate({ min: 0, max: 10 }) },
+        { [fieldName]: fakeFutureDate({ min: 11, max: 30 }) },
+      ];
+
+      const [, firstDate, secondDate, thirdDate, lastDate] = testData.map((t) => t[fieldName]);
+
+      const successTests = [
+        {
+          title: "isEqualTo",
+          condition: field(fieldName).isEqualTo(secondDate),
+          expectedLength: 1,
+        },
+        {
+          title: "isDifferentFrom",
+          condition: field(fieldName).isDifferentFrom(firstDate),
+          expectedLength: 4,
+        },
+        {
+          title: "isInArray",
+          condition: field(fieldName).isInArray([secondDate, firstDate]),
+          expectedLength: 2,
+        },
+        {
+          title: "isNotInArray",
+          condition: field(fieldName).isNotInArray([thirdDate, lastDate]),
+          expectedLength: 2, // doesn't include null values
+        },
+        {
+          title: "isNull",
+          condition: field(fieldName).isNull(),
+          expectedLength: 1,
+        },
+        {
+          title: "isNotNull",
+          condition: field(fieldName).isNotNull(),
+          expectedLength: 4,
+        },
+        {
+          title: "isBetween",
+          condition: field(fieldName).isBetween(firstDate, thirdDate),
+          expectedLength: 3,
+        },
+        {
+          title: "isLessThan",
+          condition: field(fieldName).isLessThan(secondDate),
+          expectedLength: 1,
+        },
+        {
+          title: "isGreaterThan",
+          condition: field(fieldName).isGreaterThan(secondDate),
+          expectedLength: 2,
+        },
+        {
+          title: "isEqualOrLessThan",
+          condition: field(fieldName).isEqualOrLessThan(secondDate),
+          expectedLength: 2,
+        },
+        {
+          title: "isEqualOrGreaterThan",
+          condition: field(fieldName).isEqualOrGreaterThan(secondDate),
+          expectedLength: 3,
+        },
+      ];
+
+      const failTests = [
+        {
+          title: "isLike",
+          condition: field(fieldName).isLike(lastDate),
+        },
+      ];
+
+      test(testData, successTests, failTests);
+    }
+
+    describe("Date", () => {
+      const fieldName = FIELD.DATE;
+      const fakePastDate = (yearsAgo: MinMax) => fakePastDatetime(yearsAgo).split("T")[0];
+      const fakeFutureDate = (yearsFromNow: MinMax) => fakeFutureDatetime(yearsFromNow).split("T")[0];
+
+      testDate({ fieldName, fakePastDate, fakeFutureDate });
+    });
+
+    describe("Datetime", () => {
+      testDate({
+        fieldName: FIELD.DATETIME,
+        fakePastDate: fakePastDatetime,
+        fakeFutureDate: fakeFutureDatetime,
+      });
+    });
   });
 
   describe("when setting range", () => {
