@@ -1,6 +1,7 @@
 import * as faker from "faker";
 import { of, Subject } from "rxjs";
 import { createMockFor, mockFileEvent, mockFileRecord, mockFilesList } from "../../../spec/testUtils";
+import { RequestExecuter } from "../../internal/executer";
 import { ResourceType } from "../core/resource";
 import { RealTimeEventMessage } from "../realtime/realTime.interfaces";
 import { FilesetInterface, IFileStatus } from "./fileops.interfaces";
@@ -15,8 +16,9 @@ describe("Fileset", () => {
     // @ts-ignore
     fileUploadReturnValue = of({}),
     fileUploaderMock = createMockFor(FileUploader, { returnValue: fileUploadReturnValue }),
+    requestExecuterMock = createMockFor(RequestExecuter),
   } = {}) {
-    const subject = new Fileset(filesetName, { fileOperations: fsConfig }, fileUploaderMock);
+    const subject = new Fileset(filesetName, { fileOperations: fsConfig }, fileUploaderMock, requestExecuterMock);
     return {
       subject,
       filesetName,

@@ -1,4 +1,5 @@
 import { RequestExecuter } from "../../../internal/executer";
+import { ResourceType } from "../resource";
 import { QueryAction } from "./baseQuery";
 import { FilterableQuery } from "./filterableQuery";
 
@@ -22,7 +23,7 @@ export class DeleteQuery<T> extends FilterableQuery<T> {
   /**
    * @internal
    */
-  public constructor(queryExecuter: RequestExecuter, dataset: string) {
-    super(queryExecuter, QueryAction.delete, dataset);
+  public constructor(queryExecuter: RequestExecuter, resourceType: ResourceType, resourceName: string) {
+    super(queryExecuter, QueryAction.delete, resourceType, resourceName);
   }
 }

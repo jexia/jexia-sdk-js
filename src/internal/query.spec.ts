@@ -20,11 +20,11 @@ describe("Query class", () => {
     direction: "desc",
     fields: ["field3"],
   };
-  let query1 = new Query("dataset1");
-  let query2 = new Query("dataset2");
+  let query1 = new Query();
+  let query2 = new Query();
 
   beforeEach(() => {
-    query = new Query("dataset");
+    query = new Query();
   });
 
   describe("should have initial attributes", () => {
@@ -70,7 +70,8 @@ describe("Query class", () => {
     });
   });
 
-  describe("addRelation method", () => {
+  // TODO Develop relations
+  xdescribe("addRelation method", () => {
     it("should push relation into an array", () => {
       query.addRelation(query1);
       expect((query as any).relations).toEqual([query1]);
@@ -156,7 +157,8 @@ describe("Query class", () => {
       });
     });
 
-    it("relations option", () => {
+    // TODO Develop relations
+    xit("relations option", () => {
       query.addRelation(query1);
       query.addRelation(query2);
       expect(query.compile()).toEqual({

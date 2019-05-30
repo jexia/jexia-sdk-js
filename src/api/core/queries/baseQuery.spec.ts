@@ -2,6 +2,7 @@ import * as faker from "faker";
 import { createMockFor, getRandomQueryAction } from "../../../../spec/testUtils";
 import { RequestExecuter } from "../../../internal/executer";
 import { IAggField } from "../../../internal/query";
+import { ResourceType } from "../resource";
 import { BaseQuery, QueryAction } from "./baseQuery";
 
 interface IUser {
@@ -10,26 +11,29 @@ interface IUser {
   age: number;
 }
 
-const DATASET_NAME = faker.random.word();
+const RESOURCE_NAME = faker.random.word();
+const RESOURCE_TYPE = faker.helpers.randomize([ResourceType.Dataset, ResourceType.Fileset]);
 const DEFAULT_ACTION = getRandomQueryAction();
 
 const createSubject = ({
   action = DEFAULT_ACTION,
-  datasetName = DATASET_NAME,
+  resourceName = RESOURCE_NAME,
+  resourceType = RESOURCE_TYPE,
   requestExecuterMock = createMockFor(RequestExecuter),
 } = {}) => {
   // Declare child class as long as BaseQuery class is abstract
   class BaseQueryChild<T> extends BaseQuery<T> {
     protected readonly body = null;
-    constructor(r: RequestExecuter, a: QueryAction, d: string) {
-      super(r, a, d);
+    constructor(r: RequestExecuter, a: QueryAction, t: ResourceType, d: string) {
+      super(r, a, t, d);
     }
   }
 
-  const subject = new BaseQueryChild<IUser>(requestExecuterMock, action, datasetName);
+  const subject = new BaseQueryChild<IUser>(requestExecuterMock, action, resourceType, resourceName);
 
   return {
-    datasetName,
+    resourceName,
+    resourceType,
     subject,
     requestExecuterMock,
   };
@@ -54,8 +58,12 @@ describe("BaseQuery class", () => {
     expect((subject as any).query).toBeDefined();
   });
 
-  it("Query dataset should be set to the passed one", () => {
-    expect((subject as any).query.dataset).toEqual(DATASET_NAME);
+  it("should have resource name", () => {
+    expect((subject as any).resourceName).toEqual(RESOURCE_NAME);
+  });
+
+  it("should have resource type", () => {
+    expect((subject as any).resourceType).toEqual(RESOURCE_TYPE);
   });
 });
 
@@ -136,7 +144,7 @@ describe("compiledRequest method", () => {
   });
 
   it("should contain queryParams", () => {
-    const queryParams = [];
+    const queryParams: any[] = [];
     spyOn(subject.query, "compileToQueryParams").and.returnValue(queryParams);
 
     expect(subject.compiledRequest.queryParams).toBe(queryParams);
@@ -147,6 +155,14 @@ describe("compiledRequest method", () => {
     spyOn(subject.query, "compileToQueryParams").and.returnValue(queryParams);
 
     expect(subject.compiledRequest.queryParams).toEqual([]);
+  });
+
+  it("should contain resource type", () => {
+    expect(subject.compiledRequest.resourceType).toEqual(RESOURCE_TYPE);
+  });
+
+  it("should contain resource name", () => {
+    expect(subject.compiledRequest.resourceName).toEqual(RESOURCE_NAME);
   });
 });
 

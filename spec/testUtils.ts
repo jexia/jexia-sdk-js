@@ -42,7 +42,7 @@ export function createGenericSuccesfulResponse(): Promise<any> {
   return Promise.resolve({ Status: "OK" });
 }
 
-export function createRequestExecuterMock(projectID: string, datasetName: string): RequestExecuter {
+export function createRequestExecuterMock(): RequestExecuter {
   return createMockFor(RequestExecuter, { returnValue: createGenericSuccesfulResponse() });
 }
 

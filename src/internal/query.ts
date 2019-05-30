@@ -14,7 +14,7 @@ type KeyOfObject<T> = Extract<keyof T, string>;
 
 /**
  * Object to be passed as aggregation field
- * <T> - generic dataset object
+ * <T> - generic resource object
  */
 export interface IAggField<T = any> {
   fn: "COUNT" | "MIN" | "MAX" | "AVG" | "SUM" | "EVERY";
@@ -30,7 +30,7 @@ interface ISort<K> {
 }
 
 /* Array of data sorting
-   fields should be in inherited generic dataset model (if it's been set)
+   fields should be in inherited generic resource model (if it's been set)
  */
 type SortedFields<T> = Array<ISort<KeyOfObject<T>>>;
 
@@ -50,9 +50,6 @@ export class Query<T = any> {
   private filteringConditions: ICondition;
   private orders: SortedFields<T> = [];
   private relations: Query[] = [];
-
-  constructor(private readonly dataset: string) {
-  }
 
   /*
    * This method is here to encapsulate the translation of filter settings
@@ -110,12 +107,12 @@ export class Query<T = any> {
     }
 
     /* Compile relations
-     */
-    if (this.relations.length) {
+     * TODO develop relations */
+    /*if (this.relations.length) {
       compiledQueryOptions.relations = this.relations.reduce((relations, relation) => (
         { ...relations, [relation.dataset]: relation.compile() }
       ), {});
-    }
+    }*/
 
     return compiledQueryOptions;
   }
