@@ -94,7 +94,7 @@ describe("QueryExecuter class", () => {
         expect(subject.parseQueryParams).toHaveBeenCalledWith(requestData);
       });
 
-      it("should eject request options", async () => {
+      it("should get request options", async () => {
         spyOn(subject, "getRequestOptions");
         await subject.executeRequest(requestData);
         expect(subject.getRequestOptions).toHaveBeenCalledWith(requestData);

@@ -1,7 +1,7 @@
-import { ResourceType } from "jexia-sdk-js/api/core/resource";
 import { RequestExecuter } from "../../../internal/executer";
 import { IRequestExecuterData } from "../../../internal/executer.interfaces";
 import { IAggField, Query } from "../../../internal/query";
+import { ResourceType } from "../resource";
 
 /**
  * @internal

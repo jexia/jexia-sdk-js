@@ -18,7 +18,6 @@ Executing an operation on a set of records is done through a Query. Depending on
   - sorting (the records will be sorted by a rule and direction before the action is executed)
   - limiting/offsetting (only a certain number of records, starting from a certain position in the Dataset will be affected)
   - selecting the fields to be retrieved (when the user does not want the entire record to be retrieved, only certain columns)
-  - relations (records from related datasets, as instructed, will also be affected by the request)
 
 All these features are handled server-side. Right now there is no client-side functionality implemented for filtering, sorting, etc. 
 
@@ -263,23 +262,6 @@ let anotherNestedFilter = field("first_name").isEqualTo("Tom")
 ### Filtering operator list and examples
 
 You can find a complete list of the operators supported for filtering in the API reference document.
-
-### Defining relations
-
-Relations can be added to a query in order to have the query apply not only to the main dataset the query is created from, but also to related records from other datasets.
-
-Retrieving relations:
-
-``` Javascript
-[..]
-let posts = dataModule.dataset("posts");
-let comments = dataModule.dataset("comments");
-posts.select().relation(comments).execute().then( (records) => {
-  // objects in the records array will now contain a property called "comments"
-  // which will be an array holding the comments related to a particular post.
-});
-[..]
-```
 
 ### Inserting records
 
