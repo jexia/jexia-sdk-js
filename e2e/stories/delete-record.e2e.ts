@@ -36,6 +36,29 @@ describe("delete record REST API", async () => {
     joiAssert(result, Joi.empty());
   });
 
+  it("deletes multiples records", async () => {
+    const records = await getDataSet()
+      .insert([
+        { [DEFAULT_DATASET.FIELD]: faker.name.findName() },
+        { [DEFAULT_DATASET.FIELD]: faker.name.findName() },
+      ])
+      .execute();
+
+    const isInList = field("id").isInArray(records.map((r) => r.id));
+
+    await getDataSet()
+      .delete()
+      .where(isInList)
+      .execute();
+
+    const result = await getDataSet()
+      .select()
+      .where(isInList)
+      .execute();
+
+    joiAssert(result, Joi.empty());
+  });
+
   it("should throw error under invalid where condition", async () => {
     try {
       await getDataSet()
