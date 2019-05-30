@@ -3,7 +3,7 @@ import { DatasetInterface } from "jexia-sdk-js/api/dataops/dataset";
 import { CompositeFilteringCondition, FilteringCondition, ICondition } from "./filteringCondition";
 
 /**
- * @internal
+ * This object must be build from `field` helper function, never to be instantiated directly.
  */
 export class FieldFilter<U> {
   constructor(public readonly fieldName: string) {}

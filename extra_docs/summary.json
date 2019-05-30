@@ -12,6 +12,10 @@
     "file": "../CODE_OF_CONDUCT.md"
   },
   {
+    "title": "Dataset Operations",
+    "file": "dataset/README.md"
+  },
+  {
     "title": "Fileset Operations",
     "file": "jfs/README.md"
   },
