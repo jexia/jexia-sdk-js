@@ -25,6 +25,7 @@ let apiKey: { id: string, key: string, secret: string };
 let policy: { id: string };
 
 export const DEFAULT_DATASET = { NAME: "test_dataset", FIELD: "test_field" };
+export const DEFAULT_FILESET = { NAME: "test_fileset", FIELD: "test_field" };
 
 export const init = async (
   datasetName = DEFAULT_DATASET.NAME,
