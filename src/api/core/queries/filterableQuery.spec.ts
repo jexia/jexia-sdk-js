@@ -1,8 +1,10 @@
+import * as faker from "faker";
 import { Dataset } from "../../..";
 import { createMockFor } from "../../../../spec/testUtils";
 import { RequestExecuter } from "../../../internal/executer";
 import { Query } from "../../../internal/query";
 import { field } from "../../dataops/filteringApi";
+import { ResourceType } from "../resource";
 import { QueryAction } from "./baseQuery";
 import { FilterableQuery } from "./filterableQuery";
 
@@ -13,25 +15,27 @@ interface IUser {
 
 let createSubject = ({
   action = QueryAction.select,
-  datasetName = "dataset",
+  resourceName = faker.random.word(),
+  resourceType = faker.helpers.randomize([ResourceType.Dataset, ResourceType.Fileset]),
   requestExecuterMock = createMockFor(RequestExecuter),
   createMockForQuery = true,
 } = {}) => {
   // Declare child class as long as FilterableQuery is abstract
   class FilterableQueryChild<T> extends FilterableQuery<T> {
-    constructor(r: RequestExecuter, a: QueryAction, d: string) {
-      super(r, a, d);
+    constructor(r: RequestExecuter, a: QueryAction, t: ResourceType, d: string) {
+      super(r, a, t, d);
     }
   }
 
-  const subject = new FilterableQueryChild<IUser>(requestExecuterMock, action, datasetName);
-  let queryMock = createMockForQuery ? createMockFor<Query>(Query) : new Query(datasetName);
+  const subject = new FilterableQueryChild<IUser>(requestExecuterMock, action, resourceType, resourceName);
+  let queryMock = createMockForQuery ? createMockFor<Query>(Query) : new Query();
 
   // tslint:disable-next-line:no-string-literal
   subject["query"] = queryMock;
 
   return {
-    datasetName,
+    resourceName,
+    resourceType,
     subject,
     requestExecuterMock,
     queryMock,
@@ -73,7 +77,12 @@ describe("when instantiating a select query object", () => {
     expect(queryMock.setFilterCriteria).toHaveBeenCalledWith(filter);
   });
 
-  it("should have the correct query for relation without configured query", () => {
+  it("should throw an error if call relation method", () => {
+    const { subject } = createSubject();
+    expect(() => subject.relation({} as Dataset)).toThrow();
+  });
+
+  xit("should have the correct query for relation without configured query", () => {
     const { subject } = createSubject({ createMockForQuery: false });
     const testQuery = {};
     const datasetMock = createMockFor(Dataset, { returnValue: { query: testQuery } });
@@ -82,7 +91,7 @@ describe("when instantiating a select query object", () => {
     expect(queryObj["query"]["relations"]).toEqual([testQuery]);
   });
 
-  it("should have the correct query for relation with configured query", () => {
+  xit("should have the correct query for relation with configured query", () => {
     const { subject } = createSubject({ createMockForQuery: false });
     const testQuery = {};
     const datasetMock = createMockFor(Dataset);

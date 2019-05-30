@@ -44,8 +44,6 @@ export abstract class FilterableQuery<T> extends BaseQuery<T> {
     dataSet: Dataset<R>,
     callback: (query: SelectQuery<DatasetInterface<R>>) => SelectQuery<DatasetInterface<R>> = (q) => q,
   ): this {
-    let relation = callback(dataSet.select()) as any;
-    this.query.addRelation(relation.query);
-    return this;
+    throw new Error("Relations are not supported in current version of SDK");
   }
 }
