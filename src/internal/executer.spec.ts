@@ -1,19 +1,21 @@
 import * as faker from "faker";
 import { getRandomQueryAction, requestAdapterMockFactory } from "../../spec/testUtils";
+import { QueryAction } from "../api/core/queries/baseQuery";
+import { ResourceType } from "../api/core/resource";
 import { TokenManager } from "../api/core/tokenManager";
 import { API } from "../config/config";
-import { IRequestExecuterData } from "./../../dist/internal/executer.interfaces.d";
-import { QueryAction } from "../api/core/queries/baseQuery";
 import { RequestExecuter } from "./executer";
+import { IRequestExecuterData } from "./executer.interfaces";
 import { Methods } from "./requestAdapter";
 import { deferPromise } from "./utils";
 
 describe("QueryExecuter class", () => {
   const validToken = faker.random.alphaNumeric();
-  const dataset = faker.random.word();
   const projectID = faker.random.uuid();
-  const restUrl = `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}` +
-    `/${API.DATA.ENDPOINT}/${dataset}`;
+  const restDatasetUrl = (resourceName: string) => `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}` +
+    `:${API.PORT}/${API.DATA.ENDPOINT}/${resourceName}`;
+  const restFilesetUrl = (resourceName: string) => `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}` +
+    `:${API.PORT}/${API.FILES.ENDPOINT}/${resourceName}`;
 
   const QUERY_ACTION = getRandomQueryAction();
 
@@ -27,17 +29,15 @@ describe("QueryExecuter class", () => {
     } as TokenManager,
   } = {}) => {
     return {
-      dataset,
       clientInit,
       reqAdapterMock,
       tokenManagerMock,
       subject: new RequestExecuter(
         { projectID } as any,
-        dataset,
         clientInit,
         reqAdapterMock,
         tokenManagerMock,
-      ),
+      ) as any,
     };
   };
 
@@ -49,51 +49,62 @@ describe("QueryExecuter class", () => {
   });
 
   describe("getRequestUrl method", () => {
-    it("should use rest api endpoint for the rest request", () => {
+    it("should use dataset api endpoint for the dataset request", () => {
       const { subject } = createSubject();
-      const url = (subject as any).getUrl();
-      expect(url).toEqual(restUrl);
+      const mockRequest = {
+        resourceName: faker.random.word(),
+        resourceType: ResourceType.Dataset,
+      };
+      const url = subject.getUrl(mockRequest);
+      expect(url).toEqual(restDatasetUrl(mockRequest.resourceName));
+    });
+
+    it("should use fileset api endpoint for the fileset request", () => {
+      const { subject } = createSubject();
+      const mockRequest = {
+        resourceName: faker.random.word(),
+        resourceType: ResourceType.Fileset,
+      };
+      const url = subject.getUrl(mockRequest);
+      expect(url).toEqual(restFilesetUrl(mockRequest.resourceName));
     });
   });
 
   describe("when calling", () => {
     let subject: any;
+    let requestData: any;
 
-    it("executeRestMethod() should call method to get URL", async () => {
-      ({ subject } = createSubject({
-        reqAdapterMock: requestAdapterMockFactory().genericSuccesfulExecution()
-      }));
-      spyOn(subject, "getURI");
-      await subject.executeRequest([]);
-      expect(subject.getURI).toHaveBeenCalled();
-    });
-
-    describe("getURI method", () => {
+    describe("executeRequest method", () => {
       beforeEach(() => {
-        ({ subject } = createSubject());
+        subject = createSubject({
+          reqAdapterMock: requestAdapterMockFactory().genericSuccesfulExecution()
+        }).subject;
+        requestData = { resourceName: faker.random.word() };
       });
 
-      it("should call method to get url", () => {
+      it("should get URL", async () => {
         spyOn(subject, "getUrl");
-        subject.getURI([]);
-
-        expect(subject.getUrl).toHaveBeenCalled();
+        await subject.executeRequest(requestData);
+        expect(subject.getUrl).toHaveBeenCalledWith(requestData);
       });
 
-      it("should call method to parse params", () => {
-        const queryParams = [];
-
+      it("should parse query params", async () => {
         spyOn(subject, "parseQueryParams");
-        subject.getURI(queryParams);
-
-        expect(subject.parseQueryParams).toHaveBeenCalledWith(queryParams);
+        await subject.executeRequest(requestData);
+        expect(subject.parseQueryParams).toHaveBeenCalledWith(requestData);
       });
 
-      it("should concatenate URL + query params ", () => {
-        const queryParams = [];
+      it("should eject request options", async () => {
+        spyOn(subject, "getRequestOptions");
+        await subject.executeRequest(requestData);
+        expect(subject.getRequestOptions).toHaveBeenCalledWith(requestData);
+      });
 
-        expect(subject.getURI(queryParams)).toEqual(
-          subject.getUrl() + subject.parseQueryParams(queryParams)
+      it("should make a request with proper URL, params and options", async () => {
+        await subject.executeRequest(requestData);
+        expect(subject.requestAdapter.execute).toHaveBeenCalledWith(
+          subject.getUrl(requestData) + subject.parseQueryParams(requestData),
+          await subject.getRequestOptions(requestData),
         );
       });
     });
@@ -104,7 +115,7 @@ describe("QueryExecuter class", () => {
       });
 
       it("should return empty string when argument is empty", () => {
-        expect(subject.parseQueryParams([])).toBe("");
+        expect(subject.parseQueryParams({})).toBe("");
       });
 
       it("should parse to the correct format for non-string values", () => {
@@ -123,7 +134,7 @@ describe("QueryExecuter class", () => {
         const encodeValue = (v: any) => encodeURIComponent(JSON.stringify(v));
         const expectedParams = `?${key}=${encodeValue(value)}`;
 
-        expect(subject.parseQueryParams(queryParams)).toEqual(expectedParams);
+        expect(subject.parseQueryParams({ queryParams })).toEqual(expectedParams);
       });
 
       it("should parse to the correct format for string values", () => {
@@ -138,7 +149,7 @@ describe("QueryExecuter class", () => {
 
         const expectedParams = `?${key}=${encodeValue(value)}`;
 
-        expect(subject.parseQueryParams(queryParams)).toEqual(expectedParams);
+        expect(subject.parseQueryParams({ queryParams })).toEqual(expectedParams);
       });
 
       it("should separate params by ampersand", () => {
@@ -152,18 +163,9 @@ describe("QueryExecuter class", () => {
           { key: key3, value: faker.random.number() },
         ];
 
-        const result: string = subject.parseQueryParams(queryParams);
+        const result: string = subject.parseQueryParams({ queryParams });
 
-        expect(result.match(/&/g).length).toEqual(queryParams.length - 1);
-      });
-
-      it("should concatenate URL + query params ", () => {
-        const queryParams = [];
-        ({ subject } = createSubject());
-
-        expect(subject.getURI(queryParams)).toEqual(
-          subject.getUrl() + subject.parseQueryParams(queryParams)
-        );
+        expect(result.split("&").length).toEqual(queryParams.length);
       });
     });
   });
@@ -185,13 +187,17 @@ describe("QueryExecuter class", () => {
   });
 
   describe("when calling execute() method", () => {
-    const mockRequest: IRequestExecuterData = { action: QUERY_ACTION };
+    const mockRequest: IRequestExecuterData = {
+      resourceType: faker.helpers.randomize([ResourceType.Dataset, ResourceType.Fileset]),
+      resourceName: faker.random.word(),
+      action: QUERY_ACTION,
+    };
 
     it("should pass default params down to the request adapter", async () => {
       const { subject, reqAdapterMock } = createSubject();
       await subject.executeRequest(mockRequest);
       expect(reqAdapterMock.execute).toHaveBeenCalledWith(
-        restUrl,
+        subject.getUrl(mockRequest) + subject.parseQueryParams(mockRequest),
         {
           headers: { Authorization: `Bearer ${validToken}` },
           method: subject.getMethod(QUERY_ACTION),
@@ -204,14 +210,15 @@ describe("QueryExecuter class", () => {
     withoutBody.forEach(({ action, expected }) => {
       it("should pass no body for GET requests", async () => {
         const { subject, reqAdapterMock } = createSubject();
-
-        await subject.executeRequest({
+        const request = {
           action,
           body: {},
-        });
+        };
+
+        await subject.executeRequest(request);
 
         expect(reqAdapterMock.execute).toHaveBeenCalledWith(
-          restUrl,
+          subject.getUrl(request) + subject.parseQueryParams(request),
           {
             headers: { Authorization: `Bearer ${validToken}` },
             method: expected,
@@ -228,13 +235,14 @@ describe("QueryExecuter class", () => {
         const fakeBody = {
           someObject: faker.random.number(),
         };
-        await subject.executeRequest({
+        const request = {
           action,
           body: fakeBody,
-        });
+        };
+        await subject.executeRequest(request);
 
         expect(reqAdapterMock.execute).toHaveBeenCalledWith(
-          restUrl,
+          subject.getUrl(request) + subject.parseQueryParams(request),
           {
             headers: { Authorization: `Bearer ${validToken}` },
             body: fakeBody,

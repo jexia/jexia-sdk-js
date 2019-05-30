@@ -1,6 +1,7 @@
+import { ResourceType } from "jexia-sdk-js/api/core/resource";
 import { RequestExecuter } from "../../../internal/executer";
-import { IAggField, Query } from "../../../internal/query";
 import { IRequestExecuterData } from "../../../internal/executer.interfaces";
+import { IAggField, Query } from "../../../internal/query";
 
 /**
  * @internal
@@ -35,9 +36,10 @@ export abstract class BaseQuery<T> {
   protected constructor(
       protected queryExecuter: RequestExecuter,
       protected readonly action: QueryAction,
-      readonly dataset: string,
+      protected readonly resourceType: ResourceType,
+      protected readonly resourceName: string,
   ) {
-    this.query = new Query<T>(dataset);
+    this.query = new Query<T>();
   }
 
   /**
@@ -60,6 +62,8 @@ export abstract class BaseQuery<T> {
    */
   private get compiledRequest(): IRequestExecuterData {
     return {
+      resourceType: this.resourceType,
+      resourceName: this.resourceName,
       action: this.action,
       body: this.body || {},
       queryParams: this.query.compileToQueryParams() || [],

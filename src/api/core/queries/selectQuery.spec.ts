@@ -1,48 +1,42 @@
 // tslint:disable:no-string-literal
+import * as faker from "faker";
 // tslint:disable:one-variable-per-declaration
-import { createMockFor, createRequestExecuterMock } from "../../../../spec/testUtils";
+import { createMockFor } from "../../../../spec/testUtils";
 import { MESSAGE } from "../../../config";
 import { RequestExecuter } from "../../../internal/executer";
 import { Query } from "../../../internal/query";
+import { ResourceType } from "../resource";
 import { SelectQuery } from "./selectQuery";
 
-interface ITestUser {
-  id: number;
-  name: string;
-  email: string;
-  isAdmin: boolean;
-}
-
 describe("SelectQuery class", () => {
-  const projectID = "projectID";
-  const dataset = "dataset";
   const testFields = ["id", "name", "email"];
 
   function createSubject({
-    datasetName = "dataset",
+    resourceName = faker.random.word(),
+    resourceType = faker.helpers.randomize([ResourceType.Dataset, ResourceType.Fileset]),
     mockQuery = true,
     requestExecuterMock = createMockFor(RequestExecuter),
   } = {}) {
-    const subject: SelectQuery<any> = new SelectQuery(requestExecuterMock as any, datasetName);
-    let queryMock: Query = new Query(datasetName);
+    const subject: SelectQuery<any> = new SelectQuery(requestExecuterMock as any, resourceType, resourceName);
+    let queryMock: Query = new Query();
 
     if (mockQuery) {
       queryMock = createMockFor(Query);
       subject["query"] = queryMock;
     }
     return {
-      datasetName,
+      resourceType,
+      resourceName,
       subject,
       requestExecuterMock,
       queryMock,
     };
   }
 
-  describe("when instantiating a select object", () => {
-    it("should be able to get the select query object", () => {
-      let qe = createRequestExecuterMock(projectID, dataset);
-      let selectQuery: SelectQuery<ITestUser> = new SelectQuery(qe, dataset);
-      expect(selectQuery).toBeDefined();
+  describe("when instantiating", () => {
+    it("should be defined", () => {
+      const { subject } = createSubject();
+      expect(subject).toBeDefined();
     });
   });
 
@@ -99,29 +93,25 @@ describe("SelectQuery class", () => {
     });
 
     describe("sortAsc and sortDesc default param", () => {
-      let qe = createRequestExecuterMock(projectID, dataset);
-      let queryObj: any;
-
-      beforeAll(() => {
-        queryObj = new SelectQuery(qe, "dataset");
+      it(`should throws and error when sortAsc is called`, () => {
+        const { subject } = createSubject();
+        expect(() => subject.sortAsc()).toThrow(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
       });
 
-      ["sortAsc", "sortDesc"].forEach((method) => {
-        it(`should throws and error when ${method} is called`, () => {
-          expect(() => queryObj[method]()).toThrow(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
-        });
+      it(`should throws and error when sortDesc is called`, () => {
+        const { subject } = createSubject();
+        expect(() => subject.sortDesc()).toThrow(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
       });
     });
 
   });
 
   it("should correct execute the query", () => {
-    let qe = createRequestExecuterMock(projectID, dataset);
-    let subject: any = new SelectQuery(qe, dataset);
+    const { subject } = createSubject();
     subject.fields("id");
     spyOn(subject["queryExecuter"], "executeRequest");
     subject.execute();
-    expect(subject["queryExecuter"].executeRequest).toHaveBeenLastCalledWith(subject.compiledRequest);
+    expect(subject["queryExecuter"].executeRequest).toHaveBeenLastCalledWith((subject as any).compiledRequest);
   });
 
 });

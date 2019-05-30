@@ -54,7 +54,7 @@ describe("Dataset class", () => {
 
   it("should throw an error when try to use the watch method without the real time module", () => {
     const dataset = new Dataset("test", createMockFor(RequestExecuter));
-    expect(() => dataset["watch"]()).toThrow();
+    expect(() => (dataset as any).watch()).toThrow();
   });
 
 });
