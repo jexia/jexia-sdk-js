@@ -1,15 +1,21 @@
 # Datasets Module
-A Dataset is used to manipulate records.
+A Dataset ia a data storage where data is stored either using a strict schema or without it (schemaless). You are able to manipulate this data by creating, updating, fetching and deleting records, and also to query over them by using conditions like `isEqualTo` and `isGreaterThen` (full list available in [FieldFilter API reference](../classes/FieldFilter.html)).
+
 
 ### [Initialize](#init) 
 To use dataset features, just add `dataOperations` module to the client initialization. Notice, that for Node.js
-you have to import `dataOperations` from `jexia-sdk-js/node`, but if you are running your application in a browser, you should import it from `jexia-sdk-js/browser`. That is because file format is different under these two platforms.
+you have to import `dataOperations` from `jexia-sdk-js/node`, but if you are running your application in a browser, you should import it from `jexia-sdk-js/browser`.
+
 ```typescript
 import { jexiaClient, dataOperations } from "jexia-sdk-js/node"; // "jexia-sdk-js/browser" for browser applications
 
 const dataModule = dataOperations();
 
-jexiaClient().init(credentials, dataModule);
+jexiaClient().init({
+  projectID: "<your-project-id>",
+  key: "<your-project-api-key>",
+  secret: "<your-project-api-secret>",
+}, dataModule);
 ```
 
 ### [Inserting records](#inserting-records)
@@ -49,36 +55,44 @@ The `update` method is used to modify records, it always has to be used with the
 
 ``` Javascript
 [..]
-const filter = field("id").isInArray([1, 2]);
+try {
+  const filter = field("author_name").isInArray(["Tom", "Harry"]);
+  const affectedRecords = await dataModule
+    .dataset("posts")
+    .update({ title: "Same title for tom and harry posts" })
+    .where(filter)
+    .execute();
 
-dataModule.dataset("posts")
-  .update({
-    title: "Changing title",
-  })
-  .where(filter)
-  .execute()
-  .then(() => {
-    // the elements that fill the criteria now have been changed
-  }).catch((error) => {
-    // you can see the error info here, if something goes wrong
-  });
+  console.log(affectedRecords);
+  // output: 
+  // [
+  //   { title: "Same title for tom and harry posts", author_name: "Tom" }, 
+  //   { title: "Same title for tom and harry posts", author_name: "Tom" }, 
+  //   { title: "Same title for tom and harry posts", author_name: "Harry" }, 
+  //   { title: "Same title for tom and harry posts", author_name: "Tom" }, 
+  //   ...
+  // ]
+} catch (error) {
+  // you can see the error info here, if something goes wrong
+}
 ```
 
 ### [Deleting records](#deleting-records)
 
 ``` Javascript
 [..]
-dataModule.dataset("posts")
-  .delete()
-  .where(field("title").isLike("test"))
-  .execute()
-  .then((records) => {
-    // you will be able to access the deleted records here
-    // they won't be stored in the DB anymore, but maybe you
-    // want to display a visual confirmation of what got deleted
-  }).catch((error) => {
-    // you can see the error info here, if something goes wrong
-  });
+try {
+  const posts = await dataModule.dataset("posts")
+    .delete()
+    .where(field("title").isLike("test"))
+    .execute();
+    
+  // you will be able to access the deleted posts here
+  // they won't be stored in the DB anymore, but maybe you
+  // want to display a visual confirmation of what was deleted
+} catch (error) {
+  // you can see the error info here, if something goes wrong
+}
 [..]
 ```
 
@@ -136,7 +150,7 @@ jexiaClient().init(credentials, dataModule);
 try {
   const posts = await dataModule.dataset("posts")
     .select()
-    .execute();    
+    .execute();
   // you can start iterating with posts here
 } catch (error) {
   // there was a problem retrieving the records 
@@ -152,12 +166,20 @@ In order to sort records, you need to call `.sortAsc` or `.sortDesc` on a `Query
 
 ``` Javascript
 [..]
-posts.select()
+const sortedPosts = await dataModule.dataset("posts")
+  .select()
   .sortAsc("created_at")
-  .execute()
-  .then((posts) => {
-    // operate on your sorted posts here
-  });
+  .execute();
+
+console.log(sortedPosts)
+// output: 
+// [
+//   { created_at: "2019-01-10T00:00:32.000Z", author_name: "Tom" }, 
+//   { created_at: "2019-02-15T00:10:00.000Z", author_name: "Helen" }, 
+//   { created_at: "2008-02-16T00:12:00.000Z", author_name: "Harry" },
+//   { created_at: "2008-02-16T10:45:00.000Z", author_name: "Mary" },
+//   ...
+// ]
 [..]
 ```
 
@@ -167,13 +189,13 @@ You can use `.limit` and `.offset` on a `Query` to paginate your records. They c
 
 ``` Javascript
 [..]
-posts.select()
+const paginatedPosts = await dataModule.dataset("posts")
+  .select()
   .limit(2)
   .offset(5)
-  .execute()
-  .then((posts) => {
-    // posts will be an array of 2 records, starting from position 5 in the Dataset
-  });
+  .execute();
+
+// paginatedPosts will be an array of 2 records, starting from position 5
 [..]
 ```
 
@@ -183,17 +205,17 @@ You can use `.fields` method to restrict fields you want to retrieve.
 
 ``` Javascript
 [..]
-posts.select()
-  .fields("id", "title") // you can pass an array of field names too
-  .execute()
-  .then((posts) => {
-    console.log(posts);
-    // output:
-    // [ 
-    //   { id: "78574c6a-b5a0-45da-a589-9671a88f7f53", title: "Some post title" },
-    //   { id: "1b118939-85fc-47f0-9b4f-a6de00922e15", title: "Some other post title" },
-    // ]
-  });
+const posts = await dataModule.dataset("posts")
+  .select()
+  .fields("id", "title") // you can also pass an array of field names too
+  .execute();
+
+console.log(posts);
+// output:
+// [ 
+//   { id: "78574c6a-b5a0-45da-a589-9671a88f7f53", title: "Some post title" },
+//   { id: "1b118939-85fc-47f0-9b4f-a6de00922e15", title: "Some other post title" },
+// ]
 [..]
 ```
 
@@ -212,7 +234,7 @@ const isAuthorTomOrDick = isAuthorTom.or(isAuthorDick);
 
 // In order to use these conditions, they need to be added to a query through `.where` method
 
-posts
+dataModule.dataset("posts")
   .select()
   .where(isAuthorTomOrDick);
 
@@ -223,7 +245,8 @@ If you prefer, `.where` method also accepts a lazy callback, that receives the `
 
 ``` Javascript
 [..]
-posts.select()
+dataModule.dataset("posts")
+  .select()
   .where(field => field("author_name").isEqualTo("Harry"));
 [..]
 ```
@@ -241,7 +264,8 @@ const isPostedByTomAndIsAboutSports = field("author_name")
 
 // Filtering with one nested level
 const isPostedByDickAndIsAboutMusic = field("author_name")
-  .isEqualTo("Dick").isLike("music");
+  .isEqualTo("Dick")
+  .and(field("title").isLike("music"));
 
 const isTomOrIsDickHarry = field("author_name")
   .isEqualTo("Tom")

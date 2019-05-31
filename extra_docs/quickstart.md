@@ -4,7 +4,7 @@ Jexia SDK currently exposes the following features:
   - On-demand access to data stored in Datasets and Filesets (CRUD operations, file uploads)
   - Authentication and authorization under the platform, you only need to provide your credentials.
 
-Currently SDK is focused on *consuming* data. In order to manage data schema (creating Datasets, adding fields to them, etc.) is done through our web application at [app.jexia.com](https://app.jexia.com).
+Currently SDK is focused on *consuming* data. In order to manage data schema (creating Datasets, adding fields to them, etc.) you need to use our [web application](https://app.jexia.com). We suggest you read the guide [Start your first project](https://docs.jexia.com/getting-started/start-your-first-project/).
 
 ### On-demand data access
 The user can execute the following operations on records:
