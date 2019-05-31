@@ -25,6 +25,10 @@ describe("filter records REST API", async () => {
   };
   type Condition = IFilteringCriterion<any> | IFilteringCriterionCallback<any>;
 
+  const RecordSchema = Joi.object().keys({
+    id: Joi.string().required(),
+  });
+
   function testLength(title: string, condition: Condition, expectedLength: number) {
     it(`should select records by "${title}"`, async () => {
       const selectResult = await dataset
@@ -397,7 +401,7 @@ describe("filter records REST API", async () => {
     function testDate({
       fieldName,
       fakePastDate,
-      fakeFutureDate
+      fakeFutureDate,
     }) {
       const testData = [
         { [fieldName]: null },
@@ -407,63 +411,63 @@ describe("filter records REST API", async () => {
         { [fieldName]: fakeFutureDate({ min: 11, max: 30 }) },
       ];
 
-      const [, firstDate, secondDate, thirdDate, lastDate] = testData.map((t) => t[fieldName]);
+      const [nullDate, firstDate, secondDate, thirdDate, lastDate] = testData.map((t) => t[fieldName]);
 
       const successTests = [
         {
           title: "isEqualTo",
           condition: field(fieldName).isEqualTo(secondDate),
-          expectedLength: 1,
+          validValues: [secondDate],
         },
         {
           title: "isDifferentFrom",
           condition: field(fieldName).isDifferentFrom(firstDate),
-          expectedLength: 4,
+          validValues: [nullDate, secondDate, thirdDate, lastDate],
         },
         {
           title: "isInArray",
-          condition: field(fieldName).isInArray([secondDate, firstDate]),
-          expectedLength: 2,
+          condition: field(fieldName).isInArray([firstDate, secondDate]),
+          validValues: [firstDate, secondDate],
         },
         {
           title: "isNotInArray",
           condition: field(fieldName).isNotInArray([thirdDate, lastDate]),
-          expectedLength: 2, // doesn't include null values
+          validValues: [firstDate, secondDate], // doesn't include null values
         },
         {
           title: "isNull",
           condition: field(fieldName).isNull(),
-          expectedLength: 1,
+          validValues: [nullDate],
         },
         {
           title: "isNotNull",
           condition: field(fieldName).isNotNull(),
-          expectedLength: 4,
+          validValues: [firstDate, secondDate, thirdDate, lastDate],
         },
         {
           title: "isBetween",
           condition: field(fieldName).isBetween(firstDate, thirdDate),
-          expectedLength: 3,
+          validValues: [firstDate, secondDate, thirdDate],
         },
         {
           title: "isLessThan",
           condition: field(fieldName).isLessThan(secondDate),
-          expectedLength: 1,
+          validValues: [firstDate],
         },
         {
           title: "isGreaterThan",
           condition: field(fieldName).isGreaterThan(secondDate),
-          expectedLength: 2,
+          validValues: [thirdDate, lastDate],
         },
         {
           title: "isEqualOrLessThan",
           condition: field(fieldName).isEqualOrLessThan(secondDate),
-          expectedLength: 2,
+          validValues: [firstDate, secondDate],
         },
         {
           title: "isEqualOrGreaterThan",
           condition: field(fieldName).isEqualOrGreaterThan(secondDate),
-          expectedLength: 3,
+          validValues: [secondDate, thirdDate, lastDate],
         },
       ];
 
@@ -474,7 +478,30 @@ describe("filter records REST API", async () => {
         },
       ];
 
-      test(testData, successTests, failTests);
+      setupData(testData);
+
+      successTests.forEach(({ title, condition, validValues }) => {
+        it(`should select records by "${title}"`, async () => {
+          const selectResult = await dataset
+            .select()
+            .fields(fieldName)
+            .where(condition)
+            .execute();
+
+          const expectedResult = Joi
+            .array()
+            .items(RecordSchema.append({
+              [fieldName]: Joi.string().valid(validValues),
+            }))
+            .length(validValues.length);
+
+          joiAssert(selectResult, expectedResult);
+        });
+      });
+
+      failTests.forEach(({ title, condition }) => {
+        testError(title, condition);
+      });
     }
 
     describe("Date", () => {
