@@ -1,4 +1,5 @@
 import { ReflectiveInjector } from "injection-js";
+import { RequestExecuter } from "../../internal/executer";
 import { ClientConfiguration } from "../core/client";
 import { IModule, ModuleConfiguration } from "../core/module";
 import { AuthOptions } from "../core/tokenManager";
@@ -20,7 +21,9 @@ export class FileOperationsModule<FormDataType extends IFormData<F>, F> implemen
   }
 
   public init(coreInjector: ReflectiveInjector): Promise<this> {
-    this.injector = coreInjector.resolveAndCreateChild([]);
+    this.injector = coreInjector.resolveAndCreateChild([
+      RequestExecuter,
+    ]);
 
     /* Check for RTC module if file upload subscription is activated */
     if (this.config.uploadWaitForCompleted) {

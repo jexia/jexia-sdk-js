@@ -1,4 +1,5 @@
 import { RequestExecuter } from "../../../internal/executer";
+import { ResourceType } from "../resource";
 import { BaseQuery, QueryAction } from "./baseQuery";
 
 /**
@@ -27,8 +28,8 @@ export class InsertQuery<T, D extends T> extends BaseQuery<T> {
   /**
    * @internal
    */
-  public constructor(queryExecuter: RequestExecuter, records: T[], dataset: string) {
-    super(queryExecuter, QueryAction.insert, dataset);
+  public constructor(queryExecuter: RequestExecuter, records: T[], resourceType: ResourceType, resourceName: string) {
+    super(queryExecuter, QueryAction.insert, resourceType, resourceName);
     this.body = records;
   }
 
@@ -38,6 +39,8 @@ export class InsertQuery<T, D extends T> extends BaseQuery<T> {
    */
   public execute(): Promise<D[]> {
     return this.queryExecuter.executeRequest({
+      resourceType: this.resourceType,
+      resourceName: this.resourceName,
       action: this.action,
       body: this.body,
     });

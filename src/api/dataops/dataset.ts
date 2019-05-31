@@ -1,11 +1,11 @@
 import { Inject, Injectable } from "injection-js";
 import { RequestExecuter } from "../../internal/executer";
+import { DeleteQuery } from "../core/queries/deleteQuery";
+import { InsertQuery } from "../core/queries/insertQuery";
+import { SelectQuery } from "../core/queries/selectQuery";
+import { UpdateQuery } from "../core/queries/updateQuery";
 import { IResource, ResourceType } from "../core/resource";
 import { DataSetName } from "./dataops.tokens";
-import { DeleteQuery } from "./queries/deleteQuery";
-import { InsertQuery } from "./queries/insertQuery";
-import { SelectQuery } from "./queries/selectQuery";
-import { UpdateQuery } from "./queries/updateQuery";
 
 /**
  * Default fields that will always exist for any dataset
@@ -77,7 +77,7 @@ export class Dataset<T extends object = any, D extends DatasetInterface<T> = Dat
    * With no filters set, returns all records in the selected dataset.
    */
   public select(): SelectQuery<D> {
-    return new SelectQuery<D>(this.requestExecuter, this.datasetName);
+    return new SelectQuery<D>(this.requestExecuter, ResourceType.Dataset, this.datasetName);
   }
 
   /**
@@ -87,7 +87,7 @@ export class Dataset<T extends object = any, D extends DatasetInterface<T> = Dat
    * Don't forget to apply a filter to specify the fields that will be modified.
    */
   public update(data: T): UpdateQuery<T> {
-    return new UpdateQuery<T>(this.requestExecuter, data, this.datasetName);
+    return new UpdateQuery<T>(this.requestExecuter, data, ResourceType.Dataset, this.datasetName);
   }
 
   /**
@@ -102,6 +102,7 @@ export class Dataset<T extends object = any, D extends DatasetInterface<T> = Dat
     return new InsertQuery<T, D>(
       this.requestExecuter,
       Array.isArray(data) ? data : [data],
+      ResourceType.Dataset,
       this.datasetName,
     );
   }
@@ -113,7 +114,7 @@ export class Dataset<T extends object = any, D extends DatasetInterface<T> = Dat
    * from the backend.
    */
   public delete(): DeleteQuery<D> {
-    return new DeleteQuery<D>(this.requestExecuter, this.datasetName);
+    return new DeleteQuery<D>(this.requestExecuter, ResourceType.Dataset, this.datasetName);
   }
 
 }

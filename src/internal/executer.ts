@@ -1,8 +1,8 @@
 import { Inject, Injectable } from "injection-js";
 import { ClientInit } from "../api/core/client";
+import { QueryAction } from "../api/core/queries/baseQuery";
+import { ResourceType } from "../api/core/resource";
 import { AuthOptions, IAuthOptions, TokenManager } from "../api/core/tokenManager";
-import { DataSetName } from "../api/dataops/dataops.tokens";
-import { QueryAction } from "../api/dataops/queries/baseQuery";
 import { API } from "../config";
 import { IRequestExecuterData, QueryParam } from "./executer.interfaces";
 import { IRequestOptions, Methods, RequestAdapter } from "./requestAdapter";
@@ -11,7 +11,6 @@ import { IRequestOptions, Methods, RequestAdapter } from "./requestAdapter";
 export class RequestExecuter {
   constructor(
     @Inject(AuthOptions) private config: IAuthOptions,
-    @Inject(DataSetName) private dataSetName: string,
     @Inject(ClientInit) private systemInit: Promise<any>,
     private requestAdapter: RequestAdapter,
     private tokenManager: TokenManager,
@@ -20,7 +19,7 @@ export class RequestExecuter {
   public async executeRequest(request: IRequestExecuterData): Promise<any> {
     await this.systemInit;
 
-    const URI = this.getURI(request.queryParams);
+    const URI = this.getUrl(request) + this.parseQueryParams(request);
     const options = await this.getRequestOptions(request);
 
     return this.requestAdapter.execute(URI, options);
@@ -51,18 +50,8 @@ export class RequestExecuter {
     return options;
   }
 
-  private hasBody(request: IRequestExecuterData): boolean {
-    return ![Methods.GET, Methods.DELETE].includes(this.getMethod(request.action));
-  }
-
-  /**
-   * Gets the URL concatenated with query params, when available.
-   *
-   * @param  queryParams
-   * @returns string
-   */
-  private getURI(queryParams: QueryParam[] = []): string {
-    return this.getUrl() + this.parseQueryParams(queryParams);
+  private hasBody({ action }: IRequestExecuterData): boolean {
+    return ![Methods.GET, Methods.DELETE].includes(this.getMethod(action));
   }
 
   /**
@@ -71,7 +60,7 @@ export class RequestExecuter {
    * @param  queryParams
    * @returns string
    */
-  private parseQueryParams(queryParams: QueryParam[]): string {
+  private parseQueryParams({ queryParams = [] }: IRequestExecuterData): string {
     if (!queryParams.length) {
       return "";
     }
@@ -86,11 +75,12 @@ export class RequestExecuter {
       .join("&");
   }
 
-  private getUrl(): string {
+  private getUrl({ resourceType, resourceName }: IRequestExecuterData): string {
+    const endpoint = resourceType === ResourceType.Dataset ? API.DATA.ENDPOINT : API.FILES.ENDPOINT;
     return [
       `${API.PROTOCOL}://${this.config.projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}`,
-      API.DATA.ENDPOINT,
-      this.dataSetName,
+      endpoint,
+      resourceName,
     ].join("/");
   }
 }

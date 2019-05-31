@@ -2,17 +2,20 @@
 import * as faker from "faker";
 import { createMockFor, createRequestExecuterMock, SpyObj } from "../../../../spec/testUtils";
 import { RequestExecuter } from "../../../internal/executer";
+import { ResourceType } from "../resource";
 import { UpdateQuery } from "./updateQuery";
 
 const createSubject = ({
-  datasetName = faker.random.word(),
+  resourceName = faker.random.word(),
+  resourceType = faker.helpers.randomize([ResourceType.Dataset, ResourceType.Fileset]),
   data = {},
   requestExecuterMock = createMockFor(RequestExecuter),
 } = {}) => {
-  const subject = new UpdateQuery(requestExecuterMock, data, datasetName);
+  const subject = new UpdateQuery(requestExecuterMock, data, resourceType, resourceName);
 
   return {
-    datasetName,
+    resourceType,
+    resourceName,
     data,
     subject,
     requestExecuterMock,
@@ -20,9 +23,6 @@ const createSubject = ({
 };
 
 describe("QueryRequest class", () => {
-  const projectID = "projectID";
-  const dataset = "dataset";
-
   it("should be created", () => {
     const { subject } = createSubject();
     expect(subject).toBeDefined();
@@ -35,12 +35,12 @@ describe("QueryRequest class", () => {
 
   it("should assign data to body", () => {
     const { data, subject } = createSubject();
-    expect(subject.body).toEqual(data);
+    expect((subject as any).body).toEqual(data);
   });
 
   it("should correct execute the query", () => {
     const { requestExecuterMock, subject} = createSubject({
-      requestExecuterMock: createRequestExecuterMock(projectID, dataset) as SpyObj<RequestExecuter>,
+      requestExecuterMock: createRequestExecuterMock() as SpyObj<RequestExecuter>,
     });
     spyOn(requestExecuterMock, "executeRequest");
     subject.execute();

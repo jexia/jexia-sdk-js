@@ -18,7 +18,6 @@ Executing an operation on a set of records is done through a Query. Depending on
   - sorting (the records will be sorted by a rule and direction before the action is executed)
   - limiting/offsetting (only a certain number of records, starting from a certain position in the Dataset will be affected)
   - selecting the fields to be retrieved (when the user does not want the entire record to be retrieved, only certain columns)
-  - relations (records from related datasets, as instructed, will also be affected by the request)
 
 All these features are handled server-side. Right now there is no client-side functionality implemented for filtering, sorting, etc. 
 

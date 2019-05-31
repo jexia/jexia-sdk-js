@@ -1,7 +1,11 @@
 import { Inject, Injectable } from "injection-js";
 import { Observable, Subject, Subscriber } from "rxjs";
 import { concatMap, filter, map, shareReplay, takeUntil, tap } from "rxjs/operators";
+import { RequestExecuter } from "../../internal/executer";
 import { ClientConfiguration } from "../core/client";
+import { DeleteQuery } from "../core/queries/deleteQuery";
+import { SelectQuery } from "../core/queries/selectQuery";
+import { UpdateQuery } from "../core/queries/updateQuery";
 import { IResource, ResourceType } from "../core/resource";
 import {
   FileOperationsConfig,
@@ -32,6 +36,7 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
     @Inject(FilesetName) private filesetName: string,
     @Inject(ClientConfiguration) private clientConfig: { fileOperations: FileOperationsConfig },
     private fileUploader: FileUploader<FormDataType, T, F>,
+    private requestExecuter: RequestExecuter,
   ) {}
 
   /**
@@ -57,12 +62,42 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
     return fileUploadObservable;
   }
 
-  /** TODO API to develop (make these APIs shared with dataset)
-   *
-   * public select(): SelectQuery<D> {}
-   * public update(data: T): UpdateQuery<T> {}
-   * public delete(): DeleteQuery<D> {}
+  /**
+   * Creates a Select query.
+   * @returns Query object specialized for select statements.
+   * With no filters set, returns all records in the selected dataset.
    */
+  public select(): SelectQuery<D> {
+    return new SelectQuery<D>(this.requestExecuter, ResourceType.Fileset, this.filesetName);
+  }
+
+  /**
+   * Creates an Update query.
+   * @param data Dictionary that contains the key:value pairs for the fields that you want to modify of this dataset
+   * @returns Query object specialized for update statements.
+   * Don't forget to apply a filter to specify the fields that will be modified.
+   * TODO update() does not work as in datasets
+   */
+  public update(data: T): UpdateQuery<T> {
+    return new UpdateQuery<T>(this.requestExecuter, data, ResourceType.Fileset, this.filesetName);
+  }
+
+  /**
+   * insert() does not implemented
+   */
+  public insert(): never {
+    throw new Error("Fileset does not have INSERT, please use upload() instead");
+  }
+
+  /**
+   * Creates a Delete query
+   * @returns Query object specialized for delete statements
+   * You need to specify a filter to narrow down the records that you want deleted
+   * from the backend.
+   */
+  public delete(): DeleteQuery<FilesetInterface<T>> {
+    return new DeleteQuery(this.requestExecuter, ResourceType.Fileset, this.filesetName);
+  }
 
   /**
    * Subscribe for the RTC records

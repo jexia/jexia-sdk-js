@@ -1,11 +1,12 @@
 import * as faker from "faker";
 import { createRequestExecuterMock } from "../../../../spec/testUtils";
+import { ResourceType } from "../resource";
 import { InsertQuery } from "./insertQuery";
 
 describe("InsertQuery class", () => {
-  let projectID: string;
-  let dataset: string;
-  let qe;
+  const resourceName = faker.random.word();
+  const resourceType = faker.helpers.randomize([ResourceType.Dataset, ResourceType.Fileset]);
+  let qe: any;
   let subject: InsertQuery<any, any>;
 
   const fakeRecord = {
@@ -13,14 +14,9 @@ describe("InsertQuery class", () => {
     user_id: faker.random.uuid(),
   };
 
-  beforeAll(() => {
-    dataset = "dataset";
-    projectID = "projectID";
-  });
-
   beforeEach(() => {
-    qe = createRequestExecuterMock(projectID, dataset);
-    subject = new InsertQuery(qe, [fakeRecord], dataset);
+    qe = createRequestExecuterMock();
+    subject = new InsertQuery(qe, [fakeRecord], resourceType, resourceName);
   });
 
   describe("when instantiating a insertQuery object directly", () => {
@@ -39,8 +35,10 @@ describe("InsertQuery class", () => {
     spyOn(qe, "executeRequest");
     subject.execute();
     expect(qe.executeRequest).toHaveBeenLastCalledWith({
-      action: subject.action,
+      action: (subject as any).action,
       body: [fakeRecord],
+      resourceType,
+      resourceName
     });
   });
 });

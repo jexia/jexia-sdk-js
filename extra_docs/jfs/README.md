@@ -180,31 +180,34 @@ fileset.upload(records).subscribe(fileRecord => {
 });
 ```
 
-### [Fileset CRUD operations](#crud)
-It's possible to query filesets in the same way as datasets, file records will be returned
-```typescript
-const files = await jfs.fileset("fileset_name")
-  .select("name", "url")
-  .where(field => field("size").isGreaterThan(1024000))
-  .execute();
+### [Fileset CRUD operations](#crud)  
+It's possible to query filesets in the same way as datasets, except insert query - you need to use `upload()` instead.  
+All fileset records are basically FileRecords, they have additional fields, such as `name`, `size`, `url`, etc.  
+These fields, as well as any custom fields, can be used for select queries (but you cannot update them).  
 
-// array of files that fit to the condition will be returned
-// files === [{ name: "file1.jpj", url: "https://..." }, {...}, ...]
-```
-Update fileset in the same way as dataset. Updating a fileset record with new file is impossible ATM
+#### Select query
+```typescript  
+const files = await jfs.fileset("fileset_name")  
+ .select("name", "url")  
+ .where(field => field("size").isGreaterThan(1024000))  
+ .execute();  
+  
+// array of files that fit to the condition will be returned  
+// files === [{ name: "file1.jpj", url: "https://..." }, {...}, ...]  
+```  
 
-```typescript
-await jfs.fileset("fileset_name")
-  .update({ "name": "newFileName" })
-  .where(field => field("name").isEqualTo("oldFileName"))
-  .execute();
-```
-and delete records:
-```typescript
-await jfs.fileset("fileset_name")
-  .delete()
-  .where(field => field("size").isGreaterThan(1024000))
-  .execute();
-```
-
-
+#### Update query
+Update fileset in the same way as dataset. Updating a fileset record with new file is not supported.
+  
+```typescript  
+await jfs.fileset("fileset_name")  
+ .update({ "isDefaultImage": false })  
+.where(field => field("name").isEqualTo("companyLogo.png"))
+ .execute();  
+```  
+#### Delete query
+```typescript  
+await jfs.fileset("fileset_name")  
+ .delete()  
+ .where(field => field("size").isGreaterThan(1024000))  
+ .execute();  
