@@ -126,7 +126,7 @@
     "typescript": "^2.9.2",
     "uglifyjs-webpack-plugin": "^1.2.4",
     "webpack": "^4.1.1",
-    "webpack-cli": "^2.0.12",
+    "webpack-cli": "^3.3.2",
     "ws": "^3.1.0"
   },
   "release": {
