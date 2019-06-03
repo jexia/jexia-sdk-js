@@ -1,7 +1,7 @@
 import * as faker from "faker";
 import * as Joi from "joi";
-import { cleaning, DEFAULT_DATASET, dom, init } from "../teardowns";
-import { Dataset } from "./../../src/api/dataops/dataset";
+import { Dataset } from "../../../src/api/dataops/dataset";
+import { cleaning, DEFAULT_DATASET, dom, init } from "../../teardowns";
 
 const joiAssert = Joi.assert;
 
@@ -56,7 +56,7 @@ describe("output record fields REST API", () => {
   afterAll(async () => cleaning());
 
   it("should return only id and the field passed", async () => {
-    const fieldName = faker.random.arrayElement([FIELD.TITLE, FIELD.DATE, FIELD.COMMENTS]);
+    const fieldName = faker.random.arrayElement([FIELD.TITLE, FIELD.AUTHOR, FIELD.COMMENTS]);
     const result = await dataset
       .select()
       .fields(fieldName)

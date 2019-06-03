@@ -1,9 +1,9 @@
 import * as faker from "faker";
 import * as Joi from "joi";
-import { Fileset } from "src/api/fileops/fileset";
-import { field } from "../../src";
-import { cleaning, DEFAULT_DATASET, DEFAULT_FILESET, initWithJFS, jfs } from "../teardowns";
-import { MESSAGE } from "./../../src/config/message";
+import { field } from "../../../src";
+import { Fileset } from "../../../src/api/fileops/fileset";
+import { MESSAGE } from "../../../src/config/message";
+import { cleaning, DEFAULT_DATASET, DEFAULT_FILESET, initWithJFS, jfs } from "../../teardowns";
 
 const joiAssert = Joi.assert;
 
