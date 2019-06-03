@@ -1,3 +1,43 @@
+<a name="4.0.0"></a>
+# [4.0.0](https://github.com/jexia/jexia-sdk-js/compare/v3.5.0...v4.0.0) (2019-06-03)
+
+
+* Refactor BaseQuery and RequestExecutor (#61) ([ce41dde](https://github.com/jexia/jexia-sdk-js/commit/ce41dde)), closes [#61](https://github.com/jexia/jexia-sdk-js/issues/61)
+
+
+### Bug Fixes
+
+* **api:** change authorization schema ([58c83d2](https://github.com/jexia/jexia-sdk-js/commit/58c83d2))
+* **auth:** change RTC auth point and token to access_token ([75c8c78](https://github.com/jexia/jexia-sdk-js/commit/75c8c78))
+* **query:** remove record api ([12d657c](https://github.com/jexia/jexia-sdk-js/commit/12d657c))
+* **realtime:** adapting real time module to the new module interface ([a6fe080](https://github.com/jexia/jexia-sdk-js/commit/a6fe080))
+* **realtime:** fix issues after e2e testing ([5912e16](https://github.com/jexia/jexia-sdk-js/commit/5912e16))
+* **request-executer:** remove body from GET/DELETE requests ([#70](https://github.com/jexia/jexia-sdk-js/issues/70)) ([ea8b510](https://github.com/jexia/jexia-sdk-js/commit/ea8b510))
+* **rest:** insert records calls rest api ([e07fbcc](https://github.com/jexia/jexia-sdk-js/commit/e07fbcc))
+* lint issues ([3eb2c53](https://github.com/jexia/jexia-sdk-js/commit/3eb2c53))
+* remove mocked data ([637cf5c](https://github.com/jexia/jexia-sdk-js/commit/637cf5c))
+* resoving merge conflicts ([3ec5fdd](https://github.com/jexia/jexia-sdk-js/commit/3ec5fdd))
+
+
+### Features
+
+* **auth:** change Auth API endpoints ([b1381e4](https://github.com/jexia/jexia-sdk-js/commit/b1381e4))
+* **logger:** create logger module ([9c85f0d](https://github.com/jexia/jexia-sdk-js/commit/9c85f0d))
+* **realtime:** new real time api to watch dataset events with observers ([8be37dc](https://github.com/jexia/jexia-sdk-js/commit/8be37dc))
+* **record:** fetch all records ([861fd5b](https://github.com/jexia/jexia-sdk-js/commit/861fd5b))
+* **ums:** specify user to the dataset request ([898b7f8](https://github.com/jexia/jexia-sdk-js/commit/898b7f8))
+* **update-protocol:** using consumption ([9c1bb5a](https://github.com/jexia/jexia-sdk-js/commit/9c1bb5a))
+* **update-protocol:** using consumption ([11a080b](https://github.com/jexia/jexia-sdk-js/commit/11a080b))
+* **update-protocol:** using consumption ([0aad176](https://github.com/jexia/jexia-sdk-js/commit/0aad176))
+* **update-protocol:** using consumption ([1288c87](https://github.com/jexia/jexia-sdk-js/commit/1288c87))
+
+
+### BREAKING CHANGES
+
+* Remove data property from Query and ICompiledQuery
+
+* fix: review comments
+
 <a name="3.5.0"></a>
 # [3.5.0](https://github.com/jexia/jexia-sdk-js/compare/v3.4.0...v3.5.0) (2018-08-13)
 
