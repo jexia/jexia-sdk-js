@@ -20,8 +20,14 @@ describe("filter records REST API", async () => {
     INTEGER: "integer_field",
     FLOAT: "float_field",
     STRING: "string_field",
+    DATE: "date_field",
+    DATETIME: "datetime_field",
   };
   type Condition = IFilteringCriterion<any> | IFilteringCriterionCallback<any>;
+
+  const RecordSchema = Joi.object().keys({
+    id: Joi.string().required(),
+  });
 
   function testLength(title: string, condition: Condition, expectedLength: number) {
     it(`should select records by "${title}"`, async () => {
@@ -81,6 +87,8 @@ describe("filter records REST API", async () => {
         { name: FIELD.INTEGER, type: "integer" },
         { name: FIELD.FLOAT, type: "float" },
         { name: FIELD.STRING, type: "string" },
+        { name: FIELD.DATE, type: "date" },
+        { name: FIELD.DATETIME, type: "datetime" },
       ],
     );
     dataset = dom.dataset(DEFAULT_DATASET.NAME);
@@ -382,6 +390,135 @@ describe("filter records REST API", async () => {
     ];
 
     test(testData, successTests, failTests);
+  });
+
+  describe("when filtering date related types", () => {
+    type MinMax = { min: number, max: number };
+    const fakeNumber = (options: MinMax) => faker.random.number(options);
+    const fakePastDatetime = (yearsAgo: MinMax) => faker.date.past(fakeNumber(yearsAgo)).toISOString();
+    const fakeFutureDatetime = (yearsFromNow: MinMax) => faker.date.future(fakeNumber(yearsFromNow)).toISOString();
+
+    function testDate({
+      fieldName,
+      fakePastDate,
+      fakeFutureDate,
+    }) {
+      const testData = [
+        { [fieldName]: null },
+        { [fieldName]: fakePastDate({ min: 11, max: 30 }) },
+        { [fieldName]: fakePastDate({ min: 0, max: 10 }) },
+        { [fieldName]: fakeFutureDate({ min: 0, max: 10 }) },
+        { [fieldName]: fakeFutureDate({ min: 11, max: 30 }) },
+      ];
+
+      const [nullDate, firstDate, secondDate, thirdDate, lastDate] = testData.map((t) => t[fieldName]);
+
+      const successTests = [
+        {
+          title: "isEqualTo",
+          condition: field(fieldName).isEqualTo(secondDate),
+          validValues: [secondDate],
+        },
+        {
+          title: "isDifferentFrom",
+          condition: field(fieldName).isDifferentFrom(firstDate),
+          validValues: [nullDate, secondDate, thirdDate, lastDate],
+        },
+        {
+          title: "isInArray",
+          condition: field(fieldName).isInArray([firstDate, secondDate]),
+          validValues: [firstDate, secondDate],
+        },
+        {
+          title: "isNotInArray",
+          condition: field(fieldName).isNotInArray([thirdDate, lastDate]),
+          validValues: [firstDate, secondDate], // doesn't include null values
+        },
+        {
+          title: "isNull",
+          condition: field(fieldName).isNull(),
+          validValues: [nullDate],
+        },
+        {
+          title: "isNotNull",
+          condition: field(fieldName).isNotNull(),
+          validValues: [firstDate, secondDate, thirdDate, lastDate],
+        },
+        {
+          title: "isBetween",
+          condition: field(fieldName).isBetween(firstDate, thirdDate),
+          validValues: [firstDate, secondDate, thirdDate],
+        },
+        {
+          title: "isLessThan",
+          condition: field(fieldName).isLessThan(secondDate),
+          validValues: [firstDate],
+        },
+        {
+          title: "isGreaterThan",
+          condition: field(fieldName).isGreaterThan(secondDate),
+          validValues: [thirdDate, lastDate],
+        },
+        {
+          title: "isEqualOrLessThan",
+          condition: field(fieldName).isEqualOrLessThan(secondDate),
+          validValues: [firstDate, secondDate],
+        },
+        {
+          title: "isEqualOrGreaterThan",
+          condition: field(fieldName).isEqualOrGreaterThan(secondDate),
+          validValues: [secondDate, thirdDate, lastDate],
+        },
+      ];
+
+      const failTests = [
+        {
+          title: "isLike",
+          condition: field(fieldName).isLike(lastDate),
+        },
+      ];
+
+      setupData(testData);
+
+      successTests.forEach(({ title, condition, validValues }) => {
+        it(`should select records by "${title}"`, async () => {
+          const selectResult = await dataset
+            .select()
+            .fields(fieldName)
+            .where(condition)
+            .execute();
+
+          const expectedResult = Joi
+            .array()
+            .items(RecordSchema.append({
+              [fieldName]: Joi.string().valid(validValues),
+            }))
+            .length(validValues.length);
+
+          joiAssert(selectResult, expectedResult);
+        });
+      });
+
+      failTests.forEach(({ title, condition }) => {
+        testError(title, condition);
+      });
+    }
+
+    describe("Date", () => {
+      const fieldName = FIELD.DATE;
+      const fakePastDate = (yearsAgo: MinMax) => fakePastDatetime(yearsAgo).split("T")[0];
+      const fakeFutureDate = (yearsFromNow: MinMax) => fakeFutureDatetime(yearsFromNow).split("T")[0];
+
+      testDate({ fieldName, fakePastDate, fakeFutureDate });
+    });
+
+    describe("Datetime", () => {
+      testDate({
+        fieldName: FIELD.DATETIME,
+        fakePastDate: fakePastDatetime,
+        fakeFutureDate: fakeFutureDatetime,
+      });
+    });
   });
 
   describe("when setting range", () => {
