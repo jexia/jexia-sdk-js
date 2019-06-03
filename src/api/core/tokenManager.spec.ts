@@ -1,45 +1,33 @@
 // tslint:disable:max-line-length
 // tslint:disable:no-string-literal
-import { createMockFor, requestAdapterMockFactory } from "../../../spec/testUtils";
-import { MESSAGE } from "../../config/message";
-import { ApiKeyAuth } from "../auth/apiKeyAuth";
-import { UserCredentialsAuth } from "../auth/userCredentialsAuth";
+import { requestAdapterMockFactory } from "../../../spec/testUtils";
+import { MESSAGE } from "../../config";
+import { Methods } from "../../internal/requestAdapter";
+import { Logger } from "../logger/logger";
 import { TokenStorage } from "./componentStorage";
-import { IAuthAdapter, IAuthToken, TokenManager } from "./tokenManager";
+import { TokenManager } from "./tokenManager";
 
 const validProjectID = "validProjectID";
-const defaultToken = Object.freeze({ token: "token", refresh_token: "refreshToken" });
+const defaultToken = Object.freeze({ access_token: "accessToken", refresh_token: "refreshToken" });
 
 const validOpts = () => ({ projectID: validProjectID, key: "validKey", refreshInterval: 500, secret: "validSecret" });
 
-const authMethodMock = (
-  resultValue = "authMethodMockToken",
-  resultPromise = Promise.resolve(resultValue),
-) => {
-  const authMethod: IAuthAdapter = createMockFor(["login", "refresh"], { returnValue: resultPromise });
-  return {
-    authMethod,
-    resultValue,
-    resultPromise,
-  };
-};
-
 const tokenManagerWithTokens = () => {
   const requestAdapter = requestAdapterMockFactory().succesfulExecution(defaultToken);
-  return new TokenManager(requestAdapter);
+  return new TokenManager(requestAdapter, new Logger());
 };
 
 describe("Class: TokenManager", () => {
   describe("when authenticating", () => {
     let tm: TokenManager;
 
-    beforeEach( () => {
-      TokenStorage.cleanStorage();
-      tm = new TokenManager(requestAdapterMockFactory().succesfulExecution({token: "validToken", refresh_token: "validRefreshToken"}));
+    beforeEach(() => {
+      TokenStorage.getStorageAPI().clear();
+      tm = tokenManagerWithTokens();
     });
 
     it("should throw an error if application URL is not provided", async () => {
-      await (new TokenManager(requestAdapterMockFactory().genericSuccesfulExecution()))
+      tm
         .init({projectID: "", key: "validKey", secret: "validSecret"})
         .then(() => { throw new Error("should have throw app URL error"); })
         .catch((err: Error) => {
@@ -47,61 +35,25 @@ describe("Class: TokenManager", () => {
         });
     });
 
-    it("should throw an error if key or secret is not provided", async () => {
-      await (new TokenManager(requestAdapterMockFactory().genericSuccesfulExecution()))
-        .init({projectID: validProjectID, key: "", secret: ""})
-        .then(() => { throw new Error("should have throw authentication error"); })
-        .catch((err: Error) => {
-          expect(err).toEqual(new Error("Please provide valid application credentials."));
-        });
-    });
-
     it("should throw an error if authentication failed", (done) => {
-      (new TokenManager(requestAdapterMockFactory().failedExecution("Auth error.")))
+      (new TokenManager(
+        requestAdapterMockFactory().failedExecution("Auth error."),
+        new Logger()
+       ))
         .init({projectID: validProjectID, key: "invalidKey", secret: "invalidSecret"})
         .then(() => done.fail("should throw authentication error"))
         .catch((err: Error) => {
-          expect(err).toEqual(new Error("Unable to authenticate: Auth error."));
+          expect(err).toBeDefined();
           done();
         });
-    });
-
-    it("should try login when storage has no token", async () => {
-      spyOn(TokenStorage.getStorageAPI(), "isEmpty").and.returnValue(true);
-      spyOn(tm as any, "login").and.returnValue(Promise.resolve());
-      const opts = { ...validOpts(), authMethod: () => authMethodMock().authMethod };
-      await tm.init(opts);
-      expect(tm["login"]).toHaveBeenLastCalledWith(opts);
     });
 
     it("should fail initialization when login fails", async () => {
       spyOn(TokenStorage.getStorageAPI(), "isEmpty").and.returnValue(true);
       const loginError = "loginError";
       spyOn(tm as any, "login").and.returnValue(Promise.reject(loginError));
-      const opts = { ...validOpts(), authMethod: () => authMethodMock().authMethod };
       try {
-        await tm.init(opts);
-        throw new Error("init should have failed!");
-      } catch (error) {
-        expect(error).toBe(loginError);
-      }
-    });
-
-    it("should try refresh session when storage has no token", async () => {
-      spyOn(TokenStorage.getStorageAPI(), "isEmpty").and.returnValue(false);
-      spyOn(tm as any, "refresh").and.returnValue(Promise.resolve());
-      const opts = { ...validOpts(), authMethod: () => authMethodMock().authMethod };
-      await tm.init(opts);
-      expect(tm["refresh"]).toHaveBeenLastCalledWith(opts.projectID);
-    });
-
-    it("should fail initialization when refresh session fails", async () => {
-      spyOn(TokenStorage.getStorageAPI(), "isEmpty").and.returnValue(false);
-      const loginError = "loginError";
-      spyOn(tm as any, "refresh").and.returnValue(Promise.reject(loginError));
-      const opts = { ...validOpts(), authMethod: () => authMethodMock().authMethod };
-      try {
-        await tm.init(opts);
+        await tm.init(validOpts());
         throw new Error("init should have failed!");
       } catch (error) {
         expect(error).toBe(loginError);
@@ -114,13 +66,12 @@ describe("Class: TokenManager", () => {
     });
 
     it("should have valid token and refresh token if authorization succeeded", async () => {
-      const tokens = await tm.init(validOpts()).then((out) => out["tokens"]);
-      expect(tokens.token).toBe("validToken");
-      expect(tokens.refreshToken).toBe("validRefreshToken");
+      const token = await tm.init(validOpts()).then((out: TokenManager) => out.token());
+      expect(token).toBe(defaultToken.access_token);
     });
 
     it("should throw an error if the token is accessed before login", (done) => {
-      tm.token.then( () => {
+      tm.token().then( () => {
         done.fail("Token promise should reject.");
       }).catch( (err: Error) => {
         expect(err.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
@@ -133,8 +84,11 @@ describe("Class: TokenManager", () => {
     let tm: TokenManager;
 
     beforeEach(() => {
-      TokenStorage.cleanStorage();
-      tm = new TokenManager(requestAdapterMockFactory().succesfulExecution({ token: "validToken", refresh_token: "validRefreshToken" }));
+      TokenStorage.getStorageAPI().clear();
+      tm = new TokenManager(
+        requestAdapterMockFactory().succesfulExecution({ token: "validToken", refresh_token: "validRefreshToken" }),
+        new Logger()
+      );
     });
 
     it("should have clear the session storage", (done) => {
@@ -156,126 +110,59 @@ describe("Class: TokenManager", () => {
     it("should throw an error if the token is accessed after terminate", (done) => {
       tm.init({ projectID: validProjectID, key: "validKey", secret: "validSecret" })
         .then(() => tm.terminate())
-        .then(() => tm.token)
+        .then(() => tm.token())
         .then(() => done.fail("Token access should have failed"))
         .catch((err: Error) => {
           expect(err.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
           done();
         });
     });
-
-    it("should use api key as a default auth method", (done) => {
-      tm.init(validOpts())
-        .then((tokenManager: TokenManager) => {
-          expect(tokenManager["authMethod"] instanceof ApiKeyAuth).toBeTruthy();
-          done();
-        })
-        .catch((err: Error) => done.fail(`init should not have failed: ${err.message}`));
-    });
-
-    it("should use the given auth method", (done) => {
-      tm.init({ ...validOpts(), authMethod: () => new UserCredentialsAuth() })
-        .then((tokenManager: TokenManager) => {
-          expect(tokenManager["authMethod"] instanceof UserCredentialsAuth).toBeTruthy();
-          done();
-        })
-        .catch((err: Error) => done.fail(`init should not have failed: ${err.message}`));
-    });
-
-    it("should use auth method adapter correctly", (done) => {
-      const { authMethod, resultValue } = authMethodMock();
-      const opts = { ...validOpts(), authMethod: () => authMethod };
-      spyOn(tm["storage"], "setTokens");
-      tm.init(opts)
-        .then((tokenManager: TokenManager) => {
-          expect(authMethod.login).toHaveBeenCalledWith(opts, tokenManager["requestAdapter"]);
-          expect(tm["storage"].setTokens).toHaveBeenCalledWith(resultValue);
-          done();
-        })
-        .catch((err: Error) => done.fail(`init should not have failed: ${err.message}`));
-    });
   });
 
   describe("when refreshing the token", () => {
-    it("should use the auth method adapter correct", (done) => {
-      const { authMethod } = authMethodMock();
-      const opts = { ...validOpts(), authMethod: () => authMethod };
-      const tm = tokenManagerWithTokens();
-      tm.init(opts)
-        .then(({ tokens, requestAdapter }) => {
-          setTimeout(() => {
-            expect(authMethod.refresh).toHaveBeenCalledWith(
-              tokens,
-              requestAdapter,
-              opts.projectID,
-            );
-            done();
-          }, opts.refreshInterval + 10);
-        })
-        .catch((err: Error) => done.fail(`init should not have failed: ${err.message}`));
+    let tm: TokenManager;
+
+    beforeEach(() => {
+      TokenStorage.getStorageAPI().clear();
+      tm = new TokenManager(
+        requestAdapterMockFactory().succesfulExecution({ token: "validToken", refresh_token: "validRefreshToken" }),
+        new Logger()
+      );
     });
 
-    it("should set the new tokens after a success refresh", (done) => {
-      const { authMethod, resultValue } = authMethodMock();
-      const opts = { ...validOpts(), authMethod: () => authMethod };
-      const tm = tokenManagerWithTokens();
-      tm.init(opts)
-        .then(({ tokens, requestAdapter }) => {
-          spyOn(tm["storage"], "setTokens");
-          setTimeout(() => {
-            expect(tm["storage"].setTokens).toHaveBeenCalledWith(resultValue);
-            done();
-          }, opts.refreshInterval + 10);
-        })
-        .catch((err: Error) => done.fail(`init should not have failed: ${err.message}`));
+    it("should take refresh token from storage and use it to make a request", () => {
+      tm["storage"].setTokens("testRefresh", { access_token: "access_token", refresh_token: "refresh_token" });
+      tm["refresh"]("testRefresh");
+      expect((tm as any).requestAdapter.execute.mock.calls[0][1]).toEqual({
+        body: { refresh_token: "refresh_token" },
+        method: Methods.POST
+      });
     });
 
-    it("should throw an error on refresh token failure", (done) => {
-      tokenManagerWithTokens()
-        .init(validOpts())
-        .then((tokenManager: TokenManager) => {
-          tokenManager["requestAdapter"] = requestAdapterMockFactory().failedExecution("refresh error.");
-          tokenManager["refresh"](validProjectID)
-            .then( () => done.fail("refresh should have failed"))
-            .catch( (err: Error) => {
-              expect(err.message).toEqual("Unable to refresh token: refresh error.");
-              done();
-            });
-        })
-        .catch((err: Error) => done.fail(`init should not have failed: ${err.message}`));
+    it("should reject promise if there is no token for specific auth", (done) => {
+      tm["storage"].setTokens("testRefresh", { access_token: "access_token", refresh_token: "refresh_token" });
+      tm["refresh"]("randomAuth")
+        .then(() => done.fail("should reject promise with error"))
+        .catch((error) => {
+          expect(error).toEqual(`There is no refresh token for randomAuth`);
+          done();
+        });
     });
 
-    it("should have updated token after successful auto refresh", (done) => {
-      const { authMethod, resultValue } = authMethodMock();
-      const opts = validOpts();
-      tokenManagerWithTokens()
-        .init({ ...opts, authMethod: () => authMethod })
-        .then((tokenManager: TokenManager) => {
-          spyOn(tokenManager["storage"], "setTokens");
-          tokenManager["requestAdapter"] = requestAdapterMockFactory().succesfulExecution({token: "updatedToken", refresh_token: "updatedRefreshToken"});
-          setTimeout(() => {
-            expect(tokenManager["storage"].setTokens).toHaveBeenLastCalledWith(resultValue);
-            done();
-          }, opts.refreshInterval + 10);
-        })
-        .catch((err: Error) => done.fail(`init should not have failed: ${err.message}`));
+    it("should throw an error if request failed", (done) => {
+      const tokenManager = new TokenManager(
+        requestAdapterMockFactory().failedExecution("refresh error"),
+        new Logger()
+      );
+      tokenManager["storage"].setTokens("testRefresh", { access_token: "access_token", refresh_token: "refresh_token" });
+      tokenManager["refresh"]("testRefresh")
+        .then(() => done.fail("should fail with refresh token error"))
+        .catch((error) => {
+          expect(error).toEqual(new Error("Unable to refresh token: refresh error"));
+          done();
+        });
     });
 
-    it("should have updated refresh token after successful auto refresh", (done) => {
-      tokenManagerWithTokens()
-        .init(validOpts())
-        .then((tokenManager: TokenManager) => {
-          tokenManager["requestAdapter"] = requestAdapterMockFactory().succesfulExecution({token: "updatedToken", refresh_token: "updatedRefreshToken"});
-          setTimeout(() => {
-            tokenManager["tokens"]
-              .then((tokens: IAuthToken) => {
-                expect(tokens.refreshToken).toBe("updatedRefreshToken");
-                done();
-              })
-              .catch((err: Error) => done.fail(`refresh should not have failed: ${err.message}`));
-          }, 700);
-        })
-        .catch((err: Error) => done.fail(`init should not have failed: ${err.message}`));
-    });
   });
+
 });

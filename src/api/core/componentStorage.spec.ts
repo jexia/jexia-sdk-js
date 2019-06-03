@@ -1,10 +1,10 @@
 // tslint:disable:no-string-literal
+import * as faker from "faker";
 import {
   MemoryStorageComponent,
   TokenStorage,
   WebStorageComponent,
 } from "./componentStorage";
-import { IAuthToken } from "./tokenManager";
 
 class WebStorageApiMock {
   private dictionary: any = {};
@@ -22,20 +22,18 @@ class WebStorageApiMock {
   }
 }
 
-const token = <IAuthToken> {
-  refreshToken: "validRefreshToken",
-  token: "validToken",
-};
+const generateTokens = () => ({
+  refresh_token: faker.random.uuid(),
+  token: faker.random.uuid(),
+});
 
 describe("ComponentStorage", ()  => {
   const components = ["MemoryStorageComponent", "WebStorageComponent"];
   components.forEach((component) => {
     describe(component, () => {
       let instanceComponent: WebStorageComponent | MemoryStorageComponent;
-      let savedTokens: Promise<any>;
-      const errorSettingTokens = (done: jest.DoneCallback) => {
-        return () => done.fail("setting tokens should not fail");
-      };
+      const tokenOne = generateTokens();
+      const tokenTwo = generateTokens();
 
       beforeAll(() => {
         if (component === "MemoryStorageComponent") {
@@ -46,38 +44,40 @@ describe("ComponentStorage", ()  => {
             sessionStorage: new WebStorageApiMock(),
           });
         }
-        savedTokens = instanceComponent.setTokens(token);
       });
 
-      it("should return the expected saved token", (done) => {
-         savedTokens
-          .then(() => {
-            return instanceComponent.getTokens();
-          })
-          .then((tokens: IAuthToken) => {
-            expect(tokens).toEqual(Object.assign({}, tokens));
-            done();
-          })
-          .catch(errorSettingTokens(done));
+      it("should return the expected saved token pair by alias", () => {
+        instanceComponent.setTokens("testAlias", tokenOne);
+        expect(instanceComponent.getTokens("testAlias")).toEqual(tokenOne);
       });
 
-      it("should clear the saved tokens", async () => {
-        await instanceComponent.clear();
-        expect(instanceComponent.isEmpty()).toBe(true);
+      it("should return default token if there is only one", () => {
+        expect(instanceComponent.getTokens()).toEqual(tokenOne);
       });
 
-      it("should be empty if there is no token", async () => {
-        spyOn(instanceComponent as any, "getToken").and.returnValue({
-          refreshToken: "testRefreshToken",
-        });
-        expect(instanceComponent.isEmpty()).toBe(true);
+      it("should save second token", () => {
+        instanceComponent.setTokens("anotherAlias", tokenTwo);
+        expect(instanceComponent.getTokens("anotherAlias")).toEqual(tokenTwo);
       });
 
-      it("should be empty if there is no refreshToken", async () => {
-        spyOn(instanceComponent as any, "getToken").and.returnValue({
-          token: "testToken",
-        });
-        expect(instanceComponent.isEmpty()).toBe(true);
+      it("should return first token by default", () => {
+        expect(instanceComponent.getTokens()).toEqual(tokenOne);
+      });
+
+      it("should set default token and return it", () => {
+        instanceComponent.setDefault("anotherAlias");
+        expect(instanceComponent.getTokens()).toEqual(tokenTwo);
+      });
+
+      it("should add token with default flag and return it by default", () => {
+        const tokens = generateTokens();
+        instanceComponent.setTokens("defaultTokens", tokens, true);
+        expect(instanceComponent.getTokens()).toEqual(tokens);
+      });
+
+      it("should clear the saved tokens", () => {
+        instanceComponent.clear();
+        expect(instanceComponent.isEmpty()).toBeTruthy();
       });
     });
   });
@@ -91,27 +91,24 @@ describe("ComponentStorage", ()  => {
       localStorageMock = new WebStorageApiMock();
     });
 
-    it("should use localStorage when the class is instantiated with true", (done) => {
+    it("should use localStorage when the class is instantiated with true", () => {
       const webStorageComponent = new WebStorageComponent(true, {
         localStorage: localStorageMock,
         sessionStorage: sessionStorageMock,
       });
+      const tokens = generateTokens();
       spyOn(localStorageMock, "setItem");
-      webStorageComponent
-        .setTokens(token)
-        .then(() => {
-          expect(localStorageMock.setItem.calls.count()).toBe(2);
-          expect(localStorageMock.setItem).toHaveBeenCalledWith("token", token.token);
-          expect(localStorageMock.setItem).toHaveBeenCalledWith("refreshToken", token.refreshToken);
-          done();
-        })
-        .catch(() => done.fail("setting tokens should not fail"));
+      webStorageComponent.setTokens("alias", tokens);
+      expect(localStorageMock.setItem).toHaveBeenCalledWith(
+        "__jexia_tokens__",
+        JSON.stringify({ alias: tokens })
+      );
     });
   });
 
   describe("TokenStorage", () => {
     beforeAll(() => {
-      TokenStorage.cleanStorage();
+      TokenStorage.getStorageAPI().clear();
     });
 
     it("should use MemoryStorage as default", () => {
@@ -145,27 +142,8 @@ describe("ComponentStorage", ()  => {
       expect(webStorage["storage"]).toBe(storageTypes.sessionStorage);
     });
 
-    it("should set new tokens", (done) => {
-      const memoryStorageComponent = new MemoryStorageComponent();
-      TokenStorage.setStorageAPI(memoryStorageComponent);
-      TokenStorage
-        .setTokens(token)
-        .then(() => {
-          return TokenStorage.getStorageAPI().getTokens();
-        })
-        .then((newTokens) => {
-          expect(newTokens).toEqual(token);
-          done();
-        })
-        .catch(() => done.fail("setting new tokens should now fail"));
-    });
-
     it("should throw an error when trying to use a new instance when there is an storage", () => {
       expect(() => new TokenStorage()).toThrowError();
-    });
-
-    it("should have a storage by default", () => {
-      expect(TokenStorage["storage"]).toBeInstanceOf(MemoryStorageComponent);
     });
 
     it("should create a storage when creating a new instance without one", () => {

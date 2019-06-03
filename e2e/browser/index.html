@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Jexia Javascript SDK Tests pages</title>
+  <script src="../../dist/bundle/browser.umd.js"></script>
+  <script type="text/javascript">
+    window.onload = function() {
+      if (!jexia) {
+        throw new Error("Please run `npm run build` task before run this test.");
+      }
+
+      let jfs = jexia.fileOperations();
+      let credentials = {
+        projectID: 'change-to-valid-project-id',
+        key: 'change-to-valid-key',
+        secret: 'change-to-valid-secret',
+      };
+      let jexiaClient = jexia.jexiaClient().init(credentials, jfs);
+
+      const fileInput = document.getElementById('file-input');
+      fileInput.addEventListener('change', event => {
+        const file = event.target.files[0];
+        jfs.fileset('f1').upload([{
+          data: '{}',
+          file,
+        }]).subscribe(result => console.log(result));
+      })
+    }
+  </script>
+</head>
+<body>
+<form>
+  <label>Select file:</label>
+  <input type="file" id="file-input">
+</form>
+</body>
+</html>

@@ -17,3 +17,13 @@ export function deferPromise<T = any>(): DeferType<T> {
     reject,
   } as any;
 }
+
+/**
+ * Clones an object keeping its instance
+ *
+ * @param  obj The object to be cloned
+ * @returns T
+ */
+export function clone<T>(o: T): T {
+  return Object.assign(Object.create(Object.getPrototypeOf(o)), o);
+}

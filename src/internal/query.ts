@@ -1,6 +1,7 @@
 import { IFilteringCriterion } from "../api/dataops/filteringApi";
 import { ICondition } from "../api/dataops/filteringCondition";
-import { MESSAGE } from "../config/message";
+import { MESSAGE } from "../config";
+import { QueryParam } from "./executer.interfaces";
 
 /* Sort direction
  */
@@ -13,7 +14,7 @@ type KeyOfObject<T> = Extract<keyof T, string>;
 
 /**
  * Object to be passed as aggregation field
- * <T> - generic dataset object
+ * <T> - generic resource object
  */
 export interface IAggField<T = any> {
   fn: "COUNT" | "MIN" | "MAX" | "AVG" | "SUM" | "EVERY";
@@ -29,15 +30,14 @@ interface ISort<K> {
 }
 
 /* Array of data sorting
-   fields should be in inherited generic dataset model (if it's been set)
+   fields should be in inherited generic resource model (if it's been set)
  */
 type SortedFields<T> = Array<ISort<KeyOfObject<T>>>;
 
 export interface ICompiledQuery<T> {
-  data: T;
-  conditions: Array<object>;
-  fields: string[];
-  orders: SortedFields<T>;
+  cond: Array<object>;
+  outputs: string[];
+  order: SortedFields<T>;
   range: { limit?: number, offset?: number };
   relations: {[key: string]: Partial<ICompiledQuery<T>>};
 }
@@ -46,14 +46,10 @@ export class Query<T = any> {
   public fields: Array<KeyOfObject<T> | IAggField<T>>;
   public limit: number;
   public offset: number;
-  public data: T;
 
-  private relations: Query[] = [];
   private filteringConditions: ICondition;
   private orders: SortedFields<T> = [];
-
-  constructor(public readonly dataset: string) {
-  }
+  private relations: Query[] = [];
 
   /*
    * This method is here to encapsulate the translation of filter settings
@@ -61,10 +57,10 @@ export class Query<T = any> {
    * logic for compiling filters into JSON (ICondition).
    */
   public setFilterCriteria(filter: IFilteringCriterion) {
-    this.filteringConditions = (filter as any).lowLevelCondition;
+    this.filteringConditions = filter.condition;
   }
 
-  public addSortCondition<K extends Extract<keyof T, string>>(direction: "asc" | "desc", ...fields: K[]) {
+  public addSortCondition<K extends Extract<keyof T, string>>(direction: Direction, ...fields: K[]) {
     if (fields.length === 0) {
       throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
     }
@@ -79,12 +75,12 @@ export class Query<T = any> {
    * to pass it to the API. Some conditionals can be skipped
    */
   public compile(): Partial<ICompiledQuery<T>> {
-    let compiledQueryOptions: Partial<ICompiledQuery<T>> = {};
+    const compiledQueryOptions: Partial<ICompiledQuery<T>> = {};
 
     /* Compile conditions
      */
     if (this.filteringConditions) {
-      compiledQueryOptions.conditions = [this.filteringConditions.compile()];
+      compiledQueryOptions.cond = this.filteringConditions.compile();
     }
 
     /* Compile limit and offset options
@@ -99,31 +95,49 @@ export class Query<T = any> {
     /* Compile fields
      */
     if (this.fields) {
-      compiledQueryOptions.fields = this.fields.map((field) => typeof field === "object"
-        ? this.compileAggregation(field) : field);
+      compiledQueryOptions.outputs = this.fields.map(
+        (field) => typeof field === "object" ? this.compileAggregation(field) : field
+      );
     }
 
     /* Compile sort options
      */
     if (this.orders.length) {
-      compiledQueryOptions.orders = this.orders;
-    }
-
-    /* Compile data
-     */
-    if (this.data) {
-      compiledQueryOptions.data = this.data;
+      compiledQueryOptions.order = this.orders;
     }
 
     /* Compile relations
-     */
-    if (this.relations.length) {
+     * TODO develop relations */
+    /*if (this.relations.length) {
       compiledQueryOptions.relations = this.relations.reduce((relations, relation) => (
         { ...relations, [relation.dataset]: relation.compile() }
       ), {});
-    }
+    }*/
 
     return compiledQueryOptions;
+  }
+
+  /**
+   * Gets the compiled query transformed into query params format.
+   *
+   * @returns QueryParams[]
+   */
+  public compileToQueryParams(): QueryParam[] {
+    const compiled = this.compile();
+    const params = [];
+
+    if (compiled.order) {
+      // order should be multiple key/value entries instead of a single order=[]
+      params.push(
+        ...compiled.order.map((value: any) => ({ key: "order", value }))
+      );
+    }
+
+    const otherParams = Object.entries(compiled)
+      .filter(([key]) => key !== "order") // ignore order
+      .map(([key, value]) => ({ key, value }));
+
+    return params.concat(otherParams);
   }
 
   /**

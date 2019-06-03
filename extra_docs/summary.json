@@ -10,5 +10,17 @@
   {
     "title": "Code of Conduct",
     "file": "../CODE_OF_CONDUCT.md"
+  },
+  {
+    "title": "Dataset Operations",
+    "file": "dataset/README.md"
+  },
+  {
+    "title": "Fileset Operations",
+    "file": "jfs/README.md"
+  },
+  {
+    "title": "User Management System",
+    "file": "ums/README.md"
   }
 ]

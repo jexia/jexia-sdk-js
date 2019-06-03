@@ -3,61 +3,61 @@ import { DatasetInterface } from "jexia-sdk-js/api/dataops/dataset";
 import { CompositeFilteringCondition, FilteringCondition, ICondition } from "./filteringCondition";
 
 /**
- * @internal
+ * This object must be build from `field` helper function, never to be instantiated directly.
  */
 export class FieldFilter<U> {
-  constructor(private fieldName: string) {}
+  constructor(public readonly fieldName: string) {}
 
   public isGreaterThan(value: U): IFilteringCriterion {
-    return new FilteringCriterion(new FilteringCondition(this.fieldName, ">", [value]));
+    return new FilteringCriterion(new FilteringCondition(this.fieldName, ">", value));
   }
 
   public isLessThan(value: U): IFilteringCriterion {
-    return new FilteringCriterion(new FilteringCondition(this.fieldName, "<", [value]));
+    return new FilteringCriterion(new FilteringCondition(this.fieldName, "<", value));
   }
 
   public isEqualTo(value: U): IFilteringCriterion {
-    return new FilteringCriterion(new FilteringCondition(this.fieldName, "=", [value]));
+    return new FilteringCriterion(new FilteringCondition(this.fieldName, "=", value));
   }
 
   public isDifferentFrom(value: U): IFilteringCriterion {
-    return new FilteringCriterion(new FilteringCondition(this.fieldName, "<>", [value]));
+    return new FilteringCriterion(new FilteringCondition(this.fieldName, "!=", value));
   }
 
   public isEqualOrGreaterThan(value: U): IFilteringCriterion {
-    return new FilteringCriterion(new FilteringCondition(this.fieldName, ">=", [value]));
+    return new FilteringCriterion(new FilteringCondition(this.fieldName, ">=", value));
   }
 
   public isEqualOrLessThan(value: U): IFilteringCriterion {
-    return new FilteringCriterion(new FilteringCondition(this.fieldName, "<=", [value]));
+    return new FilteringCriterion(new FilteringCondition(this.fieldName, "<=", value));
   }
 
   public isNull(): IFilteringCriterion {
-    return new FilteringCriterion(new FilteringCondition(this.fieldName, "IS_NULL", []));
+    return new FilteringCriterion(new FilteringCondition(this.fieldName, "null", true));
   }
 
   public isNotNull(): IFilteringCriterion {
-    return new FilteringCriterion(new FilteringCondition(this.fieldName, "IS_NOT_NULL", []));
+    return new FilteringCriterion(new FilteringCondition(this.fieldName, "null", false));
   }
 
   public isInArray(values: U[]): IFilteringCriterion {
-    return new FilteringCriterion(new FilteringCondition(this.fieldName, "IN", values));
+    return new FilteringCriterion(new FilteringCondition(this.fieldName, "in", values));
   }
 
   public isNotInArray(values: U[]): IFilteringCriterion {
-    return new FilteringCriterion(new FilteringCondition(this.fieldName, "NOT_IN", values));
+    return new FilteringCriterion(new FilteringCondition(this.fieldName, "not in", values));
   }
 
   public isLike(value: string): IFilteringCriterion {
-    return new FilteringCriterion(new FilteringCondition(this.fieldName, "LIKE", [value]));
+    return new FilteringCriterion(new FilteringCondition(this.fieldName, "like", value));
   }
 
   public satisfiesRegexp(regexp: string): IFilteringCriterion {
-    return new FilteringCriterion(new FilteringCondition(this.fieldName, "REGEXP", [regexp]));
+    return new FilteringCriterion(new FilteringCondition(this.fieldName, "regexp", regexp));
   }
 
   public isBetween(start: U, end: U): IFilteringCriterion {
-    return new FilteringCriterion(new FilteringCondition(this.fieldName, "BETWEEN", [start, end]));
+    return new FilteringCriterion(new FilteringCondition(this.fieldName, "between", [start, end]));
   }
 }
 
@@ -72,11 +72,15 @@ export class FilteringCriterion implements IFilteringCriterion {
       this.lowLevelCondition = lowLevelCondition;
     }
     if (highLevelCriteria) {
-      this.lowLevelCondition = new CompositeFilteringCondition(highLevelCriteria.lowLevelCondition, "AND");
+      this.lowLevelCondition = new CompositeFilteringCondition(highLevelCriteria.lowLevelCondition, "and");
     }
     if (!this.lowLevelCondition) {
       throw new Error("No information was given when constructing a FilteringCriterion.");
     }
+  }
+
+  public get condition(): ICondition {
+    return this.lowLevelCondition;
   }
 
   public and(conditionToAdd: FilteringCriterion): FilteringCriterion {
@@ -93,6 +97,10 @@ export class FilteringCriterion implements IFilteringCriterion {
  * @template T Generic type of your dataset, default to any
  */
 export interface IFilteringCriterion<T = any> {
+  /**
+   * The filtering condition object
+   */
+  readonly condition: ICondition;
   /**
    * Combine the current filtering criteria with the next one in `and` mode.
    */

@@ -1,4 +1,5 @@
-import { MESSAGE } from "../config/message";
+import { Logger } from "../api/logger/logger";
+import { MESSAGE } from "../config";
 
 /* List of allowed methods */
 export enum Methods {
@@ -14,23 +15,16 @@ export interface IRequestOptions extends RequestInit {
   body?: any;
 }
 
-interface IServerErrors {
-  /* array of errors (from server) */
-  errors: string[];
-}
-
 export interface IHTTPResponse {
   ok: boolean;
   status: number;
+  statusText: string;
   json(): Promise<any>;
 }
 
 function status(response: IHTTPResponse): Promise<IHTTPResponse> {
   if (!response.ok) {
-    /* the fetch request went through but we received an error from the server */
-    return response.json().then((errList: IServerErrors) => {
-      throw new Error(`${MESSAGE.CORE.BACKEND_ERROR}${errList.errors[0]}`);
-    });
+    throw new Error(`${MESSAGE.CORE.BACKEND_ERROR}${response.status} ${response.statusText}`);
   }
   return Promise.resolve(response);
 }
@@ -47,10 +41,43 @@ export interface IRequestAdapter {
 export type Fetch = (url: string, init?: IRequestOptions) => Promise<IHTTPResponse>;
 
 export class RequestAdapter implements IRequestAdapter {
+
+  private logger: Logger = new Logger();
+
   constructor(private fetch: Fetch) {}
 
-  public execute(uri: string, opt: IRequestOptions): Promise<any> {
+  public provideLogger(logger: Logger) {
+    this.logger = logger;
+  }
+
+  public execute<T = any>(uri: string, opt: IRequestOptions): Promise<T> {
+    let logMessage = `(REQUEST) ${opt.method} ${uri} ${JSON.stringify(opt)}\n`;
     return this.fetch(uri, {body: JSON.stringify(opt.body), headers: opt.headers, method: opt.method})
+      .then((response) => {
+        logMessage += `(RESPONSE) ${response.status} ${response.statusText}`;
+        this.logger.debug("RequestAdapter", logMessage);
+        return response;
+      })
+      /* check response status */
+      .then(status)
+      /* convert body to JSON */
+      .then(json);
+  }
+
+  /**
+   * Upload a file
+   * @param uri
+   * @param headers
+   * @param body
+   */
+  public upload<T = any>(uri: string, headers: {[header: string]: string}, body: any): Promise<T> {
+    let logMessage = `(REQUEST) UPLOAD ${uri}\n`;
+    return this.fetch(uri, { body, headers, method: Methods.POST })
+      .then((response) => {
+        logMessage += `(RESPONSE) ${response.status} ${response.statusText}`;
+        this.logger.debug("RequestAdapter", logMessage);
+        return response;
+      })
       /* check response status */
       .then(status)
       /* convert body to JSON */

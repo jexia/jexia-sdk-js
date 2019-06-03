@@ -7,6 +7,8 @@ export const MESSAGE = {
     MUST_PROVIDE_SORTING_FIELD: "A sorting field must be provided.",
   },
   RTC: {
+    BAD_MESSAGE: "The message obtained from server can't be parsed",
+    BAD_EVENT_SUBSCRIPTION_TYPE: "One or more of the given event subscription types are invalid",
     BAD_WEBSOCKET_CREATION_CALLBACK: "The websocket creation function you supplied did not return a valid websocket object.",
     CONNECTION_CLOSED: "The connection to the Jexia real-time service was closed. Message code:",
     CONNECTION_FAILED: "We could not establish a connection to the Jexia real-time service.",
@@ -19,4 +21,7 @@ export const MESSAGE = {
   TokenManager: {
     TOKEN_NOT_AVAILABLE: "You need to log in before you can access the token.",
   },
+  FILESET: {
+    UPLOADING_FILE_ERROR: "Couldn't upload a file: ",
+  }
 };

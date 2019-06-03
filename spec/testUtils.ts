@@ -1,4 +1,8 @@
-  // tslint:disable:no-string-literal
+// tslint:disable:no-string-literal
+import * as faker from "faker";
+import { ResourceType } from "../src/api/core/resource";
+import { FilesetInterface, FilesetMultipart, IFileStatus } from "../src/api/fileops/fileops.interfaces";
+import { EventSubscriptionType, RealTimeEventMessage } from "../src/api/realtime/realTime.interfaces";
 import { RequestExecuter } from "../src/internal/executer";
 import { IHTTPResponse, IRequestOptions, RequestAdapter } from "../src/internal/requestAdapter";
 
@@ -38,7 +42,7 @@ export function createGenericSuccesfulResponse(): Promise<any> {
   return Promise.resolve({ Status: "OK" });
 }
 
-export function createRequestExecuterMock(projectID: string, datasetName: string): RequestExecuter {
+export function createRequestExecuterMock(): RequestExecuter {
   return createMockFor(RequestExecuter, { returnValue: createGenericSuccesfulResponse() });
 }
 
@@ -146,15 +150,41 @@ export function deepClone<T>(obj: T): T {
   return clone;
 }
 
-export const validClientOpts = Object.freeze({
+export const validClientOpts = {
   key: "validKey",
   projectID: "validProjectID",
   refreshInterval: 500,
   secret: "validSecret",
-});
+};
 
 export const fetchWithRequestMockOk = (uri: string, opts?: IRequestOptions): Promise<IHTTPResponse> => {
   return Promise.resolve({
-    json: () => Promise.resolve({ token: "token", refresh_token: "refresh_token" }), ok: true, status: 200,
+    json: () => Promise.resolve({
+      access_token: "access_token",
+      refresh_token: "refresh_token"
+    }), ok: true, status: 200,
   } as IHTTPResponse);
 };
+
+export const mockFilesList = (n: number = 1): Array<FilesetMultipart<any, any>> => {
+  return new Array(n).fill({});
+};
+
+export const mockFileRecord = (status: IFileStatus): FilesetInterface<{}> => ({
+  id: faker.random.uuid(),
+  created_at: new Date().toDateString(),
+  updated_at: new Date().toDateString(),
+  name: "",
+  size: "",
+  status,
+});
+
+export const mockFileEvent = (id: string, action: EventSubscriptionType): RealTimeEventMessage => ({
+  action,
+  resource: { type: ResourceType.Fileset, name: "" },
+  modifier: { type: "", id: "" },
+  timestamp: new Date().toDateString(),
+  data: [ { id }],
+});
+
+export * from "./queryAction";

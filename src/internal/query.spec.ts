@@ -1,3 +1,4 @@
+import * as faker from "faker";
 import { FilteringCriterion } from "../api/dataops/filteringApi";
 import { FilteringCondition } from "../api/dataops/filteringCondition";
 import { IAggField, Query } from "./query";
@@ -19,11 +20,11 @@ describe("Query class", () => {
     direction: "desc",
     fields: ["field3"],
   };
-  let query1 = new Query("dataset1");
-  let query2 = new Query("dataset2");
+  let query1 = new Query();
+  let query2 = new Query();
 
   beforeEach(() => {
-    query = new Query("dataset");
+    query = new Query();
   });
 
   describe("should have initial attributes", () => {
@@ -35,9 +36,6 @@ describe("Query class", () => {
     });
     it("undefined offset", () => {
       expect(query.offset).toBeUndefined();
-    });
-    it("undefined data", () => {
-      expect(query.data).toBeUndefined();
     });
     it("empty relations array", () => {
       expect((query as any).relations).toEqual([]);
@@ -72,7 +70,8 @@ describe("Query class", () => {
     });
   });
 
-  describe("addRelation method", () => {
+  // TODO Develop relations
+  xdescribe("addRelation method", () => {
     it("should push relation into an array", () => {
       query.addRelation(query1);
       expect((query as any).relations).toEqual([query1]);
@@ -88,10 +87,11 @@ describe("Query class", () => {
     it("empty query to empty object", () => {
       expect(query.compile()).toEqual({});
     });
+
     it("filtering conditions", () => {
       query.setFilterCriteria(filteringCriterion);
       expect(query.compile()).toEqual({
-        conditions: [(query as any).filteringConditions.compile()],
+        cond: (query as any).filteringConditions.compile(),
       });
     });
     it("limit option", () => {
@@ -118,28 +118,28 @@ describe("Query class", () => {
       it("simple string fields", () => {
         query.fields = ["field1", "field2"];
         expect(query.compile()).toEqual({
-          fields: ["field1", "field2"],
+          outputs: ["field1", "field2"],
         });
       });
       it("aggregation method", () => {
         const aggField: IAggField<any> = { fn: "MAX", col: "field1"};
         query.fields = [aggField];
         expect(query.compile()).toEqual({
-          fields: ["MAX(field1)"],
+          outputs: ["MAX(field1)"],
         });
       });
       it("aggregation method with asterisk to id", () => {
         const aggField: IAggField<any> = { fn: "COUNT", col: "*"};
         query.fields = [aggField];
         expect(query.compile()).toEqual({
-          fields: ["COUNT(id)"],
+          outputs: ["COUNT(id)"],
         });
       });
       it("mixed fields", () => {
         const aggField: IAggField<any> = { fn: "MAX", col: "field3"};
         query.fields = ["field1", "field2", aggField, "field4"];
         expect(query.compile()).toEqual({
-          fields: ["field1", "field2", "MAX(field3)", "field4"],
+          outputs: ["field1", "field2", "MAX(field3)", "field4"],
         });
       });
       it("wrong * usage to throwing an error", () => {
@@ -153,16 +153,12 @@ describe("Query class", () => {
       query.addSortCondition(sort1.direction, ...sort1.fields);
       query.addSortCondition(sort2.direction, ...sort2.fields);
       expect(query.compile()).toEqual({
-        orders: [sort1, sort2],
+        order: [sort1, sort2],
       });
     });
-    it("data option", () => {
-      query.data = "test";
-      expect(query.compile()).toEqual({
-        data: "test",
-      });
-    });
-    it("relations option", () => {
+
+    // TODO Develop relations
+    xit("relations option", () => {
       query.addRelation(query1);
       query.addRelation(query2);
       expect(query.compile()).toEqual({
@@ -171,6 +167,53 @@ describe("Query class", () => {
           "dataset2": query2.compile(),
         },
       });
+    });
+  });
+
+  describe("should compile to query params", () => {
+    it("empty query to empty array", () => {
+      expect(query.compileToQueryParams()).toEqual([]);
+    });
+
+    it("should transform all compiled entries", () => {
+      const fakeCompiled = {
+        key1: faker.random.word(),
+        key2: faker.random.word(),
+      };
+      spyOn(query, "compile").and.returnValue(fakeCompiled);
+
+      expect(query.compileToQueryParams().length)
+        .toEqual(Object.keys(fakeCompiled).length);
+    });
+
+    it("should transform any entry to the correct format", () => {
+      const keyArray = faker.helpers.randomize(["field", "populate", "cond"]);
+      const fakeCompiled = {
+        [keyArray]: [
+          faker.random.number(),
+          faker.random.objectElement(),
+        ],
+      };
+      spyOn(query, "compile").and.returnValue(fakeCompiled);
+
+      expect(query.compileToQueryParams()).toEqual([
+        { key: keyArray, value: fakeCompiled[keyArray] },
+      ]);
+    });
+
+    it("should transform 'order' entry to the correct format", () => {
+      const fakeCompiled = {
+        order: [
+          faker.random.word(),
+          faker.random.word(),
+        ],
+      };
+      spyOn(query, "compile").and.returnValue(fakeCompiled);
+
+      expect(query.compileToQueryParams()).toEqual([
+        { key: "order", value: fakeCompiled.order[0] },
+        { key: "order", value: fakeCompiled.order[1] },
+      ]);
     });
   });
 });

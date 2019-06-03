@@ -1,30 +1,31 @@
 
-const jexiaSDK = require('../../../../dist/node');
+const { dataOperations, jexiaClient } = require("jexia-sdk-js/node");
 
-const jexiaClient = jexiaSDK.jexiaClient;
-const dataOperations = jexiaSDK.dataOperations;
+const dataSetName = "dataset";
 
 //Initialize DataOperationsModule
-let dom = dataOperations();
-let credentials = {
-  projectID: "test",
-  key: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-  secret: "a_secret"
+const dataModule = dataOperations();
+const credentials = {
+  projectID: "<your-project-id>",
+  key: "<your-project-api-key>",
+  secret: "<your-project-api-secret>",
 };
-//Initialize Client and pass DataOperationsModule to it.
-jexiaClient().init(credentials, dom);
-setTimeout(() => {
 
-  dom.dataset("posts")
-    .select()
-    .where(field => field("title").isEqualTo("My first post"))
-    .execute()
-    .then((records) => {
-      console.log(records);
-      process.exit();
-    }).catch((error) => {
-      // there was a problem retrieving the records
-      console.log(error);
-      process.exit();
-    });
-}, 10)
+//Initialize Client and pass DataOperationsModule to it.
+jexiaClient().init(credentials, dataModule);
+
+dataModule.dataset(dataSetName)
+  .insert([
+    { field: "Some value" },
+    { field: "Some value again" },
+  ])
+  .execute()
+  .then((records) => {
+    console.log("Records are inserted:\n=======================\n", records);
+    process.exit();
+  }).catch((error) => {
+    // there was a problem inserting records
+    console.log(error);
+    process.exit();
+  });
+

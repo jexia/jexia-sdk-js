@@ -1,7 +1,8 @@
 import { InjectionToken, ReflectiveInjector } from "injection-js";
 import { Fetch, RequestAdapter } from "../../internal/requestAdapter";
 import { deferPromise } from "../../internal/utils";
-import { IModule } from "./module";
+import { Logger } from "../logger/logger";
+import { IModule, ModuleConfiguration } from "./module";
 import { AuthOptions, IAuthOptions, TokenManager } from "./tokenManager";
 
 /**
@@ -10,14 +11,19 @@ import { AuthOptions, IAuthOptions, TokenManager } from "./tokenManager";
 export const ClientInit = new InjectionToken<Promise<Client>>("SystemInit");
 
 /**
+ * @internal
+ */
+export const ClientConfiguration = new InjectionToken("ClientConfiguration");
+
+/**
  * Jexia main client fo the JavaScript SDK, used to initialize the necessary modules with your project information.
- * This object must be build from the helper functions, never to be instantiated direct.
+ * This object must be build from the helper functions, never to be instantiated directly.
  *
- * @example
+ * ### Example
  * ```typescript
  * import { jexiaClient } from "jexia-sdk-js/node";
  *
- * jexiaClient().init({projectID: "your Jexia App URL", key: "username", secret: "password"}, arrayOfJexiaModules);
+ * jexiaClient().init(credentials, arrayOfJexiaModules);
  * ```
  */
 export class Client {
@@ -47,6 +53,10 @@ export class Client {
         useValue: systemDefer.promise,
       },
       {
+        provide: ClientConfiguration,
+        useFactory: () => this.collectConfiguration(modules),
+      },
+      {
         provide: AuthOptions,
         useValue: opts,
       },
@@ -54,9 +64,13 @@ export class Client {
         provide: RequestAdapter,
         useFactory: () => new RequestAdapter(this.fetch),
       },
+      Logger,
       TokenManager,
     ]);
     this.tokenManager = injector.get(TokenManager);
+
+    /* provide logger for the request adapter */
+    injector.get(RequestAdapter).provideLogger(injector.get(Logger));
 
     /* save only projectID (do not store key and secret) */
     this.modules = modules;
@@ -95,6 +109,14 @@ export class Client {
     return Promise.all(promises)
       /* Make the client still available (not initialized) after terminated */
       .then(() => this);
+  }
+
+  /**
+   * Collect all module configurations into one configuration object
+   * @param modules
+   */
+  private collectConfiguration(modules: IModule[]): { [moduleName: string]: ModuleConfiguration } {
+    return Object.assign({}, ...modules.map((module) => module.getConfig()));
   }
 
 }

@@ -3,7 +3,7 @@ import { ReflectiveInjector } from "injection-js";
 import { fetchWithRequestMockOk, mockPrototypeOf, validClientOpts } from "../../../spec/testUtils";
 import { RequestAdapter } from "../../internal/requestAdapter";
 import { deferPromise } from "../../internal/utils";
-import { Client, ClientInit } from "./client";
+import { Client, ClientConfiguration, ClientInit } from "./client";
 import { IModule } from "./module";
 import { AuthOptions, TokenManager } from "./tokenManager";
 
@@ -11,21 +11,25 @@ const errFailedToInitModule = new Error("failed to init module");
 
 const mockModuleFailure: IModule = {
   init: (injector: ReflectiveInjector) => Promise.reject(errFailedToInitModule),
+  getConfig: () => ({ mockModuleFailure: {} }),
   terminate: () => Promise.resolve({} as any),
 };
 
 const mockModuleSuccess: IModule = {
   init: (injector: ReflectiveInjector) => Promise.resolve(mockModuleSuccess),
+  getConfig: () => ({ mockModuleSuccess: {} }),
   terminate: () => Promise.resolve({} as any),
 };
 
 const moduleVoidTerminating: IModule = {
   init: (injector: ReflectiveInjector) => Promise.resolve(moduleVoidTerminating),
+  getConfig: () => ({ moduleVoidTerminating: {} }),
   terminate: () => Promise.resolve({} as any),
 };
 
 const moduleVoidTerminatingError: IModule = {
   init: (injector: ReflectiveInjector) => Promise.resolve(moduleVoidTerminatingError),
+  getConfig: () => ({ moduleVoidTerminatingError: {} }),
   terminate: () => new Promise<any>((resolve, reject) => {
     setTimeout(() => reject("some error"), 1);
   }),
@@ -85,6 +89,17 @@ describe("Class: Client", () => {
       await (new Client(fetchWithRequestMockOk)).init(validClientOpts, mockModuleSuccess);
       const authOptions = injector!.get(AuthOptions);
       expect(authOptions).toBe(validClientOpts);
+    });
+
+    it("should inject collected configuration from all the modules", async () => {
+      let injector: ReflectiveInjector | undefined;
+      spyOn(mockModuleSuccess, "init").and.callFake((i: ReflectiveInjector) => {
+        injector = i;
+        return Promise.resolve();
+      });
+      await (new Client(fetchWithRequestMockOk)).init(validClientOpts, mockModuleSuccess);
+      const clientConfig = injector!.get(ClientConfiguration);
+      expect(clientConfig).toEqual({ mockModuleSuccess: {} });
     });
 
     it("should inject into the modules the request adapter with the given fetch function", async () => {

@@ -1,0 +1,11 @@
+{
+  "transform": {
+    ".(ts)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+  },
+  "moduleFileExtensions": [
+    "ts",
+    "js"
+  ],
+  "testRegex": "(.e2e).ts?$",
+  "maxConcurrency": 0
+}

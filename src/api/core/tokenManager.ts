@@ -1,9 +1,10 @@
 import { Injectable, InjectionToken } from "injection-js";
-import { DELAY } from "../../config/config";
-import { MESSAGE } from "../../config/message";
-import { IRequestAdapter, RequestAdapter } from "../../internal/requestAdapter";
-import { apiKeyAuth } from "../auth";
+import { API, DELAY, MESSAGE } from "../../config";
+import { Methods, RequestAdapter } from "../../internal/requestAdapter";
+import { Logger } from "../logger/logger";
 import { TokenStorage } from "./componentStorage";
+
+const APIKEY_DEFAULT_ALIAS = "apikey";
 
 /**
  * API interface of the authorization token
@@ -12,26 +13,12 @@ export type Tokens = {
   /**
    * JSON web token
    */
-  token: string,
+  access_token: string,
   /**
    * Refresh token
    */
   refresh_token: string,
 };
-
-/**
- * Interface used at the client to login at the project
- */
-export interface IAuthAdapter {
-  /**
-   * Login at the project
-   */
-  login(opts: IAuthOptions, requestAdapter: IRequestAdapter): Promise<IAuthToken>;
-  /**
-   * Refresh the authorization
-   */
-  refresh(tokenPair: Promise<IAuthToken>, requestAdapter: IRequestAdapter, projectID: string): Promise<IAuthToken>;
-}
 
 /**
  * Authorization options of the project
@@ -42,13 +29,18 @@ export interface IAuthOptions {
    */
   readonly projectID: string;
   /**
+   * Authorization alias. Used for multiple authorization methods at the same time
+   * by default used 'apikey'
+   */
+  auth?: string;
+  /**
    * Project Key
    */
-  readonly key: string;
+  readonly key?: string;
   /**
    * Project Password
    */
-  readonly secret: string;
+  readonly secret?: string;
   /**
    * Token refresh interval
    */
@@ -57,98 +49,169 @@ export interface IAuthOptions {
    * Remember user flag
    */
   readonly remember?: boolean;
-  /**
-   * Auth method to be used
-   */
-  readonly authMethod?: () => IAuthAdapter;
 }
 
 export const AuthOptions = new InjectionToken<IAuthOptions>("IAuthOptions");
-
-/**
- * Internal interface of the authorization token
- */
-export interface IAuthToken {
-  /**
-   * JSON web token
-   */
-  readonly token: string;
-  /**
-   * Refresh token
-   */
-  readonly refreshToken: string;
-}
 
 /**
  * @internal
  */
 @Injectable()
 export class TokenManager {
+  /* used for auth and refresh tokens */
+  private projectId: string;
+
   /* store interval to be able to end refresh loop from outside */
-  private refreshInterval: number;
-  /* JWT and refresh tokens */
-  private tokens: Promise<IAuthToken>;
+  private refreshInterval: any;
 
-  private authMethod: IAuthAdapter;
+  /* initialize promise */
+  private initPromise: Promise<this>;
 
-  private storage = TokenStorage.getStorageAPI();
-  /* do not store key and secret */
-  constructor(
-    private requestAdapter: RequestAdapter,
-  ) {}
+  /* keep token promises */
+  private defers: { [key: string]: Promise<any> } = {};
 
-  public get token(): Promise<string> {
-    /* only actual token should be exposed (refresh_token should be hidden) */
-    if (!this.tokens) {
-      return Promise.reject(new Error(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE));
-    }
-    return this.tokens.then((tokens: IAuthToken) => tokens.token);
+  private get resolved(): Promise<any[]> {
+    return Promise.all([
+      this.initPromise,
+      ...Object.values(this.defers)
+    ]);
   }
 
+  private storage = TokenStorage.getStorageAPI();
+
+  constructor(
+    private requestAdapter: RequestAdapter,
+    private logger: Logger,
+  ) {}
+
+  public token(auth?: string): Promise<string> {
+    return this.resolved
+      .then(() => {
+        const tokens = this.storage.getTokens(auth);
+        if (!tokens) {
+          throw new Error(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
+        }
+        return tokens.access_token;
+      });
+  }
+
+  /**
+   * Initialize Token Manager
+   * should be always initialized with projectID
+   * ApiKey auth is optional
+   * @param opts
+   */
   public init(opts: IAuthOptions): Promise<TokenManager> {
-    this.authMethod = opts.authMethod ? opts.authMethod() : apiKeyAuth();
-    /* check if email/password were provided */
-    if (!opts.key || !opts.secret) {
-      return Promise.reject(new Error("Please provide valid application credentials."));
-    }
     /* check application URL */
     if (!opts.projectID) {
       return Promise.reject(new Error("Please supply a valid Jexia project ID."));
     }
 
-    this.tokens = this.storage.isEmpty() ? this.login(opts) : this.refresh(opts.projectID);
+    this.projectId = opts.projectID;
 
-    /* make sure that tokens have been successfully received */
-    return this.tokens
-      .then(this.refreshToken(opts))
-      .then(() => this);
+    this.initPromise = Promise.resolve(this);
+
+    /* if auth is provided */
+    if (opts.key && opts.secret) {
+      this.initPromise = this.initPromise
+        .then(() => this.login(opts));
+    }
+
+    return this.initPromise;
   }
 
   public terminate(): void {
     this.storage.clear();
     clearInterval(this.refreshInterval);
-    this.tokens = null as any;
   }
 
-  private refreshToken(opts: IAuthOptions) {
-    return () => {
-      this.refreshInterval = setInterval(() => {
-        /* replace existing tokens with new ones */
-        this.tokens = this.refresh(opts.projectID);
-        /* exit refresh loop on failure */
-        this.tokens.catch((err: Error) => this.terminate());
-      }, opts.refreshInterval || DELAY);
-    };
+  public setDefault(auth: string): void {
+    this.storage.setDefault(auth);
   }
 
-  private login(opts: IAuthOptions): Promise<IAuthToken> {
-    /* no need to wait for tokens */
-    return this.authMethod.login(opts, this.requestAdapter)
-      .then((tokens: IAuthToken) => this.storage.setTokens(tokens));
+  public resetDefault(): void {
+    this.storage.setDefault(APIKEY_DEFAULT_ALIAS);
   }
 
-  private refresh(projectID: string): Promise<IAuthToken> {
-    return this.tokens = this.authMethod.refresh(this.storage.getTokens(), this.requestAdapter, projectID)
-      .then((tokens) => this.storage.setTokens(tokens));
+  public addTokens(auth: string, tokens: Tokens, defaults?: boolean) {
+    this.storage.setTokens(auth, tokens, defaults);
+    this.refreshToken(auth);
+  }
+
+  private refreshToken(auth: string) {
+    this.refreshInterval = setInterval(() => {
+      this.logger.debug("tokenManager", `refresh ${auth} token`);
+      this.refresh(auth)
+        .catch((err: Error) => {
+          this.logger.error("tokenManager", err.message);
+          this.terminate();
+        });
+    }, DELAY);
+  }
+
+  private login({auth = APIKEY_DEFAULT_ALIAS, key, secret}: IAuthOptions): Promise<this> {
+
+    let defers: any;
+    this.defers[auth] = new Promise((resolve, reject) => defers = { resolve, reject });
+
+    return this.requestAdapter
+      .execute(this.authUrl, {
+        body: {
+          method: "apk",
+          key,
+          secret,
+        },
+        method: Methods.POST,
+      })
+      .then((tokens: Tokens) => {
+        this.addTokens(auth, tokens, true);
+        defers.resolve(tokens.access_token);
+        return this;
+      })
+      .catch((err: Error) => {
+        defers.reject(err);
+        this.logger.error("tokenManager", err.message);
+        throw new Error(`Unable to authenticate: ${err.message}`);
+      });
+  }
+
+  private refresh(auth: string): Promise<any> {
+
+    const tokens = this.storage.getTokens(auth);
+
+    if (!tokens || !tokens.refresh_token) {
+      return Promise.reject(`There is no refresh token for ${auth}`);
+    }
+
+    let defers: any;
+    this.defers[auth] = new Promise((resolve, reject) => defers = { resolve, reject });
+
+    return this.requestAdapter
+      .execute(this.refreshUrl, {
+        body: { refresh_token: tokens.refresh_token },
+        method: Methods.POST
+      })
+      .then((refreshedTokens: Tokens) => {
+        this.storage.setTokens(auth, refreshedTokens);
+        defers.resolve(tokens.access_token);
+        return this;
+      })
+      .catch((err: Error) => {
+        defers.reject(err);
+        this.logger.error("tokenManager", err.message);
+        throw new Error(`Unable to refresh token: ${err.message}`);
+      });
+  }
+
+  private get url(): string {
+    return `${API.PROTOCOL}://${this.projectId}.${API.HOST}.${API.DOMAIN}:${API.PORT}`;
+  }
+
+  private get authUrl(): string {
+    return `${this.url}/${API.AUTH}`;
+  }
+
+  private get refreshUrl(): string {
+    return `${this.url}/${API.REFRESH}`;
   }
 }

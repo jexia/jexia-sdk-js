@@ -1,103 +1,238 @@
-import { CompositeFilteringCondition, FilteringCondition } from "./filteringCondition";
+import * as faker from "faker";
+import { CompositeFilteringCondition, FilteringCondition, LogicalOperator } from "./filteringCondition";
+
+function createSubject({
+  field = faker.random.words(1),
+  operator = faker.helpers.randomize(["=", "!=", "like"]),
+  value = faker.helpers.randomize([faker.random.words(), [faker.random.word()]]),
+} = {}) {
+  return {
+    field,
+    operator,
+    value,
+    subject: new FilteringCondition(field, operator, value),
+  };
+}
 
 describe("FilteringCondition class", () => {
+  let subject: FilteringCondition<string>;
+  let field: string;
+  let operator: string;
+  let value: string | string[];
+
+  beforeEach(() => {
+    ({ field, operator, value, subject } = createSubject());
+  });
 
   it("should have a default logical operator type of 'and'", () => {
-    const condition = new FilteringCondition("field", "operator", ["value"]);
-    expect(condition.Type).toBe("and");
+    expect(subject.type).toBe("and");
   });
 
   describe("when compiling a simple condition", () => {
-    let condition: FilteringCondition<string>;
-    let field = "field";
-    let operator = "operator";
-    let value = "value";
-
-    beforeEach( () => {
-      condition = new FilteringCondition( field, operator, [value]);
-    });
-
-    it("compiles to a JSON object as expected by the Anemo API", () => {
-      expect(condition.compile()).toEqual({ field, operator, values: [value], type: "and"});
+    it("compiles to the expected format ", () => {
+      expect(subject.compile()).toEqual([{ field }, operator, value]);
     });
   });
 
   describe("when adding a condition with the AND/OR methods", () => {
-    let condition: FilteringCondition<string>;
-    let field = "field";
-    let operator = "operator";
-    let value = "value";
+    it("creates the proper CompositeFilteringCondition object when using OR", () => {
+      const compCondition = subject.or(createSubject().subject);
 
-    beforeEach( () => {
-      condition = new FilteringCondition( field, operator, [value]);
+      expect(compCondition instanceof CompositeFilteringCondition).toBeTruthy();
     });
 
-    it("creates the proper CompositeFilteringCondition object", () => {
-      let compCondition = condition.or(new FilteringCondition(field, operator, ["value2"]));
-      expect(compCondition.compile()).toEqual({
-        conditions: [
-          {field, operator, values: [value], type: "and"},
-          {field, operator, values: ["value2"], type: "or"}],
-        type: "and"});
+    it("creates the proper CompositeFilteringCondition object when using AND", () => {
+      const compCondition = subject.and(createSubject().subject);
+
+      expect(compCondition instanceof CompositeFilteringCondition).toBeTruthy();
+    });
+
+    describe("when compiling", () => {
+      it("returns the correct format when using the OR operator", () => {
+        const {
+          field: anotherField,
+          operator: anotherOperator,
+          value: anotherValue,
+          subject: anotherSubject,
+        } = createSubject();
+
+        const compCondition = subject.or(anotherSubject);
+
+        expect(compCondition.compile()).toEqual([
+          { field }, operator, value,
+          "or",
+          { field: anotherField }, anotherOperator, anotherValue,
+        ]);
+      });
+
+      it("returns the correct format when using the AND operator", () => {
+        const {
+          field: anotherField,
+          operator: anotherOperator,
+          value: anotherValue,
+          subject: anotherSubject,
+        } = createSubject();
+
+        const compCondition = subject.and(anotherSubject);
+
+        expect(compCondition.compile()).toEqual([
+          { field }, operator, value,
+          "and",
+          { field: anotherField }, anotherOperator, anotherValue,
+        ]);
+      });
     });
   });
 });
 
+function createCompositeSubject({
+  filtering = createSubject(),
+  type = faker.helpers.randomize(["and", "or"]),
+} = {}) {
+  return {
+    ...filtering,
+    type,
+    compositeSubject: new CompositeFilteringCondition(filtering.subject, (<LogicalOperator> type)),
+  };
+}
+
 describe("CompositeFilteringCondition class", () => {
 
   it("should use the given logical operator type", () => {
-    const compCondition = new CompositeFilteringCondition(
-      new FilteringCondition("field", "operator", ["value"]), "and");
-    expect(compCondition.Type).toBe("and");
+    const { compositeSubject, type } = createCompositeSubject();
+    expect(compositeSubject.type).toBe(type);
+  });
+
+  describe("when calling or()", () => {
+    it("should not mutate condition", () => {
+      const { compositeSubject } = createCompositeSubject();
+      const { subject: condition } = createSubject();
+      condition.type = "and";
+
+      compositeSubject.or(condition);
+
+      expect(condition.type).toEqual("and");
+    });
   });
 
   describe("when compiling a condition", () => {
-    let compCondition: CompositeFilteringCondition;
-    let field = "field";
-    let operator = "operator";
-    let value = "value";
+    it("should return expected format when there is only one", () => {
+      const { compositeSubject, field, operator, value } = createCompositeSubject();
 
-    it("compiles to a JSON object as expected by the Anemo API", () => {
-      compCondition = new CompositeFilteringCondition(new FilteringCondition( field, operator, [value]), "and");
-      expect(compCondition.compile())
-      .toEqual({ conditions: [{field, operator, values: [value], type: "and"}], type: "and"});
+      expect(compositeSubject.compile()).toEqual([
+        { field }, operator, value,
+      ]);
     });
 
-    it("compiles to a JSON object as expected by the Anemo API when using the OR operator", () => {
-      compCondition = new CompositeFilteringCondition(new FilteringCondition( field, operator, [value]), "and")
-        .or(new FilteringCondition(field, operator, ["value2"]));
-      expect(compCondition.compile() as any)
-      .toEqual({
-        conditions: [
-          { field: "field", operator: "operator", values: ["value"], type: "and" },
-          { field: "field", operator: "operator", values: ["value2"], type: "or" }],
-        type: "and" });
+    it("should return expected format when using the OR operator", () => {
+      const { compositeSubject, field, operator, value } = createCompositeSubject();
+      const {
+        field: anotherField,
+        operator: anotherOperator,
+        value: anotherValue,
+        subject: anotherSubject,
+      } = createSubject();
+
+      const composite = compositeSubject.or(anotherSubject);
+
+      expect(composite.compile()).toEqual([
+        { field }, operator, value,
+        "or",
+        { field: anotherField }, anotherOperator, anotherValue,
+      ]);
     });
 
-    it("compiles to a JSON object as expected by the Anemo API when using the AND operator", () => {
-      compCondition = new CompositeFilteringCondition(new FilteringCondition( field, operator, [value]), "and")
-        .and(new FilteringCondition(field, operator, ["value2"]));
-      expect(compCondition.compile() as any)
-      .toEqual({
-        conditions: [
-          { field: "field", operator: "operator", values: ["value"], type: "and" },
-          { field: "field", operator: "operator", values: ["value2"], type: "and" }],
-        type: "and" });
+    it("should return expected format when using the AND operator", () => {
+      const { compositeSubject, field, operator, value } = createCompositeSubject();
+      const {
+        field: field2,
+        operator: operator2,
+        value: value2,
+        subject,
+      } = createSubject();
+
+      const composite = compositeSubject.and(subject);
+
+      expect(composite.compile()).toEqual([
+        { field }, operator, value,
+        "and",
+        { field: field2 }, operator2, value2,
+      ]);
     });
 
-    it("compiles to a JSON object as expected by the Anemo API when using the OR and the AND operator", () => {
-      compCondition = new CompositeFilteringCondition(new FilteringCondition( field, operator, [value]), "and")
-        .or(new FilteringCondition(field, operator, ["value2"]))
-        .or(new FilteringCondition(field, operator, ["value3"]))
-        .and(new FilteringCondition(field, operator, ["value4"]));
-      expect(compCondition.compile() as any)
-      .toEqual({
-        conditions: [
-          { field: "field", operator: "operator", values: ["value"], type: "and" },
-          { field: "field", operator: "operator", values: ["value2"], type: "or" },
-          { field: "field", operator: "operator", values: ["value3"], type: "or" },
-          { field: "field", operator: "operator", values: ["value4"], type: "and" }],
-        type: "and" });
+    it("should return expected format when using both OR/AND operators", () => {
+      const { compositeSubject, field, operator, value } = createCompositeSubject();
+      const {
+        field: field2,
+        operator: operator2,
+        value: value2,
+        subject: subject2,
+      } = createSubject();
+      const {
+        field: field3,
+        operator: operator3,
+        value: value3,
+        subject: subject3,
+      } = createSubject();
+
+      const composite = compositeSubject
+        .or(subject2)
+        .and(subject3);
+
+      expect(composite.compile()).toEqual([
+        { field }, operator, value,
+        "or",
+        { field: field2 }, operator2, value2,
+        "and",
+        { field: field3 }, operator3, value3,
+      ]);
     });
+
+    it("should return expected format when using both OR/AND operators", () => {
+      const {
+        field: field1,
+        operator: operator1,
+        value: value1,
+        subject: subject1,
+      } = createSubject();
+      const {
+        field: field2,
+        operator: operator2,
+        value: value2,
+        subject: subject2,
+      } = createSubject();
+
+      const subject1OrSubject2 = subject1.or(subject2);
+
+      const {
+        field: field3,
+        operator: operator3,
+        value: value3,
+        subject: subject3,
+      } = createSubject();
+      const {
+        field: field4,
+        operator: operator4,
+        value: value4,
+        subject: subject4,
+      } = createSubject();
+
+      const subject3OrSubject4 = subject3.or(subject4);
+
+      const anotherComposite = subject1OrSubject2.and(subject3OrSubject4);
+
+      expect(anotherComposite.compile()).toEqual([
+        { field: field1 }, operator1, value1,
+        "or",
+        { field: field2 }, operator2, value2,
+        "and",
+        [
+          { field: field3 }, operator3, value3,
+          "or",
+          { field: field4 }, operator4, value4,
+        ],
+      ]);
+    });
+
   });
 });

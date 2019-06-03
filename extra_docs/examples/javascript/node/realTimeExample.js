@@ -1,33 +1,28 @@
 
-const jexiaSDK = require('jexia-sdk-js/node');
-const fetch = require('node-fetch');
-const ws = require("ws");
+const { dataOperations, realTime, jexiaClient } = require("jexia-sdk-js/node");
 
-const dataOperations = jexiaSDK.dataOperations;
-const field = jexiaSDK.field;
-const jexiaClient = jexiaSDK.jexiaClient;
-const realTime = jexiaSDK.realTime;
+// Initialize DataOperationsModule
+const dataModule = dataOperations();
+const credentials = {
+  projectID: "<your-project-id>",
+  key: "<your-project-api-key>",
+  secret: "<your-project-api-secret>",
+};
 
-let dom = dataOperations();
-let rtc = realTime((messageObject) => {
-  console.log("Realtime message received:");
-  console.log(messageObject);
-}, (url) => {
-    return new ws(url, {origin: "http://localhost"});
-});
-let jexiaClientInstance = jexiaClient(fetch);
+// Initialize Client and pass the data operations and real time modules to it.
+jexiaClient().init(credentials, dataModule, realTime());
 
-jexiaClientInstance.init({projectID: "anemo002", key: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", secret: "a_secret"}, dom, rtc).then( () => {
-  return rtc.subscribe("insert", dom.dataset("keywords")).then( () => {
-    console.log("Succesfully subscribed to dataset changes");
-    return dom.dataset("keywords").insert([{keyword: "aNewKeyword"}, {keyword: "anotherKeyword"}]).execute();
-  }).then( (records) => {
-    console.log("HTTP response to request query received, shutting down in 5, 4, 3...");
-    setTimeout( () => {
-      jexiaClientInstance.terminate().then( () => process.exit() );
-    }, 5000);
-  });
-}).catch( (err) => {
-  console.log(err.message);
-  jexiaClientInstance.terminate().then( () => process.exit() );
-});
+// Use your data module
+dataModule.dataset("posts")
+  // Chose the events you want to watch
+  .watch("created", "deleted")
+  .subscribe(
+    (messageObject) => {
+      console.log("Realtime message received:", messageObject.data.title);
+    },
+    (error) => {
+      // there was an error somewhere
+      console.log(error);
+      process.exit();
+    },
+  );
