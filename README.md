@@ -4,17 +4,24 @@
 
 This is the official JavaScript / TypeScript SDK for interacting with Jexia projects.
 
-## Install
+## Install for NodeJs
+With NodeJs you will need to install `node-fetch` and `ws` dependencies:
+
+```bash
+npm install jexia-sdk-js node-fetch ws --save
+```
+
+## Install for Web browser
 
 ```bash
 npm install jexia-sdk-js --save
 ```
 
+
 ## Example Use
 
 ```javascript
-// Node application
-const jexiaSDK = require("jexia-sdk-js/node");
+const jexiaSDK = require("jexia-sdk-js/node"); // use require("jexia-sdk-js/browser") for browser
 const dataModule = jexiaSDK.dataOperations();
 
 const credentials = {
