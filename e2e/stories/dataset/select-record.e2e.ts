@@ -1,11 +1,11 @@
 import * as faker from "faker";
 import * as Joi from "joi";
-import { field } from "../../src";
-import { cleaning, DEFAULT_DATASET, dom, init } from "../teardowns";
-import { Dataset } from "./../../src/api/dataops/dataset";
-import { IFilteringCriterion, IFilteringCriterionCallback } from "./../../src/api/dataops/filteringApi";
-import { MESSAGE } from "./../../src/config/message";
-import { DatasetRecordSchema } from "./../lib/dataset";
+import { field } from "../../../src";
+import { Dataset } from "../../../src/api/dataops/dataset";
+import { IFilteringCriterion, IFilteringCriterionCallback } from "../../../src/api/dataops/filteringApi";
+import { MESSAGE } from "../../../src/config/message";
+import { DatasetRecordSchema } from "../../lib/dataset";
+import { cleaning, DEFAULT_DATASET, dom, init } from "../../teardowns";
 
 const joiAssert = Joi.assert;
 
@@ -67,7 +67,11 @@ describe("filter records REST API", async () => {
     });
   }
 
-  function test(testData: any[], successTests, failTests) {
+  function test(
+    testData: any[],
+    successTests: Array<{title: string, condition: Condition, expectedLength: number}>,
+    failTests: Array<{title: string, condition: Condition}>) {
+
     setupData(testData);
 
     successTests.forEach(({ title, condition, expectedLength }) => {
@@ -402,7 +406,7 @@ describe("filter records REST API", async () => {
       fieldName,
       fakePastDate,
       fakeFutureDate,
-    }) {
+    }: any) {
       const testData = [
         { [fieldName]: null },
         { [fieldName]: fakePastDate({ min: 11, max: 30 }) },
@@ -568,6 +572,8 @@ describe("filter records REST API", async () => {
           [FIELD.INTEGER]: Joi.empty(),
           [FIELD.FLOAT]: Joi.empty(),
           [FIELD.STRING]: Joi.empty(),
+          [FIELD.DATE]: Joi.empty(),
+          [FIELD.DATETIME]: Joi.empty(),
         }))
         .length(limit);
 
@@ -583,24 +589,24 @@ describe("filter records REST API", async () => {
         [FIELD.INTEGER]: faker.random.number({ min: index }),
       })
     );
-    let sortField;
+    let sortField: string;
 
     // init beforeAll/AfterAll hooks
     setupData(testData);
 
-    function byFieldAsc(a, b) {
+    function byFieldAsc(a: any, b: any) {
       if (a[sortField] > b[sortField]) { return 1; }
       if (a[sortField] < b[sortField]) { return -1; }
       return 0;
     }
 
-    function byFieldDesc(a, b) {
+    function byFieldDesc(a: any, b: any) {
       if (a[sortField] < b[sortField]) { return 1; }
       if (a[sortField] > b[sortField]) { return -1; }
       return 0;
     }
 
-    async function testSorting(fn: "sortAsc" | "sortDesc", sortFn: (a, b) => number) {
+    async function testSorting(fn: "sortAsc" | "sortDesc", sortFn: (a: any, b: any) => number) {
       sortField = faker.random.arrayElement([FIELD.STRING, FIELD.INTEGER]);
 
       const result = await dataset
@@ -617,6 +623,8 @@ describe("filter records REST API", async () => {
           [FIELD.INTEGER]: Joi.number().integer().equal(record[FIELD.INTEGER]),
           [FIELD.FLOAT]: Joi.empty(),
           [FIELD.STRING]: Joi.empty(),
+          [FIELD.DATE]: Joi.empty(),
+          [FIELD.DATETIME]: Joi.empty(),
         }))
         .map((schema) => DatasetRecordSchema.append(schema));
 

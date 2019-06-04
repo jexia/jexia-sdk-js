@@ -80,7 +80,7 @@ export const cleaning = async () => {
 export const initWithUMS = async () => {
   client = await jexiaClient().init({
     projectID: process.env.E2E_PROJECT_ID as string,
-  }, ums, dom, new LoggerModule(LogLevel.DEBUG)); // Change to LogLevel.DEBUG to have more logs
+  }, ums, dom, new LoggerModule(LogLevel.ERROR)); // Change to LogLevel.DEBUG to have more logs
 };
 
 export const initWithJFS = async (filesetName: string = "testFileset",
@@ -101,7 +101,7 @@ export const initWithJFS = async (filesetName: string = "testFileset",
     projectID: process.env.E2E_PROJECT_ID as string,
     key: apiKey.key,
     secret: apiKey.secret,
-  }, jfs, realTime(), new LoggerModule(LogLevel.DEBUG));
+  }, jfs, realTime(), new LoggerModule(LogLevel.ERROR));
 };
 
 export const terminate = async () => {

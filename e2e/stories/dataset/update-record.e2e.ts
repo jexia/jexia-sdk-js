@@ -1,22 +1,21 @@
 import * as faker from "faker";
 import * as Joi from "joi";
-import { field } from "../../src";
-import { Fileset } from "../../src/api/fileops/fileset";
-import { FilesetRecordSchema } from "../lib/fileset";
-import { cleaning, DEFAULT_DATASET, DEFAULT_FILESET, initWithJFS, jfs } from "../teardowns";
-import { MESSAGE } from "./../../src/config/message";
+import { Dataset, field } from "../../../src";
+import { MESSAGE } from "../../../src/config/message";
+import { DatasetRecordSchema } from "../../lib/dataset";
+import { cleaning, DEFAULT_DATASET, dom, init } from "../../teardowns";
 
 const joiAssert = Joi.assert;
 
 jest.setTimeout(15000); // for the unstable internet connection
 
 describe("update record REST API", async () => {
-  let fileset: Fileset<any, any, any, any>;
   const BAD_REQUEST = new Error(`${MESSAGE.CORE.BACKEND_ERROR}400 Bad Request`);
+  let dataset: Dataset;
 
   beforeAll(async () => {
-    await initWithJFS(DEFAULT_FILESET.NAME);
-    fileset = jfs.fileset(DEFAULT_FILESET.NAME);
+    await init();
+    dataset = dom.dataset(DEFAULT_DATASET.NAME);
   });
 
   afterAll(async () => cleaning());
@@ -24,19 +23,17 @@ describe("update record REST API", async () => {
   it("should return array of records when updating single record by id", async () => {
     const newName = faker.lorem.sentence(3);
 
-    const record = await fileset
-      .upload([{
-        data: { [DEFAULT_DATASET.FIELD]: faker.name.findName() }
-      }])
-      .toPromise();
+    const [record] = await dataset
+      .insert({ [DEFAULT_DATASET.FIELD]: faker.name.findName() })
+      .execute();
 
-    const updateResult = await fileset
+    const updateResult = await dataset
       .update({ [DEFAULT_DATASET.FIELD]: newName })
       .where(field("id").isEqualTo(record.id))
       .execute();
 
     joiAssert(updateResult, Joi.array()
-      .items(FilesetRecordSchema.append({
+      .items(DatasetRecordSchema.append({
         [DEFAULT_DATASET.FIELD]: Joi.string().valid(newName).required()
       }))
       .length(1)
@@ -48,16 +45,14 @@ describe("update record REST API", async () => {
     const randomField = faker.random.arrayElement(["some_field", "another_field", "last_field"]);
     const newRandomValue = faker.lorem.sentence(5);
 
-    await fileset
-      .upload([ {
-        data: {
-          [DEFAULT_DATASET.FIELD]: originalName,
-          [randomField]: faker.lorem.sentence(4)
-        },
-      }])
-      .toPromise();
+    await dataset
+      .insert({
+        [DEFAULT_DATASET.FIELD]: originalName,
+        [randomField]: faker.lorem.sentence(4),
+      })
+      .execute();
 
-    const updateResult = await fileset
+    const updateResult = await dataset
       .update({
         [DEFAULT_DATASET.FIELD]: originalName,
         [randomField]: newRandomValue,
@@ -66,7 +61,7 @@ describe("update record REST API", async () => {
       .execute();
 
     joiAssert(updateResult, Joi.array()
-      .items(FilesetRecordSchema.append({
+      .items(DatasetRecordSchema.append({
         [DEFAULT_DATASET.FIELD]: originalName,
         [randomField]: newRandomValue,
       }))
@@ -77,12 +72,12 @@ describe("update record REST API", async () => {
   it("should throw error under invalid where condition", async () => {
     const originalName = faker.name.findName();
 
-    await fileset
-      .upload([{ data: { [DEFAULT_DATASET.FIELD]: originalName } }])
-      .toPromise();
+    await dataset
+      .insert({ [DEFAULT_DATASET.FIELD]: originalName })
+      .execute();
 
     try {
-      await fileset
+      await dataset
         .update({ [DEFAULT_DATASET.FIELD]: faker.lorem.sentence(4) })
         .where(field("id").isEqualTo("invalid"))
         .execute();

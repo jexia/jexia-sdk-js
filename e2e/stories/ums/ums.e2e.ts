@@ -2,12 +2,12 @@ import * as faker from "faker";
 import * as Joi from "joi";
 // @ts-ignore
 import * as joiAssert from "joi-assert";
-import { IUMSUser } from "../../src/api/ums/umsModule";
-import { LoggerModule, LogLevel } from "../../src/node";
-import { DatasetRecordSchema } from "../lib/dataset";
-import { UserSchema } from "../lib/ums";
-import { Management } from "../management";
-import { cleaning, dom, init, initWithUMS, terminate, ums } from "../teardowns";
+import { IUMSUser } from "../../../src/api/ums/umsModule";
+import { LoggerModule, LogLevel } from "../../../src/node";
+import { DatasetRecordSchema } from "../../lib/dataset";
+import { UserSchema } from "../../lib/ums";
+import { Management } from "../../management";
+import { cleaning, dom, init, initWithUMS, terminate, ums } from "../../teardowns";
 
 jest.setTimeout(15000);
 
@@ -137,8 +137,8 @@ describe("User Management Service", () => {
   describe("initialize with API key", () => {
 
     beforeAll(async () => {
-      await init("umsTestDataset", "name",
-        [ums, dom, new LoggerModule(LogLevel.DEBUG)]);
+      await init("umsTestDataset", [{ name: "name", type: "string" }],
+        [ums, dom, new LoggerModule(LogLevel.ERROR)]);
       await ums.signUp(credentials);
     });
 

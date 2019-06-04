@@ -4,9 +4,9 @@ import * as Joi from "joi";
 // @ts-ignore
 import * as joiAssert from "joi-assert";
 import "reflect-metadata";
-import { FilesetRecordSchema } from "../lib/fileset";
-import { RTCMessageSchema } from "../lib/rtc";
-import { cleaning, initWithJFS, jfs } from "../teardowns";
+import { FilesetRecordSchema } from "../../lib/fileset";
+import { RTCMessageSchema } from "../../lib/rtc";
+import { cleaning, initWithJFS, jfs } from "../../teardowns";
 
 jest.setTimeout(30000);
 
