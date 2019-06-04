@@ -27,25 +27,23 @@ describe("Class: TokenManager", () => {
     });
 
     it("should throw an error if application URL is not provided", async () => {
-      tm
-        .init({projectID: "", key: "validKey", secret: "validSecret"})
-        .then(() => { throw new Error("should have throw app URL error"); })
-        .catch((err: Error) => {
-          expect(err).toEqual(new Error("Please supply a valid Jexia project ID."));
-        });
+      try {
+        await tm.init({ projectID: "", key: "validKey", secret: "validSecret" });
+        throw new Error("should have throw app URL error");
+      } catch (error) {
+        expect(error).toEqual(new Error("Please supply a valid Jexia project ID."));
+      }
     });
 
-    it("should throw an error if authentication failed", (done) => {
-      (new TokenManager(
-        requestAdapterMockFactory().failedExecution("Auth error."),
-        new Logger()
-       ))
-        .init({projectID: validProjectID, key: "invalidKey", secret: "invalidSecret"})
-        .then(() => done.fail("should throw authentication error"))
-        .catch((err: Error) => {
-          expect(err).toBeDefined();
-          done();
-        });
+    it("should throw an error if authentication failed", async () => {
+      try {
+        await (new TokenManager(
+          requestAdapterMockFactory().failedExecution("Auth error."),
+          new Logger()
+        )).init({ projectID: "", key: "validKey", secret: "validSecret" });
+      } catch (error) {
+        expect(error).toBeDefined();
+      }
     });
 
     it("should fail initialization when login fails", async () => {
@@ -61,22 +59,31 @@ describe("Class: TokenManager", () => {
     });
 
     it("should result itself at then promise when authorization succeeded", async () => {
-      const result = await tm.init(validOpts());
-      expect(result).toBe(tm);
+      try {
+        const result = await tm.init(validOpts());
+        expect(result).toBe(tm);
+      } catch (error) {
+        expect(error).not.toBeDefined();
+      }
     });
 
     it("should have valid token and refresh token if authorization succeeded", async () => {
-      const token = await tm.init(validOpts()).then((out: TokenManager) => out.token());
-      expect(token).toBe(defaultToken.access_token);
+      try {
+        const tokenManager: TokenManager = await tm.init(validOpts());
+        const token: string = await tokenManager.token();
+        expect(token).toBe(defaultToken.access_token);
+      } catch (error) {
+        expect(error).not.toBeDefined();
+      }
     });
 
-    it("should throw an error if the token is accessed before login", (done) => {
-      tm.token().then( () => {
-        done.fail("Token promise should reject.");
-      }).catch( (err: Error) => {
-        expect(err.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
-        done();
-      });
+    it("should throw an error if the token is accessed before login", async () => {
+      try {
+        await tm.token();
+        throw new Error("token() should have failed!");
+      } catch (error) {
+        expect(error.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
+      }
     });
   });
 
@@ -91,31 +98,28 @@ describe("Class: TokenManager", () => {
       );
     });
 
-    it("should have clear the session storage", (done) => {
+    it("should have clear the session storage", async () => {
       spyOn(tm["storage"], "clear");
-      tm.init({ projectID: validProjectID, key: "validKey", secret: "validSecret" })
-        .then(() => tm.terminate())
-        .then(() => expect(tm["storage"]["clear"]).toHaveBeenCalledWith())
-        .then(done, done.fail);
+      try {
+        await tm.init({ projectID: validProjectID, key: "validKey", secret: "validSecret" });
+        await tm.terminate();
+
+        expect(tm["storage"]["clear"]).toHaveBeenCalledWith();
+      } catch (error) {
+        expect(error).not.toBeDefined();
+      }
     });
 
-    it("should have clear the refresh process interval", (done) => {
-      spyOn(global, "clearInterval");
-      tm.init({ projectID: validProjectID, key: "validKey", secret: "validSecret" })
-        .then(() => tm.terminate())
-        .then(() => expect(global.clearInterval).toHaveBeenCalledWith(tm["refreshInterval"]))
-        .then(done, done.fail);
-    });
+    it("should throw an error if the token is accessed after terminate", async () => {
+      try {
+        await tm.init({ projectID: validProjectID, key: "validKey", secret: "validSecret" });
+        tm.terminate();
+        await tm.token();
 
-    it("should throw an error if the token is accessed after terminate", (done) => {
-      tm.init({ projectID: validProjectID, key: "validKey", secret: "validSecret" })
-        .then(() => tm.terminate())
-        .then(() => tm.token())
-        .then(() => done.fail("Token access should have failed"))
-        .catch((err: Error) => {
-          expect(err.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
-          done();
-        });
+        expect(global.clearInterval).toHaveBeenCalledWith(tm["refreshInterval"]);
+      } catch (error) {
+        expect(error.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
+      }
     });
   });
 
@@ -139,28 +143,26 @@ describe("Class: TokenManager", () => {
       });
     });
 
-    it("should reject promise if there is no token for specific auth", (done) => {
+    it("should reject promise if there is no token for specific auth", async () => {
       tm["storage"].setTokens("testRefresh", { access_token: "access_token", refresh_token: "refresh_token" });
-      tm["refresh"]("randomAuth")
-        .then(() => done.fail("should reject promise with error"))
-        .catch((error) => {
-          expect(error).toEqual(`There is no refresh token for randomAuth`);
-          done();
-        });
+      try {
+        await tm["refresh"]("randomAuth");
+      } catch (error) {
+        expect(error).toEqual("There is no refresh token for randomAuth");
+      }
     });
 
-    it("should throw an error if request failed", (done) => {
+    it("should throw an error if request failed", async () => {
       const tokenManager = new TokenManager(
         requestAdapterMockFactory().failedExecution("refresh error"),
         new Logger()
       );
       tokenManager["storage"].setTokens("testRefresh", { access_token: "access_token", refresh_token: "refresh_token" });
-      tokenManager["refresh"]("testRefresh")
-        .then(() => done.fail("should fail with refresh token error"))
-        .catch((error) => {
-          expect(error).toEqual(new Error("Unable to refresh token: refresh error"));
-          done();
-        });
+      try {
+        await tokenManager["refresh"]("testRefresh");
+      } catch (error) {
+        expect(error).toEqual(new Error("Unable to refresh token: refresh error"));
+      }
     });
 
   });
