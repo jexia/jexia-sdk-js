@@ -1,57 +1,97 @@
 // tslint:disable:max-line-length
-// tslint:disable:no-string-literal
+import * as faker from "faker";
 import { requestAdapterMockFactory } from "../../../spec/testUtils";
 import { MESSAGE } from "../../config";
 import { Methods } from "../../internal/requestAdapter";
 import { Logger } from "../logger/logger";
-import { TokenStorage } from "./componentStorage";
-import { TokenManager } from "./tokenManager";
-
-const validProjectID = "validProjectID";
-const defaultToken = Object.freeze({ access_token: "accessToken", refresh_token: "refreshToken" });
-
-const validOpts = () => ({ projectID: validProjectID, key: "validKey", refreshInterval: 500, secret: "validSecret" });
-
-const tokenManagerWithTokens = () => {
-  const requestAdapter = requestAdapterMockFactory().succesfulExecution(defaultToken);
-  return new TokenManager(requestAdapter, new Logger());
-};
+import { API } from "./../../config/config";
+import { RequestAdapter } from "./../../internal/requestAdapter";
+import { IStorageComponent, TokenStorage } from "./componentStorage";
+import { APIKEY_DEFAULT_ALIAS, TokenManager, Tokens } from "./tokenManager";
 
 describe("Class: TokenManager", () => {
+  let subject: TokenManager;
+  let requestAdapter: RequestAdapter;
+  let logger: Logger;
+  let storage: IStorageComponent;
+
+  const VALID_PROJECT_ID = "validProjectID";
+  const DEFAULT_TOKEN: Readonly<Tokens> = {
+    access_token: faker.random.word(),
+    refresh_token: faker.random.word(),
+  };
+
+  const validOpts = () => ({
+    projectID: VALID_PROJECT_ID,
+    key: faker.random.word(),
+    refreshInterval: 500,
+    secret: faker.random.word(),
+  });
+
+  function createSubject({
+    adapter = requestAdapterMockFactory().succesfulExecution(DEFAULT_TOKEN),
+    log = new Logger(),
+  } = {}) {
+    return {
+      requestAdapter: adapter,
+      logger: log,
+      storage: TokenStorage.getStorageAPI(),
+      subject: new TokenManager(adapter, log),
+    };
+  }
+
+  beforeEach(() => {
+    expect.assertions(1);
+    jest.useFakeTimers();
+    jest.clearAllTimers();
+    TokenStorage.getStorageAPI().clear();
+    ({ logger, requestAdapter, storage, subject } = createSubject());
+  });
+
+  it("should set storage defaults", () => {
+    spyOn(storage, "setDefault");
+
+    const auth = faker.random.word();
+    subject.setDefault(auth);
+
+    expect(storage.setDefault).toHaveBeenCalledWith(auth);
+  });
+
+  it("should set default alias when reseting", () => {
+    spyOn(storage, "setDefault");
+    subject.resetDefault();
+
+    expect(storage.setDefault).toHaveBeenCalledWith(APIKEY_DEFAULT_ALIAS);
+  });
+
   describe("when authenticating", () => {
-    let tm: TokenManager;
-
-    beforeEach(() => {
-      TokenStorage.getStorageAPI().clear();
-      tm = tokenManagerWithTokens();
-    });
-
-    it("should throw an error if application URL is not provided", async () => {
+    it("should throw an error if project ID is not provided", async () => {
       try {
-        await tm.init({ projectID: "", key: "validKey", secret: "validSecret" });
-        throw new Error("should have throw app URL error");
+        await subject.init(Object.assign(validOpts(), { projectID: "" }));
+        throw new Error("should have thrown error");
       } catch (error) {
         expect(error).toEqual(new Error("Please supply a valid Jexia project ID."));
       }
     });
 
     it("should throw an error if authentication failed", async () => {
-      try {
-        await (new TokenManager(
-          requestAdapterMockFactory().failedExecution("Auth error."),
-          new Logger()
-        )).init({ projectID: "", key: "validKey", secret: "validSecret" });
-      } catch (error) {
-        expect(error).toBeDefined();
-      }
+      const errorMessage = faker.lorem.sentence();
+
+      ({ subject } = createSubject({
+        adapter: requestAdapterMockFactory().failedExecution(errorMessage),
+       }));
+
+      await expect(
+        subject.init(Object.assign(validOpts(), { key: "invalid", secret: "invalid" }))
+      ).rejects.toThrowError();
     });
 
     it("should fail initialization when login fails", async () => {
-      spyOn(TokenStorage.getStorageAPI(), "isEmpty").and.returnValue(true);
+      spyOn(storage, "isEmpty").and.returnValue(true);
       const loginError = "loginError";
-      spyOn(tm as any, "login").and.returnValue(Promise.reject(loginError));
+      spyOn(subject as any, "login").and.returnValue(Promise.reject(loginError));
       try {
-        await tm.init(validOpts());
+        await subject.init(validOpts());
         throw new Error("init should have failed!");
       } catch (error) {
         expect(error).toBe(loginError);
@@ -60,8 +100,8 @@ describe("Class: TokenManager", () => {
 
     it("should result itself at then promise when authorization succeeded", async () => {
       try {
-        const result = await tm.init(validOpts());
-        expect(result).toBe(tm);
+        const result = await subject.init(validOpts());
+        expect(result).toBe(subject);
       } catch (error) {
         expect(error).not.toBeDefined();
       }
@@ -69,9 +109,9 @@ describe("Class: TokenManager", () => {
 
     it("should have valid token and refresh token if authorization succeeded", async () => {
       try {
-        const tokenManager: TokenManager = await tm.init(validOpts());
+        const tokenManager: TokenManager = await subject.init(validOpts());
         const token: string = await tokenManager.token();
-        expect(token).toBe(defaultToken.access_token);
+        expect(token).toBe(DEFAULT_TOKEN.access_token);
       } catch (error) {
         expect(error).not.toBeDefined();
       }
@@ -79,7 +119,7 @@ describe("Class: TokenManager", () => {
 
     it("should throw an error if the token is accessed before login", async () => {
       try {
-        await tm.token();
+        await subject.token();
         throw new Error("token() should have failed!");
       } catch (error) {
         expect(error.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
@@ -88,35 +128,34 @@ describe("Class: TokenManager", () => {
   });
 
   describe("when the client is terminated", () => {
-    let tm: TokenManager;
-
-    beforeEach(() => {
-      TokenStorage.getStorageAPI().clear();
-      tm = new TokenManager(
-        requestAdapterMockFactory().succesfulExecution({ token: "validToken", refresh_token: "validRefreshToken" }),
-        new Logger()
-      );
-    });
-
-    it("should have clear the session storage", async () => {
-      spyOn(tm["storage"], "clear");
+    it("should clear session storage", async () => {
+      spyOn(storage, "clear");
       try {
-        await tm.init({ projectID: validProjectID, key: "validKey", secret: "validSecret" });
-        await tm.terminate();
+        await subject.init(validOpts());
+        await subject.terminate();
 
-        expect(tm["storage"]["clear"]).toHaveBeenCalledWith();
+        expect(storage.clear).toHaveBeenCalledWith();
       } catch (error) {
         expect(error).not.toBeDefined();
       }
     });
 
-    it("should throw an error if the token is accessed after terminate", async () => {
+    it("should clear refresh", async () => {
       try {
-        await tm.init({ projectID: validProjectID, key: "validKey", secret: "validSecret" });
-        tm.terminate();
-        await tm.token();
+        await subject.init(validOpts());
+        await subject.terminate();
 
-        expect(global.clearInterval).toHaveBeenCalledWith(tm["refreshInterval"]);
+        expect(global.clearInterval).toHaveBeenCalledWith(expect.any(Number));
+      } catch (error) {
+        expect(error).not.toBeDefined();
+      }
+    });
+
+    it("should throw an error if the token is accessed afterwards", async () => {
+      try {
+        await subject.init(validOpts());
+        subject.terminate();
+        await subject.token();
       } catch (error) {
         expect(error.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
       }
@@ -124,47 +163,90 @@ describe("Class: TokenManager", () => {
   });
 
   describe("when refreshing the token", () => {
-    let tm: TokenManager;
+    const authName = faker.random.word();
 
-    beforeEach(() => {
-      TokenStorage.getStorageAPI().clear();
-      tm = new TokenManager(
-        requestAdapterMockFactory().succesfulExecution({ token: "validToken", refresh_token: "validRefreshToken" }),
-        new Logger()
+    function addTokens(clearToken = true) {
+      subject.addTokens(authName, DEFAULT_TOKEN);
+
+      if (clearToken) {
+        storage.clear();
+      }
+
+      jest.runOnlyPendingTimers();
+      return Promise.resolve()
+        .then(() => { jest.runOnlyPendingTimers(); });
+    }
+
+    it("should make the request using the token", async () => {
+      subject.addTokens("testRefresh", DEFAULT_TOKEN);
+
+      jest.runOnlyPendingTimers();
+      expect(requestAdapter.execute).toHaveBeenCalledWith(
+        jasmine.stringMatching(API.REFRESH),
+        {
+          body: { refresh_token: DEFAULT_TOKEN.refresh_token },
+          method: Methods.POST
+        },
       );
     });
 
-    it("should take refresh token from storage and use it to make a request", () => {
-      tm["storage"].setTokens("testRefresh", { access_token: "access_token", refresh_token: "refresh_token" });
-      tm["refresh"]("testRefresh");
-      expect((tm as any).requestAdapter.execute.mock.calls[0][1]).toEqual({
-        body: { refresh_token: "refresh_token" },
-        method: Methods.POST
+    describe("when there is no token to refresh", () => {
+      it("should terminate", async () => {
+        try {
+          spyOn(subject, "terminate").and.callThrough();
+          await addTokens();
+          expect(subject.terminate).toHaveBeenCalledTimes(1);
+        } catch (error) {
+          expect(error).not.toBeDefined();
+        }
+      });
+
+      it("should log error", async () => {
+        try {
+          spyOn(logger, "error").and.callThrough();
+          await addTokens();
+          expect(logger.error).toHaveBeenCalledWith(
+            "tokenManager",
+            `There is no refresh token for ${authName}`,
+          );
+        } catch (error) {
+          expect(error).not.toBeDefined();
+        }
       });
     });
 
-    it("should reject promise if there is no token for specific auth", async () => {
-      tm["storage"].setTokens("testRefresh", { access_token: "access_token", refresh_token: "refresh_token" });
-      try {
-        await tm["refresh"]("randomAuth");
-      } catch (error) {
-        expect(error).toEqual("There is no refresh token for randomAuth");
-      }
-    });
+    describe("when request fails", () => {
+      const errorMessage = faker.lorem.sentence();
 
-    it("should throw an error if request failed", async () => {
-      const tokenManager = new TokenManager(
-        requestAdapterMockFactory().failedExecution("refresh error"),
-        new Logger()
-      );
-      tokenManager["storage"].setTokens("testRefresh", { access_token: "access_token", refresh_token: "refresh_token" });
-      try {
-        await tokenManager["refresh"]("testRefresh");
-      } catch (error) {
-        expect(error).toEqual(new Error("Unable to refresh token: refresh error"));
-      }
-    });
+      beforeEach(() => {
+        ({ logger, requestAdapter, storage, subject } = createSubject({
+          adapter: requestAdapterMockFactory().failedExecution(errorMessage),
+        }));
+      });
 
+      it("should terminate", async () => {
+        try {
+          spyOn(subject, "terminate");
+          await addTokens(false);
+          expect(subject.terminate).toHaveBeenCalledTimes(1);
+        } catch (error) {
+          expect(error).not.toBeDefined();
+        }
+      });
+
+      it("should log error", async () => {
+        try {
+          spyOn(logger, "error").and.callThrough();
+          await addTokens(false);
+          expect(logger.error).toHaveBeenCalledWith(
+            "tokenManager",
+            `Unable to refresh token: ${errorMessage}`,
+          );
+        } catch (error) {
+          expect(error).not.toBeDefined();
+        }
+      });
+    });
   });
 
 });

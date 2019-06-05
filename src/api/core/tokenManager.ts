@@ -4,7 +4,7 @@ import { Methods, RequestAdapter } from "../../internal/requestAdapter";
 import { Logger } from "../logger/logger";
 import { TokenStorage } from "./componentStorage";
 
-const APIKEY_DEFAULT_ALIAS = "apikey";
+export const APIKEY_DEFAULT_ALIAS = "apikey";
 
 /**
  * API interface of the authorization token
@@ -77,7 +77,7 @@ export class TokenManager {
     ]);
   }
 
-  private storage = TokenStorage.getStorageAPI();
+  private readonly storage = TokenStorage.getStorageAPI();
 
   constructor(
     private requestAdapter: RequestAdapter,
@@ -176,11 +176,10 @@ export class TokenManager {
   }
 
   private refresh(auth: string): Promise<any> {
-
     const tokens = this.storage.getTokens(auth);
 
     if (!tokens || !tokens.refresh_token) {
-      return Promise.reject(`There is no refresh token for ${auth}`);
+      return Promise.reject(new Error(`There is no refresh token for ${auth}`));
     }
 
     let defers: any;
@@ -198,7 +197,6 @@ export class TokenManager {
       })
       .catch((err: Error) => {
         defers.reject(err);
-        this.logger.error("tokenManager", err.message);
         throw new Error(`Unable to refresh token: ${err.message}`);
       });
   }
