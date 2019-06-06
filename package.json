@@ -83,7 +83,9 @@
     "form-data": "^2.3.3",
     "injection-js": "^2.2.1",
     "reflect-metadata": "^0.1.12",
-    "rxjs": "^6.2.1"
+    "rxjs": "^6.2.1",
+    "node-fetch": "^2.6.0",
+    "ws": "^3.3.3"
   },
   "devDependencies": {
     "@commitlint/cli": "^8.0.0",
@@ -111,7 +113,6 @@
     "jest-junit": "^3.7.0",
     "joi": "^14.1.0",
     "joi-assert": "0.0.3",
-    "node-fetch": "^2.1.1",
     "nodemon": "^1.14.11",
     "npm-run-all": "^4.1.5",
     "opn-cli": "^3.1.0",
@@ -126,8 +127,7 @@
     "typescript": "^2.9.2",
     "uglifyjs-webpack-plugin": "^1.2.4",
     "webpack": "^4.1.1",
-    "webpack-cli": "^3.3.2",
-    "ws": "^3.1.0"
+    "webpack-cli": "^3.3.2"
   },
   "release": {
     "branch": "master",
