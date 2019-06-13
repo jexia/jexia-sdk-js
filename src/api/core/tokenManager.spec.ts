@@ -1,85 +1,226 @@
-// tslint:disable:max-line-length
-// tslint:disable:no-string-literal
-import { requestAdapterMockFactory } from "../../../spec/testUtils";
+import * as faker from "faker";
+import { createMockFor } from "../../../spec/testUtils";
 import { MESSAGE } from "../../config";
-import { Methods } from "../../internal/requestAdapter";
+import { Methods, RequestAdapter } from "../../internal/requestAdapter";
 import { Logger } from "../logger/logger";
-import { TokenStorage } from "./componentStorage";
-import { TokenManager } from "./tokenManager";
+import { TokenManager, Tokens } from "./tokenManager";
 
 const validProjectID = "validProjectID";
-const defaultToken = Object.freeze({ access_token: "accessToken", refresh_token: "refreshToken" });
+let terminate: () => void;
 
-const validOpts = () => ({ projectID: validProjectID, key: "validKey", refreshInterval: 500, secret: "validSecret" });
+interface ISubjectOpts {
+  tokens: Tokens;
+  requestAdapterReturnValue: Promise<Tokens>;
+  requestAdapterMock: RequestAdapter;
+  loggerMock: Logger;
+}
 
-const tokenManagerWithTokens = () => {
-  const requestAdapter = requestAdapterMockFactory().succesfulExecution(defaultToken);
-  return new TokenManager(requestAdapter, new Logger());
+const createSubject = ({
+  tokens = { access_token: faker.random.word(), refresh_token: faker.random.word() },
+  requestAdapterReturnValue = Promise.resolve(tokens),
+  requestAdapterMock = createMockFor(RequestAdapter, { returnValue: requestAdapterReturnValue }),
+  loggerMock = createMockFor(Logger),
+}: Partial<ISubjectOpts> = {}) => {
+  const subject = new TokenManager(requestAdapterMock, loggerMock);
+  terminate = () => subject.terminate();
+  return {
+    subject,
+    tokens,
+    requestAdapterReturnValue,
+    requestAdapterMock,
+    loggerMock,
+    validOptions: {
+      projectID: validProjectID,
+      key: faker.random.word(),
+      refreshInterval: faker.random.number({ min: 100, max: 1000 }),
+      secret: faker.random.word(),
+    },
+  };
 };
 
-describe("Class: TokenManager", () => {
-  describe("when authenticating", () => {
-    let tm: TokenManager;
+describe("TokenManager", () => {
+  beforeEach(() => jest.useFakeTimers());
 
-    beforeEach(() => {
-      TokenStorage.getStorageAPI().clear();
-      tm = tokenManagerWithTokens();
-    });
+  afterEach(async () => {
+    await terminate();
+    jest.useRealTimers();
+  });
 
-    it("should throw an error if application URL is not provided", async () => {
+  describe("when initialize", () => {
+    it("should throw an error if project id is not provided", async () => {
+      const { subject } = createSubject();
       try {
-        await tm.init({ projectID: "", key: "validKey", secret: "validSecret" });
+        await subject.init({ projectID: "" });
         throw new Error("should have throw app URL error");
       } catch (error) {
         expect(error).toEqual(new Error("Please supply a valid Jexia project ID."));
       }
     });
 
+    it("should authorize if there are key and secret", async () => {
+      const { subject, validOptions, requestAdapterMock } = createSubject();
+      await subject.init(validOptions);
+      expect(requestAdapterMock.execute).toHaveBeenCalledWith(
+        expect.any(String), // url does not matter
+        {
+          body: { method: "apk", key: validOptions.key, secret: validOptions.secret },
+          method: Methods.POST,
+        },
+      );
+    });
+
+    it("should not authorize if there are neither key nor secret", async () => {
+      const { subject, requestAdapterMock } = createSubject();
+      await subject.init({ projectID: validProjectID });
+      expect(requestAdapterMock.execute).not.toHaveBeenCalled();
+    });
+
+    it("should return resolved promise of itself for init without authorization", async () => {
+      const { subject } = createSubject();
+      const value = await subject.init({ projectID: validProjectID });
+      expect(value).toEqual(subject);
+    });
+  });
+
+  describe("when authenticating", () => {
     it("should throw an error if authentication failed", async () => {
+      const { subject } = createSubject({
+        requestAdapterReturnValue: Promise.reject("Auth error"),
+      });
       try {
-        await (new TokenManager(
-          requestAdapterMockFactory().failedExecution("Auth error."),
-          new Logger()
-        )).init({ projectID: "", key: "validKey", secret: "validSecret" });
+        await subject.init({projectID: "", key: "validKey", secret: "validSecret"});
       } catch (error) {
         expect(error).toBeDefined();
       }
     });
 
-    it("should fail initialization when login fails", async () => {
-      spyOn(TokenStorage.getStorageAPI(), "isEmpty").and.returnValue(true);
-      const loginError = "loginError";
-      spyOn(tm as any, "login").and.returnValue(Promise.reject(loginError));
-      try {
-        await tm.init(validOpts());
-        throw new Error("init should have failed!");
-      } catch (error) {
-        expect(error).toBe(loginError);
-      }
+    it("should result promise of itself when authorization succeeded", async () => {
+      const { subject, validOptions } = createSubject();
+      const value = await subject.init(validOptions);
+      expect(value).toEqual(subject);
     });
 
-    it("should result itself at then promise when authorization succeeded", async () => {
-      try {
-        const result = await tm.init(validOpts());
-        expect(result).toBe(tm);
-      } catch (error) {
-        expect(error).not.toBeDefined();
-      }
+    it("should schedule token refreshing when authorization is succeeded", async () => {
+      const { subject, validOptions } = createSubject();
+      jest.spyOn(subject as any, "startRefreshDigest");
+      await subject.init(validOptions);
+      expect((subject as any).startRefreshDigest).toHaveBeenCalledWith("apikey");
     });
 
-    it("should have valid token and refresh token if authorization succeeded", async () => {
-      try {
-        const tokenManager: TokenManager = await tm.init(validOpts());
-        const token: string = await tokenManager.token();
-        expect(token).toBe(defaultToken.access_token);
-      } catch (error) {
-        expect(error).not.toBeDefined();
-      }
+    it("should schedule token refreshing for the authentication by alias", async () => {
+      const { subject, validOptions } = createSubject();
+      const auth = faker.random.word();
+      jest.spyOn(subject as any, "startRefreshDigest");
+      await subject.init({ ...validOptions, auth });
+      expect((subject as any).startRefreshDigest).toHaveBeenCalledWith(auth);
+    });
+  });
+
+  describe("when get a token", () => {
+    it("should return default token if authorization succeeded", async () => {
+      const { subject, validOptions, tokens } = createSubject();
+      await subject.init(validOptions);
+      expect(await subject.token()).toEqual(tokens.access_token);
+    });
+
+    it("should return a token by auth alias if authorized with alias", async () => {
+      const { subject, validOptions, tokens } = createSubject();
+      const randomAlias = faker.random.word();
+      await subject.init({ ...validOptions, auth: randomAlias });
+      expect(await subject.token(randomAlias)).toEqual(tokens.access_token);
+    });
+
+    it("should return a token set by default", async () => {
+      const { subject, validOptions } = createSubject();
+      const randomAlias = faker.random.word();
+      const anotherTokens = {
+        access_token: faker.random.word(),
+        refresh_token: faker.random.word(),
+      };
+      await subject.init(validOptions);
+      subject.addTokens(randomAlias, anotherTokens);
+      subject.setDefault(randomAlias);
+      expect(await subject.token()).toEqual(anotherTokens.access_token);
+    });
+
+    it("should return default token after reset to default", async () => {
+      const { subject, validOptions, tokens } = createSubject();
+      const randomAlias = faker.random.word();
+      const anotherTokens = {
+        access_token: faker.random.word(),
+        refresh_token: faker.random.word(),
+      };
+      await subject.init(validOptions);
+      subject.addTokens(randomAlias, anotherTokens);
+      subject.setDefault(randomAlias);
+      subject.resetDefault();
+      expect(await subject.token()).toEqual(tokens.access_token);
     });
 
     it("should throw an error if the token is accessed before login", async () => {
+      const { subject } = createSubject();
       try {
-        await tm.token();
+        await subject.token();
+        throw new Error("token() should have failed!");
+      } catch (error) {
+        expect(error.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
+      }
+    });
+
+    it("should throw an error if accessed nonexistent token", async () => {
+      const { subject, validOptions } = createSubject();
+      await subject.init(validOptions);
+      try {
+        await subject.token("randomToken");
+        throw new Error("token() should have failed");
+      } catch (error) {
+        expect(error.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
+      }
+    });
+
+    it("should return a token if authorized by alias and get default token", async () => {
+      const { subject, validOptions, tokens } = createSubject();
+      await subject.init({ ...validOptions, auth: faker.random.word() });
+      expect(await subject.token()).toEqual(tokens.access_token);
+    });
+  });
+
+  describe("when the client is terminated", () => {
+    it("should have clear the session storage", async () => {
+      const { subject, validOptions } = createSubject();
+      const storage = (subject as any).storage;
+      const clear = storage.clear.bind(storage);
+      spyOn(storage, "clear");
+      await subject.init(validOptions);
+      await subject.terminate();
+      expect(storage.clear).toHaveBeenCalledWith();
+      clear();
+    });
+
+    it("should clear all refreshing intervals", async () => {
+      const { subject, validOptions } = createSubject();
+      const clearIntervalSpy = jest.spyOn(global, "clearInterval");
+      await subject.init(validOptions);
+      await subject.addTokens(faker.random.word(), {
+        access_token: faker.random.word(),
+        refresh_token: faker.random.word(),
+      });
+      const [ firstInterval, secondInterval ] = (subject as any).refreshes;
+      await subject.terminate();
+      // @ts-ignore
+      expect(global.clearInterval).toHaveBeenNthCalledWith(1, firstInterval);
+      // @ts-ignore
+      expect(global.clearInterval).toHaveBeenNthCalledWith(2, secondInterval);
+      expect((subject as any).refreshes).toEqual([]);
+      clearIntervalSpy.mockRestore();
+    });
+
+    it("should throw an error if the token is accessed after terminate", async () => {
+      const { subject, validOptions } = createSubject();
+      await subject.init(validOptions);
+      await subject.terminate();
+      try {
+        await subject.token();
         throw new Error("token() should have failed!");
       } catch (error) {
         expect(error.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
@@ -87,84 +228,70 @@ describe("Class: TokenManager", () => {
     });
   });
 
-  describe("when the client is terminated", () => {
-    let tm: TokenManager;
-
-    beforeEach(() => {
-      TokenStorage.getStorageAPI().clear();
-      tm = new TokenManager(
-        requestAdapterMockFactory().succesfulExecution({ token: "validToken", refresh_token: "validRefreshToken" }),
-        new Logger()
-      );
-    });
-
-    it("should have clear the session storage", async () => {
-      spyOn(tm["storage"], "clear");
-      try {
-        await tm.init({ projectID: validProjectID, key: "validKey", secret: "validSecret" });
-        await tm.terminate();
-
-        expect(tm["storage"]["clear"]).toHaveBeenCalledWith();
-      } catch (error) {
-        expect(error).not.toBeDefined();
-      }
-    });
-
-    it("should throw an error if the token is accessed after terminate", async () => {
-      try {
-        await tm.init({ projectID: validProjectID, key: "validKey", secret: "validSecret" });
-        tm.terminate();
-        await tm.token();
-
-        expect(global.clearInterval).toHaveBeenCalledWith(tm["refreshInterval"]);
-      } catch (error) {
-        expect(error.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
-      }
-    });
-  });
-
   describe("when refreshing the token", () => {
-    let tm: TokenManager;
+    describe("when time for refreshing has come", () => {
 
-    beforeEach(() => {
-      TokenStorage.getStorageAPI().clear();
-      tm = new TokenManager(
-        requestAdapterMockFactory().succesfulExecution({ token: "validToken", refresh_token: "validRefreshToken" }),
-        new Logger()
-      );
-    });
+      it("should print debug message", async () => {
+        const { subject, loggerMock, validOptions } = createSubject();
+        await subject.init(validOptions);
+        jest.runOnlyPendingTimers();
+        expect(loggerMock.debug).toHaveBeenCalledWith("tokenManager", "refresh apikey token");
+      });
 
-    it("should take refresh token from storage and use it to make a request", () => {
-      tm["storage"].setTokens("testRefresh", { access_token: "access_token", refresh_token: "refresh_token" });
-      tm["refresh"]("testRefresh");
-      expect((tm as any).requestAdapter.execute.mock.calls[0][1]).toEqual({
-        body: { refresh_token: "refresh_token" },
-        method: Methods.POST
+      it("should refresh the token", async () => {
+        const { subject, validOptions } = createSubject();
+        await subject.init(validOptions);
+        jest.spyOn(subject as any, "refresh");
+        jest.runOnlyPendingTimers();
+        expect((subject as any).refresh).toHaveBeenCalledWith("apikey");
+      });
+
+      it("should terminate itself if there is an error during refresh", async () => {
+        const { subject, validOptions } = createSubject();
+        await subject.init(validOptions);
+        jest.spyOn(subject as any, "refresh").mockRejectedValue("refresh error");
+        jest.spyOn(subject, "terminate");
+        jest.runOnlyPendingTimers();
+        return Promise.resolve().then(
+          () => expect(subject.terminate).toHaveBeenCalled());
       });
     });
 
+    it("should take refresh token from storage and use it to make a request", async () => {
+      const { subject, validOptions, tokens, requestAdapterMock } = createSubject();
+      await subject.init(validOptions);
+      (subject as any).refresh();
+      expect(requestAdapterMock.execute).toHaveBeenCalledWith(
+        (subject as any).refreshUrl,
+        {
+          body: { refresh_token: tokens.refresh_token },
+          method: Methods.POST
+        },
+      );
+    });
+
     it("should reject promise if there is no token for specific auth", async () => {
-      tm["storage"].setTokens("testRefresh", { access_token: "access_token", refresh_token: "refresh_token" });
+      const { subject } = createSubject();
+      (subject as any).storage.setTokens("testRefresh",
+        { access_token: "access_token", refresh_token: "refresh_token" });
       try {
-        await tm["refresh"]("randomAuth");
+        await (subject as any).refresh("randomAuth");
       } catch (error) {
-        expect(error).toEqual("There is no refresh token for randomAuth");
+        expect(error.message).toEqual("There is no refresh token for randomAuth");
       }
     });
 
     it("should throw an error if request failed", async () => {
-      const tokenManager = new TokenManager(
-        requestAdapterMockFactory().failedExecution("refresh error"),
-        new Logger()
-      );
-      tokenManager["storage"].setTokens("testRefresh", { access_token: "access_token", refresh_token: "refresh_token" });
+      const { subject } = createSubject({
+        requestAdapterReturnValue: Promise.reject(new Error("refresh error")),
+      });
+      (subject as any).storage.setTokens("testRefresh",
+        { access_token: "access_token", refresh_token: "refresh_token" });
       try {
-        await tokenManager["refresh"]("testRefresh");
+        await (subject as any).refresh("testRefresh");
       } catch (error) {
-        expect(error).toEqual(new Error("Unable to refresh token: refresh error"));
+        expect(error.message).toEqual("Unable to get tokens: refresh error");
       }
     });
-
   });
-
 });

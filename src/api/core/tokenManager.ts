@@ -54,15 +54,15 @@ export interface IAuthOptions {
 export const AuthOptions = new InjectionToken<IAuthOptions>("IAuthOptions");
 
 /**
- * @internal
+ * Keep token pairs and refresh them when its needed
  */
 @Injectable()
 export class TokenManager {
   /* used for auth and refresh tokens */
   private projectId: string;
 
-  /* store interval to be able to end refresh loop from outside */
-  private refreshInterval: any;
+  /* store intervals to be able to end refresh loop from outside */
+  private refreshes: any[] = [];
 
   /* initialize promise */
   private initPromise: Promise<this>;
@@ -84,6 +84,10 @@ export class TokenManager {
     private logger: Logger,
   ) {}
 
+  /**
+   * Get access token for the specific authentication alias (APK by default)
+   * @param {string} auth Authentication alias
+   */
   public token(auth?: string): Promise<string> {
     return this.resolved
       .then(() => {
@@ -99,7 +103,7 @@ export class TokenManager {
    * Initialize Token Manager
    * should be always initialized with projectID
    * ApiKey auth is optional
-   * @param opts
+   * @param {IAuthOptions} opts Initialize options
    */
   public init(opts: IAuthOptions): Promise<TokenManager> {
     /* check application URL */
@@ -120,97 +124,130 @@ export class TokenManager {
     return this.initPromise;
   }
 
+  /** Terminate token manager and clear all tokens
+   */
   public terminate(): void {
     this.storage.clear();
-    clearInterval(this.refreshInterval);
+    this.refreshes.forEach((interval) => clearInterval(interval));
+    this.refreshes = [];
   }
 
+  /**
+   * Set specific token to use by default
+   * @param {string} auth authentication alias
+   */
   public setDefault(auth: string): void {
     this.storage.setDefault(auth);
   }
 
+  /**
+   * Switch back to apikey token
+   */
   public resetDefault(): void {
     this.storage.setDefault(APIKEY_DEFAULT_ALIAS);
   }
 
+  /**
+   * Add new token pair and run refresh digest
+   * @param {string} auth Authenticate alias
+   * @param {Tokens} tokens Token pair
+   * @param {boolean} defaults Whether to use this token by default
+   */
   public addTokens(auth: string, tokens: Tokens, defaults?: boolean) {
     this.storage.setTokens(auth, tokens, defaults);
-    this.refreshToken(auth);
+    this.startRefreshDigest(auth);
   }
 
-  private refreshToken(auth: string) {
-    this.refreshInterval = setInterval(() => {
-      this.logger.debug("tokenManager", `refresh ${auth} token`);
-      this.refresh(auth)
-        .catch((err: Error) => {
-          this.logger.error("tokenManager", err.message);
-          this.terminate();
-        });
-    }, DELAY);
+  /**
+   * Start refreshing digest for the specific auth
+   * @ignore
+   */
+  private startRefreshDigest(auth: string) {
+    this.refreshes.push(
+      setInterval(() => {
+        this.logger.debug("tokenManager", `refresh ${auth} token`);
+        this.refresh(auth)
+          .catch(() => this.terminate());
+      }, DELAY)
+    );
   }
 
+  /**
+   * Login to the project using APK method
+   * @ignore
+   */
   private login({auth = APIKEY_DEFAULT_ALIAS, key, secret}: IAuthOptions): Promise<this> {
-
-    let defers: any;
-    this.defers[auth] = new Promise((resolve, reject) => defers = { resolve, reject });
-
-    return this.requestAdapter
-      .execute(this.authUrl, {
-        body: {
-          method: "apk",
-          key,
-          secret,
-        },
-        method: Methods.POST,
-      })
-      .then((tokens: Tokens) => {
+    return this.obtainTokens(auth, this.authUrl, { method: "apk", key, secret })
+      .then((tokens) => {
         this.addTokens(auth, tokens, true);
-        defers.resolve(tokens.access_token);
         return this;
-      })
-      .catch((err: Error) => {
-        defers.reject(err);
-        this.logger.error("tokenManager", err.message);
-        throw new Error(`Unable to authenticate: ${err.message}`);
       });
   }
 
-  private refresh(auth: string): Promise<any> {
+  /**
+   * Refresh the token
+   * @ignore
+   */
+  private refresh(auth: string): Promise<this> {
 
     const tokens = this.storage.getTokens(auth);
 
     if (!tokens || !tokens.refresh_token) {
-      return Promise.reject(`There is no refresh token for ${auth}`);
+      return Promise.reject(new Error(`There is no refresh token for ${auth}`));
     }
+
+    return this.obtainTokens(auth, this.refreshUrl, { refresh_token: tokens.refresh_token })
+      .then((refreshedTokens) => {
+        this.storage.setTokens(auth, refreshedTokens);
+        return this;
+      });
+  }
+
+  /**
+   * Get tokens from the project
+   * @ignore
+   */
+  private obtainTokens(auth: string, url: string, body: object): Promise<Tokens> {
 
     let defers: any;
     this.defers[auth] = new Promise((resolve, reject) => defers = { resolve, reject });
 
     return this.requestAdapter
-      .execute(this.refreshUrl, {
-        body: { refresh_token: tokens.refresh_token },
+      .execute(url, {
+        body,
         method: Methods.POST
       })
       .then((refreshedTokens: Tokens) => {
-        this.storage.setTokens(auth, refreshedTokens);
-        defers.resolve(tokens.access_token);
-        return this;
+        defers.resolve(refreshedTokens.access_token);
+        return refreshedTokens;
       })
       .catch((err: Error) => {
         defers.reject(err);
         this.logger.error("tokenManager", err.message);
-        throw new Error(`Unable to refresh token: ${err.message}`);
+        throw new Error(`Unable to get tokens: ${err.message}`);
       });
   }
 
+  /**
+   * Project url
+   * @ignore
+   */
   private get url(): string {
     return `${API.PROTOCOL}://${this.projectId}.${API.HOST}.${API.DOMAIN}:${API.PORT}`;
   }
 
+  /**
+   * Authenticate url
+   * @ignore
+   */
   private get authUrl(): string {
     return `${this.url}/${API.AUTH}`;
   }
 
+  /**
+   * Refresh token url
+   * @ignore
+   */
   private get refreshUrl(): string {
     return `${this.url}/${API.REFRESH}`;
   }
