@@ -193,7 +193,7 @@ export class TokenManager {
     const tokens = this.storage.getTokens(auth);
 
     if (!tokens || !tokens.refresh_token) {
-      return Promise.reject(`There is no refresh token for ${auth}`);
+      return Promise.reject(new Error(`There is no refresh token for ${auth}`));
     }
 
     return this.obtainTokens(auth, this.refreshUrl, { refresh_token: tokens.refresh_token })

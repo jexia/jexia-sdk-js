@@ -16,7 +16,7 @@ interface ISubjectOpts {
 }
 
 const createSubject = ({
-  tokens = { access_token: "accessToken", refresh_token: "refreshToken" },
+  tokens = { access_token: faker.random.word(), refresh_token: faker.random.word() },
   requestAdapterReturnValue = Promise.resolve(tokens),
   requestAdapterMock = createMockFor(RequestAdapter, { returnValue: requestAdapterReturnValue }),
   loggerMock = createMockFor(Logger),
@@ -29,12 +29,22 @@ const createSubject = ({
     requestAdapterReturnValue,
     requestAdapterMock,
     loggerMock,
-    validOptions: { projectID: validProjectID, key: "validKey", refreshInterval: 500, secret: "validSecret" },
+    validOptions: {
+      projectID: validProjectID,
+      key: faker.random.word(),
+      refreshInterval: faker.random.number({ min: 100, max: 1000 }),
+      secret: faker.random.word(),
+    },
   };
 };
 
 describe("TokenManager", () => {
-  afterEach(async () => await terminate());
+  beforeEach(() => jest.useFakeTimers());
+
+  afterEach(async () => {
+    await terminate();
+    jest.useRealTimers();
+  });
 
   describe("when initialize", () => {
     it("should throw an error if project id is not provided", async () => {
@@ -48,17 +58,21 @@ describe("TokenManager", () => {
     });
 
     it("should authorize if there are key and secret", async () => {
-      const { subject, validOptions } = createSubject();
-      jest.spyOn(subject as any, "login");
+      const { subject, validOptions, requestAdapterMock } = createSubject();
       await subject.init(validOptions);
-      expect((subject as any).login).toHaveBeenCalledWith(validOptions);
+      expect(requestAdapterMock.execute).toHaveBeenCalledWith(
+        expect.any(String), // url does not matter
+        {
+          body: { method: "apk", key: validOptions.key, secret: validOptions.secret },
+          method: Methods.POST,
+        },
+      );
     });
 
     it("should not authorize if there are neither key nor secret", async () => {
-      const { subject } = createSubject();
-      jest.spyOn(subject as any, "login");
+      const { subject, requestAdapterMock } = createSubject();
       await subject.init({ projectID: validProjectID });
-      expect((subject as any).login).not.toHaveBeenCalled();
+      expect(requestAdapterMock.execute).not.toHaveBeenCalled();
     });
 
     it("should return resolved promise of itself for init without authorization", async () => {
@@ -124,7 +138,7 @@ describe("TokenManager", () => {
         refresh_token: faker.random.word(),
       };
       await subject.init(validOptions);
-      (subject as any).storage.setTokens(randomAlias, anotherTokens);
+      subject.addTokens(randomAlias, anotherTokens);
       subject.setDefault(randomAlias);
       expect(await subject.token()).toEqual(anotherTokens.access_token);
     });
@@ -137,7 +151,7 @@ describe("TokenManager", () => {
         refresh_token: faker.random.word(),
       };
       await subject.init(validOptions);
-      (subject as any).storage.setTokens(randomAlias, anotherTokens);
+      subject.addTokens(randomAlias, anotherTokens);
       subject.setDefault(randomAlias);
       subject.resetDefault();
       expect(await subject.token()).toEqual(tokens.access_token);
@@ -216,9 +230,6 @@ describe("TokenManager", () => {
 
   describe("when refreshing the token", () => {
     describe("when time for refreshing has come", () => {
-      beforeEach(() => jest.useFakeTimers());
-
-      afterEach(() => jest.useRealTimers());
 
       it("should print debug message", async () => {
         const { subject, loggerMock, validOptions } = createSubject();
@@ -266,7 +277,7 @@ describe("TokenManager", () => {
       try {
         await (subject as any).refresh("randomAuth");
       } catch (error) {
-        expect(error).toEqual("There is no refresh token for randomAuth");
+        expect(error.message).toEqual("There is no refresh token for randomAuth");
       }
     });
 
@@ -279,7 +290,7 @@ describe("TokenManager", () => {
       try {
         await (subject as any).refresh("testRefresh");
       } catch (error) {
-        expect(error).toEqual(new Error("Unable to get tokens: refresh error"));
+        expect(error.message).toEqual("Unable to get tokens: refresh error");
       }
     });
   });
