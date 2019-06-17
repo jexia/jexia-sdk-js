@@ -1,5 +1,4 @@
 import * as faker from "faker";
-import { Dataset } from "../../..";
 import { createMockFor } from "../../../../spec/testUtils";
 import { RequestExecuter } from "../../../internal/executer";
 import { Query } from "../../../internal/query";
@@ -52,10 +51,6 @@ describe("QueryRequest class", () => {
   it("where method should be defined", () => {
     expect(subject.where).toBeDefined();
   });
-
-  it("relation method should be defined", () => {
-    expect(subject.relation).toBeDefined();
-  });
 });
 
 describe("when instantiating a select query object", () => {
@@ -75,28 +70,5 @@ describe("when instantiating a select query object", () => {
       return filter;
     });
     expect(queryMock.setFilterCriteria).toHaveBeenCalledWith(filter);
-  });
-
-  it("should throw an error if call relation method", () => {
-    const { subject } = createSubject();
-    expect(() => subject.relation({} as Dataset)).toThrow();
-  });
-
-  xit("should have the correct query for relation without configured query", () => {
-    const { subject } = createSubject({ createMockForQuery: false });
-    const testQuery = {};
-    const datasetMock = createMockFor(Dataset, { returnValue: { query: testQuery } });
-    const queryObj = subject.relation(datasetMock);
-    // tslint:disable-next-line:no-string-literal
-    expect(queryObj["query"]["relations"]).toEqual([testQuery]);
-  });
-
-  xit("should have the correct query for relation with configured query", () => {
-    const { subject } = createSubject({ createMockForQuery: false });
-    const testQuery = {};
-    const datasetMock = createMockFor(Dataset);
-    const queryObj = subject.relation(datasetMock, () => ({ query: testQuery } as any));
-    // tslint:disable-next-line:no-string-literal
-    expect(queryObj["query"]["relations"]).toEqual([testQuery]);
   });
 });
