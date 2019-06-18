@@ -20,25 +20,20 @@ describe("Query class", () => {
     direction: "desc",
     fields: ["field3"],
   };
-  let query1 = new Query();
-  let query2 = new Query();
 
   beforeEach(() => {
     query = new Query();
   });
 
   describe("should have initial attributes", () => {
-    it("undefined fields", () => {
-      expect(query.fields).toBeUndefined();
+    it("empty fields", () => {
+      expect(query.fields).toEqual([]);
     });
     it("undefined limit", () => {
       expect(query.limit).toBeUndefined();
     });
     it("undefined offset", () => {
       expect(query.offset).toBeUndefined();
-    });
-    it("empty relations array", () => {
-      expect((query as any).relations).toEqual([]);
     });
     it("undefined filtering conditions", () => {
       expect((query as any).filteringConditions).toBeUndefined();
@@ -67,19 +62,6 @@ describe("Query class", () => {
       query.addSortCondition(sort1.direction, ...sort1.fields);
       query.addSortCondition(sort2.direction, ...sort2.fields);
       expect((query as any).orders).toEqual([sort1, sort2]);
-    });
-  });
-
-  // TODO Develop relations
-  xdescribe("addRelation method", () => {
-    it("should push relation into an array", () => {
-      query.addRelation(query1);
-      expect((query as any).relations).toEqual([query1]);
-    });
-    it("should accumulate values", () => {
-      query.addRelation(query1);
-      query.addRelation(query2);
-      expect((query as any).relations).toEqual([query1, query2]);
     });
   });
 
@@ -154,18 +136,6 @@ describe("Query class", () => {
       query.addSortCondition(sort2.direction, ...sort2.fields);
       expect(query.compile()).toEqual({
         order: [sort1, sort2],
-      });
-    });
-
-    // TODO Develop relations
-    xit("relations option", () => {
-      query.addRelation(query1);
-      query.addRelation(query2);
-      expect(query.compile()).toEqual({
-        relations: {
-          "dataset1": query1.compile(),
-          "dataset2": query2.compile(),
-        },
       });
     });
   });

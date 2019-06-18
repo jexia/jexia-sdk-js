@@ -4,25 +4,8 @@ import { DeleteQuery } from "../core/queries/deleteQuery";
 import { InsertQuery } from "../core/queries/insertQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
-import { IResource, ResourceType } from "../core/resource";
+import { IResource, ResourceInterface, ResourceType } from "../core/resource";
 import { DataSetName } from "./dataops.tokens";
-
-/**
- * Default fields that will always exist for any dataset
- */
-export type DefaultDatasetFields = "id" | "created_at" | "updated_at";
-
-/**
- * Default dataset interface type
- */
-export type DefaultDatasetInterface = {
-  [P in DefaultDatasetFields]: string;
-};
-
-/**
- * Extend user provided interface (T) with default dataset fields
- */
-export type DatasetInterface<T> = T & DefaultDatasetInterface;
 
 /**
  * Dataset object used to fetch and modify data at your datasets.
@@ -50,7 +33,9 @@ export type DatasetInterface<T> = T & DefaultDatasetInterface;
  * @template T Generic type of your dataset, default to any
  */
 @Injectable()
-export class Dataset<T extends object = any, D extends DatasetInterface<T> = DatasetInterface<T>> implements IResource {
+export class Dataset<
+  T extends object = any,
+  D extends ResourceInterface<T> = ResourceInterface<T>> implements IResource {
   /**
    * Resource type of the dataset
    */

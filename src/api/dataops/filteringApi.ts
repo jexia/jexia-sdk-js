@@ -1,5 +1,5 @@
 // tslint:disable:max-classes-per-file
-import { DatasetInterface } from "jexia-sdk-js/api/dataops/dataset";
+import { ResourceInterface } from "../core/resource";
 import { CompositeFilteringCondition, FilteringCondition, ICondition } from "./filteringCondition";
 
 /**
@@ -117,9 +117,9 @@ export interface IFilteringCriterion<T = any> {
  * @template T Generic type of your dataset, default to any
  * @template K Generic name of the dataset field you want to filter by
  */
-export function field<T = DatasetInterface<any>, K extends Extract<keyof DatasetInterface<T>, string> = any>(name: K):
-  FieldFilter<DatasetInterface<T>[K]> {
-  return new FieldFilter<DatasetInterface<T>[K]>(name);
+export function field<T = ResourceInterface<any>, K extends Extract<keyof ResourceInterface<T>, string> = any>(name: K):
+  FieldFilter<ResourceInterface<T>[K]> {
+  return new FieldFilter<ResourceInterface<T>[K]>(name);
 }
 
 /**

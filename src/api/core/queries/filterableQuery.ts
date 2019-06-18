@@ -1,7 +1,5 @@
-import { Dataset, DatasetInterface } from "../../dataops/dataset";
 import { FieldFilter, IFilteringCriterion, IFilteringCriterionCallback } from "../../dataops/filteringApi";
 import { BaseQuery } from "./baseQuery";
-import { SelectQuery } from "./selectQuery";
 
 /**
  * Extend `BaseQuery` and overrides `where()` and `relation()` methods. Used by `SELECT`, `UPDATE` and `DELETE` queries.
@@ -33,17 +31,5 @@ export abstract class FilterableQuery<T> extends BaseQuery<T> {
         filter,
     );
     return this;
-  }
-
-  /**
-   * Filter the dataset records with some conditions against a related dataset
-   * @param dataSet name of the related dataset
-   * @param callback callback that returns the select query for the related dataset
-   */
-  public relation<R extends object>(
-    dataSet: Dataset<R>,
-    callback: (query: SelectQuery<DatasetInterface<R>>) => SelectQuery<DatasetInterface<R>> = (q) => q,
-  ): this {
-    throw new Error("Relations are not supported in current version of SDK");
   }
 }

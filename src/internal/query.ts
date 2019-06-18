@@ -43,13 +43,12 @@ export interface ICompiledQuery<T> {
 }
 
 export class Query<T = any> {
-  public fields: Array<KeyOfObject<T> | IAggField<T>>;
+  public fields: Array<KeyOfObject<T> | IAggField<T>> = [];
   public limit: number;
   public offset: number;
 
   private filteringConditions: ICondition;
   private orders: SortedFields<T> = [];
-  private relations: Query[] = [];
 
   /*
    * This method is here to encapsulate the translation of filter settings
@@ -65,10 +64,6 @@ export class Query<T = any> {
       throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
     }
     this.orders.push({ fields, direction });
-  }
-
-  public addRelation(relation: Query): void {
-    this.relations.push(relation);
   }
 
   /* Collect all conditionals inside one object
@@ -94,7 +89,7 @@ export class Query<T = any> {
 
     /* Compile fields
      */
-    if (this.fields) {
+    if (this.fields.length) {
       compiledQueryOptions.outputs = this.fields.map(
         (field) => typeof field === "object" ? this.compileAggregation(field) : field
       );
