@@ -1,5 +1,5 @@
 import { RequestExecuter } from "../../../internal/executer";
-import { IRequestExecuterData } from "../../../internal/executer.interfaces";
+import { IRequestExecuterData, QueryParam } from "../../../internal/executer.interfaces";
 import { IAggField, Query } from "../../../internal/query";
 import { ResourceType } from "../resource";
 
@@ -48,13 +48,13 @@ export abstract class BaseQuery<T> {
    * { fn: aggFn, col: string }
    * @param fields fields names or aggregation object
    */
-   public fields(fields: Array<Extract<keyof T, string> | IAggField<T>>): this;
-   public fields(...fields: Array<Extract<keyof T, string> | IAggField<T>>): this;
-   public fields<K extends Extract<keyof T, string>>(field: K | IAggField<T>,
-                                                     ...fields: Array<K | IAggField<T>>): this {
-     this.query.fields = Array.isArray(field) ? field : [field, ...fields];
-     return this;
-   }
+  public fields(fields: Array<Extract<keyof T, string> | IAggField<T>>): this;
+  public fields(...fields: Array<Extract<keyof T, string> | IAggField<T>>): this;
+  public fields<K extends Extract<keyof T, string>>(field: K | IAggField<T>,
+                                                    ...fields: Array<K | IAggField<T>>): this {
+    this.query.fields = Array.isArray(field) ? field : [field, ...fields];
+    return this;
+  }
 
   /**
    * Prepare compiled request before execute it
@@ -66,7 +66,7 @@ export abstract class BaseQuery<T> {
       resourceName: this.resourceName,
       action: this.action,
       body: this.body || {},
-      queryParams: this.query.compileToQueryParams() || [],
+      queryParams: this.compileToQueryParams(),
     };
   }
 
@@ -76,5 +76,12 @@ export abstract class BaseQuery<T> {
    */
   public execute(): Promise<T[]> {
     return this.queryExecuter.executeRequest(this.compiledRequest);
+  }
+
+  /**
+   * @internal
+   */
+  protected compileToQueryParams(): QueryParam[] {
+    return this.query.compileToQueryParams() || [];
   }
 }
