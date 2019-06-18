@@ -104,6 +104,54 @@ describe("SelectQuery class", () => {
       });
     });
 
+    describe("nested relations", () => {
+      it("should add relation to the query", () => {
+        const { subject } = createSubject({ mockQuery: false });
+        subject.related("profile");
+        expect(subject["query"]["fields"]).toContain("profile");
+      });
+
+      it("should add relation fields to the query if they are provided", () => {
+        const { subject } = createSubject({ mockQuery: false });
+        subject.related("profile", (profile) => profile.fields("email"));
+        expect(subject["query"]["fields"]).toContain("profile.email");
+      });
+
+      it("should proceed an array of fields", () => {
+        const { subject } = createSubject({ mockQuery: false });
+        subject.related("profile", (profile) => profile.fields(["email", "age"]));
+        expect(subject["query"]["fields"]).toEqual(["profile.email", "profile.age"]);
+      });
+
+      it("should not add relation fields to the query if they were not provided", () => {
+        const { subject } = createSubject({ mockQuery: false });
+        subject.related("profile", (profile) => profile.fields("email"));
+        expect(subject["query"]["fields"]).not.toContain("profile.age");
+      });
+
+      it("should add nested relation", () => {
+        const { subject } = createSubject({ mockQuery: false });
+        subject.related("profile", (profile) => profile
+          .related("address"));
+        expect(subject["query"]["fields"]).toContain("profile.address");
+      });
+
+      it("should add nested relation fields", () => {
+        const { subject } = createSubject({ mockQuery: false });
+        subject.related("profile", (profile) => profile
+          .related("address", (address) => address
+            .fields("city")));
+        expect(subject["query"]["fields"]).toContain("profile.address.city");
+      });
+
+      it("should not add not provided nested relation fields", () => {
+        const { subject } = createSubject({ mockQuery: false });
+        subject.related("profile", (profile) => profile
+          .related("address", (address) => address
+            .fields("city")));
+        expect(subject["query"]["fields"]).not.toContain("profile.address.building");
+      });
+    });
   });
 
   it("should correct execute the query", () => {
