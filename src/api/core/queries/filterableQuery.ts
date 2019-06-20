@@ -1,4 +1,4 @@
-import { FieldFilter, IFilteringCriterion, IFilteringCriterionCallback } from "../../dataops/filteringApi";
+import { IFilteringCriterion, IFilteringCriterionCallback, toFilteringCriterion } from "../../dataops/filteringApi";
 import { BaseQuery } from "./baseQuery";
 
 /**
@@ -25,11 +25,7 @@ export abstract class FilterableQuery<T> extends BaseQuery<T> {
    */
   public where(
     filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>): this {
-    this.query.setFilterCriteria(
-      typeof filter === "function" ?
-        filter((field) => new FieldFilter(field)) :
-        filter,
-    );
+    this.query.setFilterCriteria(toFilteringCriterion(filter));
     return this;
   }
 }
