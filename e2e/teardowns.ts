@@ -19,10 +19,11 @@ export const jfs = fileOperations();
 
 const management = new Management();
 let client: Client;
-let dataset: { name: string, id: string };
+let datasets: Array<{ name: string, id: string }> = [];
 let fileset: { name: string, id: string };
 let apiKey: { id: string, key: string, secret: string };
 let policy: { id: string };
+let relations: Array<{ id: string }> = [];
 
 export const DEFAULT_DATASET = { NAME: "test_dataset", FIELD: "test_field" };
 export const DEFAULT_FILESET = { NAME: "test_fileset", FIELD: "test_field" };
@@ -34,7 +35,8 @@ export const init = async (
 
   await management.login();
 
-  dataset = await management.createDataset(datasetName);
+  const dataset = await management.createDataset(datasetName);
+  datasets.push(dataset);
 
   if (!fields.length) {
     await management.createDatasetField(dataset.id, DEFAULT_DATASET.FIELD, {
@@ -50,7 +52,7 @@ export const init = async (
   }
 
   apiKey = await management.createApiKey();
-  policy = await management.createPolicy(dataset, [`apk:${apiKey.key}`]);
+  policy = await management.createPolicy(datasets, [`apk:${apiKey.key}`]);
 
   client = await jexiaClient().init({
     projectID: process.env.E2E_PROJECT_ID as string,
@@ -60,7 +62,10 @@ export const init = async (
 };
 
 export const cleaning = async () => {
-  if (dataset) {
+  for (let relation of relations) {
+    await management.deleteRelation(relation.id);
+  }
+  for (let dataset of datasets) {
     await management.deleteDataset(dataset.id);
   }
   if (fileset) {
@@ -95,13 +100,44 @@ export const initWithJFS = async (filesetName: string = "testFileset",
   }
 
   apiKey = await management.createApiKey();
-  policy = await management.createPolicy(fileset, [`apk:${apiKey.key}`]);
+  policy = await management.createPolicy([fileset], [`apk:${apiKey.key}`]);
 
   client = await jexiaClient().init({
     projectID: process.env.E2E_PROJECT_ID as string,
     key: apiKey.key,
     secret: apiKey.secret,
   }, jfs, realTime(), new LoggerModule(LogLevel.ERROR));
+};
+
+export const initForRelations = async () => {
+  await management.login();
+
+  let posts = await management.createDataset("posts");
+  await management.createDatasetField(posts.id, "title", { type: "string" });
+  await management.createDatasetField(posts.id, "text", { type: "string" });
+
+  let comments = await management.createDataset("comments");
+  await management.createDatasetField(comments.id, "message", { type: "string" });
+  await management.createDatasetField(comments.id, "like", { type: "boolean" });
+
+  let author = await management.createDataset("author");
+  await management.createDatasetField(author.id, "email", { type: "string" });
+
+  relations.push(
+    await management.createRelation(posts, comments),
+    await management.createRelation(comments, author, "ONE", "ONE")
+  );
+
+  datasets.push(posts, comments, author);
+
+  apiKey = await management.createApiKey();
+  policy = await management.createPolicy(datasets, [`apk:${apiKey.key}`]);
+
+  client = await jexiaClient().init({
+    projectID: process.env.E2E_PROJECT_ID as string,
+    key: apiKey.key,
+    secret: apiKey.secret,
+  }, dom, new LoggerModule(LogLevel.DEBUG));
 };
 
 export const terminate = async () => {
