@@ -1,7 +1,7 @@
 import { IFilteringCriterion } from "../api/dataops/filteringApi";
 import { ICondition } from "../api/dataops/filteringCondition";
 import { MESSAGE } from "../config";
-import { QueryParam } from "./executer.interfaces";
+import { QueryParam, toQueryParams } from "./executer.interfaces";
 
 /* Sort direction
  */
@@ -128,11 +128,9 @@ export class Query<T = any> {
       );
     }
 
-    const otherParams = Object.entries(compiled)
-      .filter(([key]) => key !== "order") // ignore order
-      .map(([key, value]) => ({ key, value }));
+    const { order, ...compiledWithNoOrder } = compiled;
 
-    return params.concat(otherParams);
+    return params.concat(toQueryParams(compiledWithNoOrder));
   }
 
   /**
