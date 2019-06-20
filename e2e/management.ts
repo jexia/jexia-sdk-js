@@ -14,6 +14,10 @@ export interface IFieldOptions {
   constraints?: IFieldConstraints[];
 }
 
+interface IResource {
+  id: string;
+}
+
 /* Get AWS credentials for fileset */
 const { AWS_KEY, AWS_SECRET, AWS_BUCKET } = process.env;
 
@@ -120,7 +124,7 @@ export class Management {
     });
   }
 
-  public createPolicy(dataset: { id: string }, keys: string[]): Promise<any> {
+  public createPolicy(datasets: Array<{ id: string }>, keys: string[]): Promise<any> {
     return this.fetch(api.policy.create, {
       method: "POST",
       headers: this.headers,
@@ -129,7 +133,7 @@ export class Management {
         actions: ["read", "create", "update", "delete"],
         effect: "allow",
         subjects: keys,
-        resources: [dataset.id],
+        resources: datasets.map((dataset) => dataset.id),
       })
     })
       .then((response: Response) => response.json());
@@ -179,6 +183,35 @@ export class Management {
       })
     })
       .then((response: Response) => response.json());
+  }
+
+  public createRelation(from: IResource, to: IResource, fromCardinality = "ONE", toCardinality = "MANY") {
+    return this.fetch(api.dataset.relation, {
+      method: "POST",
+      headers: this.headers,
+      body: JSON.stringify({
+        from_resource: {
+          namespace: "mimir",
+          resource_id: from.id
+        },
+        to_resource: {
+          namespace: "mimir",
+          resource_id: to.id
+        },
+        type: {
+          from_cardinality: fromCardinality,
+          to_cardinality: toCardinality,
+        }
+      })
+    })
+      .then((response: Response) => response.json());
+  }
+
+  public deleteRelation(id: string): Promise<any> {
+    return this.fetch(`${api.dataset.relation}/${id}`, {
+      method: "DELETE",
+      headers: this.headers,
+    });
   }
 
   private fetch(url: string, init: any = {}): Promise<Response> {
