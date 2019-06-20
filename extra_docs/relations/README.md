@@ -51,6 +51,25 @@ dom.dataset("posts")
 
 Notice that records should be inserted in appropriate order - the relation root must be insert root. 
 It's impossible to insert into comment dataset with post related to that comment (tree cannot grow upside down). 
+This example is not going to work:
+
+```typescript
+dom.dataset("comments")
+  .insert([{
+    text: "Me too!",
+    like: true,
+    posts: {
+      title: "Relations with Jexia SDK",
+      message: "A do like how Jexia SDK implements relations!"
+    }
+  }])
+  .execute();  
+```
+
+If you want to create a comment to the existent post, you need to use `attach()`, 
+see how to use it below in this document.
+
+
 Also look how we are using arrays for *one-2-many* **posts** -> **comments** relation and just an object 
 for the **comments** -> **author** *one-2-one* relation.
 
