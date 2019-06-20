@@ -1,12 +1,15 @@
 // tslint:disable:no-string-literal
+import * as faker from "faker";
 import { createMockFor } from "../../../spec/testUtils";
 import { RequestExecuter } from "../../internal/executer";
+import { AttachQuery } from "../core/queries/attachQuery";
 import { DeleteQuery } from "../core/queries/deleteQuery";
 import { InsertQuery } from "../core/queries/insertQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
 import { ResourceType } from "../core/resource";
 import { Dataset } from "./dataset";
+import { field } from "./filteringApi";
 
 describe("Dataset class", () => {
   describe("after initiating", () => {
@@ -50,6 +53,13 @@ describe("Dataset class", () => {
   it("should be able start a delete query", () => {
     const dataset = new Dataset("test", createMockFor(RequestExecuter));
     expect(dataset.delete() instanceof DeleteQuery).toBeTruthy();
+  });
+
+  it("should be able start an attach query", () => {
+    const dataset = new Dataset("test", createMockFor(RequestExecuter));
+    const attachQuery = dataset.attach(faker.random.word(), field("id").isEqualTo("someId"));
+
+    expect(attachQuery instanceof AttachQuery).toBeTruthy();
   });
 
   it("should throw an error when try to use the watch method without the real time module", () => {

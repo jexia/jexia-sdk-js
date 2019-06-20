@@ -5,7 +5,9 @@ import { InsertQuery } from "../core/queries/insertQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
 import { IResource, ResourceInterface, ResourceType } from "../core/resource";
+import { AttachQuery } from "./../core/queries/attachQuery";
 import { DataSetName } from "./dataops.tokens";
+import { IFilteringCriterion, IFilteringCriterionCallback } from "./filteringApi";
 
 /**
  * Dataset object used to fetch and modify data at your datasets.
@@ -102,6 +104,25 @@ export class Dataset<
     return new DeleteQuery<D>(this.requestExecuter, ResourceType.Dataset, this.datasetName);
   }
 
+  /**
+   * Creates an Attach query
+   * @param  relatedDatasetName The name of the dataset to be attached
+   * @param  filter Filtering criteria or a callback that returns a filtering criteria
+   * that will be applied to the dataset to be attached.
+   * @returns AttachQuery object specialized for attaching datasets to the current one.
+   */
+  public attach(
+    relatedDatasetName: string,
+    filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
+  ): AttachQuery<T> {
+    return new AttachQuery<T>(
+      this.requestExecuter,
+      ResourceType.Dataset,
+      this.datasetName,
+      relatedDatasetName,
+      filter,
+    );
+  }
 }
 
 (Dataset as any).prototype.watch = () => {
