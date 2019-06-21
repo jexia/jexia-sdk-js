@@ -28,3 +28,4 @@ export function clone<T>(o: T): T {
 }
 
 export * from "./relations";
+export * from "./queryParam";

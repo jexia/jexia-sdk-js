@@ -1,7 +1,7 @@
 import { IFilteringCriterion } from "../api/dataops/filteringApi";
 import { ICondition } from "../api/dataops/filteringCondition";
 import { MESSAGE } from "../config";
-import { QueryParam, toQueryParams } from "./executer.interfaces";
+import { QueryParam, toQueryParams } from "./utils";
 
 /* Sort direction
  */
