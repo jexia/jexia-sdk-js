@@ -105,9 +105,9 @@ export class Dataset<
   }
 
   /**
-   * Creates an Attach query
-   * @param  relatedDatasetName The name of the dataset to be attached
-   * @param  filter Filtering criteria or a callback that returns a filtering criteria
+   * Creates an Attach query.
+   * @param  relatedDatasetName The name of the dataset to be attached.
+   * @param  filter Filtering criterion or a callback that returns one,
    * that will be applied to the dataset to be attached.
    * @returns AttachQuery object specialized for attaching datasets to the current one.
    */

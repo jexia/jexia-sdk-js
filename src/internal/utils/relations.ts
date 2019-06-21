@@ -7,9 +7,9 @@ export enum RelationLinkType {
 /**
  * Adds attach operation params to a query params array.
  *
- * @param  queryParams The query params to be appended
- * @param  resourceName The name of the resource
- * @param  relationLinkType The type of t
+ * @param   queryParams The query params to be appended
+ * @param   resourceName The name of the resource
+ * @param   relationLinkType The type of t
  * @returns QueryParam[]
  */
 export function linkRelation(
@@ -28,8 +28,8 @@ export function linkRelation(
 /**
  * Adds attach operation params to a query params array.
  *
- * @param  queryParams The query params to be appended
- * @param  resourceName The name of the resource
+ * @param   queryParams The query params to be appended
+ * @param   resourceName The name of the resource
  * @returns QueryParam[]
  */
 export function attachRelation(

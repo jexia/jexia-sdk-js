@@ -13,7 +13,7 @@ export interface IRequestExecuterData {
 
 /**
  * Maps an object into a list of QueryParam
- * @param  o The object to be mapped
+ * @param   o The object to be mapped
  * @returns QueryParam A list of query params
  */
 export function toQueryParams(o: object): QueryParam[] {
