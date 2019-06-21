@@ -9,8 +9,7 @@ There are three datasets and two relations: **posts** has *one-2-many* relation 
 *one-2-one* relation to **author** (remember that all management opearations, such as creating datasets, fields and 
 relations can be done with [Web Management Application](https://docs.jexia.com/getting-started/user-management/) only).
 
-To make our datasets not so boring, we can also add a few fields and create appropriate interfaces 
-for our typescript code:
+To make our datasets not so boring, we can also add a few fields:
 ```typescript
 interface Author {
   email: string;
@@ -27,7 +26,7 @@ interface Post {
 }
 ```
 Pay your attention - **Post** includes **comments** field as an array, but **Comment** has an **author** 
-as a plain value. Thats the difference between *one-2-many* and *one-2-one* relation types.
+as a plain value. That's the difference between *one-2-many* and *one-2-one* relation types.
 
 ### [Insert data](#insert)
 To insert related records just provide a nested array to the `.insert()` method:
@@ -50,7 +49,7 @@ dom.dataset("posts")
 ```
 
 Notice that records should be inserted in appropriate order - the relation root must be insert root. 
-It's impossible to insert into comment dataset with post related to that comment (tree cannot grow upside down). 
+It's impossible to insert into **comment** dataset with post related to that comment (tree cannot grow upside down). 
 This example is not going to work:
 
 ```typescript
