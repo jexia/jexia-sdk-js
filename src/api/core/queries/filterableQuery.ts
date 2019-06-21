@@ -1,4 +1,4 @@
-import { IFilteringCriterion, IFilteringCriterionCallback, toFilteringCriterion } from "../../dataops/filteringApi";
+import { IFilteringCriterion, IFilteringCriterionCallback } from "../../dataops/filteringApi";
 import { BaseQuery } from "./baseQuery";
 
 /**
@@ -23,9 +23,8 @@ export abstract class FilterableQuery<T> extends BaseQuery<T> {
    * Filter the dataset rows with some conditions where the operation will be applied
    * @param filter Filtering criteria or a callback that returns a filtering criteria with the conditions
    */
-  public where(
-    filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>): this {
-    this.query.setFilterCriteria(toFilteringCriterion(filter));
+  public where(filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>): this {
+    this.query.setFilterCriteria(filter);
     return this;
   }
 }

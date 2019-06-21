@@ -1,21 +1,26 @@
 import * as faker from "faker";
 import { createRequestExecuterMock, randomFilteringCriteria } from "../../../../spec/testUtils";
-import { attachRelation } from "../../../internal/utils";
+import { addActionParams, QueryActionType } from "../../../internal/utils";
 import { toFilteringCriterion } from "../../dataops/filteringApi";
 import { ResourceType } from "../resource";
-import { AttachQuery } from "./attachQuery";
+import { ActionQuery } from "./actionQuery";
 
-describe("AttachQuery class", () => {
+describe("ActionQuery class", () => {
   function createSubject({
     requestExecuterMock = createRequestExecuterMock(),
     attachedResourceName = faker.random.word(),
     filter = randomFilteringCriteria(),
+    relationType = faker.helpers.randomize([
+      QueryActionType.ATTACH,
+      QueryActionType.DETACH,
+    ]),
   } = {}) {
-    const subject = new AttachQuery(
+    const subject = new ActionQuery(
       requestExecuterMock,
       faker.helpers.randomize([ResourceType.Dataset, ResourceType.Fileset]),
       faker.random.word(),
       attachedResourceName,
+      relationType,
       filter,
     );
 
@@ -24,15 +29,24 @@ describe("AttachQuery class", () => {
       attachedResourceName,
       filter,
       subject,
+      relationType,
     };
   }
 
   it("should add props to query params by passing a filter", () => {
-    const { subject, requestExecuterMock, attachedResourceName, filter } = createSubject();
+    const {
+      subject,
+      requestExecuterMock,
+      attachedResourceName,
+      filter,
+      relationType,
+    } = createSubject();
+
     spyOn(requestExecuterMock, "executeRequest");
-    const expectedQueryParams = attachRelation(
+    const expectedQueryParams = addActionParams(
       [],
       attachedResourceName,
+      relationType,
       toFilteringCriterion(filter).condition.compile(),
     );
 

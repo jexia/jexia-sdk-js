@@ -1,4 +1,4 @@
-import { IFilteringCriterion } from "../api/dataops/filteringApi";
+import { IFilteringCriterion, IFilteringCriterionCallback, toFilteringCriterion } from "../api/dataops/filteringApi";
 import { ICondition } from "../api/dataops/filteringCondition";
 import { MESSAGE } from "../config";
 import { QueryParam, toQueryParams } from "./utils";
@@ -55,8 +55,8 @@ export class Query<T = any> {
    * between the API layer of the SDK (IFilteringCriterion) and the internal
    * logic for compiling filters into JSON (ICondition).
    */
-  public setFilterCriteria(filter: IFilteringCriterion) {
-    this.filteringConditions = filter.condition;
+  public setFilterCriteria(filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>): void {
+    this.filteringConditions = toFilteringCriterion(filter).condition;
   }
 
   public addSortCondition<K extends Extract<keyof T, string>>(direction: Direction, ...fields: K[]) {

@@ -5,7 +5,8 @@ import { InsertQuery } from "../core/queries/insertQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
 import { IResource, ResourceInterface, ResourceType } from "../core/resource";
-import { AttachQuery } from "./../core/queries/attachQuery";
+import { QueryActionType } from "./../../internal/utils";
+import { ActionQuery } from "./../core/queries/actionQuery";
 import { DataSetName } from "./dataops.tokens";
 import { IFilteringCriterion, IFilteringCriterionCallback } from "./filteringApi";
 
@@ -106,20 +107,21 @@ export class Dataset<
 
   /**
    * Creates an Attach query.
-   * @param  relatedDatasetName The name of the dataset to be attached.
-   * @param  filter Filtering criterion or a callback that returns one,
+   * @param   resourceName The name of the resource to be attached.
+   * @param   filter Filtering criterion or a callback that returns one,
    * that will be applied to the dataset to be attached.
    * @returns AttachQuery object specialized for attaching datasets to the current one.
    */
   public attach(
-    relatedDatasetName: string,
-    filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
-  ): AttachQuery<T> {
-    return new AttachQuery<T>(
+    resourceName: string,
+    filter?: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
+  ): ActionQuery<T> {
+    return new ActionQuery<T>(
       this.requestExecuter,
       ResourceType.Dataset,
       this.datasetName,
-      relatedDatasetName,
+      resourceName,
+      QueryActionType.ATTACH,
       filter,
     );
   }
