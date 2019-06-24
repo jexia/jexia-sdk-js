@@ -1,5 +1,6 @@
 import * as faker from "faker";
-import { FilteringCriterion } from "../api/dataops/filteringApi";
+import { getRandonQueryActionType, randomFilteringCriteria } from "../../spec/testUtils";
+import { FilteringCriterion, toFilteringCriterion } from "../api/dataops/filteringApi";
 import { FilteringCondition } from "../api/dataops/filteringCondition";
 import { IAggField, Query } from "./query";
 
@@ -62,6 +63,34 @@ describe("Query class", () => {
       query.addSortCondition(sort1.direction, ...sort1.fields);
       query.addSortCondition(sort2.direction, ...sort2.fields);
       expect((query as any).orders).toEqual([sort1, sort2]);
+    });
+  });
+
+  describe("On setAction", () => {
+    it("should compile with no condition", () => {
+      const queryActionType = getRandonQueryActionType();
+      const actionResource = faker.random.alphaNumeric();
+
+      query.setAction(queryActionType, actionResource);
+
+      expect(query.compile()).toEqual({
+        action: queryActionType,
+        action_resource: actionResource,
+      });
+    });
+
+    it("should compile with condition", () => {
+      const queryActionType = getRandonQueryActionType();
+      const actionResource = faker.random.alphaNumeric();
+      const filter = randomFilteringCriteria();
+
+      query.setAction(queryActionType, actionResource, filter);
+
+      expect(query.compile()).toEqual({
+        action: queryActionType,
+        action_resource: actionResource,
+        action_cond: toFilteringCriterion(filter).condition.compile(),
+      });
     });
   });
 

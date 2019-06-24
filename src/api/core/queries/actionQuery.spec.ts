@@ -1,6 +1,10 @@
 import * as faker from "faker";
-import { createRequestExecuterMock, randomFilteringCriteria } from "../../../../spec/testUtils";
-import { addActionParams, QueryActionType } from "../../../internal/utils";
+import {
+  createRequestExecuterMock,
+  getRandonQueryActionType,
+  randomFilteringCriteria,
+} from "../../../../spec/testUtils";
+import { toQueryParams } from "../../../internal/utils";
 import { toFilteringCriterion } from "../../dataops/filteringApi";
 import { ResourceType } from "../resource";
 import { ActionQuery } from "./actionQuery";
@@ -8,28 +12,25 @@ import { ActionQuery } from "./actionQuery";
 describe("ActionQuery class", () => {
   function createSubject({
     requestExecuterMock = createRequestExecuterMock(),
-    attachedResourceName = faker.random.word(),
+    actionResourceName = faker.random.word(),
     filter = randomFilteringCriteria(),
-    relationType = faker.helpers.randomize([
-      QueryActionType.ATTACH,
-      QueryActionType.DETACH,
-    ]),
+    queryActionType = getRandonQueryActionType(),
   } = {}) {
-    const subject = new ActionQuery(
+    const subject = ActionQuery.create(
       requestExecuterMock,
       faker.helpers.randomize([ResourceType.Dataset, ResourceType.Fileset]),
       faker.random.word(),
-      attachedResourceName,
-      relationType,
+      actionResourceName,
+      queryActionType,
       filter,
     );
 
     return {
       requestExecuterMock,
-      attachedResourceName,
+      actionResourceName,
       filter,
       subject,
-      relationType,
+      queryActionType,
     };
   }
 
@@ -37,18 +38,18 @@ describe("ActionQuery class", () => {
     const {
       subject,
       requestExecuterMock,
-      attachedResourceName,
+      actionResourceName,
       filter,
-      relationType,
+      queryActionType,
     } = createSubject();
 
     spyOn(requestExecuterMock, "executeRequest");
-    const expectedQueryParams = addActionParams(
-      [],
-      attachedResourceName,
-      relationType,
-      toFilteringCriterion(filter).condition.compile(),
-    );
+
+    const expectedQueryParams = toQueryParams({
+      action: queryActionType,
+      action_resource: actionResourceName,
+      action_cond: toFilteringCriterion(filter).condition.compile(),
+    });
 
     subject.execute();
 

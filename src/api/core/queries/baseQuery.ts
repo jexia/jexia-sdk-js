@@ -1,5 +1,5 @@
 import { RequestExecuter } from "../../../internal/executer";
-import { IRequestExecuterData, QueryParam } from "../../../internal/executer.interfaces";
+import { IRequestExecuterData } from "../../../internal/executer.interfaces";
 import { IAggField, Query } from "../../../internal/query";
 import { ResourceType } from "../resource";
 
@@ -66,7 +66,7 @@ export abstract class BaseQuery<T> {
       resourceName: this.resourceName,
       action: this.action,
       body: this.body || {},
-      queryParams: this.compileToQueryParams(),
+      queryParams: this.query.compileToQueryParams() || [],
     };
   }
 
@@ -76,12 +76,5 @@ export abstract class BaseQuery<T> {
    */
   public execute(): Promise<T[]> {
     return this.queryExecuter.executeRequest(this.compiledRequest);
-  }
-
-  /**
-   * @internal
-   */
-  protected compileToQueryParams(): QueryParam[] {
-    return this.query.compileToQueryParams() || [];
   }
 }

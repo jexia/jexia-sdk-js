@@ -55,16 +55,28 @@ describe("Dataset class", () => {
     expect(dataset.delete() instanceof DeleteQuery).toBeTruthy();
   });
 
-  it("should be able start an attach query", () => {
-    const dataset = new Dataset("test", createMockFor(RequestExecuter));
-    const query = dataset.attach(faker.random.word(), field("id").isEqualTo("someId"));
-
-    expect(query instanceof ActionQuery).toBeTruthy();
-  });
-
   it("should throw an error when try to use the watch method without the real time module", () => {
     const dataset = new Dataset("test", createMockFor(RequestExecuter));
     expect(() => (dataset as any).watch()).toThrow();
+  });
+
+  describe("On attach", () => {
+    it("should return the query by passing a filter", () => {
+      const dataset = new Dataset("test", createMockFor(RequestExecuter));
+      const query = dataset.attach(
+        faker.random.word(),
+        field(faker.random.alphaNumeric()).isEqualTo(faker.random.word()),
+      );
+
+      expect(query instanceof ActionQuery).toBeTruthy();
+    });
+
+    it("should return the query without passing a filter", () => {
+      const dataset = new Dataset("test", createMockFor(RequestExecuter));
+      const query = dataset.attach(faker.random.word());
+
+      expect(query instanceof ActionQuery).toBeTruthy();
+    });
   });
 
 });

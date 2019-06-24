@@ -63,12 +63,9 @@ describe("when instantiating a select query object", () => {
   });
 
   it("should use the correct filter criteria when passing it from a callback function", () => {
-    let filter;
+    const filter = (f: any) => f("name").isEqualTo("John");
     const { subject, queryMock } = createSubject();
-    subject.where((f) => {
-      filter = f("name").isEqualTo("John");
-      return filter;
-    });
+    subject.where(filter);
     expect(queryMock.setFilterCriteria).toHaveBeenCalledWith(filter);
   });
 });

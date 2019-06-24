@@ -27,5 +27,5 @@ export function clone<T>(o: T): T {
   return Object.assign(Object.create(Object.getPrototypeOf(o)), o);
 }
 
-export * from "./queryAction";
+export * from "./queryActionType";
 export * from "./queryParam";

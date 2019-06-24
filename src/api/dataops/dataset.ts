@@ -109,14 +109,14 @@ export class Dataset<
    * Creates an Attach query.
    * @param   resourceName The name of the resource to be attached.
    * @param   filter Filtering criterion or a callback that returns one,
-   * that will be applied to the dataset to be attached.
-   * @returns AttachQuery object specialized for attaching datasets to the current one.
+   * that will be applied to the resource to be attached.
+   * @returns ActionQuery object specialized for attaching datasets to the current one.
    */
   public attach(
     resourceName: string,
     filter?: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
   ): ActionQuery<T> {
-    return new ActionQuery<T>(
+    return ActionQuery.create(
       this.requestExecuter,
       ResourceType.Dataset,
       this.datasetName,

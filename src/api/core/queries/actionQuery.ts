@@ -1,7 +1,7 @@
 import { RequestExecuter } from "../../../internal/executer";
 import { ResourceType } from "../resource";
-import { addActionParams, QueryActionType, QueryParam } from "./../../../internal/utils";
-import { IFilteringCriterion, IFilteringCriterionCallback, toFilteringCriterion } from "./../../dataops/filteringApi";
+import { QueryActionType } from "./../../../internal/utils";
+import { IFilteringCriterion, IFilteringCriterionCallback } from "./../../dataops/filteringApi";
 import { QueryAction } from "./baseQuery";
 import { FilterableQuery } from "./filterableQuery";
 
@@ -24,30 +24,40 @@ export class ActionQuery<T> extends FilterableQuery<T> {
   /**
    * @internal
    */
-  public constructor(
+  public static create<T>(
     queryExecuter: RequestExecuter,
     resourceType: ResourceType,
     resourceName: string,
-    private readonly attachedResourceName: string,
-    private readonly relationType: QueryActionType,
+    actionResourceName: string,
+    queryActionType: QueryActionType,
+    filter?: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
+  ): ActionQuery<T> {
+    return new ActionQuery(
+      queryExecuter,
+      resourceType,
+      resourceName,
+      actionResourceName,
+      queryActionType,
+      filter,
+    ).setQueryAction();
+  }
+
+  /**
+   * @internal
+   */
+  private constructor(
+    queryExecuter: RequestExecuter,
+    resourceType: ResourceType,
+    resourceName: string,
+    private readonly actionResourceName: string,
+    private readonly queryActionType: QueryActionType,
     private readonly filter?: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
   ) {
     super(queryExecuter, QueryAction.update, resourceType, resourceName);
   }
 
-  /**
-   * @inheritdoc
-   */
-  protected compileToQueryParams(): QueryParam[] {
-    return addActionParams(
-      super.compileToQueryParams(),
-      this.attachedResourceName,
-      this.relationType,
-      this.compiledCondition,
-    );
-  }
-
-  private get compiledCondition(): any {
-    return this.filter ? toFilteringCriterion(this.filter).condition.compile() : null;
+  private setQueryAction(): this {
+    this.query.setAction(this.queryActionType, this.actionResourceName, this.filter);
+    return this;
   }
 }
