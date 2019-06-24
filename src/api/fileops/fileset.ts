@@ -124,6 +124,27 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
   }
 
   /**
+   * Creates a Detach query.
+   * @param   resourceName The name of the resource to be detached.
+   * @param   filter Filtering criterion or a callback that returns one,
+   * that will be applied to the resource to be detached.
+   * @returns ActionQuery object specialized for detaching resources to the current one.
+   */
+  public detach(
+    resourceName: string,
+    filter?: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
+  ): ActionQuery<T> {
+    return new ActionQuery(
+      this.requestExecuter,
+      ResourceType.Fileset,
+      this.filesetName,
+      resourceName,
+      QueryActionType.DETACH,
+      filter,
+    );
+  }
+
+  /**
    * Subscribe for the RTC records
    * update file record with a status
    * @param uploadingProcess Observable of the uploading files process

@@ -125,6 +125,27 @@ export class Dataset<
       filter,
     );
   }
+
+  /**
+   * Creates a Detach query.
+   * @param   resourceName The name of the resource to be detached.
+   * @param   filter Filtering criterion or a callback that returns one,
+   * that will be applied to the resource to be detached.
+   * @returns ActionQuery object specialized for detaching resources to the current one.
+   */
+  public detach(
+    resourceName: string,
+    filter?: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
+  ): ActionQuery<T> {
+    return new ActionQuery(
+      this.requestExecuter,
+      ResourceType.Dataset,
+      this.datasetName,
+      resourceName,
+      QueryActionType.DETACH,
+      filter,
+    );
+  }
 }
 
 (Dataset as any).prototype.watch = () => {
