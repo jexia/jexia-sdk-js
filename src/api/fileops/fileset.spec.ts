@@ -2,10 +2,12 @@ import * as faker from "faker";
 import { of, Subject } from "rxjs";
 import { createMockFor, mockFileEvent, mockFileRecord, mockFilesList } from "../../../spec/testUtils";
 import { RequestExecuter } from "../../internal/executer";
+import { ActionQuery } from "../core/queries/actionQuery";
 import { DeleteQuery } from "../core/queries/deleteQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
 import { ResourceType } from "../core/resource";
+import { field } from "../dataops/filteringApi";
 import { RealTimeEventMessage } from "../realtime/realTime.interfaces";
 import { FilesetInterface, IFileStatus } from "./fileops.interfaces";
 import { Fileset } from "./fileset";
@@ -230,6 +232,25 @@ describe("Fileset", () => {
     it("should be able start a delete query", () => {
       const { subject } = createSubject();
       expect(subject.delete() instanceof DeleteQuery).toBeTruthy();
+    });
+  });
+
+  describe("On attach", () => {
+    it("should return the query by passing a filter", () => {
+      const { subject } = createSubject();
+      const query = subject.attach(
+        faker.random.word(),
+        field(faker.random.alphaNumeric()).isEqualTo(faker.random.word()),
+      );
+
+      expect(query instanceof ActionQuery).toBeTruthy();
+    });
+
+    it("should return the query without passing a filter", () => {
+      const { subject } = createSubject();
+      const query = subject.attach(faker.random.word());
+
+      expect(query instanceof ActionQuery).toBeTruthy();
     });
   });
 });

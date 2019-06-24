@@ -2,12 +2,12 @@
 import * as faker from "faker";
 import { createMockFor } from "../../../spec/testUtils";
 import { RequestExecuter } from "../../internal/executer";
+import { ActionQuery } from "../core/queries/actionQuery";
 import { DeleteQuery } from "../core/queries/deleteQuery";
 import { InsertQuery } from "../core/queries/insertQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
 import { ResourceType } from "../core/resource";
-import { ActionQuery } from "./../core/queries/actionQuery";
 import { Dataset } from "./dataset";
 import { field } from "./filteringApi";
 

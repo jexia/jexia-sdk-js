@@ -1,8 +1,8 @@
 import * as faker from "faker";
 import {
   createRequestExecuterMock,
-  getRandonQueryActionType,
-  randomFilteringCriteria,
+  getRandomFilteringCriteria,
+  getRandomQueryActionType,
 } from "../../../../spec/testUtils";
 import { toQueryParams } from "../../../internal/utils";
 import { toFilteringCriterion } from "../../dataops/filteringApi";
@@ -13,10 +13,10 @@ describe("ActionQuery class", () => {
   function createSubject({
     requestExecuterMock = createRequestExecuterMock(),
     actionResourceName = faker.random.word(),
-    filter = randomFilteringCriteria(),
-    queryActionType = getRandonQueryActionType(),
+    filter = getRandomFilteringCriteria(),
+    queryActionType = getRandomQueryActionType(),
   } = {}) {
-    const subject = ActionQuery.create(
+    const subject = new ActionQuery(
       requestExecuterMock,
       faker.helpers.randomize([ResourceType.Dataset, ResourceType.Fileset]),
       faker.random.word(),
@@ -42,8 +42,6 @@ describe("ActionQuery class", () => {
       filter,
       queryActionType,
     } = createSubject();
-
-    spyOn(requestExecuterMock, "executeRequest");
 
     const expectedQueryParams = toQueryParams({
       action: queryActionType,
