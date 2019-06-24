@@ -1,7 +1,7 @@
-import { IFilteringCriterion } from "../api/dataops/filteringApi";
+import { IFilteringCriterion, IFilteringCriterionCallback, toFilteringCriterion } from "../api/dataops/filteringApi";
 import { ICondition } from "../api/dataops/filteringCondition";
 import { MESSAGE } from "../config";
-import { QueryParam } from "./executer.interfaces";
+import { QueryActionType, QueryParam, toQueryParams } from "./utils";
 
 /* Sort direction
  */
@@ -35,6 +35,9 @@ interface ISort<K> {
 type SortedFields<T> = Array<ISort<KeyOfObject<T>>>;
 
 export interface ICompiledQuery<T> {
+  action: QueryActionType;
+  action_resource: string;
+  action_cond: Array<object>;
   cond: Array<object>;
   outputs: string[];
   order: SortedFields<T>;
@@ -49,14 +52,19 @@ export class Query<T = any> {
 
   private filteringConditions: ICondition;
   private orders: SortedFields<T> = [];
+  private actionParams: {
+    action: QueryActionType;
+    actionResource: string;
+    filter?: IFilteringCriterion<T> | IFilteringCriterionCallback<T>;
+  };
 
   /*
    * This method is here to encapsulate the translation of filter settings
    * between the API layer of the SDK (IFilteringCriterion) and the internal
    * logic for compiling filters into JSON (ICondition).
    */
-  public setFilterCriteria(filter: IFilteringCriterion) {
-    this.filteringConditions = filter.condition;
+  public setFilterCriteria(filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>): void {
+    this.filteringConditions = toFilteringCriterion(filter).condition;
   }
 
   public addSortCondition<K extends Extract<keyof T, string>>(direction: Direction, ...fields: K[]) {
@@ -64,6 +72,20 @@ export class Query<T = any> {
       throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
     }
     this.orders.push({ fields, direction });
+  }
+  /**
+   * Sets an action to the current query (e.g. ATTACH/DETACH)
+   * @param   action The query action type
+   * @param   actionResource The name of the resource
+   * @param   filter An optional filter which condition will be applied to the resource.
+   * @returns void
+   */
+  public setAction(
+    action: QueryActionType,
+    actionResource: string,
+    filter?: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
+  ): void {
+    this.actionParams = { action, actionResource, filter };
   }
 
   /* Collect all conditionals inside one object
@@ -101,6 +123,16 @@ export class Query<T = any> {
       compiledQueryOptions.order = this.orders;
     }
 
+    if (this.actionParams) {
+      const { action, actionResource, filter } = this.actionParams;
+      compiledQueryOptions.action = action;
+      compiledQueryOptions.action_resource = actionResource;
+
+      if (filter) {
+        compiledQueryOptions.action_cond = toFilteringCriterion(filter).condition.compile();
+      }
+    }
+
     /* Compile relations
      * TODO develop relations */
     /*if (this.relations.length) {
@@ -128,11 +160,9 @@ export class Query<T = any> {
       );
     }
 
-    const otherParams = Object.entries(compiled)
-      .filter(([key]) => key !== "order") // ignore order
-      .map(([key, value]) => ({ key, value }));
+    const { order, ...compiledWithNoOrder } = compiled;
 
-    return params.concat(otherParams);
+    return params.concat(toQueryParams(compiledWithNoOrder));
   }
 
   /**

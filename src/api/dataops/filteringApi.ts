@@ -139,3 +139,16 @@ export type IFilteringCriterionCallback<T> =
 export function combineCriteria(criteria: IFilteringCriterion): IFilteringCriterion {
   return new FilteringCriterion(undefined, criteria as FilteringCriterion);
 }
+
+/**
+ * Gets a IFilteringCriterion whether the given filter it's a callback or a IFilteringCriterion itself.
+ * @param   filter Filtering criteria or a callback that returns a filtering criteria
+ * @returns IFilteringCriterion The filtering criterion
+ */
+export function toFilteringCriterion<T>(
+  filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>
+): IFilteringCriterion<T> {
+  return typeof filter === "function"
+    ? filter((field) => new FieldFilter(field))
+    : filter;
+}

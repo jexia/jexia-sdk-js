@@ -1,11 +1,14 @@
 import { Inject, Injectable } from "injection-js";
 import { RequestExecuter } from "../../internal/executer";
+import { QueryActionType } from "../../internal/utils";
+import { ActionQuery } from "../core/queries/actionQuery";
 import { DeleteQuery } from "../core/queries/deleteQuery";
 import { InsertQuery } from "../core/queries/insertQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
 import { IResource, ResourceInterface, ResourceType } from "../core/resource";
 import { DataSetName } from "./dataops.tokens";
+import { IFilteringCriterion, IFilteringCriterionCallback } from "./filteringApi";
 
 /**
  * Dataset object used to fetch and modify data at your datasets.
@@ -102,6 +105,26 @@ export class Dataset<
     return new DeleteQuery<D>(this.requestExecuter, ResourceType.Dataset, this.datasetName);
   }
 
+  /**
+   * Creates an Attach query.
+   * @param   resourceName The name of the resource to be attached.
+   * @param   filter Filtering criterion or a callback that returns one,
+   * that will be applied to the resource to be attached.
+   * @returns ActionQuery object specialized for attaching resources to the current one.
+   */
+  public attach(
+    resourceName: string,
+    filter?: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
+  ): ActionQuery<T> {
+    return new ActionQuery(
+      this.requestExecuter,
+      ResourceType.Dataset,
+      this.datasetName,
+      resourceName,
+      QueryActionType.ATTACH,
+      filter,
+    );
+  }
 }
 
 (Dataset as any).prototype.watch = () => {
