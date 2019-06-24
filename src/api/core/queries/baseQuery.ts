@@ -48,13 +48,13 @@ export abstract class BaseQuery<T> {
    * { fn: aggFn, col: string }
    * @param fields fields names or aggregation object
    */
-   public fields(fields: Array<Extract<keyof T, string> | IAggField<T>>): this;
-   public fields(...fields: Array<Extract<keyof T, string> | IAggField<T>>): this;
-   public fields<K extends Extract<keyof T, string>>(field: K | IAggField<T>,
-                                                     ...fields: Array<K | IAggField<T>>): this {
-     this.query.fields = Array.isArray(field) ? field : [field, ...fields];
-     return this;
-   }
+  public fields(fields: Array<Extract<keyof T, string> | IAggField<T>>): this;
+  public fields(...fields: Array<Extract<keyof T, string> | IAggField<T>>): this;
+  public fields<K extends Extract<keyof T, string>>(field: K | IAggField<T>,
+                                                    ...fields: Array<K | IAggField<T>>): this {
+    this.query.fields = Array.isArray(field) ? field : [field, ...fields];
+    return this;
+  }
 
   /**
    * Prepare compiled request before execute it

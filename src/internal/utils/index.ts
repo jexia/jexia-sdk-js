@@ -1,4 +1,3 @@
-
 export type DeferType<T = any> = {
   promise: Promise<T>,
   resolve(value?: T): void,
@@ -27,3 +26,6 @@ export function deferPromise<T = any>(): DeferType<T> {
 export function clone<T>(o: T): T {
   return Object.assign(Object.create(Object.getPrototypeOf(o)), o);
 }
+
+export * from "./queryActionType";
+export * from "./queryParam";

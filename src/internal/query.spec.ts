@@ -1,5 +1,6 @@
 import * as faker from "faker";
-import { FilteringCriterion } from "../api/dataops/filteringApi";
+import { getRandomFilteringCriteria, getRandomQueryActionType } from "../../spec/testUtils";
+import { FilteringCriterion, toFilteringCriterion } from "../api/dataops/filteringApi";
 import { FilteringCondition } from "../api/dataops/filteringCondition";
 import { IAggField, Query } from "./query";
 
@@ -62,6 +63,34 @@ describe("Query class", () => {
       query.addSortCondition(sort1.direction, ...sort1.fields);
       query.addSortCondition(sort2.direction, ...sort2.fields);
       expect((query as any).orders).toEqual([sort1, sort2]);
+    });
+  });
+
+  describe("On setAction", () => {
+    it("should compile with no condition", () => {
+      const queryActionType = getRandomQueryActionType();
+      const actionResource = faker.random.alphaNumeric();
+
+      query.setAction(queryActionType, actionResource);
+
+      expect(query.compile()).toEqual({
+        action: queryActionType,
+        action_resource: actionResource,
+      });
+    });
+
+    it("should compile with condition", () => {
+      const queryActionType = getRandomQueryActionType();
+      const actionResource = faker.random.alphaNumeric();
+      const filter = getRandomFilteringCriteria();
+
+      query.setAction(queryActionType, actionResource, filter);
+
+      expect(query.compile()).toEqual({
+        action: queryActionType,
+        action_resource: actionResource,
+        action_cond: toFilteringCriterion(filter).condition.compile(),
+      });
     });
   });
 
@@ -136,6 +165,29 @@ describe("Query class", () => {
       query.addSortCondition(sort2.direction, ...sort2.fields);
       expect(query.compile()).toEqual({
         order: [sort1, sort2],
+      });
+    });
+
+    it("should compile all conditions together", () => {
+      const aggField: IAggField<any> = { fn: "COUNT", col: "*"};
+      const queryActionType = getRandomQueryActionType();
+      const actionResource = faker.random.alphaNumeric();
+      const field1 = faker.random.alphaNumeric();
+
+      query.addSortCondition(sort1.direction, ...sort1.fields);
+      query.limit = faker.random.number();
+      query.offset = faker.random.number();
+      query.fields = [field1, aggField];
+      query.setAction(queryActionType, actionResource);
+      query.setFilterCriteria(filteringCriterion);
+
+      expect(query.compile()).toEqual({
+        order: [sort1],
+        range: { limit: query.limit, offset: query.offset },
+        outputs: [field1, "COUNT(id)"],
+        action: queryActionType,
+        action_resource: actionResource,
+        cond: toFilteringCriterion(filteringCriterion).condition.compile(),
       });
     });
   });

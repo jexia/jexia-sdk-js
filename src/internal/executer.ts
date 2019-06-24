@@ -4,7 +4,8 @@ import { QueryAction } from "../api/core/queries/baseQuery";
 import { ResourceType } from "../api/core/resource";
 import { AuthOptions, IAuthOptions, TokenManager } from "../api/core/tokenManager";
 import { API } from "../config";
-import { IRequestExecuterData, QueryParam } from "./executer.interfaces";
+import { QueryParam } from "../internal/utils";
+import { IRequestExecuterData } from "./executer.interfaces";
 import { IRequestOptions, Methods, RequestAdapter } from "./requestAdapter";
 
 @Injectable()
