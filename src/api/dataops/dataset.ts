@@ -118,10 +118,31 @@ export class Dataset<
   ): ActionQuery<T> {
     return new ActionQuery(
       this.requestExecuter,
-      ResourceType.Dataset,
+      this.resourceType,
       this.datasetName,
       resourceName,
       QueryActionType.ATTACH,
+      filter,
+    );
+  }
+
+  /**
+   * Creates a Detach query.
+   * @param   resourceName The name of the resource to be detached.
+   * @param   filter Filtering criterion or a callback that returns one,
+   * that will be applied to the resource to be detached.
+   * @returns ActionQuery object specialized for detaching resources from the current one.
+   */
+  public detach(
+    resourceName: string,
+    filter?: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
+  ): ActionQuery<T> {
+    return new ActionQuery(
+      this.requestExecuter,
+      this.resourceType,
+      this.datasetName,
+      resourceName,
+      QueryActionType.DETACH,
       filter,
     );
   }
