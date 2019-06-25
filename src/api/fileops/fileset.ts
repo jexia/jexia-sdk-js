@@ -111,7 +111,7 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
    */
   public attach(
     resourceName: string,
-    filter?: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
+    filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
   ): ActionQuery<T> {
     return new ActionQuery(
       this.requestExecuter,
@@ -132,7 +132,7 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
    */
   public detach(
     resourceName: string,
-    filter?: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
+    filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
   ): ActionQuery<T> {
     return new ActionQuery(
       this.requestExecuter,

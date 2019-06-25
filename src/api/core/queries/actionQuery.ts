@@ -30,7 +30,7 @@ export class ActionQuery<T> extends FilterableQuery<T> {
     resourceName: string,
     actionResourceName: string,
     public readonly queryActionType: QueryActionType,
-    filter?: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
+    filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
   ) {
     super(queryExecuter, QueryAction.update, resourceType, resourceName);
     this.query.setAction(queryActionType, actionResourceName, filter);

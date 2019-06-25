@@ -61,53 +61,41 @@ describe("Dataset class", () => {
   });
 
   describe("On attach", () => {
-    it("should return the query by passing a filter", () => {
+    let query: any;
+
+    beforeEach(() => {
       const dataset = new Dataset("test", createMockFor(RequestExecuter));
-      const query = dataset.attach(
+      query = dataset.attach(
         faker.random.word(),
         getRandomFilteringCriteria(),
       );
+    });
 
+    it("should return the query", () => {
       expect(query instanceof ActionQuery).toBeTruthy();
     });
 
-    it("should return the query without passing a filter", () => {
-      const dataset = new Dataset("test", createMockFor(RequestExecuter));
-      const query = dataset.attach(faker.random.word());
-
-      expect(query instanceof ActionQuery).toBeTruthy();
-    });
-
-    it("should return the query without passing a filter", () => {
-      const dataset = new Dataset("test", createMockFor(RequestExecuter));
-      const query = dataset.attach(faker.random.word());
-
+    it("should pass the correct query action type", () => {
       expect(query.queryActionType).toBe(QueryActionType.ATTACH);
     });
   });
 
   describe("On detach", () => {
-    it("should return the query by passing a filter", () => {
+    let query: any;
+
+    beforeEach(() => {
       const dataset = new Dataset("test", createMockFor(RequestExecuter));
-      const query = dataset.detach(
+      query = dataset.detach(
         faker.random.word(),
         getRandomFilteringCriteria(),
       );
-
-      expect(query instanceof ActionQuery).toBeTruthy();
     });
 
-    it("should return the query without passing a filter", () => {
-      const dataset = new Dataset("test", createMockFor(RequestExecuter));
-      const query = dataset.detach(faker.random.word());
-
+    it("should return the query", () => {
       expect(query instanceof ActionQuery).toBeTruthy();
     });
 
     it("should pass the correct query action type", () => {
-      const dataset = new Dataset("test", createMockFor(RequestExecuter));
-      const query = dataset.detach(faker.random.word());
-
       expect(query.queryActionType).toBe(QueryActionType.DETACH);
     });
   });

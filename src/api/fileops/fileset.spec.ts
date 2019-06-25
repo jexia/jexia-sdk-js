@@ -242,53 +242,41 @@ describe("Fileset", () => {
   });
 
   describe("On attach", () => {
-    it("should return the query by passing a filter", () => {
+    let query: any;
+
+    beforeEach(() => {
       const { subject } = createSubject();
-      const query = subject.attach(
+      query = subject.attach(
         faker.random.word(),
         getRandomFilteringCriteria(),
       );
-
-      expect(query instanceof ActionQuery).toBeTruthy();
     });
 
-    it("should return the query without passing a filter", () => {
-      const { subject } = createSubject();
-      const query = subject.attach(faker.random.word());
-
+    it("should return the query", () => {
       expect(query instanceof ActionQuery).toBeTruthy();
     });
 
     it("should pass the correct query action type", () => {
-      const { subject } = createSubject();
-      const query = subject.attach(faker.random.word());
-
       expect(query.queryActionType).toBe(QueryActionType.ATTACH);
     });
   });
 
   describe("On detach", () => {
-    it("should return the query by passing a filter", () => {
+    let query: any;
+
+    beforeEach(() => {
       const { subject } = createSubject();
-      const query = subject.detach(
+      query = subject.detach(
         faker.random.word(),
         getRandomFilteringCriteria(),
       );
-
-      expect(query instanceof ActionQuery).toBeTruthy();
     });
 
-    it("should return the query without passing a filter", () => {
-      const { subject } = createSubject();
-      const query = subject.detach(faker.random.word());
-
+    it("should return the query", () => {
       expect(query instanceof ActionQuery).toBeTruthy();
     });
 
     it("should pass the correct query action type", () => {
-      const { subject } = createSubject();
-      const query = subject.detach(faker.random.word());
-
       expect(query.queryActionType).toBe(QueryActionType.DETACH);
     });
   });
