@@ -8,6 +8,7 @@ import {
   mockFilesList,
 } from "../../../spec/testUtils";
 import { RequestExecuter } from "../../internal/executer";
+import { QueryActionType } from "../../internal/utils";
 import { ActionQuery } from "../core/queries/actionQuery";
 import { DeleteQuery } from "../core/queries/deleteQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
@@ -257,6 +258,13 @@ describe("Fileset", () => {
 
       expect(query instanceof ActionQuery).toBeTruthy();
     });
+
+    it("should pass the correct query action type", () => {
+      const { subject } = createSubject();
+      const query = subject.attach(faker.random.word());
+
+      expect(query.queryActionType).toBe(QueryActionType.ATTACH);
+    });
   });
 
   describe("On detach", () => {
@@ -275,6 +283,13 @@ describe("Fileset", () => {
       const query = subject.detach(faker.random.word());
 
       expect(query instanceof ActionQuery).toBeTruthy();
+    });
+
+    it("should pass the correct query action type", () => {
+      const { subject } = createSubject();
+      const query = subject.detach(faker.random.word());
+
+      expect(query.queryActionType).toBe(QueryActionType.DETACH);
     });
   });
 });

@@ -2,6 +2,7 @@
 import * as faker from "faker";
 import { createMockFor, getRandomFilteringCriteria } from "../../../spec/testUtils";
 import { RequestExecuter } from "../../internal/executer";
+import { QueryActionType } from "../../internal/utils";
 import { ActionQuery } from "../core/queries/actionQuery";
 import { DeleteQuery } from "../core/queries/deleteQuery";
 import { InsertQuery } from "../core/queries/insertQuery";
@@ -76,6 +77,13 @@ describe("Dataset class", () => {
 
       expect(query instanceof ActionQuery).toBeTruthy();
     });
+
+    it("should return the query without passing a filter", () => {
+      const dataset = new Dataset("test", createMockFor(RequestExecuter));
+      const query = dataset.attach(faker.random.word());
+
+      expect(query.queryActionType).toBe(QueryActionType.ATTACH);
+    });
   });
 
   describe("On detach", () => {
@@ -94,6 +102,13 @@ describe("Dataset class", () => {
       const query = dataset.detach(faker.random.word());
 
       expect(query instanceof ActionQuery).toBeTruthy();
+    });
+
+    it("should pass the correct query action type", () => {
+      const dataset = new Dataset("test", createMockFor(RequestExecuter));
+      const query = dataset.detach(faker.random.word());
+
+      expect(query.queryActionType).toBe(QueryActionType.DETACH);
     });
   });
 
