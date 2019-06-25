@@ -1,8 +1,8 @@
 import { RequestExecuter } from "../../../internal/executer";
+import { RequestMethod } from "../../../internal/requestAdapter.interfaces";
 import { QueryActionType } from "../../../internal/utils";
 import { IFilteringCriterion, IFilteringCriterionCallback } from "../../dataops/filteringApi";
 import { ResourceType } from "../resource";
-import { QueryAction } from "./baseQuery";
 import { FilterableQuery } from "./filterableQuery";
 
 /**
@@ -32,7 +32,7 @@ export class ActionQuery<T> extends FilterableQuery<T> {
     public readonly queryActionType: QueryActionType,
     filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
   ) {
-    super(queryExecuter, QueryAction.update, resourceType, resourceName);
+    super(queryExecuter, RequestMethod.PUT, resourceType, resourceName);
     this.query.setAction(queryActionType, actionResourceName, filter);
   }
 }

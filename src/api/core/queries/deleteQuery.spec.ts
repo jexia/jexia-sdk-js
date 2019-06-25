@@ -1,8 +1,8 @@
 import * as faker from "faker";
 import { createMockFor } from "../../../../spec/testUtils";
 import { RequestExecuter } from "../../../internal/executer";
+import { RequestMethod } from "../../../internal/requestAdapter.interfaces";
 import { ResourceType } from "../resource";
-import { QueryAction } from "./baseQuery";
 import { DeleteQuery } from "./deleteQuery";
 
 const createSubject = ({
@@ -33,6 +33,6 @@ describe("DeleteQuery class", () => {
 
   it("should contain delete as request", () => {
     const { subject } = createSubject();
-    expect((subject as any).action).toBe(QueryAction.delete);
+    expect((subject as any).method).toBe(RequestMethod.DELETE);
   });
 });

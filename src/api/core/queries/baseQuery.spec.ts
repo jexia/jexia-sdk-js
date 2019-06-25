@@ -1,9 +1,10 @@
 import * as faker from "faker";
-import { createMockFor, getRandomQueryAction } from "../../../../spec/testUtils";
+import { createMockFor, getRandomRequestMethod } from "../../../../spec/testUtils";
 import { RequestExecuter } from "../../../internal/executer";
 import { IAggField } from "../../../internal/query";
+import { RequestMethod } from "../../../internal/requestAdapter.interfaces";
 import { ResourceType } from "../resource";
-import { BaseQuery, QueryAction } from "./baseQuery";
+import { BaseQuery } from "./baseQuery";
 
 interface IUser {
   id: number;
@@ -13,10 +14,10 @@ interface IUser {
 
 const RESOURCE_NAME = faker.random.word();
 const RESOURCE_TYPE = faker.helpers.randomize([ResourceType.Dataset, ResourceType.Fileset]);
-const DEFAULT_ACTION = getRandomQueryAction();
+const DEFAULT_REQUEST_METHOD = getRandomRequestMethod();
 
 const createSubject = ({
-  action = DEFAULT_ACTION,
+  method = DEFAULT_REQUEST_METHOD,
   resourceName = RESOURCE_NAME,
   resourceType = RESOURCE_TYPE,
   requestExecuterMock = createMockFor(RequestExecuter),
@@ -24,12 +25,12 @@ const createSubject = ({
   // Declare child class as long as BaseQuery class is abstract
   class BaseQueryChild<T> extends BaseQuery<T> {
     protected readonly body = null;
-    constructor(r: RequestExecuter, a: QueryAction, t: ResourceType, d: string) {
-      super(r, a, t, d);
+    constructor(r: RequestExecuter, m: RequestMethod, t: ResourceType, d: string) {
+      super(r, m, t, d);
     }
   }
 
-  const subject = new BaseQueryChild<IUser>(requestExecuterMock, action, resourceType, resourceName);
+  const subject = new BaseQueryChild<IUser>(requestExecuterMock, method, resourceType, resourceName);
 
   return {
     resourceName,
@@ -50,8 +51,8 @@ describe("BaseQuery class", () => {
     expect((subject as any).queryExecuter).toBeDefined();
   });
 
-  it("action should equal passed action", () => {
-    expect((subject as any).action).toEqual(DEFAULT_ACTION);
+  it("should contain passed action", () => {
+    expect((subject as any).method).toEqual(DEFAULT_REQUEST_METHOD);
   });
 
   it("Query should be defined", () => {
@@ -129,7 +130,7 @@ describe("compiledRequest method", () => {
   });
 
   it("should contain correct action key", () => {
-    expect(subject.compiledRequest.action).toEqual(DEFAULT_ACTION);
+    expect(subject.compiledRequest.method).toEqual(DEFAULT_REQUEST_METHOD);
   });
 
   it("should contain empty body by default", () => {

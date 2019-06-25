@@ -1,6 +1,6 @@
 import { Injectable, InjectionToken } from "injection-js";
 import { API, DELAY, MESSAGE } from "../../config";
-import { Methods, RequestAdapter } from "../../internal/requestAdapter";
+import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { Logger } from "../logger/logger";
 import { TokenStorage } from "./componentStorage";
 
@@ -215,7 +215,7 @@ export class TokenManager {
     return this.requestAdapter
       .execute(url, {
         body,
-        method: Methods.POST
+        method: RequestMethod.POST,
       })
       .then((refreshedTokens: Tokens) => {
         defers.resolve(refreshedTokens.access_token);

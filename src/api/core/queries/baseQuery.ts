@@ -1,17 +1,8 @@
 import { RequestExecuter } from "../../../internal/executer";
 import { IRequestExecuterData } from "../../../internal/executer.interfaces";
 import { IAggField, Query } from "../../../internal/query";
+import { RequestMethod } from "../../../internal/requestAdapter.interfaces";
 import { ResourceType } from "../resource";
-
-/**
- * @internal
- */
-export enum QueryAction {
-  select = "select",
-  insert = "insert",
-  update = "update",
-  delete = "delete",
-}
 
 /**
  * Base class for SELECT, INSERT, UPDATE and DELETE queries. Implements fields to be returned
@@ -35,7 +26,7 @@ export abstract class BaseQuery<T> {
 
   protected constructor(
       protected queryExecuter: RequestExecuter,
-      protected readonly action: QueryAction,
+      protected readonly method: RequestMethod,
       protected readonly resourceType: ResourceType,
       protected readonly resourceName: string,
   ) {
@@ -64,7 +55,7 @@ export abstract class BaseQuery<T> {
     return {
       resourceType: this.resourceType,
       resourceName: this.resourceName,
-      action: this.action,
+      method: this.method,
       body: this.body || {},
       queryParams: this.query.compileToQueryParams() || [],
     };

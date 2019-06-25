@@ -187,6 +187,6 @@ export const mockFileEvent = (id: string, action: EventSubscriptionType): RealTi
   data: [ { id }],
 });
 
-export * from "./queryAction";
+export * from "./requestMethod";
 export * from "./queryActionType";
 export * from "./filtering";

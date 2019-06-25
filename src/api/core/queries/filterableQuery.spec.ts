@@ -2,9 +2,9 @@ import * as faker from "faker";
 import { createMockFor } from "../../../../spec/testUtils";
 import { RequestExecuter } from "../../../internal/executer";
 import { Query } from "../../../internal/query";
+import { RequestMethod } from "../../../internal/requestAdapter.interfaces";
 import { field } from "../../dataops/filteringApi";
 import { ResourceType } from "../resource";
-import { QueryAction } from "./baseQuery";
 import { FilterableQuery } from "./filterableQuery";
 
 interface IUser {
@@ -13,7 +13,7 @@ interface IUser {
 }
 
 let createSubject = ({
-  action = QueryAction.select,
+  method = RequestMethod.GET,
   resourceName = faker.random.word(),
   resourceType = faker.helpers.randomize([ResourceType.Dataset, ResourceType.Fileset]),
   requestExecuterMock = createMockFor(RequestExecuter),
@@ -21,12 +21,12 @@ let createSubject = ({
 } = {}) => {
   // Declare child class as long as FilterableQuery is abstract
   class FilterableQueryChild<T> extends FilterableQuery<T> {
-    constructor(r: RequestExecuter, a: QueryAction, t: ResourceType, d: string) {
-      super(r, a, t, d);
+    constructor(r: RequestExecuter, m: RequestMethod, t: ResourceType, d: string) {
+      super(r, m, t, d);
     }
   }
 
-  const subject = new FilterableQueryChild<IUser>(requestExecuterMock, action, resourceType, resourceName);
+  const subject = new FilterableQueryChild<IUser>(requestExecuterMock, method, resourceType, resourceName);
   let queryMock = createMockForQuery ? createMockFor<Query>(Query) : new Query();
 
   // tslint:disable-next-line:no-string-literal
