@@ -5,6 +5,7 @@ jobs:
       - image: circleci/node:8.9.0
     steps:
       - checkout
+      - run: DISABLE_OPENCOLLECTIVE=true
       - run: npm install
       - run: npm run lint
       - run:
@@ -23,6 +24,7 @@ jobs:
       - image: circleci/node:8.9.0
     steps:
       - checkout
+      - run: DISABLE_OPENCOLLECTIVE=true
       - run: npm install
       - run: npm run build
       - run: npm run semantic-release
