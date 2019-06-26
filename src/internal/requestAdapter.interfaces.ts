@@ -16,7 +16,7 @@ export interface IHTTPResponse {
   ok: boolean;
   status: number;
   statusText: string;
-  json(): Promise<any>;
+  text(): Promise<string>;
 }
 
 export interface IRequestAdapter {

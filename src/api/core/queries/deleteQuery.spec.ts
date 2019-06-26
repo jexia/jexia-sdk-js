@@ -1,13 +1,12 @@
 import * as faker from "faker";
-import { createMockFor } from "../../../../spec/testUtils";
+import { createMockFor, getRandomResourceType } from "../../../../spec/testUtils";
 import { RequestExecuter } from "../../../internal/executer";
 import { RequestMethod } from "../../../internal/requestAdapter.interfaces";
-import { ResourceType } from "../resource";
 import { DeleteQuery } from "./deleteQuery";
 
 const createSubject = ({
   resourceName = faker.random.word(),
-  resourceType = faker.helpers.randomize([ResourceType.Dataset, ResourceType.Fileset]),
+  resourceType = getRandomResourceType(),
   requestExecuterMock = createMockFor(RequestExecuter),
 } = {}) => {
   const subject = new DeleteQuery(requestExecuterMock, resourceType, resourceName);

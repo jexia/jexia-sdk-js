@@ -1,63 +1,91 @@
-// tslint:disable:max-line-length
+import * as faker from "faker";
 import { MESSAGE } from "../config";
 import { IHTTPResponse, IRequestOptions, RequestAdapter } from "./requestAdapter";
 
 describe("Class: RequestAdapter", () => {
+  function createSubject({
+    data = {},
+    status = 200,
+    statusText = "",
+  } = {}) {
+    const stringifiedData = typeof data !== "string" ? JSON.stringify(data as any) : data;
+    const promise = Promise.resolve({
+      ok: status === 200,
+      status,
+      statusText,
+      text: () => Promise.resolve(stringifiedData),
+    } as IHTTPResponse);
+
+    const mockFetch = (uri: string, opts?: IRequestOptions): Promise<IHTTPResponse> => promise;
+
+    return {
+      subject: new RequestAdapter(mockFetch),
+      data,
+      status,
+      statusText,
+    };
+  }
+
   describe("when creating the RequestAdapter", () => {
     it("should create a valid object", () => {
-      expect(new RequestAdapter((uri: string, opts?: IRequestOptions): Promise<IHTTPResponse> => {
-        return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve()} as IHTTPResponse);
-      })).toBeDefined();
+      const { subject } = createSubject();
+      expect(subject).toBeDefined();
     });
   });
 
   describe("when executing a succesful query", () => {
-    const respData = [{id: 1}, {id: 2}, {id: 3}];
-    it("should not throw an exception and should return the data", (done) => {
-      (new RequestAdapter((uri: string, opts?: IRequestOptions): Promise<IHTTPResponse> => {
-        return Promise.resolve({ok: true, status: 200, json: () => Promise.resolve(respData)} as IHTTPResponse);
-      }))
-        .execute("validProjectID", {headers: {}})
-        .then((data: any) => {
-          expect(data).toEqual(respData);
-          done();
-        })
-        .catch((err: Error) => {
-          done.fail(err);
-        });
+    it("should return the data", async () => {
+      expect.assertions(1);
+
+      const { subject, data } = createSubject({
+        data: [
+          { id: faker.random.uuid() },
+          { id: faker.random.uuid() },
+          { id: faker.random.uuid() },
+        ],
+      });
+
+      try {
+        const responseData = await subject.execute(faker.random.uuid(), { headers: {} });
+
+        expect(responseData).toEqual(data);
+      } catch (err) {
+        expect(err).not.toBeDefined();
+      }
+    });
+
+    it("should return empty object when response body is empty", async () => {
+      expect.assertions(1);
+
+      const { subject } = createSubject({
+        data: "",
+      });
+
+      try {
+        const responseData = await subject.execute(faker.random.uuid(), { headers: {} });
+
+        expect(responseData).toEqual({});
+      } catch (err) {
+        expect(err).not.toBeDefined();
+      }
     });
 
     describe("when calling fetch fails", () => {
-      const error = "unauthorized";
-      it("should cause fetch error", (done) => {
-        (new RequestAdapter((uri: string, opts?: IRequestOptions): Promise<IHTTPResponse> => {
-          return Promise.resolve({ok: false, status: 401, statusText: error} as IHTTPResponse);
-        }))
-          .execute("invalidProjectID", {})
-          .then((data: any) => {
-            done.fail("should throw an error");
-          })
-          .catch((err: Error) => {
-            expect(err).toEqual(new Error(`${MESSAGE.CORE.BACKEND_ERROR}401 unauthorized`));
-            done();
-          });
-      });
-    });
+      it("should cause fetch error", async () => {
+        expect.assertions(1);
 
-    describe("when executing query with not ok status", () => {
-      const error = new Error("error");
-      it("should throw an exception", (done) => {
-        (new RequestAdapter((uri: string, opts?: IRequestOptions): Promise<IHTTPResponse> => {
-          return Promise.reject(error);
-        }))
-          .execute("validProjectID", {})
-          .then((data: any) => {
-            done.fail("should throw an error");
-          })
-          .catch((err: Error) => {
-            expect(err).toEqual(error);
-            done();
-          });
+        const { subject, status, statusText } = createSubject({
+          status: 401,
+          statusText: faker.lorem.sentence(),
+        });
+
+        try {
+          await subject.execute(faker.random.uuid(), { headers: {} });
+
+          expect(false).toBeTruthy();
+        } catch (err) {
+          expect(err).toEqual(new Error(`${MESSAGE.CORE.BACKEND_ERROR}${status} ${statusText}`));
+        }
       });
     });
   });
