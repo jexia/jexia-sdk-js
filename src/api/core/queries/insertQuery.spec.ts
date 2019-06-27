@@ -1,5 +1,6 @@
 import * as faker from "faker";
 import { createRequestExecuterMock } from "../../../../spec/testUtils";
+import { RequestMethod } from "../../../internal/requestAdapter.interfaces";
 import { ResourceType } from "../resource";
 import { InsertQuery } from "./insertQuery";
 
@@ -25,17 +26,11 @@ describe("InsertQuery class", () => {
     });
   });
 
-  describe("when instantiating a insertQuery object from client", () => {
-    it("should be able to invoke methods exposed by it", () => {
-      expect(typeof subject.execute).toBe("function");
-    });
-  });
-
   it("should execute the query with the correct parameters", () => {
     spyOn(qe, "executeRequest");
     subject.execute();
     expect(qe.executeRequest).toHaveBeenLastCalledWith({
-      action: (subject as any).action,
+      method: RequestMethod.POST,
       body: [fakeRecord],
       resourceType,
       resourceName

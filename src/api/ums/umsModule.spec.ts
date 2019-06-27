@@ -3,7 +3,7 @@ import * as faker from "faker";
 import { ReflectiveInjector } from "injection-js";
 import { createMockFor, SpyObj } from "../../../spec/testUtils";
 import { API } from "../../config";
-import { Methods, RequestAdapter } from "../../internal/requestAdapter";
+import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { deferPromise } from "../../internal/utils";
 import { Client } from "../core/client";
 import { AuthOptions, TokenManager } from "../core/tokenManager";
@@ -205,7 +205,7 @@ describe("UMS Module", () => {
               new_password: newPassword,
             },
             headers: { Authorization: `Bearer ${tokenTest}`},
-            method: Methods.POST,
+            method: RequestMethod.POST,
           },
         );
       });
@@ -231,7 +231,7 @@ describe("UMS Module", () => {
           {
             body: { password: testUser.password },
             headers: { Authorization: `Bearer ${tokenTest}`},
-            method: Methods.DELETE,
+            method: RequestMethod.DELETE,
           },
         );
       });

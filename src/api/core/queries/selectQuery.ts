@@ -1,7 +1,7 @@
 import { MESSAGE } from "../../../config/message";
 import { RequestExecuter } from "../../../internal/executer";
+import { RequestMethod } from "../../../internal/requestAdapter.interfaces";
 import { FromRelated, ResourceType } from "../resource";
-import { QueryAction } from "./baseQuery";
 import { FilterableQuery } from "./filterableQuery";
 import { RelatedQuery } from "./relatedQuery";
 
@@ -25,7 +25,7 @@ export class SelectQuery<T> extends FilterableQuery<T> {
    * @internal
    */
   public constructor(queryExecuter: RequestExecuter, resourceType: ResourceType, resourceName: string) {
-    super(queryExecuter, QueryAction.select, resourceType, resourceName);
+    super(queryExecuter, RequestMethod.GET, resourceType, resourceName);
   }
 
   /**

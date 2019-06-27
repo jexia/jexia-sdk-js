@@ -1,6 +1,7 @@
 import { RequestExecuter } from "../../../internal/executer";
+import { RequestMethod } from "../../../internal/requestAdapter.interfaces";
 import { ResourceType } from "../resource";
-import { BaseQuery, QueryAction } from "./baseQuery";
+import { BaseQuery } from "./baseQuery";
 
 /**
  * Query object specialized for insert statements.
@@ -29,7 +30,7 @@ export class InsertQuery<T, D extends T> extends BaseQuery<T> {
    * @internal
    */
   public constructor(queryExecuter: RequestExecuter, records: T[], resourceType: ResourceType, resourceName: string) {
-    super(queryExecuter, QueryAction.insert, resourceType, resourceName);
+    super(queryExecuter, RequestMethod.POST, resourceType, resourceName);
     this.body = records;
   }
 
@@ -41,7 +42,7 @@ export class InsertQuery<T, D extends T> extends BaseQuery<T> {
     return this.queryExecuter.executeRequest({
       resourceType: this.resourceType,
       resourceName: this.resourceName,
-      action: this.action,
+      method: this.method,
       body: this.body,
     });
   }
