@@ -1,31 +1,6 @@
 // tslint:disable:max-line-length
 import { MESSAGE } from "../config";
-import { IHTTPResponse, IRequestAdapter, IRequestOptions, Methods, RequestAdapter } from "./requestAdapter";
-
-/* Mock request adapter */
-export const mockRequestAdapter: IRequestAdapter = {
-  execute: (uri: string, opt: IRequestOptions): Promise<any> => {
-    switch (opt.method) {
-      /* log in */
-      case Methods.POST:
-        if ((opt.body as any).email === "validKey" && (opt.body as any).password === "validSecret") {
-          return Promise.resolve({ token: "validToken", refresh_token: "validRefreshToken" });
-        }
-        return Promise.reject(new Error("Auth error."));
-      /* refresh token */
-      case Methods.PATCH:
-        if ((opt.headers as any).Authorization === "validToken"
-          && (opt.body as any).refresh_token === "validRefreshToken") {
-          return Promise.resolve({ token: "updatedToken", refresh_token: "updatedRefreshToken" });
-        }
-        return Promise.reject(new Error("Auth error."));
-      /* do not allow to use other methods */
-      default:
-        /* not implemented */
-        return Promise.reject(new Error("Not implemented."));
-    }
-  },
-};
+import { IHTTPResponse, IRequestOptions, RequestAdapter } from "./requestAdapter";
 
 describe("Class: RequestAdapter", () => {
   describe("when creating the RequestAdapter", () => {

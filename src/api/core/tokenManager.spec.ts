@@ -1,7 +1,7 @@
 import * as faker from "faker";
 import { createMockFor } from "../../../spec/testUtils";
 import { MESSAGE } from "../../config";
-import { Methods, RequestAdapter } from "../../internal/requestAdapter";
+import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { Logger } from "../logger/logger";
 import { TokenManager, Tokens } from "./tokenManager";
 
@@ -64,7 +64,7 @@ describe("TokenManager", () => {
         expect.any(String), // url does not matter
         {
           body: { method: "apk", key: validOptions.key, secret: validOptions.secret },
-          method: Methods.POST,
+          method: RequestMethod.POST,
         },
       );
     });
@@ -265,7 +265,7 @@ describe("TokenManager", () => {
         (subject as any).refreshUrl,
         {
           body: { refresh_token: tokens.refresh_token },
-          method: Methods.POST
+          method: RequestMethod.POST
         },
       );
     });

@@ -114,7 +114,7 @@ export class Dataset<
    */
   public attach(
     resourceName: string,
-    filter?: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
+    filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
   ): ActionQuery<T> {
     return new ActionQuery(
       this.requestExecuter,
@@ -135,7 +135,7 @@ export class Dataset<
    */
   public detach(
     resourceName: string,
-    filter?: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
+    filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
   ): ActionQuery<T> {
     return new ActionQuery(
       this.requestExecuter,
