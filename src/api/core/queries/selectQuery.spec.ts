@@ -1,11 +1,10 @@
 // tslint:disable:no-string-literal
 import * as faker from "faker";
 // tslint:disable:one-variable-per-declaration
-import { createMockFor } from "../../../../spec/testUtils";
+import { createMockFor, getRandomResourceType } from "../../../../spec/testUtils";
 import { MESSAGE } from "../../../config";
 import { RequestExecuter } from "../../../internal/executer";
 import { Query } from "../../../internal/query";
-import { ResourceType } from "../resource";
 import { SelectQuery } from "./selectQuery";
 
 describe("SelectQuery class", () => {
@@ -13,7 +12,7 @@ describe("SelectQuery class", () => {
 
   function createSubject({
     resourceName = faker.random.word(),
-    resourceType = faker.helpers.randomize([ResourceType.Dataset, ResourceType.Fileset]),
+    resourceType = getRandomResourceType(),
     mockQuery = true,
     requestExecuterMock = createMockFor(RequestExecuter),
   } = {}) {

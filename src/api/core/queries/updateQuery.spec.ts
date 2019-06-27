@@ -1,13 +1,12 @@
 // tslint:disable:no-string-literal
 import * as faker from "faker";
-import { createMockFor, createRequestExecuterMock, SpyObj } from "../../../../spec/testUtils";
+import { createMockFor, createRequestExecuterMock, getRandomResourceType, SpyObj } from "../../../../spec/testUtils";
 import { RequestExecuter } from "../../../internal/executer";
-import { ResourceType } from "../resource";
 import { UpdateQuery } from "./updateQuery";
 
 const createSubject = ({
   resourceName = faker.random.word(),
-  resourceType = faker.helpers.randomize([ResourceType.Dataset, ResourceType.Fileset]),
+  resourceType = getRandomResourceType(),
   data = {},
   requestExecuterMock = createMockFor(RequestExecuter),
 } = {}) => {

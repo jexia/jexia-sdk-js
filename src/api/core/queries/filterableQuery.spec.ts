@@ -1,5 +1,5 @@
 import * as faker from "faker";
-import { createMockFor } from "../../../../spec/testUtils";
+import { createMockFor, getRandomResourceType } from "../../../../spec/testUtils";
 import { RequestExecuter } from "../../../internal/executer";
 import { Query } from "../../../internal/query";
 import { RequestMethod } from "../../../internal/requestAdapter.interfaces";
@@ -15,7 +15,7 @@ interface IUser {
 let createSubject = ({
   method = RequestMethod.GET,
   resourceName = faker.random.word(),
-  resourceType = faker.helpers.randomize([ResourceType.Dataset, ResourceType.Fileset]),
+  resourceType = getRandomResourceType(),
   requestExecuterMock = createMockFor(RequestExecuter),
   createMockForQuery = true,
 } = {}) => {
