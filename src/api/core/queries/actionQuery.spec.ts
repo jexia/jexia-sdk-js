@@ -3,10 +3,10 @@ import {
   createRequestExecuterMock,
   getRandomFilteringCriteria,
   getRandomQueryActionType,
+  getRandomResourceType,
 } from "../../../../spec/testUtils";
 import { toQueryParams } from "../../../internal/utils";
 import { toFilteringCriterion } from "../../dataops/filteringApi";
-import { ResourceType } from "../resource";
 import { ActionQuery } from "./actionQuery";
 
 describe("ActionQuery class", () => {
@@ -18,7 +18,7 @@ describe("ActionQuery class", () => {
   } = {}) {
     const subject = new ActionQuery(
       requestExecuterMock,
-      faker.helpers.randomize([ResourceType.Dataset, ResourceType.Fileset]),
+      getRandomResourceType(),
       faker.random.word(),
       actionResourceName,
       queryActionType,

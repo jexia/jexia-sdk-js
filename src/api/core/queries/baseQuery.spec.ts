@@ -1,5 +1,5 @@
 import * as faker from "faker";
-import { createMockFor, getRandomRequestMethod } from "../../../../spec/testUtils";
+import { createMockFor, getRandomRequestMethod, getRandomResourceType } from "../../../../spec/testUtils";
 import { RequestExecuter } from "../../../internal/executer";
 import { IAggField } from "../../../internal/query";
 import { RequestMethod } from "../../../internal/requestAdapter.interfaces";
@@ -13,7 +13,7 @@ interface IUser {
 }
 
 const RESOURCE_NAME = faker.random.word();
-const RESOURCE_TYPE = faker.helpers.randomize([ResourceType.Dataset, ResourceType.Fileset]);
+const RESOURCE_TYPE = getRandomResourceType();
 const DEFAULT_REQUEST_METHOD = getRandomRequestMethod();
 
 const createSubject = ({

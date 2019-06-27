@@ -1,12 +1,11 @@
 import * as faker from "faker";
-import { createRequestExecuterMock } from "../../../../spec/testUtils";
+import { createRequestExecuterMock, getRandomResourceType } from "../../../../spec/testUtils";
 import { RequestMethod } from "../../../internal/requestAdapter.interfaces";
-import { ResourceType } from "../resource";
 import { InsertQuery } from "./insertQuery";
 
 describe("InsertQuery class", () => {
   const resourceName = faker.random.word();
-  const resourceType = faker.helpers.randomize([ResourceType.Dataset, ResourceType.Fileset]);
+  const resourceType = getRandomResourceType();
   let qe: any;
   let subject: InsertQuery<any, any>;
 

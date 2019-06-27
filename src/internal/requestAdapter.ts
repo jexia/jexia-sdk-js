@@ -10,8 +10,8 @@ function status(response: IHTTPResponse): Promise<IHTTPResponse> {
 }
 
 function json(response: IHTTPResponse): Promise<any> {
-  /* convert response to JSON */
-  return response.json();
+  // parses response body into JSON or return an empty object when it's empty
+  return response.text().then((text) => text ? JSON.parse(text) : {});
 }
 export class RequestAdapter implements IRequestAdapter {
 
