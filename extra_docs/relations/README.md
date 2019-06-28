@@ -1,12 +1,12 @@
 # Relations
-All project resources can be related to each other and SDK supports inserting, fetching and attaching/detaching related 
+All project resources can be related to each other and SDK supports inserting, fetching and attaching/detaching related
 records.
 Let's create a simple schema which will be used for all further examples:
 
-![Relations schema](https://jexia.github.io/jexia-sdk-js/assets/relations-schema.png) 
+![Relations schema](https://jexia.github.io/jexia-sdk-js/assets/relations-schema.png)
 
-There are three datasets and two relations: **posts** has *one-2-many* relation to **comments** and **comments** has 
-*one-2-one* relation to **author** (remember that all management opearations, such as creating datasets, fields and 
+There are three datasets and two relations: **posts** has *one-2-many* relation to **comments** and **comments** has
+*one-2-one* relation to **author** (remember that all management opearations, such as creating datasets, fields and
 relations can be done with [Web Management Application](https://docs.jexia.com/getting-started/user-management/) only).
 
 To make our datasets not so boring, we can also add a few fields:
@@ -25,7 +25,7 @@ interface Post {
   comments: Comment[];
 }
 ```
-Pay your attention - **Post** includes **comments** field as an array, but **Comment** has an **author** 
+Pay your attention - **Post** includes **comments** field as an array, but **Comment** has an **author**
 as a plain value. That's the difference between *one-2-many* and *one-2-one* relation types.
 
 ### [Insert data](#insert)
@@ -48,8 +48,8 @@ dom.dataset("posts")
   .execute();
 ```
 
-Notice that records should be inserted in appropriate order - the relation root must be insert root. 
-It's impossible to insert into **comment** dataset with post related to that comment (tree cannot grow upside down). 
+Notice that records should be inserted in appropriate order - the relation root must be insert root.
+It's impossible to insert into **comment** dataset with post related to that comment (tree cannot grow upside down).
 This example is not going to work:
 
 ```typescript
@@ -62,18 +62,17 @@ dom.dataset("comments")
       message: "A do like how Jexia SDK implements relations!"
     }
   }])
-  .execute();  
+  .execute();
 ```
 
-If you want to create a comment to the existent post, you need to use `attach()`, 
-see how to use it below in this document.
+If you want to create a comment in the existent post, you need to use `.attach()`, see how to use it in
+[Attach and detach records](#attach-and-detach-records).
 
-
-Also look how we are using arrays for *one-2-many* **posts** -> **comments** relation and just an object 
+Also look how we are using arrays for *one-2-many* **posts** -> **comments** relation and just an object
 for the **comments** -> **author** *one-2-one* relation.
 
 ### [Fetching related records](#fetch-related)
-By default, `.select()` operation does not include related resources. To make it doing that we need to use `.related()` 
+By default, `.select()` operation does not include related resources. To make it doing that we need to use `.related()`
 method:
 ```typescript
 dom.dataset("posts")
@@ -175,7 +174,7 @@ dom.dataset<Post>("posts")
 ```
 
 Now we've got hint for the `.related()` method:
-![Related hint](https://jexia.github.io/jexia-sdk-js/assets/relations-hints-1.png) 
+![Related hint](https://jexia.github.io/jexia-sdk-js/assets/relations-hints-1.png)
 
 and hint for the nested fields:
-![Related fields hint](https://jexia.github.io/jexia-sdk-js/assets/relations-hints-2.png) 
+![Related fields hint](https://jexia.github.io/jexia-sdk-js/assets/relations-hints-2.png)
