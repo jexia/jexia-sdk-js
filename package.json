@@ -15,7 +15,7 @@
     "commit": "git-cz",
     "commitmsg": "commitlint -e $GIT_PARAMS",
     "lint": "tslint \"src/**/*.ts\" \"spec/**/*.ts\" \"e2e/**/*.ts\"",
-    "test": "jest",
+    "test": "jest --maxWorkers=50%",
     "test:ci": "jest --no-cache --ci --testResultsProcessor=\"jest-junit\" --runInBand",
     "test:e2e": "node ./scripts/env-check.js && jest --config e2e.config.json --runInBand",
     "tdd": "jest --no-cache --watch",
