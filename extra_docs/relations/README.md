@@ -155,16 +155,124 @@ dom.dataset("posts")
   .execute()
 ```
 
-### [Attach and detach records](#attachdetach)
+### [Attach and detach records](#attach-and-detach-records)
 
-We were describing how to insert parent and child records in one go, but often we need to add related records to the 
-existent data. In our schema it would be adding a comment to the certain post. 
+We have described how to insert parent and child records in one go, but eventually, we need to relate existent records
+to other ones. You can do it using `.attach()` and `.detach()`.
 
-/* TODO Attach and detach documentation */
+Let's say you have inserted a post:
 
-### [Take an advantage from the TS interfaces](#typescript-relation)
-We have created a typescript interfaces for our datasets, why? Well, it can give us some usable hints, 
-especially when we are working on big, complex query. Let's see how it works.
+```typescript
+  const posts = await dom.dataset("posts")
+    .insert({
+      title: "A post with no comments",
+      message: "Okay",
+    })
+    .execute();
+
+  console.log(posts);
+  // output:
+  // [
+  //   {
+  //     id: ...,
+  //     title: "A post with no comments",
+  //     message: "Okay",
+  //   }
+  // ]
+```
+
+Then some comments...
+
+```typescript
+  const comments = await dom.dataset("comments")
+    .insert([
+      {
+        text: "Very nice, congrats!",
+        like: true,
+      },
+      {
+        text: "Might've been waaaay better",
+        like: false,
+      },
+    ])
+    .execute();
+
+  console.log(comments);
+  // output:
+  // [
+  //   { id: ..., text: "Very nice, congrats!", like: true },
+  //   { id: ..., text: "Might've been waaaay better", like: false }
+  // ]
+```
+
+Finally, you want to relate these with your post, so you call `.attach()` passing the name of the **resource** (that can
+be either a **dataset** or a **fileset**) and filter criteria:
+
+```typescript
+  const [firstPost] = posts;
+  const commentsIds = comments.map(comment => comment.id);
+
+  await = dom.dataset("posts")
+    .attach("comments", (field) => field("id").isInArray(commentsIds))
+    .where((field) => field("id").isEqualTo(firstPost.id)) // required for both attach/detach, otherwise an error will be thrown
+    .execute();
+
+  // attach operation doesn't return any data, so we need to call .select()
+  const postsWithComments = await dom.dataset("posts")
+    .select()
+    .related("comments")
+    .execute();
+
+  console.log(postsWithComments);
+
+  // output:
+  // [
+  //   {
+  //     id: ...,
+  //     title: "A post with no comments",
+  //     message: "Okay",
+  //     comments: [
+  //       { id: ..., text: "Very nice, congrats!", like: true },
+  //       { id: ..., text: "Might've been waaaay better", like: false }
+  //     ]
+  //   }
+  // ]
+
+```
+
+After attaching those comments, you feel regret, and you want to undo it. That's totally acceptable,
+similar to `.attach()`, call `.detach()`:
+
+```typescript
+  await = dom.dataset("posts")
+    .detach("comments", (field) => field("like").isEqualTo(false)) // detach comments with unlike from the post
+    .where((field) => field("id").isEqualTo(firstPost.id))
+    .execute();
+
+  const postsWithNoUnlikeComments = await dom.dataset("posts")
+    .select()
+    .related("comments")
+    .execute();
+
+  console.log(postsWithNoUnlikeComments);
+
+  // output:
+  // [
+  //   {
+  //     id: ...,
+  //     title: "A post with no comments",
+  //     message: "Okay",
+  //     comments: [
+  //       { id: ..., text: "Very nice, congrats!", like: true }
+  //     ]
+  //   }
+  // ]
+```
+
+
+### [Take advantage from the TS interfaces](#take-advantage-from-the-ts-interfaces)
+We have created typescript interfaces for our datasets. Why? Well, it can give us some useful hints,
+especially when we are working on a big, complex query. Let's see how it works.
 
 All we need to do to turn on typescript magic it's just provide an interface when we are initializing a query:
 ```typescript
