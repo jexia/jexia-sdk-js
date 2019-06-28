@@ -28,7 +28,7 @@ interface Post {
 Pay your attention - **Post** includes **comments** field as an array, but **Comment** has an **author**
 as a plain value. That's the difference between *one-2-many* and *one-2-one* relation types.
 
-### [Insert data](#insert)
+### [Insert data](#insert-data)
 To insert related records just provide a nested array to the `.insert()` method:
 ```typescript
 dom.dataset("posts")
@@ -71,7 +71,7 @@ If you want to create a comment in the existent post, you need to use `.attach()
 Also look how we are using arrays for *one-2-many* **posts** -> **comments** relation and just an object
 for the **comments** -> **author** *one-2-one* relation.
 
-### [Fetching related records](#fetch-related)
+### [Fetching related records](#fetching-related-records)
 By default, `.select()` operation does not include related resources. To make it doing that we need to use `.related()`
 method:
 ```typescript
