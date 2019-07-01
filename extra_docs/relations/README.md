@@ -75,60 +75,66 @@ for the **comments** -> **author** *one-2-one* relation.
 By default, `.select()` operation does not include related resources. To make it doing that we need to use `.related()`
 method:
 ```typescript
-dom.dataset("posts")
+const postsWithComments = await dom.dataset("posts")
   .select()
   .related("comments")
-  .execute()
-```
+  .execute();
 
-The result will be:
-```typescript
-[{
-  id: ...
-  created_at: ...
-  updated_at: ...
-  title: "Relations with Jexia SDK",
-  message: "A do like how Jexia SDK implements relations!",
-  comments: [{
-    id: ...
-    created_at: ...
-    updated_at: ...
-    text: "Me too!",
-    like: true,
-  }, {
-    id: ...
-    created_at: ...
-    updated_at: ...
-    text: "Might've been a bit better :(",
-    like: false,
-  }]
-}]
+console.log(postsWithComments);
+// [
+//   {
+//     id: ...
+//     created_at: ...
+//     updated_at: ...
+//     title: "Relations with Jexia SDK",
+//     message: "A do like how Jexia SDK implements relations!",
+//     comments: [
+//       {
+//         id: ...
+//         created_at: ...
+//         updated_at: ...
+//         text: "Me too!",
+//         like: true,
+//       },
+//       {
+//         id: ...
+//         created_at: ...
+//         updated_at: ...
+//         text: "Might've been a bit better :(",
+//         like: false,
+//       }
+//     ]
+//   }
+// ]
 ```
 
 We can also want to get not all fields but only few:
 ```typescript
-dom.dataset("posts")
+const postsWithCommentsText = await dom.dataset("posts")
   .select()
   .related("comments", comments => comments.fields("text"))
-  .execute()
-```
+  .execute();
 
-Here is the result:
-```typescript
-[{
-  id: ...
-  created_at: ...
-  updated_at: ...
-  title: "Relations with Jexia SDK",
-  message: "A do like how Jexia SDK implements relations!",
-  comments: [{
-    id: ...
-    text: "Me too!",
-  }, {
-    id: ...
-    text: "Might've been a bit better :(",
-  }]
-}]
+console.log(postsWithCommentsText);
+// [
+//   {
+//     id: ...
+//     created_at: ...
+//     updated_at: ...
+//     title: "Relations with Jexia SDK",
+//     message: "A do like how Jexia SDK implements relations!",
+//     comments: [
+//       {
+//         id: ...
+//         text: "Me too!",
+//       },
+//       {
+//         id: ...
+//         text: "Might've been a bit better :(",
+//       }
+//     ]
+//   }
+// ]
 ```
 
 Notice that `id` field will be always there. Nothing will be working without `id`!
@@ -171,7 +177,6 @@ Let's say you have inserted a post:
     .execute();
 
   console.log(posts);
-  // output:
   // [
   //   {
   //     id: ...,
@@ -198,7 +203,6 @@ Then some comments...
     .execute();
 
   console.log(comments);
-  // output:
   // [
   //   { id: ..., text: "Very nice, congrats!", like: true },
   //   { id: ..., text: "Might've been waaaay better", like: false }
@@ -209,10 +213,10 @@ Finally, you want to relate these with your post, so you call `.attach()` passin
 be either a **dataset** or a **fileset**) and filter criteria:
 
 ```typescript
-  const [firstPost] = posts;
+  const firstPost = posts[0];
   const commentsIds = comments.map(comment => comment.id);
 
-  await = dom.dataset("posts")
+  await dom.dataset("posts")
     .attach("comments", (field) => field("id").isInArray(commentsIds))
     .where((field) => field("id").isEqualTo(firstPost.id)) // required for both attach/detach, otherwise an error will be thrown
     .execute();
@@ -224,8 +228,6 @@ be either a **dataset** or a **fileset**) and filter criteria:
     .execute();
 
   console.log(postsWithComments);
-
-  // output:
   // [
   //   {
   //     id: ...,
@@ -244,7 +246,7 @@ After attaching those comments, you feel regret, and you want to undo it. That's
 similar to `.attach()`, call `.detach()`:
 
 ```typescript
-  await = dom.dataset("posts")
+  await dom.dataset("posts")
     .detach("comments", (field) => field("like").isEqualTo(false)) // detach comments with unlike from the post
     .where((field) => field("id").isEqualTo(firstPost.id))
     .execute();
@@ -255,8 +257,6 @@ similar to `.attach()`, call `.detach()`:
     .execute();
 
   console.log(postsWithNoUnlikeComments);
-
-  // output:
   // [
   //   {
   //     id: ...,
