@@ -1,8 +1,8 @@
 import { RequestExecuter } from "../../../internal/executer";
 import { RequestMethod } from "../../../internal/requestAdapter.interfaces";
 import { QueryActionType } from "../../../internal/utils";
-import { IFilteringCriterion, IFilteringCriterionCallback } from "../../dataops/filteringApi";
-import { ResourceType } from "../resource";
+import { field, IFilteringCriterion, IFilteringCriterionCallback } from "../../dataops/filteringApi";
+import { IdentityCollection, ResourceInterface, ResourceType } from "../resource";
 import { FilterableQuery } from "./filterableQuery";
 
 /**
@@ -19,7 +19,7 @@ import { FilterableQuery } from "./filterableQuery";
  *
  * @template T Generic type of your resource, default to any
  */
-export class ActionQuery<T> extends FilterableQuery<T> {
+export class ActionQuery<T, D extends ResourceInterface<T>> extends FilterableQuery<D> {
 
   /**
    * @internal
@@ -30,9 +30,30 @@ export class ActionQuery<T> extends FilterableQuery<T> {
     resourceName: string,
     actionResourceName: string,
     public readonly queryActionType: QueryActionType,
-    filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
+    filter: IFilteringCriterion<D> | IFilteringCriterionCallback<D> | IdentityCollection<D>,
   ) {
     super(queryExecuter, RequestMethod.PUT, resourceType, resourceName);
-    this.query.setAction(queryActionType, actionResourceName, filter);
+    this.query.setAction(queryActionType, actionResourceName, this.getFilter(filter));
+  }
+
+  private getFilter(
+    filter: IFilteringCriterion<D> | IFilteringCriterionCallback<D> | IdentityCollection<D>,
+  ): IFilteringCriterion<D> | IFilteringCriterionCallback<D> {
+    if (!Array.isArray(filter)) {
+      return filter;
+    }
+
+    const idCollection: any[] = filter;
+    const hasInvalidIds = () => idCollection.some((o) => !o || typeof o === "object" && !o.id);
+    const hasMixedData = () => new Set<any>(idCollection.map((o) => typeof o)).size > 1;
+
+    if (hasInvalidIds() || hasMixedData()) {
+      throw Error("Invalid resource or id list: " + idCollection);
+    }
+
+    const hasOnlyIds = idCollection.every((o) => typeof o === "string");
+    const ids = hasOnlyIds ? idCollection : idCollection.map((c) => c.id);
+
+    return field("id").isInArray(ids);
   }
 }
