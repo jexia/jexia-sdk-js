@@ -55,7 +55,7 @@ export class Query<T = any> {
   private actionParams: {
     action: QueryActionType;
     actionResource: string;
-    filter?: IFilteringCriterion<T> | IFilteringCriterionCallback<T>;
+    filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>;
   };
 
   /*
@@ -83,7 +83,7 @@ export class Query<T = any> {
   public setAction(
     action: QueryActionType,
     actionResource: string,
-    filter?: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
+    filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
   ): void {
     this.actionParams = { action, actionResource, filter };
   }
@@ -127,19 +127,8 @@ export class Query<T = any> {
       const { action, actionResource, filter } = this.actionParams;
       compiledQueryOptions.action = action;
       compiledQueryOptions.action_resource = actionResource;
-
-      if (filter) {
-        compiledQueryOptions.action_cond = toFilteringCriterion(filter).condition.compile();
-      }
+      compiledQueryOptions.action_cond = toFilteringCriterion(filter).condition.compile();
     }
-
-    /* Compile relations
-     * TODO develop relations */
-    /*if (this.relations.length) {
-      compiledQueryOptions.relations = this.relations.reduce((relations, relation) => (
-        { ...relations, [relation.dataset]: relation.compile() }
-      ), {});
-    }*/
 
     return compiledQueryOptions;
   }
