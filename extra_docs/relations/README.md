@@ -208,9 +208,50 @@ Then some comments...
   //   { id: ..., text: "Might've been waaaay better", like: false }
   // ]
 ```
+<br/>
 
 Finally, you want to relate these with your post, so you call `.attach()` passing the name of the **resource** (that can
-be either a **dataset** or a **fileset**) and filter criteria:
+be either a **dataset** or a **fileset**) and a second argument, a filter that will restrict the operation.
+
+Available ways to filter attach/detach operation:
+
+```typescript
+  // an array of entities containing their id
+  dom.dataset("posts")
+    .attach("comments", [
+      {
+        id: "b4961b6a-85a2-4ee8-b946-9001c978c801",
+        text: "Very nice, congrats!",
+      },
+      {
+        id: "e199d460-c88f-4ab9-8373-1d6ad0bd0acb",
+        text: "Might've been waaaay better",
+      },
+    ]);
+
+  // an array of ids
+  dom.dataset("posts")
+    .attach("comments", [
+      "b4961b6a-85a2-4ee8-b946-9001c978c801",
+      "e199d460-c88f-4ab9-8373-1d6ad0bd0acb",
+    ]);
+```
+<br/>
+
+Or even using filter criterion (More details in [Filtering records](dataset-operations.html#filtering-records)):
+
+```typescript
+  // a callback that will receive "field" function
+  dom.dataset("posts")
+    .attach("comments", (field) => field("id").isInArray(commentsIds));
+
+  // an exposed "field" function
+  dom.dataset("posts")
+    .attach("comments", field("id").isInArray(commentsIds));
+```
+<br/>
+
+Full example using a callback:
 
 ```typescript
   const firstPost = posts[0];
@@ -239,8 +280,8 @@ be either a **dataset** or a **fileset**) and filter criteria:
   //     ]
   //   }
   // ]
-
 ```
+<br/>
 
 After attaching those comments, you feel regret, and you want to undo it. That's totally acceptable,
 similar to `.attach()`, call `.detach()`:
