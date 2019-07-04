@@ -67,18 +67,6 @@ describe("Query class", () => {
   });
 
   describe("On setAction", () => {
-    it("should compile with no condition", () => {
-      const queryActionType = getRandomQueryActionType();
-      const actionResource = faker.random.alphaNumeric();
-
-      query.setAction(queryActionType, actionResource);
-
-      expect(query.compile()).toEqual({
-        action: queryActionType,
-        action_resource: actionResource,
-      });
-    });
-
     it("should compile with condition", () => {
       const queryActionType = getRandomQueryActionType();
       const actionResource = faker.random.alphaNumeric();
@@ -173,12 +161,13 @@ describe("Query class", () => {
       const queryActionType = getRandomQueryActionType();
       const actionResource = faker.random.alphaNumeric();
       const field1 = faker.random.alphaNumeric();
+      const filter = getRandomFilteringCriteria();
 
       query.addSortCondition(sort1.direction, ...sort1.fields);
       query.limit = faker.random.number();
       query.offset = faker.random.number();
       query.fields = [field1, aggField];
-      query.setAction(queryActionType, actionResource);
+      query.setAction(queryActionType, actionResource, filter);
       query.setFilterCriteria(filteringCriterion);
 
       expect(query.compile()).toEqual({
@@ -186,6 +175,7 @@ describe("Query class", () => {
         range: { limit: query.limit, offset: query.offset },
         outputs: [field1, "COUNT(id)"],
         action: queryActionType,
+        action_cond: toFilteringCriterion(filter).condition.compile(),
         action_resource: actionResource,
         cond: toFilteringCriterion(filteringCriterion).condition.compile(),
       });

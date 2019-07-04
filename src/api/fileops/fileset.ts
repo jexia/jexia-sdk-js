@@ -8,7 +8,7 @@ import { ActionQuery } from "../core/queries/actionQuery";
 import { DeleteQuery } from "../core/queries/deleteQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
-import { IResource, ResourceType } from "../core/resource";
+import { IdentityCollection, IResource, ResourceType } from "../core/resource";
 import { IFilteringCriterion, IFilteringCriterionCallback } from "../dataops/filteringApi";
 import {
   FileOperationsConfig,
@@ -111,8 +111,10 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
    */
   public attach(
     resourceName: string,
-    filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
-  ): ActionQuery<T> {
+    filter: IFilteringCriterion<FilesetInterface<T>>
+      | IFilteringCriterionCallback<FilesetInterface<T>>
+      | IdentityCollection<FilesetInterface<T>>,
+  ): ActionQuery<T, FilesetInterface<T>> {
     return new ActionQuery(
       this.requestExecuter,
       this.resourceType,
@@ -132,8 +134,10 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
    */
   public detach(
     resourceName: string,
-    filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
-  ): ActionQuery<T> {
+    filter: IFilteringCriterion<FilesetInterface<T>>
+      | IFilteringCriterionCallback<FilesetInterface<T>>
+      | IdentityCollection<FilesetInterface<T>>,
+  ): ActionQuery<T, FilesetInterface<T>> {
     return new ActionQuery(
       this.requestExecuter,
       this.resourceType,

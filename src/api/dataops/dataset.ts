@@ -6,7 +6,7 @@ import { DeleteQuery } from "../core/queries/deleteQuery";
 import { InsertQuery } from "../core/queries/insertQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
-import { IResource, ResourceInterface, ResourceType } from "../core/resource";
+import { IdentityCollection, IResource, ResourceInterface, ResourceType } from "../core/resource";
 import { DataSetName } from "./dataops.tokens";
 import { IFilteringCriterion, IFilteringCriterionCallback } from "./filteringApi";
 
@@ -114,8 +114,8 @@ export class Dataset<
    */
   public attach(
     resourceName: string,
-    filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
-  ): ActionQuery<T> {
+    filter: IFilteringCriterion<D> | IFilteringCriterionCallback<D> | IdentityCollection<D>,
+  ): ActionQuery<T, D> {
     return new ActionQuery(
       this.requestExecuter,
       this.resourceType,
@@ -135,8 +135,8 @@ export class Dataset<
    */
   public detach(
     resourceName: string,
-    filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
-  ): ActionQuery<T> {
+    filter: IFilteringCriterion<D> | IFilteringCriterionCallback<D> | IdentityCollection<D>,
+  ): ActionQuery<T, D> {
     return new ActionQuery(
       this.requestExecuter,
       this.resourceType,

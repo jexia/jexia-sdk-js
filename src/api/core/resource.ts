@@ -38,6 +38,11 @@ export type DefaultResourceInterface = {
 export type ResourceInterface<T> = T & DefaultResourceInterface;
 
 /**
+ * An array of either ids or resources
+ */
+export type IdentityCollection<T> = string[] | Array<ResourceInterface<T>>;
+
+/**
  * Extract interface from the related resource either its array or a single type
  * and expand it with the default resource fields
  */
