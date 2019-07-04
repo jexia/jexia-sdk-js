@@ -1,6 +1,6 @@
 import * as Joi from "joi";
-import { DatasetRecordSchema } from "../lib/dataset";
-import { cleaning, dom, init } from "../teardowns";
+import { DatasetRecordSchema } from "../../lib/dataset";
+import { cleaning, dom, init } from "../../teardowns";
 
 // tslint:disable-next-line:no-var-requires
 const joiAssert = require("joi-assert");

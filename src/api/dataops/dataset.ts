@@ -1,28 +1,14 @@
 import { Inject, Injectable } from "injection-js";
 import { RequestExecuter } from "../../internal/executer";
+import { QueryActionType } from "../../internal/utils";
+import { ActionQuery } from "../core/queries/actionQuery";
 import { DeleteQuery } from "../core/queries/deleteQuery";
 import { InsertQuery } from "../core/queries/insertQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
-import { IResource, ResourceType } from "../core/resource";
+import { IdentityCollection, IResource, ResourceInterface, ResourceType } from "../core/resource";
 import { DataSetName } from "./dataops.tokens";
-
-/**
- * Default fields that will always exist for any dataset
- */
-export type DefaultDatasetFields = "id" | "created_at" | "updated_at";
-
-/**
- * Default dataset interface type
- */
-export type DefaultDatasetInterface = {
-  [P in DefaultDatasetFields]: string;
-};
-
-/**
- * Extend user provided interface (T) with default dataset fields
- */
-export type DatasetInterface<T> = T & DefaultDatasetInterface;
+import { IFilteringCriterion, IFilteringCriterionCallback } from "./filteringApi";
 
 /**
  * Dataset object used to fetch and modify data at your datasets.
@@ -50,7 +36,9 @@ export type DatasetInterface<T> = T & DefaultDatasetInterface;
  * @template T Generic type of your dataset, default to any
  */
 @Injectable()
-export class Dataset<T extends object = any, D extends DatasetInterface<T> = DatasetInterface<T>> implements IResource {
+export class Dataset<
+  T extends object = any,
+  D extends ResourceInterface<T> = ResourceInterface<T>> implements IResource {
   /**
    * Resource type of the dataset
    */
@@ -117,6 +105,47 @@ export class Dataset<T extends object = any, D extends DatasetInterface<T> = Dat
     return new DeleteQuery<D>(this.requestExecuter, ResourceType.Dataset, this.datasetName);
   }
 
+  /**
+   * Creates an Attach query.
+   * @param   resourceName The name of the resource to be attached.
+   * @param   filter Filtering criterion or a callback that returns one,
+   * that will be applied to the resource to be attached.
+   * @returns ActionQuery object specialized for attaching resources to the current one.
+   */
+  public attach(
+    resourceName: string,
+    filter: IFilteringCriterion<D> | IFilteringCriterionCallback<D> | IdentityCollection<D>,
+  ): ActionQuery<T, D> {
+    return new ActionQuery(
+      this.requestExecuter,
+      this.resourceType,
+      this.datasetName,
+      resourceName,
+      QueryActionType.ATTACH,
+      filter,
+    );
+  }
+
+  /**
+   * Creates a Detach query.
+   * @param   resourceName The name of the resource to be detached.
+   * @param   filter Filtering criterion or a callback that returns one,
+   * that will be applied to the resource to be detached.
+   * @returns ActionQuery object specialized for detaching resources from the current one.
+   */
+  public detach(
+    resourceName: string,
+    filter: IFilteringCriterion<D> | IFilteringCriterionCallback<D> | IdentityCollection<D>,
+  ): ActionQuery<T, D> {
+    return new ActionQuery(
+      this.requestExecuter,
+      this.resourceType,
+      this.datasetName,
+      resourceName,
+      QueryActionType.DETACH,
+      filter,
+    );
+  }
 }
 
 (Dataset as any).prototype.watch = () => {

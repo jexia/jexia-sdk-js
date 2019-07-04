@@ -159,10 +159,12 @@ export const validClientOpts = {
 
 export const fetchWithRequestMockOk = (uri: string, opts?: IRequestOptions): Promise<IHTTPResponse> => {
   return Promise.resolve({
-    json: () => Promise.resolve({
+    text: () => Promise.resolve(JSON.stringify({
       access_token: "access_token",
       refresh_token: "refresh_token"
-    }), ok: true, status: 200,
+    })),
+    ok: true,
+    status: 200,
   } as IHTTPResponse);
 };
 
@@ -187,4 +189,7 @@ export const mockFileEvent = (id: string, action: EventSubscriptionType): RealTi
   data: [ { id }],
 });
 
-export * from "./queryAction";
+export * from "./requestMethod";
+export * from "./resource";
+export * from "./queryActionType";
+export * from "./filtering";

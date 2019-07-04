@@ -1,37 +1,30 @@
 import * as faker from "faker";
 import * as Joi from "joi";
-import { field } from "../../src";
-import { cleaning, DEFAULT_DATASET, dom, init } from "../teardowns";
-import { Dataset } from "./../../src/api/dataops/dataset";
-import { IFilteringCriterion, IFilteringCriterionCallback } from "./../../src/api/dataops/filteringApi";
-import { MESSAGE } from "./../../src/config/message";
-import { DatasetRecordSchema } from "./../lib/dataset";
+import { field } from "../../../src";
+import { IFilteringCriterion, IFilteringCriterionCallback } from "../../../src/api/dataops/filteringApi";
+import { Fileset } from "../../../src/api/fileops/fileset";
+import { FilesetRecordSchema } from "../../lib/fileset";
+import { cleaning, DEFAULT_FILESET, initWithJFS, jfs } from "../../teardowns";
+import { BAD_REQUEST_ERROR } from "./../../lib/utils";
 
 const joiAssert = Joi.assert;
 
 jest.setTimeout(15000); // for unstable internet connection
 
 describe("filter records REST API", async () => {
-  let dataset: Dataset<any>;
-  const BAD_REQUEST = new Error(`${MESSAGE.CORE.BACKEND_ERROR}400 Bad Request`);
+  let fileset: Fileset<any, any, any, any>;
 
   const FIELD = {
     BOOLEAN: "boolean_field",
     INTEGER: "integer_field",
     FLOAT: "float_field",
     STRING: "string_field",
-    DATE: "date_field",
-    DATETIME: "datetime_field",
   };
   type Condition = IFilteringCriterion<any> | IFilteringCriterionCallback<any>;
 
-  const RecordSchema = Joi.object().keys({
-    id: Joi.string().required(),
-  });
-
   function testLength(title: string, condition: Condition, expectedLength: number) {
     it(`should select records by "${title}"`, async () => {
-      const selectResult = await dataset
+      const selectResult = await fileset
         .select()
         .where(condition)
         .execute();
@@ -43,31 +36,34 @@ describe("filter records REST API", async () => {
   function testError(title: string, condition: Condition) {
     it(`should throw error when selecting records by "${title}"`, async () => {
       try {
-        await dataset
+        await fileset
           .select()
           .where(condition)
           .execute();
       } catch (e) {
-        joiAssert(e, BAD_REQUEST);
+        joiAssert(e, BAD_REQUEST_ERROR);
       }
     });
   }
 
-  function setupData(testData: any[]) {
+  function setupData(testData: Array<{ data: any }>) {
     beforeAll(async () => {
-      await dataset
-        .insert(testData)
-        .execute();
+      await fileset
+        .upload(testData)
+        .toPromise();
     });
 
     afterAll(async () => {
-      await dataset
+      await fileset
         .delete()
         .execute();
     });
   }
 
-  function test(testData: any[], successTests, failTests) {
+  function test(
+    testData: Array<{ data: any }>,
+    successTests: Array<{title: string; condition: Condition, expectedLength: number}>,
+    failTests: Array<{title: string; condition: Condition}>) {
     setupData(testData);
 
     successTests.forEach(({ title, condition, expectedLength }) => {
@@ -80,18 +76,16 @@ describe("filter records REST API", async () => {
   }
 
   beforeAll(async () => {
-    await init(
-      DEFAULT_DATASET.NAME,
+    await initWithJFS(
+      DEFAULT_FILESET.NAME,
       [
         { name: FIELD.BOOLEAN, type: "boolean" },
         { name: FIELD.INTEGER, type: "integer" },
         { name: FIELD.FLOAT, type: "float" },
         { name: FIELD.STRING, type: "string" },
-        { name: FIELD.DATE, type: "date" },
-        { name: FIELD.DATETIME, type: "datetime" },
       ],
     );
-    dataset = dom.dataset(DEFAULT_DATASET.NAME);
+    fileset = jfs.fileset(DEFAULT_FILESET.NAME);
   });
 
   afterAll(async () => cleaning());
@@ -164,7 +158,7 @@ describe("filter records REST API", async () => {
       { [fieldName]: true },
       { [fieldName]: true },
       { [fieldName]: false },
-    ];
+    ].map((data) => ({ data }));
 
     test(testData, successTests, failTests);
   });
@@ -243,7 +237,7 @@ describe("filter records REST API", async () => {
       { [fieldName]: 2 },
       { [fieldName]: 3 },
       { [fieldName]: 4 },
-    ];
+    ].map((data) => ({ data }));
 
     test(testData, successTests, failTests);
   });
@@ -312,7 +306,7 @@ describe("filter records REST API", async () => {
       { [fieldName]: 2.4 },
       { [fieldName]: 4.6 },
       { [fieldName]: 6.7 },
-    ];
+    ].map((data) => ({ data }));
 
     test(testData, successTests, failTests);
   });
@@ -387,138 +381,9 @@ describe("filter records REST API", async () => {
       { [fieldName]: "2nd" },
       { [fieldName]: "3rd" },
       { [fieldName]: "4th" },
-    ];
+    ].map((data) => ({ data }));
 
     test(testData, successTests, failTests);
-  });
-
-  describe("when filtering date related types", () => {
-    type MinMax = { min: number, max: number };
-    const fakeNumber = (options: MinMax) => faker.random.number(options);
-    const fakePastDatetime = (yearsAgo: MinMax) => faker.date.past(fakeNumber(yearsAgo)).toISOString();
-    const fakeFutureDatetime = (yearsFromNow: MinMax) => faker.date.future(fakeNumber(yearsFromNow)).toISOString();
-
-    function testDate({
-      fieldName,
-      fakePastDate,
-      fakeFutureDate,
-    }) {
-      const testData = [
-        { [fieldName]: null },
-        { [fieldName]: fakePastDate({ min: 11, max: 30 }) },
-        { [fieldName]: fakePastDate({ min: 0, max: 10 }) },
-        { [fieldName]: fakeFutureDate({ min: 0, max: 10 }) },
-        { [fieldName]: fakeFutureDate({ min: 11, max: 30 }) },
-      ];
-
-      const [nullDate, firstDate, secondDate, thirdDate, lastDate] = testData.map((t) => t[fieldName]);
-
-      const successTests = [
-        {
-          title: "isEqualTo",
-          condition: field(fieldName).isEqualTo(secondDate),
-          validValues: [secondDate],
-        },
-        {
-          title: "isDifferentFrom",
-          condition: field(fieldName).isDifferentFrom(firstDate),
-          validValues: [nullDate, secondDate, thirdDate, lastDate],
-        },
-        {
-          title: "isInArray",
-          condition: field(fieldName).isInArray([firstDate, secondDate]),
-          validValues: [firstDate, secondDate],
-        },
-        {
-          title: "isNotInArray",
-          condition: field(fieldName).isNotInArray([thirdDate, lastDate]),
-          validValues: [firstDate, secondDate], // doesn't include null values
-        },
-        {
-          title: "isNull",
-          condition: field(fieldName).isNull(),
-          validValues: [nullDate],
-        },
-        {
-          title: "isNotNull",
-          condition: field(fieldName).isNotNull(),
-          validValues: [firstDate, secondDate, thirdDate, lastDate],
-        },
-        {
-          title: "isBetween",
-          condition: field(fieldName).isBetween(firstDate, thirdDate),
-          validValues: [firstDate, secondDate, thirdDate],
-        },
-        {
-          title: "isLessThan",
-          condition: field(fieldName).isLessThan(secondDate),
-          validValues: [firstDate],
-        },
-        {
-          title: "isGreaterThan",
-          condition: field(fieldName).isGreaterThan(secondDate),
-          validValues: [thirdDate, lastDate],
-        },
-        {
-          title: "isEqualOrLessThan",
-          condition: field(fieldName).isEqualOrLessThan(secondDate),
-          validValues: [firstDate, secondDate],
-        },
-        {
-          title: "isEqualOrGreaterThan",
-          condition: field(fieldName).isEqualOrGreaterThan(secondDate),
-          validValues: [secondDate, thirdDate, lastDate],
-        },
-      ];
-
-      const failTests = [
-        {
-          title: "isLike",
-          condition: field(fieldName).isLike(lastDate),
-        },
-      ];
-
-      setupData(testData);
-
-      successTests.forEach(({ title, condition, validValues }) => {
-        it(`should select records by "${title}"`, async () => {
-          const selectResult = await dataset
-            .select()
-            .fields(fieldName)
-            .where(condition)
-            .execute();
-
-          const expectedResult = Joi
-            .array()
-            .items(RecordSchema.append({
-              [fieldName]: Joi.string().valid(validValues),
-            }))
-            .length(validValues.length);
-
-          joiAssert(selectResult, expectedResult);
-        });
-      });
-
-      failTests.forEach(({ title, condition }) => {
-        testError(title, condition);
-      });
-    }
-
-    describe("Date", () => {
-      const fieldName = FIELD.DATE;
-      const fakePastDate = (yearsAgo: MinMax) => fakePastDatetime(yearsAgo).split("T")[0];
-      const fakeFutureDate = (yearsFromNow: MinMax) => fakeFutureDatetime(yearsFromNow).split("T")[0];
-
-      testDate({ fieldName, fakePastDate, fakeFutureDate });
-    });
-
-    describe("Datetime", () => {
-      testDate({
-        fieldName: FIELD.DATETIME,
-        fakePastDate: fakePastDatetime,
-        fakeFutureDate: fakeFutureDatetime,
-      });
-    });
   });
 
   describe("when setting range", () => {
@@ -529,13 +394,13 @@ describe("filter records REST API", async () => {
       { [FIELD.STRING]: "4th" },
       { [FIELD.STRING]: "5th" },
       { [FIELD.STRING]: "6th" },
-    ];
+    ].map((data) => ({ data }));
 
     // init beforeAll/AfterAll hooks
     setupData(testData);
 
     it("should return less items when limit is lower than total of results", async () => {
-      const result = await dataset
+      const result = await fileset
         .select()
         .limit(2)
         .execute();
@@ -544,7 +409,7 @@ describe("filter records REST API", async () => {
     });
 
     it("should return all items when limit is higher than total of results", async () => {
-      const result = await dataset
+      const result = await fileset
         .select()
         .limit(10)
         .execute();
@@ -554,7 +419,7 @@ describe("filter records REST API", async () => {
 
     it(`should split results when setting limit/offset`, async () => {
       const limit = 2;
-      const result = await dataset
+      const result = await fileset
         .select()
         .limit(limit)
         .offset(1)
@@ -562,7 +427,7 @@ describe("filter records REST API", async () => {
 
       const expectedSchema = Joi
         .array()
-        .items(DatasetRecordSchema.append({
+        .items(FilesetRecordSchema.append({
           [FIELD.STRING]: Joi.string().valid("2nd", "3rd"),
           [FIELD.BOOLEAN]: Joi.empty(),
           [FIELD.INTEGER]: Joi.empty(),
@@ -583,27 +448,27 @@ describe("filter records REST API", async () => {
         [FIELD.INTEGER]: faker.random.number({ min: index }),
       })
     );
-    let sortField;
+    let sortField: string;
 
     // init beforeAll/AfterAll hooks
-    setupData(testData);
+    setupData(testData.map((data) => ({ data })));
 
-    function byFieldAsc(a, b) {
+    function byFieldAsc(a: any, b: any) {
       if (a[sortField] > b[sortField]) { return 1; }
       if (a[sortField] < b[sortField]) { return -1; }
       return 0;
     }
 
-    function byFieldDesc(a, b) {
+    function byFieldDesc(a: any, b: any) {
       if (a[sortField] < b[sortField]) { return 1; }
       if (a[sortField] > b[sortField]) { return -1; }
       return 0;
     }
 
-    async function testSorting(fn: "sortAsc" | "sortDesc", sortFn: (a, b) => number) {
+    async function testSorting(fn: "sortAsc" | "sortDesc", sortFn: (a: any, b: any) => number) {
       sortField = faker.random.arrayElement([FIELD.STRING, FIELD.INTEGER]);
 
-      const result = await dataset
+      const result = await fileset
         .select()
         [fn](sortField)
         .execute();
@@ -611,14 +476,14 @@ describe("filter records REST API", async () => {
       const orderedSchemas = testData
         .slice(0) // copy array
         .sort(sortFn)
-        .map((record) => ({
+        .map((record: { [field: string]: any }) => ({
           [FIELD.STRING]: Joi.string().equal(record[FIELD.STRING]),
           [FIELD.BOOLEAN]: Joi.empty(),
           [FIELD.INTEGER]: Joi.number().integer().equal(record[FIELD.INTEGER]),
           [FIELD.FLOAT]: Joi.empty(),
           [FIELD.STRING]: Joi.empty(),
         }))
-        .map((schema) => DatasetRecordSchema.append(schema));
+        .map((schema) => FilesetRecordSchema.append(schema));
 
       const expectedSchema = Joi
         .array()

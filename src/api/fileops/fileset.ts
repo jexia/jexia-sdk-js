@@ -2,11 +2,14 @@ import { Inject, Injectable } from "injection-js";
 import { Observable, Subject, Subscriber } from "rxjs";
 import { concatMap, filter, map, shareReplay, takeUntil, tap } from "rxjs/operators";
 import { RequestExecuter } from "../../internal/executer";
+import { QueryActionType } from "../../internal/utils";
 import { ClientConfiguration } from "../core/client";
+import { ActionQuery } from "../core/queries/actionQuery";
 import { DeleteQuery } from "../core/queries/deleteQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
-import { IResource, ResourceType } from "../core/resource";
+import { IdentityCollection, IResource, ResourceType } from "../core/resource";
+import { IFilteringCriterion, IFilteringCriterionCallback } from "../dataops/filteringApi";
 import {
   FileOperationsConfig,
   FilesetInterface,
@@ -97,6 +100,52 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
    */
   public delete(): DeleteQuery<FilesetInterface<T>> {
     return new DeleteQuery(this.requestExecuter, ResourceType.Fileset, this.filesetName);
+  }
+
+  /**
+   * Creates an Attach query.
+   * @param   resourceName The name of the resource to be attached.
+   * @param   filter Filtering criterion or a callback that returns one,
+   * that will be applied to the resource to be attached.
+   * @returns ActionQuery object specialized for attaching resources to the current one.
+   */
+  public attach(
+    resourceName: string,
+    filter: IFilteringCriterion<FilesetInterface<T>>
+      | IFilteringCriterionCallback<FilesetInterface<T>>
+      | IdentityCollection<FilesetInterface<T>>,
+  ): ActionQuery<T, FilesetInterface<T>> {
+    return new ActionQuery(
+      this.requestExecuter,
+      this.resourceType,
+      this.filesetName,
+      resourceName,
+      QueryActionType.ATTACH,
+      filter,
+    );
+  }
+
+  /**
+   * Creates a Detach query.
+   * @param   resourceName The name of the resource to be detached.
+   * @param   filter Filtering criterion or a callback that returns one,
+   * that will be applied to the resource to be detached.
+   * @returns ActionQuery object specialized for detaching resources from the current one.
+   */
+  public detach(
+    resourceName: string,
+    filter: IFilteringCriterion<FilesetInterface<T>>
+      | IFilteringCriterionCallback<FilesetInterface<T>>
+      | IdentityCollection<FilesetInterface<T>>,
+  ): ActionQuery<T, FilesetInterface<T>> {
+    return new ActionQuery(
+      this.requestExecuter,
+      this.resourceType,
+      this.filesetName,
+      resourceName,
+      QueryActionType.DETACH,
+      filter,
+    );
   }
 
   /**

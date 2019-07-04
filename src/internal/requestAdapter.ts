@@ -1,26 +1,6 @@
 import { Logger } from "../api/logger/logger";
 import { MESSAGE } from "../config";
-
-/* List of allowed methods */
-export enum Methods {
-  GET = "GET",
-  POST = "POST",
-  PUT = "PUT",
-  PATCH = "PATCH",
-  DELETE = "DELETE",
-  OPTIONS = "OPTIONS",
-}
-
-export interface IRequestOptions extends RequestInit {
-  body?: any;
-}
-
-export interface IHTTPResponse {
-  ok: boolean;
-  status: number;
-  statusText: string;
-  json(): Promise<any>;
-}
+import { Fetch, IHTTPResponse, IRequestAdapter, IRequestOptions, RequestMethod } from "./requestAdapter.interfaces";
 
 function status(response: IHTTPResponse): Promise<IHTTPResponse> {
   if (!response.ok) {
@@ -30,16 +10,9 @@ function status(response: IHTTPResponse): Promise<IHTTPResponse> {
 }
 
 function json(response: IHTTPResponse): Promise<any> {
-  /* convert response to JSON */
-  return response.json();
+  // parses response body into JSON or return an empty object when it's empty
+  return response.text().then((text) => text ? JSON.parse(text) : {});
 }
-
-export interface IRequestAdapter {
-  execute(uri: string, opt: IRequestOptions): Promise<any>;
-}
-
-export type Fetch = (url: string, init?: IRequestOptions) => Promise<IHTTPResponse>;
-
 export class RequestAdapter implements IRequestAdapter {
 
   private logger: Logger = new Logger();
@@ -72,7 +45,7 @@ export class RequestAdapter implements IRequestAdapter {
    */
   public upload<T = any>(uri: string, headers: {[header: string]: string}, body: any): Promise<T> {
     let logMessage = `(REQUEST) UPLOAD ${uri}\n`;
-    return this.fetch(uri, { body, headers, method: Methods.POST })
+    return this.fetch(uri, { body, headers, method: RequestMethod.POST })
       .then((response) => {
         logMessage += `(RESPONSE) ${response.status} ${response.statusText}`;
         this.logger.debug("RequestAdapter", logMessage);
@@ -84,3 +57,5 @@ export class RequestAdapter implements IRequestAdapter {
       .then(json);
   }
 }
+
+export * from "./requestAdapter.interfaces";

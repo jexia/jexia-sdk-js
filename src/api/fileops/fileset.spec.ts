@@ -1,7 +1,15 @@
 import * as faker from "faker";
 import { of, Subject } from "rxjs";
-import { createMockFor, mockFileEvent, mockFileRecord, mockFilesList } from "../../../spec/testUtils";
+import {
+  createMockFor,
+  getRandomFilteringCriteria,
+  mockFileEvent,
+  mockFileRecord,
+  mockFilesList,
+} from "../../../spec/testUtils";
 import { RequestExecuter } from "../../internal/executer";
+import { QueryActionType } from "../../internal/utils";
+import { ActionQuery } from "../core/queries/actionQuery";
 import { DeleteQuery } from "../core/queries/deleteQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
@@ -230,6 +238,46 @@ describe("Fileset", () => {
     it("should be able start a delete query", () => {
       const { subject } = createSubject();
       expect(subject.delete() instanceof DeleteQuery).toBeTruthy();
+    });
+  });
+
+  describe("On attach", () => {
+    let query: any;
+
+    beforeEach(() => {
+      const { subject } = createSubject();
+      query = subject.attach(
+        faker.random.word(),
+        getRandomFilteringCriteria(),
+      );
+    });
+
+    it("should return the query", () => {
+      expect(query instanceof ActionQuery).toBeTruthy();
+    });
+
+    it("should pass the correct query action type", () => {
+      expect(query.queryActionType).toBe(QueryActionType.ATTACH);
+    });
+  });
+
+  describe("On detach", () => {
+    let query: any;
+
+    beforeEach(() => {
+      const { subject } = createSubject();
+      query = subject.detach(
+        faker.random.word(),
+        getRandomFilteringCriteria(),
+      );
+    });
+
+    it("should return the query", () => {
+      expect(query instanceof ActionQuery).toBeTruthy();
+    });
+
+    it("should pass the correct query action type", () => {
+      expect(query.queryActionType).toBe(QueryActionType.DETACH);
     });
   });
 });

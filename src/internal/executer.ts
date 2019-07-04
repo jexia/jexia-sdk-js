@@ -1,11 +1,11 @@
 import { Inject, Injectable } from "injection-js";
 import { ClientInit } from "../api/core/client";
-import { QueryAction } from "../api/core/queries/baseQuery";
 import { ResourceType } from "../api/core/resource";
 import { AuthOptions, IAuthOptions, TokenManager } from "../api/core/tokenManager";
 import { API } from "../config";
-import { IRequestExecuterData, QueryParam } from "./executer.interfaces";
-import { IRequestOptions, Methods, RequestAdapter } from "./requestAdapter";
+import { QueryParam } from "../internal/utils";
+import { IRequestExecuterData } from "./executer.interfaces";
+import { IRequestOptions, RequestAdapter, RequestMethod } from "./requestAdapter";
 
 @Injectable()
 export class RequestExecuter {
@@ -25,22 +25,12 @@ export class RequestExecuter {
     return this.requestAdapter.execute(URI, options);
   }
 
-  public getMethod(action: QueryAction): Methods {
-    switch (action) {
-      default:
-      case QueryAction.insert: return Methods.POST;
-      case QueryAction.delete: return Methods.DELETE;
-      case QueryAction.select: return Methods.GET;
-      case QueryAction.update: return Methods.PATCH;
-    }
-  }
-
   private async getRequestOptions(request: IRequestExecuterData): Promise<IRequestOptions> {
     const token = await this.tokenManager.token(this.config.auth);
 
     const options: IRequestOptions = {
       headers: { Authorization: `Bearer ${token}` },
-      method: this.getMethod(request.action)
+      method: request.method,
     };
 
     if (this.hasBody(request)) {
@@ -50,8 +40,8 @@ export class RequestExecuter {
     return options;
   }
 
-  private hasBody({ action }: IRequestExecuterData): boolean {
-    return ![Methods.GET, Methods.DELETE].includes(this.getMethod(action));
+  private hasBody({ method }: IRequestExecuterData): boolean {
+    return ![RequestMethod.GET, RequestMethod.DELETE].includes(method);
   }
 
   /**

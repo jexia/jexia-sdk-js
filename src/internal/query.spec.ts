@@ -1,5 +1,6 @@
 import * as faker from "faker";
-import { FilteringCriterion } from "../api/dataops/filteringApi";
+import { getRandomFilteringCriteria, getRandomQueryActionType } from "../../spec/testUtils";
+import { FilteringCriterion, toFilteringCriterion } from "../api/dataops/filteringApi";
 import { FilteringCondition } from "../api/dataops/filteringCondition";
 import { IAggField, Query } from "./query";
 
@@ -20,25 +21,20 @@ describe("Query class", () => {
     direction: "desc",
     fields: ["field3"],
   };
-  let query1 = new Query();
-  let query2 = new Query();
 
   beforeEach(() => {
     query = new Query();
   });
 
   describe("should have initial attributes", () => {
-    it("undefined fields", () => {
-      expect(query.fields).toBeUndefined();
+    it("empty fields", () => {
+      expect(query.fields).toEqual([]);
     });
     it("undefined limit", () => {
       expect(query.limit).toBeUndefined();
     });
     it("undefined offset", () => {
       expect(query.offset).toBeUndefined();
-    });
-    it("empty relations array", () => {
-      expect((query as any).relations).toEqual([]);
     });
     it("undefined filtering conditions", () => {
       expect((query as any).filteringConditions).toBeUndefined();
@@ -70,16 +66,19 @@ describe("Query class", () => {
     });
   });
 
-  // TODO Develop relations
-  xdescribe("addRelation method", () => {
-    it("should push relation into an array", () => {
-      query.addRelation(query1);
-      expect((query as any).relations).toEqual([query1]);
-    });
-    it("should accumulate values", () => {
-      query.addRelation(query1);
-      query.addRelation(query2);
-      expect((query as any).relations).toEqual([query1, query2]);
+  describe("On setAction", () => {
+    it("should compile with condition", () => {
+      const queryActionType = getRandomQueryActionType();
+      const actionResource = faker.random.alphaNumeric();
+      const filter = getRandomFilteringCriteria();
+
+      query.setAction(queryActionType, actionResource, filter);
+
+      expect(query.compile()).toEqual({
+        action: queryActionType,
+        action_resource: actionResource,
+        action_cond: toFilteringCriterion(filter).condition.compile(),
+      });
     });
   });
 
@@ -157,15 +156,28 @@ describe("Query class", () => {
       });
     });
 
-    // TODO Develop relations
-    xit("relations option", () => {
-      query.addRelation(query1);
-      query.addRelation(query2);
+    it("should compile all conditions together", () => {
+      const aggField: IAggField<any> = { fn: "COUNT", col: "*"};
+      const queryActionType = getRandomQueryActionType();
+      const actionResource = faker.random.alphaNumeric();
+      const field1 = faker.random.alphaNumeric();
+      const filter = getRandomFilteringCriteria();
+
+      query.addSortCondition(sort1.direction, ...sort1.fields);
+      query.limit = faker.random.number();
+      query.offset = faker.random.number();
+      query.fields = [field1, aggField];
+      query.setAction(queryActionType, actionResource, filter);
+      query.setFilterCriteria(filteringCriterion);
+
       expect(query.compile()).toEqual({
-        relations: {
-          "dataset1": query1.compile(),
-          "dataset2": query2.compile(),
-        },
+        order: [sort1],
+        range: { limit: query.limit, offset: query.offset },
+        outputs: [field1, "COUNT(id)"],
+        action: queryActionType,
+        action_cond: toFilteringCriterion(filter).condition.compile(),
+        action_resource: actionResource,
+        cond: toFilteringCriterion(filteringCriterion).condition.compile(),
       });
     });
   });

@@ -5,6 +5,7 @@ import {
   TokenStorage,
   WebStorageComponent,
 } from "./componentStorage";
+import { Tokens } from "./tokenManager";
 
 class WebStorageApiMock {
   private dictionary: any = {};
@@ -21,10 +22,9 @@ class WebStorageApiMock {
     this.dictionary[item] = null;
   }
 }
-
-const generateTokens = () => ({
+const generateTokens = (): Tokens => ({
   refresh_token: faker.random.uuid(),
-  token: faker.random.uuid(),
+  access_token: faker.random.uuid(),
 });
 
 describe("ComponentStorage", ()  => {

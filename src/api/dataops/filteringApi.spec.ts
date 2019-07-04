@@ -22,11 +22,11 @@ describe("FieldFilter class", () => {
   function testParams<T>({ operator, getCriterion, value }: {
     operator: string;
     value: T;
-    getCriterion: (subject) => IFilteringCriterion<T>;
+    getCriterion: (subject: FieldFilter<any>) => IFilteringCriterion<T>;
   }) {
     let filteringCondition: FilteringCondition<string>;
-    let fieldName;
-    let subject;
+    let fieldName: string;
+    let subject: FieldFilter<any>;
 
     beforeEach(() => {
       ({ subject, fieldName } = createSubject());
@@ -177,13 +177,21 @@ describe("FieldFilter class", () => {
 });
 
 describe("FilteringCriterion class", () => {
+  interface ICriterionSubject {
+    fieldName: string;
+    operator: string;
+    value: string;
+    lowLevelCondition: FilteringCondition<any>;
+    highLevelCriteria: any;
+  }
+
   function createSubject({
     fieldName = faker.random.alphaNumeric(10),
     operator = faker.random.alphaNumeric(3),
     value = faker.random.word(),
     lowLevelCondition = new FilteringCondition(fieldName, operator, value),
     highLevelCriteria = null,
-  } = {}) {
+  }: Partial<ICriterionSubject> = {}) {
     return {
       fieldName,
       operator,
