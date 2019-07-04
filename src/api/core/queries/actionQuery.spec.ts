@@ -136,9 +136,8 @@ describe("ActionQuery class", () => {
   describe("When passing invalid types", () => {
     const randomInvalid = () => faker.helpers.randomize(["", undefined, null]);
     function testError(filter: any) {
-      const create = createSubject.bind(null, { filter });
-
-      expect(create).toThrow("Invalid resource or id list: " + filter);
+      expect(() => createSubject({ filter }))
+        .toThrow("Invalid resource or id list: " + filter);
     }
 
     it("should throw error for list with invalid id", () => {
