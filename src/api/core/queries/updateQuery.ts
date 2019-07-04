@@ -1,6 +1,6 @@
 import { RequestExecuter } from "../../../internal/executer";
+import { RequestMethod } from "../../../internal/requestAdapter.interfaces";
 import { ResourceType } from "../resource";
-import { QueryAction } from "./baseQuery";
 import { FilterableQuery } from "./filterableQuery";
 
 /**
@@ -30,7 +30,7 @@ export class UpdateQuery<T> extends FilterableQuery<T> {
    * @internal
    */
   public constructor(queryExecuter: RequestExecuter, data: T, resourceType: ResourceType, resourceName: string) {
-    super(queryExecuter, QueryAction.update, resourceType, resourceName);
+    super(queryExecuter, RequestMethod.PATCH, resourceType, resourceName);
     this.body = data;
   }
 

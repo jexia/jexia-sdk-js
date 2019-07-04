@@ -8,7 +8,8 @@ export const api = {
     delete: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/mimir/ds/{dataset_id}`,
     field: {
       create: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/mimir/ds/{dataset_id}/field`
-    }
+    },
+    relation: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/mimir/ds/relation`
   },
   fileset: {
     create: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/bestla/fs`,

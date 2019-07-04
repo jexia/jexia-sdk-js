@@ -1,8 +1,9 @@
 import { MESSAGE } from "../../../config/message";
 import { RequestExecuter } from "../../../internal/executer";
-import { ResourceType } from "../resource";
-import { QueryAction } from "./baseQuery";
+import { RequestMethod } from "../../../internal/requestAdapter.interfaces";
+import { FromRelated, ResourceType } from "../resource";
 import { FilterableQuery } from "./filterableQuery";
+import { RelatedQuery } from "./relatedQuery";
 
 /**
  * Query object specialized for select statements.
@@ -24,7 +25,7 @@ export class SelectQuery<T> extends FilterableQuery<T> {
    * @internal
    */
   public constructor(queryExecuter: RequestExecuter, resourceType: ResourceType, resourceName: string) {
-    super(queryExecuter, QueryAction.select, resourceType, resourceName);
+    super(queryExecuter, RequestMethod.GET, resourceType, resourceName);
   }
 
   /**
@@ -70,6 +71,29 @@ export class SelectQuery<T> extends FilterableQuery<T> {
       throw new Error(MESSAGE.QUERY.MUST_PROVIDE_SORTING_FIELD);
     }
     this.query.addSortCondition("desc", ...(Array.isArray(field) ? field : field && [field, ...fields]));
+    return this;
+  }
+
+  /**
+   * Allow to populate related resource fields
+   * @param {string} resourceName Related resource
+   * @param {function} callback Pass RelatedQuery object to the callback
+   * @example
+   *   dataset("posts")
+   *     .select()
+   *     .related("comments", comments => comments.fields("author", "date", "text"))
+   *   execute();
+   *
+   */
+  public related<R extends keyof T>(
+    resourceName: R,
+    callback: (q: RelatedQuery<FromRelated<T[R]>>) => RelatedQuery<FromRelated<T[R]>> = (related) => {
+      // @ts-ignore // TODO typescript issue, upgrade TS
+      this.query.fields.push(resourceName);
+      return related;
+    }): this {
+    // @ts-ignore
+    callback(new RelatedQuery<FromRelated<T[R]>>(resourceName, this.query));
     return this;
   }
 }

@@ -1,12 +1,15 @@
 import * as faker from "faker";
-import { getRandomQueryAction, requestAdapterMockFactory } from "../../spec/testUtils";
-import { QueryAction } from "../api/core/queries/baseQuery";
+import {
+  getRandomRequestMethod,
+  getRandomResourceType,
+  requestAdapterMockFactory,
+} from "../../spec/testUtils";
 import { ResourceType } from "../api/core/resource";
 import { TokenManager } from "../api/core/tokenManager";
 import { API } from "../config/config";
 import { RequestExecuter } from "./executer";
 import { IRequestExecuterData } from "./executer.interfaces";
-import { Methods } from "./requestAdapter";
+import { RequestAdapter, RequestMethod } from "./requestAdapter";
 import { deferPromise } from "./utils";
 
 describe("QueryExecuter class", () => {
@@ -16,8 +19,6 @@ describe("QueryExecuter class", () => {
     `:${API.PORT}/${API.DATA.ENDPOINT}/${resourceName}`;
   const restFilesetUrl = (resourceName: string) => `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}` +
     `:${API.PORT}/${API.FILES.ENDPOINT}/${resourceName}`;
-
-  const QUERY_ACTION = getRandomQueryAction();
 
   const createSubject = ({
     reqAdapterMock = requestAdapterMockFactory().genericSuccesfulExecution(),
@@ -72,14 +73,18 @@ describe("QueryExecuter class", () => {
 
   describe("when calling", () => {
     let subject: any;
-    let requestData: any;
+    let requestData: IRequestExecuterData;
+    let reqAdapterMock: RequestAdapter;
 
     describe("executeRequest method", () => {
       beforeEach(() => {
-        subject = createSubject({
-          reqAdapterMock: requestAdapterMockFactory().genericSuccesfulExecution()
-        }).subject;
-        requestData = { resourceName: faker.random.word() };
+        reqAdapterMock = requestAdapterMockFactory().genericSuccesfulExecution();
+        subject = createSubject({ reqAdapterMock }).subject;
+        requestData = {
+          resourceType: getRandomResourceType(),
+          method: getRandomRequestMethod(),
+          resourceName: faker.random.word(),
+        };
       });
 
       it("should get URL", async () => {
@@ -102,7 +107,7 @@ describe("QueryExecuter class", () => {
 
       it("should make a request with proper URL, params and options", async () => {
         await subject.executeRequest(requestData);
-        expect(subject.requestAdapter.execute).toHaveBeenCalledWith(
+        expect(reqAdapterMock.execute).toHaveBeenCalledWith(
           subject.getUrl(requestData) + subject.parseQueryParams(requestData),
           await subject.getRequestOptions(requestData),
         );
@@ -170,27 +175,11 @@ describe("QueryExecuter class", () => {
     });
   });
 
-  const actions = [
-    { action: QueryAction.insert, expected: Methods.POST, hasBody: true },
-    { action: QueryAction.delete, expected: Methods.DELETE, hasBody: false },
-    { action: QueryAction.select, expected: Methods.GET, hasBody: false },
-    { action: QueryAction.update, expected: Methods.PATCH, hasBody: true },
-  ];
-
-  describe("on calling getMethod()", () => {
-    actions.forEach(({ action, expected }) => {
-      it(`should return ${expected} for ${action}`, async () => {
-        const { subject } = createSubject();
-        expect(subject.getMethod(action)).toBe(expected);
-      });
-    });
-  });
-
   describe("when calling execute() method", () => {
     const mockRequest: IRequestExecuterData = {
-      resourceType: faker.helpers.randomize([ResourceType.Dataset, ResourceType.Fileset]),
+      resourceType: getRandomResourceType(),
       resourceName: faker.random.word(),
-      action: QUERY_ACTION,
+      method: getRandomRequestMethod(),
     };
 
     it("should pass default params down to the request adapter", async () => {
@@ -200,18 +189,26 @@ describe("QueryExecuter class", () => {
         subject.getUrl(mockRequest) + subject.parseQueryParams(mockRequest),
         {
           headers: { Authorization: `Bearer ${validToken}` },
-          method: subject.getMethod(QUERY_ACTION),
+          method: mockRequest.method,
         },
       );
     });
 
+    const actions = [
+      { method: RequestMethod.DELETE, hasBody: false },
+      { method: RequestMethod.GET, hasBody: false },
+      { method: RequestMethod.PATCH, hasBody: true },
+      { method: RequestMethod.POST, hasBody: true },
+      { method: RequestMethod.PUT, hasBody: true },
+    ];
+
     const withoutBody = actions.filter((action) => !action.hasBody);
 
-    withoutBody.forEach(({ action, expected }) => {
-      it("should pass no body for GET requests", async () => {
+    withoutBody.forEach(({ method }) => {
+      it(`should pass no body for ${method} requests`, async () => {
         const { subject, reqAdapterMock } = createSubject();
         const request = {
-          action,
+          method,
           body: {},
         };
 
@@ -221,7 +218,7 @@ describe("QueryExecuter class", () => {
           subject.getUrl(request) + subject.parseQueryParams(request),
           {
             headers: { Authorization: `Bearer ${validToken}` },
-            method: expected,
+            method,
           },
         );
       });
@@ -229,14 +226,14 @@ describe("QueryExecuter class", () => {
 
     const withBody = actions.filter((action) => action.hasBody);
 
-    withBody.forEach(({ action, expected }) => {
-      it("should pass the proper options down to the request adapter", async () => {
+    withBody.forEach(({ method }) => {
+      it(`should pass body down to the request adapter for ${method} requests`, async () => {
         const { subject, reqAdapterMock } = createSubject();
         const fakeBody = {
           someObject: faker.random.number(),
         };
         const request = {
-          action,
+          method,
           body: fakeBody,
         };
         await subject.executeRequest(request);
@@ -246,7 +243,7 @@ describe("QueryExecuter class", () => {
           {
             headers: { Authorization: `Bearer ${validToken}` },
             body: fakeBody,
-            method: expected,
+            method,
           }
         );
       });
@@ -257,7 +254,7 @@ describe("QueryExecuter class", () => {
       const { subject, reqAdapterMock } = createSubject({
         clientInit: defer.promise,
       });
-      subject.executeRequest({ action: QUERY_ACTION });
+      subject.executeRequest({ method: mockRequest.method });
       setTimeout(() => {
         expect(reqAdapterMock.execute).not.toHaveBeenCalled();
         done();
@@ -271,7 +268,7 @@ describe("QueryExecuter class", () => {
       });
 
       try {
-        await subject.executeRequest({ action: QUERY_ACTION });
+        await subject.executeRequest({ method: mockRequest.method });
         throw new Error("request execution should have throw an error");
       } catch (error) {
         expect(error).toBe(initError);
@@ -285,7 +282,7 @@ describe("QueryExecuter class", () => {
       const { subject } = createSubject({
         reqAdapterMock: requestAdapterMockFactory().failedExecution(serverError)
       });
-      const mockBody = { action: QUERY_ACTION, body: {} };
+      const mockBody = { method: mockRequest.method, body: {} };
       try {
         await subject.executeRequest(mockBody);
       } catch (err) {

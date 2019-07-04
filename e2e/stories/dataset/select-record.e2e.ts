@@ -3,9 +3,9 @@ import * as Joi from "joi";
 import { field } from "../../../src";
 import { Dataset } from "../../../src/api/dataops/dataset";
 import { IFilteringCriterion, IFilteringCriterionCallback } from "../../../src/api/dataops/filteringApi";
-import { MESSAGE } from "../../../src/config/message";
 import { DatasetRecordSchema } from "../../lib/dataset";
 import { cleaning, DEFAULT_DATASET, dom, init } from "../../teardowns";
+import { BAD_REQUEST_ERROR } from "./../../lib/utils";
 
 const joiAssert = Joi.assert;
 
@@ -13,7 +13,6 @@ jest.setTimeout(15000); // for unstable internet connection
 
 describe("filter records REST API", async () => {
   let dataset: Dataset<any>;
-  const BAD_REQUEST = new Error(`${MESSAGE.CORE.BACKEND_ERROR}400 Bad Request`);
 
   const FIELD = {
     BOOLEAN: "boolean_field",
@@ -48,7 +47,7 @@ describe("filter records REST API", async () => {
           .where(condition)
           .execute();
       } catch (e) {
-        joiAssert(e, BAD_REQUEST);
+        joiAssert(e, BAD_REQUEST_ERROR);
       }
     });
   }

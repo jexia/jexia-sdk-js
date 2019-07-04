@@ -1,13 +1,12 @@
 import * as faker from "faker";
-import { createMockFor } from "../../../../spec/testUtils";
+import { createMockFor, getRandomResourceType } from "../../../../spec/testUtils";
 import { RequestExecuter } from "../../../internal/executer";
-import { ResourceType } from "../resource";
-import { QueryAction } from "./baseQuery";
+import { RequestMethod } from "../../../internal/requestAdapter.interfaces";
 import { DeleteQuery } from "./deleteQuery";
 
 const createSubject = ({
   resourceName = faker.random.word(),
-  resourceType = faker.helpers.randomize([ResourceType.Dataset, ResourceType.Fileset]),
+  resourceType = getRandomResourceType(),
   requestExecuterMock = createMockFor(RequestExecuter),
 } = {}) => {
   const subject = new DeleteQuery(requestExecuterMock, resourceType, resourceName);
@@ -33,6 +32,6 @@ describe("DeleteQuery class", () => {
 
   it("should contain delete as request", () => {
     const { subject } = createSubject();
-    expect((subject as any).action).toBe(QueryAction.delete);
+    expect((subject as any).method).toBe(RequestMethod.DELETE);
   });
 });

@@ -1,6 +1,9 @@
 // tslint:disable:no-string-literal
-import { createMockFor } from "../../../spec/testUtils";
+import * as faker from "faker";
+import { createMockFor, getRandomFilteringCriteria } from "../../../spec/testUtils";
 import { RequestExecuter } from "../../internal/executer";
+import { QueryActionType } from "../../internal/utils";
+import { ActionQuery } from "../core/queries/actionQuery";
 import { DeleteQuery } from "../core/queries/deleteQuery";
 import { InsertQuery } from "../core/queries/insertQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
@@ -55,6 +58,46 @@ describe("Dataset class", () => {
   it("should throw an error when try to use the watch method without the real time module", () => {
     const dataset = new Dataset("test", createMockFor(RequestExecuter));
     expect(() => (dataset as any).watch()).toThrow();
+  });
+
+  describe("On attach", () => {
+    let query: any;
+
+    beforeEach(() => {
+      const dataset = new Dataset("test", createMockFor(RequestExecuter));
+      query = dataset.attach(
+        faker.random.word(),
+        getRandomFilteringCriteria(),
+      );
+    });
+
+    it("should return the query", () => {
+      expect(query instanceof ActionQuery).toBeTruthy();
+    });
+
+    it("should pass the correct query action type", () => {
+      expect(query.queryActionType).toBe(QueryActionType.ATTACH);
+    });
+  });
+
+  describe("On detach", () => {
+    let query: any;
+
+    beforeEach(() => {
+      const dataset = new Dataset("test", createMockFor(RequestExecuter));
+      query = dataset.detach(
+        faker.random.word(),
+        getRandomFilteringCriteria(),
+      );
+    });
+
+    it("should return the query", () => {
+      expect(query instanceof ActionQuery).toBeTruthy();
+    });
+
+    it("should pass the correct query action type", () => {
+      expect(query.queryActionType).toBe(QueryActionType.DETACH);
+    });
   });
 
 });

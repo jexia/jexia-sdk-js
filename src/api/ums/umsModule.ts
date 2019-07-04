@@ -1,6 +1,6 @@
 import { ReflectiveInjector } from "injection-js";
 import { API } from "../../config";
-import { Methods, RequestAdapter } from "../../internal/requestAdapter";
+import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { IModule, ModuleConfiguration } from "../core/module";
 import { AuthOptions, TokenManager, Tokens } from "../core/tokenManager";
 
@@ -58,7 +58,7 @@ export class UMSModule implements IModule {
 
     return this.requestAdapter.execute<Tokens>(
       this.getUrl(API.AUTH, false),
-      { body, method: Methods.POST }
+      { body, method: RequestMethod.POST }
     ).then((tokens) => {
 
       this.tokenManager.addTokens(
@@ -82,7 +82,7 @@ export class UMSModule implements IModule {
     };
     return this.requestAdapter.execute<IUMSUser>(
       this.getUrl(API.UMS.SIGNUP),
-      { body, method: Methods.POST },
+      { body, method: RequestMethod.POST },
     );
   }
 
@@ -120,7 +120,7 @@ export class UMSModule implements IModule {
     return this.tokenManager.token(alias)
       .then((token) => this.requestAdapter.execute<IUMSUser>(
         this.getUrl(API.UMS.CHANGEPASSWORD),
-        { body, headers: { Authorization: `Bearer ${token}` }, method: Methods.POST },
+        { body, headers: { Authorization: `Bearer ${token}` }, method: RequestMethod.POST },
       ));
   }
 
@@ -134,7 +134,7 @@ export class UMSModule implements IModule {
     return this.tokenManager.token(alias)
       .then((token) => this.requestAdapter.execute(
         this.getUrl(API.UMS.USER),
-        { body, headers: { Authorization: `Bearer ${token}` }, method: Methods.DELETE },
+        { body, headers: { Authorization: `Bearer ${token}` }, method: RequestMethod.DELETE },
       ));
   }
 

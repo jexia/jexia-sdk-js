@@ -1,12 +1,11 @@
-import { QueryAction } from "../api/core/queries/baseQuery";
 import { ResourceType } from "../api/core/resource";
-
-export type QueryParam = { key: string; value: any; };
+import { RequestMethod } from "./requestAdapter.interfaces";
+import { QueryParam } from "./utils";
 
 export interface IRequestExecuterData {
   resourceType: ResourceType;
   resourceName: string;
-  action: QueryAction;
+  method: RequestMethod;
   body?: any;
   queryParams?: QueryParam[];
 }
