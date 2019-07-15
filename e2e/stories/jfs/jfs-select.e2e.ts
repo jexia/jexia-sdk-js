@@ -1,7 +1,7 @@
 import * as faker from "faker";
 import * as Joi from "joi";
 import { field } from "../../../src";
-import { IFilteringCriterion, IFilteringCriterionCallback } from "../../../src/api/dataops/filteringApi";
+import { IFilteringCriterion, IFilteringCriterionCallback } from "../../../src/api/core/filteringApi";
 import { Fileset } from "../../../src/api/fileops/fileset";
 import { FilesetRecordSchema } from "../../lib/fileset";
 import { cleaning, DEFAULT_FILESET, initWithJFS, jfs } from "../../teardowns";

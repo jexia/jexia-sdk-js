@@ -19,6 +19,9 @@ export const API = {
     USER: "user",
     CHANGEPASSWORD: "changepassword",
   },
+  CHANNEL: {
+    ENDPOINT: "channel",
+  },
   DOMAIN: "com",
   HOST: "app.jexia",
   PORT: 443,

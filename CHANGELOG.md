@@ -1,3 +1,10 @@
+# [4.1.0](https://github.com/jexia/jexia-sdk-js/compare/v4.0.0...v4.1.0) (2019-07-04)
+
+
+### Features
+
+* **relations:** add relations support ([#109](https://github.com/jexia/jexia-sdk-js/issues/109)) ([830559d](https://github.com/jexia/jexia-sdk-js/commit/830559d))
+
 <a name="4.0.0"></a>
 # [4.0.0](https://github.com/jexia/jexia-sdk-js/compare/v3.5.0...v4.0.0) (2019-06-03)
 

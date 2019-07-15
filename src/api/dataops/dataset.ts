@@ -1,6 +1,7 @@
 import { Inject, Injectable } from "injection-js";
 import { RequestExecuter } from "../../internal/executer";
 import { QueryActionType } from "../../internal/utils";
+import { IFilteringCriterion, IFilteringCriterionCallback } from "../core/filteringApi";
 import { ActionQuery } from "../core/queries/actionQuery";
 import { DeleteQuery } from "../core/queries/deleteQuery";
 import { InsertQuery } from "../core/queries/insertQuery";
@@ -8,7 +9,6 @@ import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
 import { IdentityCollection, IResource, ResourceInterface, ResourceType } from "../core/resource";
 import { DataSetName } from "./dataops.tokens";
-import { IFilteringCriterion, IFilteringCriterionCallback } from "./filteringApi";
 
 /**
  * Dataset object used to fetch and modify data at your datasets.

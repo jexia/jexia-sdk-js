@@ -77,7 +77,7 @@ describe("User Management Service", () => {
         await management.login();
         dataset = await management.createDataset("testUms");
         await management.createDatasetField(dataset.id, "name", { type: "string" });
-        policy = await management.createPolicy(dataset, ["ums:<.*>"]);
+        policy = await management.createPolicy([dataset], ["ums:<.*>"]);
       });
 
       afterAll(async () => {

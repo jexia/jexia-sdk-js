@@ -4,7 +4,7 @@ Jexia SDK currently exposes the following features:
   - On-demand access to data stored in Datasets and Filesets (CRUD operations, file uploads)
   - Authentication and authorization under the platform, you only need to provide your credentials.
 
-Currently SDK is focused on *consuming* data. In order to manage data schema (creating Datasets, adding fields to them, etc.) you need to use our [web application](https://app.jexia.com). We suggest you read the guide [Start your first project](https://docs.jexia.com/getting-started/start-your-first-project/).
+Currently SDK is focused on *consuming* data. In order to manage data schema (creating Datasets, adding fields to them, etc.) you need to use our [web application](https://app.jexia.com). We suggest you read the guide [Start your first project](https://www.jexia.com/en/docs/getting-started/).
 
 ### On-demand data access
 The user can execute the following operations on records:
@@ -41,7 +41,7 @@ import { jexiaClient } from "jexia-sdk-js/browser";
 
 ### [Initialization and Authentication](#init-sdk)
 
-The `jexiaClient()` function will return a a `Promise` of the `Client` class. You can provide a custom `fetch` standard compliant function as a parameter, as default we are using are using `node-fetch` package at NodeJS, and the native browser's `fetch` implementation.
+The `jexiaClient()` function will return a `Promise` of the `Client` class. You can provide a custom `fetch` standard compliant function as a parameter, as default we are using `node-fetch` package at NodeJS, and the native browser's `fetch` implementation.
 
 ``` Typescript
 import { Client } from "jexia-sdk-js";

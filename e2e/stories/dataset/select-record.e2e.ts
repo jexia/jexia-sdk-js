@@ -1,8 +1,8 @@
 import * as faker from "faker";
 import * as Joi from "joi";
 import { field } from "../../../src";
+import { IFilteringCriterion, IFilteringCriterionCallback } from "../../../src/api/core/filteringApi";
 import { Dataset } from "../../../src/api/dataops/dataset";
-import { IFilteringCriterion, IFilteringCriterionCallback } from "../../../src/api/dataops/filteringApi";
 import { DatasetRecordSchema } from "../../lib/dataset";
 import { cleaning, DEFAULT_DATASET, dom, init } from "../../teardowns";
 import { BAD_REQUEST_ERROR } from "./../../lib/utils";

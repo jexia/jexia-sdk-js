@@ -5,9 +5,10 @@ const availableVars = [
   "E2E_EMAIL",
   "E2E_PASSWORD",
   "RECAPTCHA_TOKEN",
-  "AWS_KEY",
+/* these are only for jfs module tests
+   "AWS_KEY",
   "AWS_SECRET",
-  "AWS_BUCKET",
+  "AWS_BUCKET", */
 ];
 
 const docUrl = "https://github.com/jexia/jexia-sdk-js/blob/master/e2e/README.md";

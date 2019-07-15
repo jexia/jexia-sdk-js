@@ -1,7 +1,7 @@
 import * as faker from "faker";
 import { getRandomFilteringCriteria, getRandomQueryActionType } from "../../spec/testUtils";
-import { FilteringCriterion, toFilteringCriterion } from "../api/dataops/filteringApi";
-import { FilteringCondition } from "../api/dataops/filteringCondition";
+import { FilteringCriterion, toFilteringCriterion } from "../api/core/filteringApi";
+import { FilteringCondition } from "../api/core/filteringCondition";
 import { IAggField, Query } from "./query";
 
 describe("Query class", () => {

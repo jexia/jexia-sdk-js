@@ -7,3 +7,6 @@ export {
   Resource,
   Modifier,
 } from "./realTime.interfaces";
+export {
+  Channel
+} from "./channel";

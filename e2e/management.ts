@@ -108,6 +108,23 @@ export class Management {
       .then((response: Response) => response.json());
   }
 
+  public createChannel(name: string, history = false): Promise<{id: string; name: string}> {
+    return this.fetch(api.channel.create, {
+      method: "POST",
+      headers: this.headers,
+      body: JSON.stringify({ name, properties: { store_messages: history } }),
+    })
+      .then((response: Response) => response.json());
+  }
+
+  public deleteChannel(id: string): Promise<void> {
+    return this.fetch(api.channel.delete.replace("{channel_id}", id), {
+      method: "DELETE",
+      headers: this.headers
+    })
+      .then((response: Response) => response.json());
+  }
+
   public createApiKey(): Promise<any> {
     return this.fetch(api.apikey.create, {
       method: "POST",
@@ -124,7 +141,7 @@ export class Management {
     });
   }
 
-  public createPolicy(datasets: Array<{ id: string }>, keys: string[]): Promise<any> {
+  public createPolicy(resources: Array<{ id: string }>, keys: string[]): Promise<any> {
     return this.fetch(api.policy.create, {
       method: "POST",
       headers: this.headers,
@@ -133,7 +150,7 @@ export class Management {
         actions: ["read", "create", "update", "delete"],
         effect: "allow",
         subjects: keys,
-        resources: datasets.map((dataset) => dataset.id),
+        resources: resources.map((resource) => resource.id),
       })
     })
       .then((response: Response) => response.json());
