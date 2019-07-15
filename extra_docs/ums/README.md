@@ -44,7 +44,7 @@ const user = await ums.signIn({
   password: 'secret-password',  
   default: false, 
   alias: 'Elon Musk'
-);
+});
 ```  
   
 ### Perform data operation on behalf of a user 
