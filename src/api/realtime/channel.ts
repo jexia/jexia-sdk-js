@@ -1,5 +1,4 @@
-import { Observable } from "rxjs";
-import { fromPromise } from "rxjs/internal-compatibility";
+import { from, Observable } from "rxjs";
 import { ResourceType } from "../core/resource";
 import { IWebSocket, RealTimeCommandResponse, RealTimeCommandTypes, RealTimeEventMessage } from "./realTime.interfaces";
 import { realTimeCommand, subscribeEventMessage, unsubscribeEventMessage, wsReadyDefer } from "./websocket";
@@ -35,20 +34,21 @@ export class Channel<T = any> extends Observable<RealTimeEventMessage<T>> {
         )
         .catch((error: any) => observer.error(error));
 
-      return () => wsReadyDefer.promise.then(
-        () => unsubscribeEventMessage(
-            this.websocket, ["published"], name, ResourceType.Channel, observer
-          ).catch(() => undefined)
+      return () => wsReadyDefer.promise
+        .then(() => unsubscribeEventMessage(
+          this.websocket, ["published"], name, ResourceType.Channel, observer
+        )
+        .catch(() => undefined)
       );
     });
   }
 
   /**
    * Send a message to the channel
-   * @param {String} data
+   * @param {any} data
    */
   public publish(data: any): Observable<RealTimeCommandResponse> {
-    return fromPromise(
+    return from(
       wsReadyDefer.promise.then(() => {
         return realTimeCommand(this.websocket, {
           command: RealTimeCommandTypes.Publish,
