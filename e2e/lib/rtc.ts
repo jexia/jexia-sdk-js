@@ -20,3 +20,16 @@ export const RTCMessageSchema = Joi.object().keys({
   timestamp: Joi.string().isoDate().required(),
   data: Joi.array().items(RTCRecordSchema).required()
 });
+
+export const RTCChannelMessageSchema = Joi.object().keys({
+  action: Joi.string().valid("published"),
+  resource: Joi.object().keys({
+    type: Joi.string().valid("channel").required(),
+    name: Joi.string().required()
+  }),
+  modifier: Joi.object().keys({
+    id: Joi.string().required()
+  }).required(),
+  timestamp: Joi.string().isoDate().required(),
+  data: Joi.any().required()
+});

@@ -18,6 +18,10 @@ export const api = {
       create: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/bestla/fs/{fileset_id}/field`
     }
   },
+  channel: {
+    create: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/sharky/channel`,
+    delete: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/sharky/channel/{channel_id}`
+  },
   apikey: {
     create: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/utgard/`,
     delete: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/utgard/{key}`

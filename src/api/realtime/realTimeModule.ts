@@ -6,8 +6,10 @@ import { AuthOptions, IAuthOptions, TokenManager } from "../core/tokenManager";
 import { Dataset } from "../dataops/dataset";
 import { IFormData } from "../fileops/fileops.interfaces";
 import { Fileset } from "../fileops/fileset";
-import { IWebSocket, IWebSocketBuilder, WebSocketState } from "./realTime.interfaces";
-import * as setWatch from "./watch";
+import { Channel } from "./channel";
+import { IWebSocket, IWebSocketBuilder, RealTimeEventMessage, WebSocketState } from "./realTime.interfaces";
+import { watch } from "./watch";
+import * as websocket from "./websocket";
 
 /**
  * List of resources that will be extended by RTC module
@@ -19,7 +21,7 @@ declare module "../dataops/dataset" {
   // tslint:disable-next-line:interface-name
   interface Dataset<T> {
     webSocket: IWebSocket;
-    watch: typeof setWatch.watch;
+    watch: typeof watch;
   }
 }
 
@@ -27,7 +29,7 @@ declare module "../fileops/fileset" {
   // tslint:disable-next-line:interface-name
   interface Fileset<FormDataType extends IFormData<F>, T, D, F> {
     webSocket: IWebSocket;
-    watch: typeof setWatch.watch;
+    watch: typeof watch;
   }
 }
 
@@ -68,7 +70,7 @@ export class RealTimeModule implements IModule {
     const tokenManager: TokenManager = coreInjector.get(TokenManager);
     const { projectID }: IAuthOptions = coreInjector.get(AuthOptions);
 
-    RTCResources.forEach((resource) => resource.prototype.watch = setWatch.watch);
+    RTCResources.forEach((resource) => resource.prototype.watch = watch);
 
     return tokenManager.token().then((token) => {
       try {
@@ -88,7 +90,7 @@ export class RealTimeModule implements IModule {
         this.websocket.onerror = () => reject(new Error(MESSAGE.RTC.CONNECTION_FAILED));
       });
     })
-    .then(() => setWatch.start(this.websocket, () => tokenManager.token()))
+    .then(() => websocket.start(this.websocket, () => tokenManager.token()))
     .then(() => this);
   }
 
@@ -97,6 +99,14 @@ export class RealTimeModule implements IModule {
    */
   public getConfig(): { [moduleName: string]: ModuleConfiguration } {
     return { rtc: {} };
+  }
+
+  /**
+   * Return a channel
+   * @param name
+   */
+  public channel<T = any>(name: string): Channel<RealTimeEventMessage<T>> {
+    return new Channel(this.websocket, name);
   }
 
   /**

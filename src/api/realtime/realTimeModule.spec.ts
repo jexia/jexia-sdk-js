@@ -54,25 +54,25 @@ describe("Real Time Module", () => {
 
     it("should start dataset watch functionality after initialized with correct parameters", async () => {
       const { webSocketMock, moduleInit, tokenManagerMock } = createSubject();
-      const datasetWatch = require("./watch");
-      spyOn(datasetWatch, "start");
+      const websocket = require("./websocket");
+      spyOn(websocket, "start");
       await moduleInit();
-      expect(datasetWatch.start).toHaveBeenCalledWith(webSocketMock, jasmine.any(Function));
-      const token = (datasetWatch.start as jasmine.Spy).calls.mostRecent().args[1]();
+      expect(websocket.start).toHaveBeenCalledWith(webSocketMock, jasmine.any(Function));
+      const token = (websocket.start as jasmine.Spy).calls.mostRecent().args[1]();
       expect(token).toBe(tokenManagerMock.token());
     });
 
     it("should not start dataset watch functionality if not initialized", async () => {
       const { moduleInit, websocketBuilder } = createSubject();
-      const datasetWatch = require("./watch");
-      spyOn(datasetWatch, "start");
+      const websocket = require("./websocket");
+      spyOn(websocket, "start");
       websocketBuilder.and.callFake(() => { throw new Error("builderError"); });
       try {
         await moduleInit();
         throw new Error(shouldHaveFailed);
       } catch (error) {
         expect(error.message).not.toBe(shouldHaveFailed);
-        expect(datasetWatch.start).not.toHaveBeenCalled();
+        expect(websocket.start).not.toHaveBeenCalled();
       }
     });
 
