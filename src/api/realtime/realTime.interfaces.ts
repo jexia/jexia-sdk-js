@@ -118,7 +118,7 @@ export interface RealTimeCommand {
   /**
    * Arguments of the command
    */
-  arguments: SubscriptionArgument | JwtRefreshArgument;
+  arguments: SubscriptionArgument | JwtRefreshArgument | PublishArgument;
 }
 
 /**
@@ -128,6 +128,7 @@ export enum RealTimeCommandTypes {
   Subscribe = "subscribe",
   UnSubscribe = "unsubscribe",
   JwtRefresh = "jwt replace",
+  Publish = "publish",
 }
 
 /**
@@ -199,6 +200,20 @@ export interface SubscriptionArgument {
    * Resource to subscribe
    */
   resource: Resource;
+}
+
+/**
+ * Publish to the channel argument contract
+ */
+export interface PublishArgument {
+  /**
+   * Channel name
+   */
+  channel: string;
+  /**
+   * Message payload (any valid JSON)
+   */
+  data: any;
 }
 
 /**
@@ -283,5 +298,6 @@ export enum CommandErrorCodes {
 
 /**
  * Events types available to subscribe
+ * TODO Created different events for channels and sets
  */
-export type EventSubscriptionType = "created" | "updated" | "deleted" | "all";
+export type EventSubscriptionType = "created" | "updated" | "deleted" | "published" | "all";
