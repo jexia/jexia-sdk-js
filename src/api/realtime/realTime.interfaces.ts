@@ -119,6 +119,10 @@ export interface RealTimeCommand {
    * Arguments of the command
    */
   arguments: SubscriptionArgument | JwtRefreshArgument | PublishArgument;
+  /**
+   * It is possible to provide a correlation id in order to match request and response more thoroughly
+   */
+  correlation_id?: string;
 }
 
 /**

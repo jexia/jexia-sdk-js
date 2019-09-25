@@ -53,6 +53,7 @@ export class Channel<T = any> extends Observable<RealTimeEventMessage<T>> {
         return realTimeCommand(this.websocket, {
           command: RealTimeCommandTypes.Publish,
           arguments: { channel: this.name, data },
+          correlation_id: Math.random().toString(),
         });
       })
     );
