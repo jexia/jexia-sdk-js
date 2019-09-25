@@ -1,6 +1,17 @@
+import { ReflectiveInjector } from "injection-js";
 import { from, Observable } from "rxjs";
+import { RequestExecuter } from "../../internal/executer";
+import { Query } from "../../internal/query";
+import { RequestMethod } from "../../internal/requestAdapter.interfaces";
+import { IFilteringCriterion, IFilteringCriterionCallback } from "../core/filteringApi";
 import { ResourceType } from "../core/resource";
-import { IWebSocket, RealTimeCommandResponse, RealTimeCommandTypes, RealTimeEventMessage } from "./realTime.interfaces";
+import {
+  IWebSocket,
+  RealTimeCommandResponse,
+  RealTimeCommandTypes,
+  RealTimeEventMessage,
+  RealTimeStoredMessage
+} from "./realTime.interfaces";
 import { realTimeCommand, subscribeEventMessage, unsubscribeEventMessage, wsReadyDefer } from "./websocket";
 
 /**
@@ -20,10 +31,12 @@ import { realTimeCommand, subscribeEventMessage, unsubscribeEventMessage, wsRead
 export class Channel<T = any> extends Observable<RealTimeEventMessage<T>> {
   /**
    * @internal
+   * @param injector
    * @param websocket
    * @param name
    */
   constructor(
+    readonly injector: ReflectiveInjector,
     readonly websocket: IWebSocket,
     readonly name: string
   ) {
@@ -57,5 +70,33 @@ export class Channel<T = any> extends Observable<RealTimeEventMessage<T>> {
         });
       })
     );
+  }
+
+  /**
+   * Load channel messaging history
+   * @param {IFilteringCriterion | IFilteringCriterionCallback } filter filtering condition
+   *
+   * @example
+   *   rtm.channel("my_channel").getLog(); // returns an observable of full channel history
+   *
+   *   // filtering messages
+   *   rtm.channel("my_channel").getLog(field => field("sender_id").isEqualTo(user.id)); // messages from certain user
+   */
+  public getLog(filter?: IFilteringCriterion<T> | IFilteringCriterionCallback<T>): Observable<RealTimeStoredMessage[]> {
+    const query = new Query<T>();
+
+    if (filter) {
+      query.setFilterCriteria(filter);
+    }
+
+    const requestExecutor = this.injector.get(RequestExecuter);
+
+    return from(requestExecutor.executeRequest({
+      resourceType: ResourceType.Channel,
+      resourceName: this.name,
+      method: RequestMethod.GET,
+      body: {},
+      queryParams: query.compileToQueryParams() || []
+    }));
   }
 }

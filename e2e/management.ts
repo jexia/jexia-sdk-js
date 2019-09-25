@@ -108,11 +108,11 @@ export class Management {
       .then((response: Response) => response.json());
   }
 
-  public createChannel(name: string): Promise<{id: string; name: string}> {
+  public createChannel(name: string, history = false): Promise<{id: string; name: string}> {
     return this.fetch(api.channel.create, {
       method: "POST",
       headers: this.headers,
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({ name, properties: { store_messages: history } }),
     })
       .then((response: Response) => response.json());
   }

@@ -1,6 +1,6 @@
 // tslint:disable:max-classes-per-file
-import { ResourceInterface } from "../core/resource";
 import { CompositeFilteringCondition, FilteringCondition, ICondition } from "./filteringCondition";
+import { ResourceInterface } from "./resource";
 
 /**
  * This object must be build from `field` helper function, never to be instantiated directly.

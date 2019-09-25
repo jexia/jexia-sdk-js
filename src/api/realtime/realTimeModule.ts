@@ -1,5 +1,6 @@
 import { ReflectiveInjector } from "injection-js";
 import { API, MESSAGE } from "../../config";
+import { RequestExecuter } from "../../internal/executer";
 import { IModule, ModuleConfiguration } from "../core/module";
 import { IResource } from "../core/resource";
 import { AuthOptions, IAuthOptions, TokenManager } from "../core/tokenManager";
@@ -52,6 +53,7 @@ declare module "../fileops/fileset" {
  * ```
  */
 export class RealTimeModule implements IModule {
+  private injector: ReflectiveInjector;
   private websocket: IWebSocket;
 
   /**
@@ -67,6 +69,10 @@ export class RealTimeModule implements IModule {
   public init(
     coreInjector: ReflectiveInjector,
   ): Promise<this> {
+    this.injector = coreInjector.resolveAndCreateChild([
+      RequestExecuter,
+    ]);
+
     const tokenManager: TokenManager = coreInjector.get(TokenManager);
     const { projectID }: IAuthOptions = coreInjector.get(AuthOptions);
 
@@ -107,7 +113,7 @@ export class RealTimeModule implements IModule {
    * @param {string} name Name of the channel
    */
   public channel<T = any>(name: string): Channel<T> {
-    return new Channel<T>(this.websocket, name);
+    return new Channel<T>(this.injector, this.websocket, name);
   }
 
   /**

@@ -1,5 +1,5 @@
 import * as faker from "faker";
-import { field } from "../src/api/dataops/filteringApi";
+import { field } from "../src/api/core/filteringApi";
 
 export function getRandomFilteringCriteria() {
   return faker.helpers.randomize([

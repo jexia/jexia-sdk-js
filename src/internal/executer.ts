@@ -7,6 +7,12 @@ import { QueryParam } from "../internal/utils";
 import { IRequestExecuterData } from "./executer.interfaces";
 import { IRequestOptions, RequestAdapter, RequestMethod } from "./requestAdapter";
 
+const resourceEndpoints = {
+  [ResourceType.Dataset]: API.DATA.ENDPOINT,
+  [ResourceType.Fileset]: API.FILES.ENDPOINT,
+  [ResourceType.Channel]: API.CHANNEL.ENDPOINT
+};
+
 @Injectable()
 export class RequestExecuter {
   constructor(
@@ -66,7 +72,7 @@ export class RequestExecuter {
   }
 
   private getUrl({ resourceType, resourceName }: IRequestExecuterData): string {
-    const endpoint = resourceType === ResourceType.Dataset ? API.DATA.ENDPOINT : API.FILES.ENDPOINT;
+    const endpoint = resourceEndpoints[resourceType];
     return [
       `${API.PROTOCOL}://${this.config.projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}`,
       endpoint,

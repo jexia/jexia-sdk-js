@@ -230,6 +230,15 @@ export interface JwtRefreshArgument {
   token: string;
 }
 
+export interface RealTimeStoredMessage {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  sender_id: string;
+  sender_type: string;
+  data: any;
+}
+
 /**
  * Resource contract
  */
