@@ -2,6 +2,7 @@
 // tslint:disable:no-empty
 import { ReflectiveInjector } from "injection-js";
 import { createMockFor, SpyObj } from "../../../spec/testUtils";
+import { RequestExecuter } from "../../../src/internal/executer";
 import { API, MESSAGE } from "../../config";
 import { AuthOptions, TokenManager } from "../core/tokenManager";
 import { IWebSocket, WebSocketState } from "./realTime.interfaces";
@@ -18,14 +19,16 @@ describe("Real Time Module", () => {
     websocketBuilder = jasmine.createSpy().and.returnValue(webSocketMock),
     tokenPromise = Promise.resolve(tokenTest),
     tokenManagerMock = createMockFor(TokenManager),
-    injectorMock = createMockFor(["get"]) as SpyObj<ReflectiveInjector>,
+    injectorMock = createMockFor(["get", "resolveAndCreateChild"]) as SpyObj<ReflectiveInjector>,
   } = {}) {
     (tokenManagerMock as any)["token"] = () => tokenPromise;
     const injectorMap = new Map<any, any>([
       [TokenManager, tokenManagerMock],
       [AuthOptions, { projectID }],
+      [RequestExecuter, createMockFor(RequestExecuter)]
     ]);
     injectorMock.get.mockImplementation((key: any) => injectorMap.get(key));
+    injectorMock.resolveAndCreateChild.mockImplementation(() => injectorMock);
     const subject = new RealTimeModule(websocketBuilder);
     return {
       projectID,
