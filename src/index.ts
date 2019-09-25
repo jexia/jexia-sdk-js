@@ -10,7 +10,7 @@ export {
   FieldFilter,
   IFilteringCriterion,
   IFilteringCriterionCallback,
-} from "./api/dataops/filteringApi";
+} from "./api/core/filteringApi";
 export { Dataset } from "./api/dataops/dataset";
 export { IAuthOptions } from "./api/core/tokenManager";
 export * from "./api/realtime/public-api";

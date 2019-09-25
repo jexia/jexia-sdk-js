@@ -88,9 +88,9 @@ export const cleaning = async () => {
   }
 };
 
-export const initWithChannel = async (channelName: string) => {
+export const initWithChannel = async (channelName: string, history = false) => {
   await management.login();
-  channel = await management.createChannel(channelName);
+  channel = await management.createChannel(channelName, history);
   apiKey = await management.createApiKey();
   policy = await management.createPolicy([channel], [`apk:${apiKey.key}`]);
 

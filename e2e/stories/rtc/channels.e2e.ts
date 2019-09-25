@@ -1,7 +1,9 @@
 import * as faker from "faker";
+import * as Joi from "joi";
 import { Subscription } from "rxjs";
+import { field } from "../../../src";
 import { Channel, RealTimeEventMessage } from "../../../src/api/realtime/public-api";
-import { RTCChannelMessageSchema } from "../../lib/rtc";
+import { RTCChannelMessageSchema, RTCChannelStoredMessageSchema } from "../../lib/rtc";
 import { getRandomList } from "../../lib/utils";
 import { cleaning, initWithChannel, management, rtm } from "../../teardowns";
 
@@ -13,7 +15,7 @@ jest.setTimeout(15000);
 const channelName = "my_channel";
 
 describe("Real Time Channels Communication", () => {
-  beforeAll(async () => initWithChannel(channelName));
+  beforeAll(async () => initWithChannel(channelName, true));
   afterAll(async () => cleaning());
 
   describe("subscribe to the channel", () => {
@@ -49,21 +51,47 @@ describe("Real Time Channels Communication", () => {
 
   describe("send messages", () => {
     let channel: Channel;
+    let subscription: Subscription;
     beforeAll(() => channel = rtm.channel(channelName));
+    afterAll(() => subscription.unsubscribe());
 
     it("should receive all sent messages in the same order", (done) => {
-      const messages = getRandomList<string>({ length: 100, callback: () => faker.lorem.sentence() });
+      const messages = getRandomList<string>({ length: 10, callback: () => faker.lorem.sentence() });
       const receivedMessages: string[] = [];
-      const subscription = channel.subscribe((message) => {
+      subscription = channel.subscribe((message) => {
         receivedMessages.push(message.data);
         if (receivedMessages.length === messages.length) {
           expect(receivedMessages).toEqual(messages);
-          subscription.unsubscribe();
           done();
         }
       });
 
       messages.forEach((m) => setTimeout(() => channel.publish(m), 10));
+    });
+  });
+
+  describe("load channel history", () => {
+    let channel: Channel;
+    beforeAll(() => channel = rtm.channel(channelName));
+
+    it("should return a channel history", (done) => {
+      channel.getLog().subscribe((result) => {
+        joiAssert(result, Joi.array().items(RTCChannelStoredMessageSchema));
+        done();
+      });
+    });
+
+    it("should filter records from the history", (done) => {
+      const data = faker.lorem.sentence();
+      channel.publish(data).subscribe(() => {
+
+        const filter = field("data").isEqualTo(data);
+        channel.getLog(filter).subscribe((result) => {
+          expect(result.length).toEqual(1);
+          expect(result[0].data).toEqual(data);
+          done();
+        });
+      });
     });
   });
 

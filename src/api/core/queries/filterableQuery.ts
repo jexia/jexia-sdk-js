@@ -1,4 +1,4 @@
-import { IFilteringCriterion, IFilteringCriterionCallback } from "../../dataops/filteringApi";
+import { IFilteringCriterion, IFilteringCriterionCallback } from "../filteringApi";
 import { BaseQuery } from "./baseQuery";
 
 /**
