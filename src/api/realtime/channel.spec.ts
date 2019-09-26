@@ -35,9 +35,12 @@ function createSubject({
 
 describe("Channel", () => {
   describe("on creating", () => {
-    it("should not send anything to the websocket", () => {
+    it("should not send anything to the websocket", (done) => {
       const { websocketMock } = createSubject();
-      setTimeout(() => expect(websocketMock.send).not.toHaveBeenCalled());
+      setTimeout(() => {
+        expect(websocketMock.send).not.toHaveBeenCalled();
+        done();
+      });
     });
   });
 
