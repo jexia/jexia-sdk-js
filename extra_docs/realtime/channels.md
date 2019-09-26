@@ -1,7 +1,7 @@
 ## Communication with channels
 
 Client-side applications can communicate with each other in real-time using channels which basically, allows sending and receiving messages through websocket. 
-Before using this feature, you need to create at least one channel and an appropriate policy with allowed "publish" and "subscribe" actions.  Channels can be managed with  [Jexia Web Management Application](https://docs.jexia.com/getting-started/user-management/).  
+Before using this feature, you need to create at least one channel and an appropriate policy with allowed "publish" and "subscribe" actions. Channels can be managed with [Jexia Web Management Application](https://docs.jexia.com/getting-started/user-management/).  
 
 When an application sends a message to the channel, everyone subscribed to that channel immediately receives it. If the persistent store is activated for the channel (using management application), it is also possible to get messaging history.   
   
@@ -23,7 +23,7 @@ jexiaClient().init({
 Then you can get your channel object (considered that channel has been already created in management application, otherwise an error will be thrown, see "Handling errors" below):
 
 ```javascript
-const channel = rtm.channel('my_channel');
+const channel = rtm.channel("my_channel");
 ```
 
   
@@ -41,7 +41,7 @@ You can use `.pipe()` and any RxJS operators to have more flexibility:
 ```javascript
 channel.pipe(
   filter(message => message.from === user.id), // filter only specific user
-  pluck('data') // pull out only data field 
+  pluck("data") // pull out only data field 
 ).subscribe(data => {
   // you've got data from the specific user here!
 });
@@ -77,7 +77,7 @@ channel.publish({
   
 ```javascript
 channel.getLog().subscribe(log => {
-  // you will receive all the messages here
+  // you will receive an array of all the messages here (see schema below)
 });  
 ```
 
@@ -88,7 +88,7 @@ channel.getLog(field => field("sender_id").isEqualTo(user.id));
 ```
 
 #### Stored message format
-```typescript
+```javascript
 [{
   id: string, // uuid 
   sender_id: string, // uuid 
