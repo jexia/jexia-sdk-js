@@ -3,7 +3,7 @@
 Client-side applications can communicate with each other in real-time using channels which basically, allows sending and receiving messages through websocket. 
 Before using this feature, you need to create at least one channel and an appropriate policy with allowed "publish" and "subscribe" actions.  Channels can be managed with  [Jexia Web Management Application](https://docs.jexia.com/getting-started/user-management/).  
 
-When an application sends a message to the channel, everyone subscribed to that channel immediately receives it. If the message store is activated for the channel, it is also possible to get messaging history.   
+When an application sends a message to the channel, everyone subscribed to that channel immediately receives it. If the persistent store is activated for the channel (using management application), it is also possible to get messaging history.   
   
 ### Initialize  
 To use real-time communication initialize Jexia client with the real-time module:  
@@ -85,6 +85,18 @@ It is also possible to use filters:
 ```javascript
 // load messages from the specific user
 channel.getLog(field => field("sender_id").isEqualTo(user.id));
+```
+
+#### Stored message format
+```typescript
+[{
+  id: string, // uuid 
+  sender_id: string, // uuid 
+  sender_type: string, // either "apk" or "ums",
+  created_at: string, // Date in ISO format 
+  updated_at: string, // Date in ISO format
+  data: any,
+}, {...}, ...]
 ```
 
 ### Errors handling
