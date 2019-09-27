@@ -2,6 +2,7 @@
 // tslint:disable:no-empty
 import { ReflectiveInjector } from "injection-js";
 import { createMockFor, SpyObj } from "../../../spec/testUtils";
+import { RequestExecuter } from "../../../src/internal/executer";
 import { API, MESSAGE } from "../../config";
 import { AuthOptions, TokenManager } from "../core/tokenManager";
 import { IWebSocket, WebSocketState } from "./realTime.interfaces";
@@ -18,14 +19,16 @@ describe("Real Time Module", () => {
     websocketBuilder = jasmine.createSpy().and.returnValue(webSocketMock),
     tokenPromise = Promise.resolve(tokenTest),
     tokenManagerMock = createMockFor(TokenManager),
-    injectorMock = createMockFor(["get"]) as SpyObj<ReflectiveInjector>,
+    injectorMock = createMockFor(["get", "resolveAndCreateChild"]) as SpyObj<ReflectiveInjector>,
   } = {}) {
     (tokenManagerMock as any)["token"] = () => tokenPromise;
     const injectorMap = new Map<any, any>([
       [TokenManager, tokenManagerMock],
       [AuthOptions, { projectID }],
+      [RequestExecuter, createMockFor(RequestExecuter)]
     ]);
     injectorMock.get.mockImplementation((key: any) => injectorMap.get(key));
+    injectorMock.resolveAndCreateChild.mockImplementation(() => injectorMock);
     const subject = new RealTimeModule(websocketBuilder);
     return {
       projectID,
@@ -54,25 +57,25 @@ describe("Real Time Module", () => {
 
     it("should start dataset watch functionality after initialized with correct parameters", async () => {
       const { webSocketMock, moduleInit, tokenManagerMock } = createSubject();
-      const datasetWatch = require("./watch");
-      spyOn(datasetWatch, "start");
+      const websocket = require("./websocket");
+      spyOn(websocket, "start");
       await moduleInit();
-      expect(datasetWatch.start).toHaveBeenCalledWith(webSocketMock, jasmine.any(Function));
-      const token = (datasetWatch.start as jasmine.Spy).calls.mostRecent().args[1]();
+      expect(websocket.start).toHaveBeenCalledWith(webSocketMock, jasmine.any(Function));
+      const token = (websocket.start as jasmine.Spy).calls.mostRecent().args[1]();
       expect(token).toBe(tokenManagerMock.token());
     });
 
     it("should not start dataset watch functionality if not initialized", async () => {
       const { moduleInit, websocketBuilder } = createSubject();
-      const datasetWatch = require("./watch");
-      spyOn(datasetWatch, "start");
+      const websocket = require("./websocket");
+      spyOn(websocket, "start");
       websocketBuilder.and.callFake(() => { throw new Error("builderError"); });
       try {
         await moduleInit();
         throw new Error(shouldHaveFailed);
       } catch (error) {
         expect(error.message).not.toBe(shouldHaveFailed);
-        expect(datasetWatch.start).not.toHaveBeenCalled();
+        expect(websocket.start).not.toHaveBeenCalled();
       }
     });
 

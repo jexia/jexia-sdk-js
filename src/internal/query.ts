@@ -1,5 +1,5 @@
-import { IFilteringCriterion, IFilteringCriterionCallback, toFilteringCriterion } from "../api/dataops/filteringApi";
-import { ICondition } from "../api/dataops/filteringCondition";
+import { IFilteringCriterion, IFilteringCriterionCallback, toFilteringCriterion } from "../api/core/filteringApi";
+import { ICondition } from "../api/core/filteringCondition";
 import { MESSAGE } from "../config";
 import { QueryActionType, QueryParam, toQueryParams } from "./utils";
 

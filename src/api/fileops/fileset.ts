@@ -4,12 +4,12 @@ import { concatMap, filter, map, shareReplay, takeUntil, tap } from "rxjs/operat
 import { RequestExecuter } from "../../internal/executer";
 import { QueryActionType } from "../../internal/utils";
 import { ClientConfiguration } from "../core/client";
+import { IFilteringCriterion, IFilteringCriterionCallback } from "../core/filteringApi";
 import { ActionQuery } from "../core/queries/actionQuery";
 import { DeleteQuery } from "../core/queries/deleteQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
 import { IdentityCollection, IResource, ResourceType } from "../core/resource";
-import { IFilteringCriterion, IFilteringCriterionCallback } from "../dataops/filteringApi";
 import {
   FileOperationsConfig,
   FilesetInterface,

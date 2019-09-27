@@ -35,6 +35,6 @@
     "src/api/core/componentStorage.ts",
     "src/api/core/module.ts",
     "src/api/core/tokenManager.ts",
-    "src/api/dataops/filteringCondition.ts"
+    "src/api/core/filteringCondition.ts"
   ]
 }

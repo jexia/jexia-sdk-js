@@ -3,7 +3,7 @@ import { createMockFor, getRandomResourceType } from "../../../../spec/testUtils
 import { RequestExecuter } from "../../../internal/executer";
 import { Query } from "../../../internal/query";
 import { RequestMethod } from "../../../internal/requestAdapter.interfaces";
-import { field } from "../../dataops/filteringApi";
+import { field } from "../filteringApi";
 import { ResourceType } from "../resource";
 import { FilterableQuery } from "./filterableQuery";
 

@@ -1,7 +1,7 @@
 import { RequestExecuter } from "../../../internal/executer";
 import { RequestMethod } from "../../../internal/requestAdapter.interfaces";
 import { QueryActionType } from "../../../internal/utils";
-import { field, IFilteringCriterion, IFilteringCriterionCallback } from "../../dataops/filteringApi";
+import { field, IFilteringCriterion, IFilteringCriterionCallback } from "../filteringApi";
 import { IdentityCollection, ResourceInterface, ResourceType } from "../resource";
 import { FilterableQuery } from "./filterableQuery";
 

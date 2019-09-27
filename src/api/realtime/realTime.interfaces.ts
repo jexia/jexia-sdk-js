@@ -118,7 +118,11 @@ export interface RealTimeCommand {
   /**
    * Arguments of the command
    */
-  arguments: SubscriptionArgument | JwtRefreshArgument;
+  arguments: SubscriptionArgument | JwtRefreshArgument | PublishArgument;
+  /**
+   * It is possible to provide a correlation id in order to match request and response more thoroughly
+   */
+  correlation_id?: string;
 }
 
 /**
@@ -128,6 +132,7 @@ export enum RealTimeCommandTypes {
   Subscribe = "subscribe",
   UnSubscribe = "unsubscribe",
   JwtRefresh = "jwt replace",
+  Publish = "publish",
 }
 
 /**
@@ -202,6 +207,20 @@ export interface SubscriptionArgument {
 }
 
 /**
+ * Publish to the channel argument contract
+ */
+export interface PublishArgument {
+  /**
+   * Channel name
+   */
+  channel: string;
+  /**
+   * Message payload (any valid JSON)
+   */
+  data: any;
+}
+
+/**
  * JWT refresh command argument contract
  */
 export interface JwtRefreshArgument {
@@ -209,6 +228,15 @@ export interface JwtRefreshArgument {
    * New token to be used from now on
    */
   token: string;
+}
+
+export interface RealTimeStoredMessage {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  sender_id: string;
+  sender_type: string;
+  data: any;
 }
 
 /**
@@ -283,5 +311,6 @@ export enum CommandErrorCodes {
 
 /**
  * Events types available to subscribe
+ * TODO Created different events for channels and sets
  */
-export type EventSubscriptionType = "created" | "updated" | "deleted" | "all";
+export type EventSubscriptionType = "created" | "updated" | "deleted" | "published" | "all";

@@ -17,13 +17,16 @@ export const ums = new UMSModule();
 
 export const jfs = fileOperations();
 
-const management = new Management();
+export const rtm = realTime();
+
+export const management = new Management();
 let client: Client;
 let datasets: Array<{ name: string, id: string }> = [];
 let fileset: { name: string, id: string };
 let apiKey: { id: string, key: string, secret: string };
 let policy: { id: string };
 let relations: Array<{ id: string }> = [];
+let channel: { id: string; name: string };
 
 export const DEFAULT_DATASET = { NAME: "test_dataset", FIELD: "test_field" };
 export const DEFAULT_FILESET = { NAME: "test_fileset", FIELD: "test_field" };
@@ -31,7 +34,7 @@ export const DEFAULT_FILESET = { NAME: "test_fileset", FIELD: "test_field" };
 export const init = async (
   datasetName = DEFAULT_DATASET.NAME,
   fields: Array<{ name: string, type: FieldType }> = [],
-  modules: IModule[] = [dom, realTime(), new LoggerModule(LogLevel.ERROR)]) => {
+  modules: IModule[] = [dom, rtm, new LoggerModule(LogLevel.ERROR)]) => {
 
   await management.login();
 
@@ -80,6 +83,22 @@ export const cleaning = async () => {
   if (client) {
     await client.terminate();
   }
+  if (channel) {
+    await management.deleteChannel(channel.id);
+  }
+};
+
+export const initWithChannel = async (channelName: string, history = false) => {
+  await management.login();
+  channel = await management.createChannel(channelName, history);
+  apiKey = await management.createApiKey();
+  policy = await management.createPolicy([channel], [`apk:${apiKey.key}`]);
+
+  client = await jexiaClient().init({
+    projectID: process.env.E2E_PROJECT_ID as string,
+    key: apiKey.key,
+    secret: apiKey.secret,
+  }, rtm, new LoggerModule(LogLevel.ERROR));
 };
 
 export const initWithUMS = async () => {
