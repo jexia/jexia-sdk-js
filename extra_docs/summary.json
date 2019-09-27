@@ -26,5 +26,15 @@
   {
     "title": "Relations",
     "file": "relations/README.md"
+  },
+  {
+    "title": "Real Time Operations",
+    "file": "realtime/realtime.md",
+    "children": [
+      {
+        "title": "Communication with channels",
+        "file": "realtime/channels.md"
+      }
+    ]
   }
 ]

@@ -6,7 +6,7 @@ import {
   getRandomResourceType,
 } from "../../../../spec/testUtils";
 import { QueryActionType, toQueryParams } from "../../../internal/utils";
-import { field, toFilteringCriterion } from "../../dataops/filteringApi";
+import { field, toFilteringCriterion } from "../filteringApi";
 import { ActionQuery } from "./actionQuery";
 
 describe("ActionQuery class", () => {

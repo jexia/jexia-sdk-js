@@ -4,6 +4,7 @@
 export enum ResourceType {
   Dataset = "ds",
   Fileset = "fs",
+  Channel = "channel",
 }
 
 /**
