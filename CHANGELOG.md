@@ -1,3 +1,10 @@
+# [4.2.0](https://github.com/jexia/jexia-sdk-js/compare/v4.1.0...v4.2.0) (2019-09-27)
+
+
+### Features
+
+* **pub_sub:** communications with channels ([#122](https://github.com/jexia/jexia-sdk-js/issues/122)) ([a168c9e](https://github.com/jexia/jexia-sdk-js/commit/a168c9e))
+
 # [4.1.0](https://github.com/jexia/jexia-sdk-js/compare/v4.0.0...v4.1.0) (2019-07-04)
 
 
