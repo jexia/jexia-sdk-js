@@ -87,8 +87,8 @@ It is also possible to use filters:
 channel.getLog(field => field("sender_id").isEqualTo(user.id));
 ```
 
-#### Stored message format
-```javascript
+#### Stored message schema
+```JSON
 [{
   id: string, // uuid 
   sender_id: string, // uuid 
@@ -105,18 +105,27 @@ Some errors can happen during communications - channel might have not been creat
 
 In this example there is no such channel:
 ```javascript
-rtm.channel("my_camel").subscribe({
-  error: error => {
+rtm.channel("my_camel").subscribe(
+  (message) => {
+    console.log(message); // we've got a message from the channel
+  },
+  (error) => {
     console.log(error); // Subscription Error: (1001): resource "my_camel" is unavailable
+  },
+  () => { // complete
+    // connection to the channel has been closed
   }
-});
+);
 ```
 
 You tries to get channel history, but policy does not allow you to read from the channel:
 ```javascript
-rtm.channel("not_my_channel").getLog().subscribe({
-  error: error => {
+rtm.channel("not_my_channel").getLog().subscribe(
+  (messages) => {
+    console.log(messages); 
+  },
+  (error) => {
     console.log(error); // Subscription Error: (2): none of the given actions ["read"] for this resource are allowed
   }
-});
+);
 ```
