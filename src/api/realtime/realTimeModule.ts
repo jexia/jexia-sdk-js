@@ -16,7 +16,9 @@ import * as setWatch from "./watch";
 const RTCResources: Array<{ new(...args: any[]): IResource }> = [Dataset, Fileset];
 
 declare module "../dataops/dataset" {
-  // tslint:disable-next-line:interface-name
+  /**
+   * @ignore
+   */ // tslint:disable-next-line:interface-name
   interface Dataset<T> {
     webSocket: IWebSocket;
     watch: typeof setWatch.watch;
@@ -24,7 +26,9 @@ declare module "../dataops/dataset" {
 }
 
 declare module "../fileops/fileset" {
-  // tslint:disable-next-line:interface-name
+  /**
+   * @ignore
+   */ // tslint:disable-next-line:interface-name
   interface Fileset<FormDataType extends IFormData<F>, T, D, F> {
     webSocket: IWebSocket;
     watch: typeof setWatch.watch;
