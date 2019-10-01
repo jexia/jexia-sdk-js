@@ -8,13 +8,13 @@ import { FileUploader } from "./fileUploader";
 
 let formDataAppendSpy: jasmine.Spy;
 
-class TestFormData implements IFormData<{}> {
+class TestFormData implements IFormData<unknown> {
   constructor(public createdAutomatically = true) {
     this.append = formDataAppendSpy;
   }
 
   // tslint:disable-next-line:no-empty
-  public append(name: string, value: string | {}, filename?: string) {
+  public append(name: string, value: string | unknown, filename?: string) {
   }
 }
 
