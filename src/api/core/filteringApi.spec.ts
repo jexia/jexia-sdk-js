@@ -203,7 +203,10 @@ describe("FilteringCriterion class", () => {
   }
 
   it("should throw an error when no condition is provided", () => {
-    expect(createSubject.bind(null, ({ lowLevelCondition: null }))).toThrowError();
+    expect(() => {
+      // tslint:disable
+      new FilteringCriterion();
+    }).toThrowError();
   });
 
   it("should assign the proper condition", () => {
