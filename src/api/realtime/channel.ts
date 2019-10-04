@@ -97,6 +97,6 @@ export class Channel<T = any> extends Observable<RealTimeEventMessage<T>> {
       method: RequestMethod.GET,
       body: {},
       queryParams: query.compileToQueryParams()
-    }));
+    }) as Promise<RealTimeStoredMessage[]>);
   }
 }
