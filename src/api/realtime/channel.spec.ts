@@ -1,11 +1,10 @@
 import * as faker from "faker";
-import { ReflectiveInjector } from "injection-js";
 import {
   createPublishMessage,
   createSubscribeCommandMessage,
   createUnsubscribeCommandMessage
 } from "../../../spec/rtcHelpers";
-import { createMockFor, SpyObj } from "../../../spec/testUtils";
+import { createMockFor } from "../../../spec/testUtils";
 import { RequestExecuter } from "../../internal/executer";
 import { Query } from "../../internal/query";
 import { RequestMethod } from "../../internal/requestAdapter.interfaces";
@@ -14,15 +13,15 @@ import { Channel } from "./channel";
 import * as websocket from "./websocket";
 
 function createSubject({
-  injectorMock = createMockFor(["get"]) as SpyObj<ReflectiveInjector>,
-  websocketMock = createMockFor(WebSocket),
+  injectorMock = createMockFor(["get"]) as any,
+  websocketMock = createMockFor(WebSocket) as any,
   name = faker.random.word(),
   requestExecuterMock = createMockFor(RequestExecuter, { returnValue: Promise.resolve() })
 } = {}) {
   injectorMock.get.mockImplementation(() => requestExecuterMock);
   websocket.start(websocketMock, () => Promise.resolve("token"));
 
-  const subject = new Channel(injectorMock, websocketMock, name);
+  const subject = new Channel(injectorMock, () => websocketMock, name);
 
   return {
     subject,
@@ -108,7 +107,7 @@ describe("Channel", () => {
       const { subject, websocketMock } = createSubject();
       const message = faker.lorem.sentence();
       let correlationId: string;
-      websocketMock.send.mockImplementationOnce((command) => {
+      websocketMock.send.mockImplementationOnce((command: string) => {
         correlationId = JSON.parse(command).data.correlation_id;
       });
       subject.publish(message);

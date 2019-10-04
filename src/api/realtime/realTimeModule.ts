@@ -117,7 +117,7 @@ export class RealTimeModule implements IModule {
    * @param {string} name Name of the channel
    */
   public channel<T = any>(name: string): Channel<T> {
-    return new Channel<T>(this.injector, this.websocket, name);
+    return new Channel<T>(this.injector, () => this.websocket, name);
   }
 
   /**
