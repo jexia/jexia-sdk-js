@@ -21,7 +21,7 @@ function createSubject({
   injectorMock.get.mockImplementation(() => requestExecuterMock);
   websocket.start(websocketMock, () => Promise.resolve("token"));
 
-  const subject = new Channel(injectorMock, websocketMock, name);
+  const subject = new Channel(injectorMock, () => websocketMock, name);
 
   return {
     subject,

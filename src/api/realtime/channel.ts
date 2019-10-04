@@ -32,24 +32,24 @@ export class Channel<T = any> extends Observable<RealTimeEventMessage<T>> {
   /**
    * @internal
    * @param injector
-   * @param websocket
+   * @param websocketFactory
    * @param name
    */
   constructor(
     readonly injector: ReflectiveInjector,
-    readonly websocket: IWebSocket,
+    readonly websocketFactory: () => IWebSocket,
     readonly name: string
   ) {
     super((observer) => {
       wsReadyDefer.promise
         .then(() => subscribeEventMessage(
-          this.websocket, ["published"], name, ResourceType.Channel, observer)
+          this.websocketFactory(), ["published"], name, ResourceType.Channel, observer)
         )
         .catch((error: any) => observer.error(error));
 
       return () => wsReadyDefer.promise
         .then(() => unsubscribeEventMessage(
-          this.websocket, ["published"], name, ResourceType.Channel, observer
+          this.websocketFactory(), ["published"], name, ResourceType.Channel, observer
         )
         .catch(() => undefined)
       );
@@ -63,7 +63,7 @@ export class Channel<T = any> extends Observable<RealTimeEventMessage<T>> {
   public publish(data: any): Observable<RealTimeCommandResponse> {
     return from(
       wsReadyDefer.promise.then(() => {
-        return realTimeCommand(this.websocket, {
+        return realTimeCommand(this.websocketFactory(), {
           command: RealTimeCommandTypes.Publish,
           arguments: { channel: this.name, data },
           correlation_id: Math.random().toString(),
