@@ -1,3 +1,11 @@
+## [4.2.1](https://github.com/jexia/jexia-sdk-js/compare/v4.2.0...v4.2.1) (2019-10-04)
+
+
+### Bug Fixes
+
+* **channels:** fix crashing after subscribing to the new channel ([8d14d35](https://github.com/jexia/jexia-sdk-js/commit/8d14d35))
+* **typescript:** resolve types issue ([3af7df3](https://github.com/jexia/jexia-sdk-js/commit/3af7df3))
+
 # [4.2.0](https://github.com/jexia/jexia-sdk-js/compare/v4.1.0...v4.2.0) (2019-09-27)
 
 
