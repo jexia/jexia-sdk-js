@@ -25,7 +25,7 @@ describe("User Management Service", () => {
   describe("initialize without API key", () => {
 
     const wrongCredentialsError = new Error(
-      "There was an error on the back-end as a result of your request: 400 Bad Request",
+      "There was an error on the back-end as a result of your request: 401 Unauthorized",
     );
 
     beforeAll(async () => await initWithUMS());
@@ -105,8 +105,7 @@ describe("User Management Service", () => {
         }));
       });
 
-      // TODO Does not work until alias/email token key will be developed
-      xit("should fetch himself by email", async () => {
+      it("should fetch himself by email", async () => {
         const fetchedUSer = await ums.getUser(credentials.email);
         joiAssert(fetchedUSer, UserSchema);
       });
