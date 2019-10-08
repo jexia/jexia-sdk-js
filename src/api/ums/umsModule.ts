@@ -60,13 +60,7 @@ export class UMSModule implements IModule {
       this.getUrl(API.AUTH, false),
       { body, method: RequestMethod.POST }
     ).then((tokens) => {
-
-      this.tokenManager.addTokens(
-        user.alias || user.email,
-        tokens,
-        user.default,
-      );
-
+      this.tokenManager.addTokens([user.email, user.alias], tokens, user.default);
       return tokens.access_token;
     });
   }

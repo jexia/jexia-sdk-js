@@ -104,7 +104,7 @@ describe("TokenManager", () => {
       const { subject, validOptions } = createSubject();
       jest.spyOn(subject as any, "startRefreshDigest");
       await subject.init(validOptions);
-      expect((subject as any).startRefreshDigest).toHaveBeenCalledWith("apikey");
+      expect((subject as any).startRefreshDigest).toHaveBeenCalledWith(["apikey"]);
     });
 
     it("should schedule token refreshing for the authentication by alias", async () => {
@@ -112,7 +112,7 @@ describe("TokenManager", () => {
       const auth = faker.random.word();
       jest.spyOn(subject as any, "startRefreshDigest");
       await subject.init({ ...validOptions, auth });
-      expect((subject as any).startRefreshDigest).toHaveBeenCalledWith(auth);
+      expect((subject as any).startRefreshDigest).toHaveBeenCalledWith([auth]);
     });
   });
 
@@ -138,9 +138,22 @@ describe("TokenManager", () => {
         refresh_token: faker.random.word(),
       };
       await subject.init(validOptions);
-      subject.addTokens(randomAlias, anotherTokens);
+      subject.addTokens([randomAlias], anotherTokens);
       subject.setDefault(randomAlias);
       expect(await subject.token()).toEqual(anotherTokens.access_token);
+    });
+
+    it("should return a token by any of aliases if there are few", async () => {
+      const { subject, validOptions } = createSubject();
+      const randomAliases = [faker.random.word(), faker.random.word(), faker.random.word()];
+      const randomAlias = faker.helpers.randomize(randomAliases);
+      const anotherTokens = {
+        access_token: faker.random.word(),
+        refresh_token: faker.random.word(),
+      };
+      await subject.init(validOptions);
+      subject.addTokens(randomAliases, anotherTokens);
+      expect(await subject.token(randomAlias)).toEqual(anotherTokens.access_token);
     });
 
     it("should return default token after reset to default", async () => {
@@ -151,7 +164,7 @@ describe("TokenManager", () => {
         refresh_token: faker.random.word(),
       };
       await subject.init(validOptions);
-      subject.addTokens(randomAlias, anotherTokens);
+      subject.addTokens([randomAlias], anotherTokens);
       subject.setDefault(randomAlias);
       subject.resetDefault();
       expect(await subject.token()).toEqual(tokens.access_token);
@@ -201,7 +214,7 @@ describe("TokenManager", () => {
       const { subject, validOptions } = createSubject();
       const clearIntervalSpy = jest.spyOn(global, "clearInterval");
       await subject.init(validOptions);
-      await subject.addTokens(faker.random.word(), {
+      await subject.addTokens([faker.random.word()], {
         access_token: faker.random.word(),
         refresh_token: faker.random.word(),
       });
@@ -243,7 +256,7 @@ describe("TokenManager", () => {
         await subject.init(validOptions);
         jest.spyOn(subject as any, "refresh");
         jest.runOnlyPendingTimers();
-        expect((subject as any).refresh).toHaveBeenCalledWith("apikey");
+        expect((subject as any).refresh).toHaveBeenCalledWith(["apikey"]);
       });
 
       it("should terminate itself if there is an error during refresh", async () => {
@@ -275,7 +288,7 @@ describe("TokenManager", () => {
       (subject as any).storage.setTokens("testRefresh",
         { access_token: "access_token", refresh_token: "refresh_token" });
       try {
-        await (subject as any).refresh("randomAuth");
+        await (subject as any).refresh(["randomAuth"]);
       } catch (error) {
         expect(error.message).toEqual("There is no refresh token for randomAuth");
       }
@@ -288,7 +301,7 @@ describe("TokenManager", () => {
       (subject as any).storage.setTokens("testRefresh",
         { access_token: "access_token", refresh_token: "refresh_token" });
       try {
-        await (subject as any).refresh("testRefresh");
+        await (subject as any).refresh(["testRefresh"]);
       } catch (error) {
         expect(error.message).toEqual("Unable to get tokens: refresh error");
       }

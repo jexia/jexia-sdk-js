@@ -54,6 +54,15 @@ export interface IAuthOptions {
 export const AuthOptions = new InjectionToken<IAuthOptions>("IAuthOptions");
 
 /**
+ * Not undefined type guard
+ * @internal
+ * @param x
+ */
+function notUndefined<T>(x: T | undefined): x is T {
+  return x !== undefined;
+}
+
+/**
  * Keep token pairs and refresh them when its needed
  */
 @Injectable()
@@ -149,24 +158,31 @@ export class TokenManager {
 
   /**
    * Add new token pair and run refresh digest
-   * @param {string} auth Authenticate alias
+   * @param {Array<string | undefined>} aliases an array of authenticate aliases
    * @param {Tokens} tokens Token pair
    * @param {boolean} defaults Whether to use this token by default
    */
-  public addTokens(auth: string, tokens: Tokens, defaults?: boolean) {
-    this.storage.setTokens(auth, tokens, defaults);
-    this.startRefreshDigest(auth);
+  public addTokens(aliases: Array<string | undefined>, tokens: Tokens, defaults?: boolean) {
+
+    const definedAliases: string[] = aliases.filter(notUndefined);
+
+    /* Store token pairs for each alias but make default the first one only */
+    definedAliases.forEach((alias, index) => {
+      this.storage.setTokens(alias, tokens, !index && defaults);
+    });
+
+    this.startRefreshDigest(definedAliases);
   }
 
   /**
    * Start refreshing digest for the specific auth
    * @ignore
    */
-  private startRefreshDigest(auth: string) {
+  private startRefreshDigest(aliases: string[]) {
     this.refreshes.push(
       setInterval(() => {
-        this.logger.debug("tokenManager", `refresh ${auth} token`);
-        this.refresh(auth)
+        this.logger.debug("tokenManager", `refresh ${aliases[0]} token`);
+        this.refresh(aliases)
           .catch(() => this.terminate());
       }, DELAY)
     );
@@ -179,7 +195,7 @@ export class TokenManager {
   private login({auth = APIKEY_DEFAULT_ALIAS, key, secret}: IAuthOptions): Promise<this> {
     return this.obtainTokens(auth, this.authUrl, { method: "apk", key, secret })
       .then((tokens) => {
-        this.addTokens(auth, tokens, true);
+        this.addTokens([auth], tokens, true);
         return this;
       });
   }
@@ -188,7 +204,7 @@ export class TokenManager {
    * Refresh the token
    * @ignore
    */
-  private refresh(auth: string): Promise<this> {
+  private refresh([auth, ...restAliases]: string[] = []): Promise<this> {
 
     const tokens = this.storage.getTokens(auth);
 
@@ -198,7 +214,7 @@ export class TokenManager {
 
     return this.obtainTokens(auth, this.refreshUrl, { refresh_token: tokens.refresh_token })
       .then((refreshedTokens) => {
-        this.storage.setTokens(auth, refreshedTokens);
+        [auth, ...restAliases].forEach((alias) =>  this.storage.setTokens(alias, refreshedTokens));
         return this;
       });
   }

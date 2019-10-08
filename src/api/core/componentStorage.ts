@@ -18,7 +18,7 @@ export interface IStorageComponent {
   /**
    * Return token pair by their alias
    * if alias not provided, returns the default pair
-   * @param auth {string} Authentication alias
+   * @param auth {string} Authentication alias or user email
    */
   getTokens(auth?: string): Tokens;
 
