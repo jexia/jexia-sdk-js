@@ -1,5 +1,4 @@
 import * as faker from "faker";
-import { MESSAGE } from "../config";
 import { IHTTPResponse, IRequestOptions, RequestAdapter } from "./requestAdapter";
 
 describe("Class: RequestAdapter", () => {
@@ -84,7 +83,7 @@ describe("Class: RequestAdapter", () => {
 
           expect(false).toBeTruthy();
         } catch (err) {
-          expect(err).toEqual(new Error(`${MESSAGE.CORE.BACKEND_ERROR}${status} ${statusText}`));
+          expect(err.httpStatus).toEqual({ code: status, status: statusText });
         }
       });
     });

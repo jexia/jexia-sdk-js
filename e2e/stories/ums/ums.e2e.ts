@@ -4,6 +4,7 @@ import * as Joi from "joi";
 import * as joiAssert from "joi-assert";
 import { IUMSUser } from "../../../src/api/ums/umsModule";
 import { LoggerModule, LogLevel } from "../../../src/node";
+import { BackendErrorSchema } from "../../lib/common";
 import { DatasetRecordSchema } from "../../lib/dataset";
 import { UserSchema } from "../../lib/ums";
 import { Management } from "../../management";
@@ -23,10 +24,6 @@ describe("User Management Service", () => {
   let user: IUMSUser;
 
   describe("initialize without API key", () => {
-
-    const wrongCredentialsError = new Error(
-      "There was an error on the back-end as a result of your request: 401 Unauthorized",
-    );
 
     beforeAll(async () => await initWithUMS());
 
@@ -63,7 +60,7 @@ describe("User Management Service", () => {
             done("should not be able to sign in with wrong credentials");
           })
           .catch((error) => {
-            expect(error).toEqual(wrongCredentialsError);
+            joiAssert(error, BackendErrorSchema);
             done();
           });
       });
@@ -76,7 +73,7 @@ describe("User Management Service", () => {
       beforeAll(async () => {
         await management.login();
         dataset = await management.createDataset("testUms");
-        await management.createDatasetField(dataset.id, "name", { type: "string" });
+        await management.createDatasetField(dataset.id, { name: "name", type: "string" });
         policy = await management.createPolicy([dataset], ["ums:<.*>"]);
       });
 
@@ -123,7 +120,7 @@ describe("User Management Service", () => {
         try {
           await ums.signIn(credentials);
         } catch (error) {
-          expect(error).toEqual(wrongCredentialsError);
+          joiAssert(error, BackendErrorSchema);
           done();
           return;
         }
@@ -145,8 +142,6 @@ describe("User Management Service", () => {
 
     describe("UMS user", () => {
 
-      const accessError = new Error("There was an error on the back-end as a result of your request: 403 Forbidden");
-
       it("should be able to sign-in", async () => {
         const token = await ums.signIn({ ...credentials, default: true });
         expect(token).toBeDefined();
@@ -158,7 +153,7 @@ describe("User Management Service", () => {
           .execute()
           .then(() => done("should not have access to the dataset"))
           .catch((err) => {
-            expect(err).toEqual(accessError);
+            joiAssert(err, BackendErrorSchema);
             done();
           });
       });
@@ -183,7 +178,7 @@ describe("User Management Service", () => {
           .execute()
           .then(() => done("should not have access to the dataset"))
           .catch((err) => {
-            expect(err).toEqual(accessError);
+            joiAssert(err, BackendErrorSchema);
             done();
           });
       });
@@ -195,7 +190,7 @@ describe("User Management Service", () => {
           .execute()
           .then(() => done("should not have access to the dataset"))
           .catch((err) => {
-            expect(err).toEqual(accessError);
+            joiAssert(err, BackendErrorSchema);
             done();
           });
       });

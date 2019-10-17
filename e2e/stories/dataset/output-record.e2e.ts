@@ -3,7 +3,8 @@ import * as Joi from "joi";
 import { Dataset } from "../../../src/api/dataops/dataset";
 import { cleaning, DEFAULT_DATASET, dom, init } from "../../teardowns";
 
-const joiAssert = Joi.assert;
+// tslint:disable-next-line:no-var-requires
+const joiAssert = require("joi-assert");
 
 jest.setTimeout(15000); // for unstable internet connection
 

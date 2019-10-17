@@ -6,10 +6,13 @@ import { api } from "./config";
 export type FieldType = "boolean" | "date" | "datetime" | "float" | "integer" | "json" | "string" | "uuid";
 
 export interface IFieldConstraints {
-  type?: "required";
+  type: "required" | "numeric" | "alpha" | "alphanumeric" | "uppercase" | "lowercase" | "min" | "max" | "min_length"
+  | "max_length" | "regexp";
+  value?: "true" | "false" | number | string;
 }
 
-export interface IFieldOptions {
+export interface ISetField {
+  name: string;
   type: FieldType;
   constraints?: IFieldConstraints[];
 }
@@ -26,7 +29,7 @@ const { AWS_KEY, AWS_SECRET, AWS_BUCKET } = process.env;
  */
 export class ManagementError extends Error {
 
-  public static formatError(res: Response): string {
+  public static formatError(res: Response, req: any): string {
     const title = chalk.yellow("There is an error happened during server request: ") +
       chalk.redBright(res.status.toString() + " " + res.statusText);
     const lane = new Array(title.length).fill("-").join("");
@@ -35,22 +38,24 @@ export class ManagementError extends Error {
       chalk.gray(lane),
       chalk.cyan("url: ") + chalk.yellowBright(res.url),
       chalk.cyan("Response body:") + " " + chalk.redBright(res.body.read() as string),
+      chalk.gray(lane),
+      chalk.cyan("Request:") + " " + chalk.redBright(JSON.stringify(req)),
     ].join("\n");
   }
 
-  constructor(private response: Response) {
+  constructor(private response: Response, private request: any) {
     super();
-    this.message = ManagementError.formatError(this.response);
+    this.message = ManagementError.formatError(this.response, this.request);
   }
 }
 
 export class Management {
 
-  public static checkStatus(res: Response) {
+  public static checkStatus(res: Response, init: any) {
     if (res.ok) {
       return res;
     } else {
-      throw new ManagementError(res);
+      throw new ManagementError(res, init);
     }
   }
 
@@ -96,14 +101,11 @@ export class Management {
     });
   }
 
-  public createDatasetField(datasetId: string, name: string, options: IFieldOptions): Promise<any> {
+  public createDatasetField(datasetId: string, field: ISetField): Promise<any> {
     return this.fetch(api.dataset.field.create.replace("{dataset_id}", datasetId), {
       method: "POST",
       headers: this.headers,
-      body: JSON.stringify({
-        name,
-        ...options
-      })
+      body: JSON.stringify(field)
     })
       .then((response: Response) => response.json());
   }
@@ -190,14 +192,11 @@ export class Management {
     });
   }
 
-  public createFilesetField(filesetId: string, name: string, options: IFieldOptions): Promise<any> {
+  public createFilesetField(filesetId: string, field: ISetField): Promise<any> {
     return this.fetch(api.fileset.field.create.replace("{fileset_id}", filesetId), {
       method: "POST",
       headers: this.headers,
-      body: JSON.stringify({
-        name,
-        ...options
-      })
+      body: JSON.stringify(field)
     })
       .then((response: Response) => response.json());
   }
@@ -232,6 +231,6 @@ export class Management {
   }
 
   private fetch(url: string, init: any = {}): Promise<Response> {
-    return fetch(url, init).then(Management.checkStatus);
+    return fetch(url, init).then((res) => Management.checkStatus(res, init));
   }
 }

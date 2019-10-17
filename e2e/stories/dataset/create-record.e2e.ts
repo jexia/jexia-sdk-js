@@ -7,7 +7,7 @@ const joiAssert = require("joi-assert");
 
 jest.setTimeout(15000); // for the unstable internet connection
 
-describe("create record REST API", async () => {
+describe("create record REST API", () => {
 
   beforeAll(async () => init());
 

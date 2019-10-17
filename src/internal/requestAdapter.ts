@@ -1,18 +1,13 @@
 import { Logger } from "../api/logger/logger";
-import { MESSAGE } from "../config";
-import { Fetch, IHTTPResponse, IRequestAdapter, IRequestOptions, RequestMethod } from "./requestAdapter.interfaces";
+import {
+  Fetch,
+  IHTTPResponse,
+  IRequestAdapter,
+  IRequestError,
+  IRequestOptions,
+  RequestMethod
+} from "./requestAdapter.interfaces";
 
-function status(response: IHTTPResponse): Promise<IHTTPResponse> {
-  if (!response.ok) {
-    throw new Error(`${MESSAGE.CORE.BACKEND_ERROR}${response.status} ${response.statusText}`);
-  }
-  return Promise.resolve(response);
-}
-
-function json(response: IHTTPResponse): Promise<any> {
-  // parses response body into JSON or return an empty object when it's empty
-  return response.text().then((text) => text ? JSON.parse(text) : {});
-}
 export class RequestAdapter implements IRequestAdapter {
 
   private logger: Logger = new Logger();
@@ -25,16 +20,19 @@ export class RequestAdapter implements IRequestAdapter {
 
   public execute<T = any>(uri: string, opt: IRequestOptions): Promise<T> {
     let logMessage = `(REQUEST) ${opt.method} ${uri} ${JSON.stringify(opt)}\n`;
-    return this.fetch(uri, {body: JSON.stringify(opt.body), headers: opt.headers, method: opt.method})
+    const requestOptions: IRequestOptions = {
+      body: JSON.stringify(opt.body),
+      headers: opt.headers,
+      method: opt.method
+    };
+    return this.fetch(uri, requestOptions)
       .then((response) => {
         logMessage += `(RESPONSE) ${response.status} ${response.statusText}`;
         this.logger.debug("RequestAdapter", logMessage);
         return response;
       })
       /* check response status */
-      .then(status)
-      /* convert body to JSON */
-      .then(json);
+      .then((response) => this.handleResponse(response, opt));
   }
 
   /**
@@ -52,9 +50,50 @@ export class RequestAdapter implements IRequestAdapter {
         return response;
       })
       /* check response status */
-      .then(status)
-      /* convert body to JSON */
-      .then(json);
+      .then((response) => this.handleResponse(response,
+        { body, headers, method: RequestMethod.POST }));
+  }
+
+  /**
+   * Analyze response and reject promise with IRequestError object if there is an error
+   * @internal
+   */
+  private handleResponse<T = any>(response: IHTTPResponse, request: IRequestOptions): Promise<T> {
+    return response.text().then((responseBody: string) => {
+      if (response.ok) {
+        return responseBody ? JSON.parse(responseBody) : {};
+      }
+      const error: IRequestError = {
+        ...this.fetchErrorMessage(responseBody),
+        request,
+        httpStatus: {
+          code: response.status,
+          status: response.statusText
+        }
+      };
+
+      return Promise.reject(error);
+    });
+  }
+
+  /**
+   * Fetch id and message from the body of the error response
+   * @internal
+   */
+  private fetchErrorMessage(body: string): { id: string; message: string } {
+    let id: string = "";
+    let message: string;
+    try {
+      /* there is always an array of errors but only the first matters */
+      const [ parsedBody ] = JSON.parse(body);
+      if (parsedBody.request_id) {
+        id = parsedBody.request_id;
+      }
+      message = parsedBody.message || parsedBody;
+    } catch (_) {
+      message = body;
+    }
+    return { id, message };
   }
 }
 

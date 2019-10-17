@@ -3,15 +3,16 @@ import * as Joi from "joi";
 import { field } from "../../../src";
 import { IFilteringCriterion, IFilteringCriterionCallback } from "../../../src/api/core/filteringApi";
 import { Fileset } from "../../../src/api/fileops/fileset";
+import { BackendErrorSchema } from "../../lib/common";
 import { FilesetRecordSchema } from "../../lib/fileset";
 import { cleaning, DEFAULT_FILESET, initWithJFS, jfs } from "../../teardowns";
-import { BAD_REQUEST_ERROR } from "./../../lib/utils";
 
-const joiAssert = Joi.assert;
+// tslint:disable-next-line:no-var-requires
+const joiAssert = require("joi-assert");
 
 jest.setTimeout(15000); // for unstable internet connection
 
-describe("filter records REST API", async () => {
+describe("filter records REST API", () => {
   let fileset: Fileset<any, any, any, any>;
 
   const FIELD = {
@@ -29,7 +30,7 @@ describe("filter records REST API", async () => {
         .where(condition)
         .execute();
 
-      joiAssert(selectResult, Joi.array().length(expectedLength));
+      expect(selectResult.length).toEqual(expectedLength);
     });
   }
 
@@ -41,30 +42,27 @@ describe("filter records REST API", async () => {
           .where(condition)
           .execute();
       } catch (e) {
-        joiAssert(e, BAD_REQUEST_ERROR);
+        joiAssert(e, BackendErrorSchema);
       }
     });
   }
 
   function setupData(testData: Array<{ data: any }>) {
-    beforeAll(async () => {
-      await fileset
-        .upload(testData)
-        .toPromise();
-    });
+    return fileset
+      .upload(testData)
+      .toPromise();
+  }
 
-    afterAll(async () => {
-      await fileset
-        .delete()
-        .execute();
-    });
+  function clearData() {
+    return fileset
+      .delete()
+      .where((field) => field("id").isNotNull())
+      .execute();
   }
 
   function test(
-    testData: Array<{ data: any }>,
     successTests: Array<{title: string; condition: Condition, expectedLength: number}>,
     failTests: Array<{title: string; condition: Condition}>) {
-    setupData(testData);
 
     successTests.forEach(({ title, condition, expectedLength }) => {
       testLength(title, condition, expectedLength);
@@ -160,7 +158,11 @@ describe("filter records REST API", async () => {
       { [fieldName]: false },
     ].map((data) => ({ data }));
 
-    test(testData, successTests, failTests);
+    beforeAll(async () => await setupData(testData));
+
+    afterAll(async () => await clearData());
+
+    test(successTests, failTests);
   });
 
   describe("when filtering integer types", () => {
@@ -239,7 +241,11 @@ describe("filter records REST API", async () => {
       { [fieldName]: 4 },
     ].map((data) => ({ data }));
 
-    test(testData, successTests, failTests);
+    beforeAll(async () => await setupData(testData));
+
+    afterAll(async () => await clearData());
+
+    test(successTests, failTests);
   });
 
   describe("when filtering float types", () => {
@@ -308,7 +314,11 @@ describe("filter records REST API", async () => {
       { [fieldName]: 6.7 },
     ].map((data) => ({ data }));
 
-    test(testData, successTests, failTests);
+    beforeAll(async () => await setupData(testData));
+
+    afterAll(async () => await clearData());
+
+    test(successTests, failTests);
   });
 
   describe("when filtering string types", () => {
@@ -383,7 +393,11 @@ describe("filter records REST API", async () => {
       { [fieldName]: "4th" },
     ].map((data) => ({ data }));
 
-    test(testData, successTests, failTests);
+    beforeAll(async () => await setupData(testData));
+
+    afterAll(async () => await clearData());
+
+    test(successTests, failTests);
   });
 
   describe("when setting range", () => {
@@ -396,8 +410,9 @@ describe("filter records REST API", async () => {
       { [FIELD.STRING]: "6th" },
     ].map((data) => ({ data }));
 
-    // init beforeAll/AfterAll hooks
-    setupData(testData);
+    beforeAll(async () => await setupData(testData));
+
+    afterAll(async () => await clearData());
 
     it("should return less items when limit is lower than total of results", async () => {
       const result = await fileset
@@ -405,7 +420,7 @@ describe("filter records REST API", async () => {
         .limit(2)
         .execute();
 
-      joiAssert(result, Joi.array().length(2));
+      expect(result.length).toEqual(2);
     });
 
     it("should return all items when limit is higher than total of results", async () => {
@@ -414,7 +429,7 @@ describe("filter records REST API", async () => {
         .limit(10)
         .execute();
 
-      joiAssert(result, Joi.array().length(testData.length));
+      expect(result.length).toEqual(testData.length);
     });
 
     it(`should split results when setting limit/offset`, async () => {
@@ -450,8 +465,9 @@ describe("filter records REST API", async () => {
     );
     let sortField: string;
 
-    // init beforeAll/AfterAll hooks
-    setupData(testData.map((data) => ({ data })));
+    beforeAll(async () => await setupData(testData.map((data) => ({ data }))));
+
+    afterAll(async () => await clearData());
 
     function byFieldAsc(a: any, b: any) {
       if (a[sortField] > b[sortField]) { return 1; }

@@ -4,11 +4,12 @@ import { field } from "../../../src";
 import { cleaning, DEFAULT_DATASET, dom, init } from "../../teardowns";
 import { BAD_REQUEST_ERROR } from "./../../lib/utils";
 
-const joiAssert = Joi.assert;
+// tslint:disable-next-line:no-var-requires
+const joiAssert = require("joi-assert");
 
 jest.setTimeout(15000); // for the unstable internet connection
 
-describe("delete record REST API", async () => {
+describe("delete record REST API", () => {
   const getDataSet = () => dom.dataset(DEFAULT_DATASET.NAME);
 
   beforeAll(async () => init());
