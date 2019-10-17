@@ -2,11 +2,12 @@ import * as faker from "faker";
 import * as Joi from "joi";
 import { field } from "../../../src";
 import { Fileset } from "../../../src/api/fileops/fileset";
+import { BackendErrorSchema } from "../../lib/common";
 import { FilesetRecordSchema } from "../../lib/fileset";
 import { cleaning, DEFAULT_DATASET, DEFAULT_FILESET, initWithJFS, jfs } from "../../teardowns";
-import { BAD_REQUEST_ERROR } from "./../../lib/utils";
 
-const joiAssert = Joi.assert;
+// tslint:disable-next-line:no-var-requires
+const joiAssert = require("joi-assert");
 
 jest.setTimeout(15000); // for the unstable internet connection
 
@@ -86,7 +87,7 @@ describe("update record REST API", async () => {
         .where(field("id").isEqualTo("invalid"))
         .execute();
     } catch (e) {
-      joiAssert(e, BAD_REQUEST_ERROR);
+      joiAssert(e, BackendErrorSchema);
     }
   });
 

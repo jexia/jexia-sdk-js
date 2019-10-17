@@ -65,8 +65,8 @@ export class Channel<T = any> extends Observable<RealTimeEventMessage<T>> {
       wsReadyDefer.promise.then(() => {
         return realTimeCommand(this.websocketFactory(), {
           command: RealTimeCommandTypes.Publish,
-          arguments: { channel: this.name, data },
           correlation_id: Math.random().toString(),
+          arguments: { channel: this.name, data },
         });
       })
     );

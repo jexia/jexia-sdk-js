@@ -1,15 +1,16 @@
 import * as faker from "faker";
 import * as Joi from "joi";
 import { Dataset, field } from "../../../src";
+import { BackendErrorSchema } from "../../lib/common";
 import { DatasetRecordSchema } from "../../lib/dataset";
 import { cleaning, DEFAULT_DATASET, dom, init } from "../../teardowns";
-import { BAD_REQUEST_ERROR } from "./../../lib/utils";
 
-const joiAssert = Joi.assert;
+// tslint:disable-next-line:no-var-requires
+const joiAssert = require("joi-assert");
 
 jest.setTimeout(15000); // for the unstable internet connection
 
-describe("update record REST API", async () => {
+describe("update record REST API", () => {
   let dataset: Dataset;
 
   beforeAll(async () => {
@@ -81,7 +82,7 @@ describe("update record REST API", async () => {
         .where(field("id").isEqualTo("invalid"))
         .execute();
     } catch (e) {
-      joiAssert(e, BAD_REQUEST_ERROR);
+      joiAssert(e, BackendErrorSchema);
     }
   });
 

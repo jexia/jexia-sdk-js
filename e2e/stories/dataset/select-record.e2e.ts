@@ -3,15 +3,16 @@ import * as Joi from "joi";
 import { field } from "../../../src";
 import { IFilteringCriterion, IFilteringCriterionCallback } from "../../../src/api/core/filteringApi";
 import { Dataset } from "../../../src/api/dataops/dataset";
+import { BackendErrorSchema } from "../../lib/common";
 import { DatasetRecordSchema } from "../../lib/dataset";
 import { cleaning, DEFAULT_DATASET, dom, init } from "../../teardowns";
-import { BAD_REQUEST_ERROR } from "./../../lib/utils";
 
-const joiAssert = Joi.assert;
+// tslint:disable-next-line:no-var-requires
+const joiAssert = require("joi-assert");
 
 jest.setTimeout(15000); // for unstable internet connection
 
-describe("filter records REST API", async () => {
+describe("filter records REST API", () => {
   let dataset: Dataset<any>;
 
   const FIELD = {
@@ -47,7 +48,7 @@ describe("filter records REST API", async () => {
           .where(condition)
           .execute();
       } catch (e) {
-        joiAssert(e, BAD_REQUEST_ERROR);
+        joiAssert(e, BackendErrorSchema);
       }
     });
   }
@@ -62,6 +63,7 @@ describe("filter records REST API", async () => {
     afterAll(async () => {
       await dataset
         .delete()
+        .where((field) => field("id").isNotNull())
         .execute();
     });
   }
@@ -489,12 +491,19 @@ describe("filter records REST API", async () => {
             .select()
             .fields(fieldName)
             .where(condition)
-            .execute();
+            .execute()
+            /* Make date field to be Date object since ISO format difference
+               2022-03-22T10:21:59.470Z ==> 2022-03-22T10:21:59.47Z
+             */
+            .then((result) => result.map((record) => {
+              record[fieldName] = new Date(record[fieldName]);
+              return record;
+            }));
 
           const expectedResult = Joi
             .array()
             .items(RecordSchema.append({
-              [fieldName]: Joi.string().valid(validValues),
+              [fieldName]: Joi.date().valid(validValues.map((d) => new Date(d))),
             }))
             .length(validValues.length);
 

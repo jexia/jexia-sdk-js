@@ -26,8 +26,8 @@ export function createPublishMessage(channel: string, data: any, correlationId: 
     type: RealTimeMessageTypes.Command,
     data: {
       command: RealTimeCommandTypes.Publish,
-      arguments: { channel, data },
-      correlation_id: correlationId
+      correlation_id: correlationId,
+      arguments: { channel, data }
     }
   };
 }

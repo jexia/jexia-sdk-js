@@ -9,7 +9,7 @@ import {
   realTime,
   UMSModule
 } from "../src/node";
-import { FieldType, Management } from "./management";
+import { FieldType, ISetField, Management } from "./management";
 
 export const dom = dataOperations();
 
@@ -33,7 +33,7 @@ export const DEFAULT_FILESET = { NAME: "test_fileset", FIELD: "test_field" };
 
 export const init = async (
   datasetName = DEFAULT_DATASET.NAME,
-  fields: Array<{ name: string, type: FieldType }> = [],
+  fields: ISetField[] = [],
   modules: IModule[] = [dom, rtm, new LoggerModule(LogLevel.ERROR)]) => {
 
   await management.login();
@@ -42,16 +42,17 @@ export const init = async (
   datasets.push(dataset);
 
   if (!fields.length) {
-    await management.createDatasetField(dataset.id, DEFAULT_DATASET.FIELD, {
+    await management.createDatasetField(dataset.id, {
+      name: DEFAULT_DATASET.FIELD,
       type: "string",
       constraints: [
         { type: "required" },
       ]
     });
   } else {
-    fields.forEach(async (field) => await management.createDatasetField(dataset.id, field.name, {
-      type: field.type,
-    }));
+    for (let field of fields) {
+      await management.createDatasetField(dataset.id, field);
+    }
   }
 
   apiKey = await management.createApiKey();
@@ -113,9 +114,9 @@ export const initWithJFS = async (filesetName: string = "testFileset",
   fileset = await management.createFileset(filesetName);
 
   if (fields) {
-    fields.forEach(async (field) => await management.createFilesetField(fileset.id, field.name, {
-      type: field.type,
-    }));
+    for (let field of fields) {
+      await management.createFilesetField(fileset.id, field);
+    }
   }
 
   apiKey = await management.createApiKey();
@@ -132,15 +133,15 @@ export const initForRelations = async () => {
   await management.login();
 
   let posts = await management.createDataset("posts");
-  await management.createDatasetField(posts.id, "title", { type: "string" });
-  await management.createDatasetField(posts.id, "text", { type: "string" });
+  await management.createDatasetField(posts.id, { name: "title", type: "string" });
+  await management.createDatasetField(posts.id, { name: "text", type: "string" });
 
   let comments = await management.createDataset("comments");
-  await management.createDatasetField(comments.id, "message", { type: "string" });
-  await management.createDatasetField(comments.id, "like", { type: "boolean" });
+  await management.createDatasetField(comments.id, { name: "message", type: "string" });
+  await management.createDatasetField(comments.id, { name: "like", type: "boolean" });
 
   let author = await management.createDataset("author");
-  await management.createDatasetField(author.id, "email", { type: "string" });
+  await management.createDatasetField(author.id, { name: "email", type: "string" });
 
   relations.push(
     await management.createRelation(posts, comments),

@@ -2,9 +2,9 @@ import * as faker from "faker";
 import * as Joi from "joi";
 // @ts-ignore
 import * as joiAssert from "joi-assert";
+import { BackendErrorSchema } from "../../lib/common";
 import { DatasetRecordSchema } from "../../lib/dataset";
 import { cleaning, dom, initForRelations } from "../../teardowns";
-import { BAD_REQUEST_ERROR } from "./../../lib/utils";
 
 jest.setTimeout(15000);
 
@@ -117,7 +117,7 @@ describe("Attach/detach related resources", () => {
 
           joiAssert(true, false, "should not reach this line");
         } catch (e) {
-          joiAssert(e, BAD_REQUEST_ERROR);
+          joiAssert(e, BackendErrorSchema);
         }
       });
     });
@@ -135,7 +135,7 @@ describe("Attach/detach related resources", () => {
 
           joiAssert(true, false, "should not reach this line");
         } catch (e) {
-          joiAssert(e, BAD_REQUEST_ERROR);
+          joiAssert(e, BackendErrorSchema);
         }
       });
     });
@@ -237,7 +237,7 @@ describe("Attach/detach related resources", () => {
 
           joiAssert(true, false, "should not reach this line");
         } catch (e) {
-          joiAssert(e, BAD_REQUEST_ERROR);
+          joiAssert(e, BackendErrorSchema);
         }
       });
     });
