@@ -1,3 +1,10 @@
+## [4.2.3](https://github.com/jexia/jexia-sdk-js/compare/v4.2.2...v4.2.3) (2019-10-18)
+
+
+### Bug Fixes
+
+* **request:** remake backend error format ([4f83058](https://github.com/jexia/jexia-sdk-js/commit/4f83058))
+
 ## [4.2.2](https://github.com/jexia/jexia-sdk-js/compare/v4.2.1...v4.2.2) (2019-10-09)
 
 
