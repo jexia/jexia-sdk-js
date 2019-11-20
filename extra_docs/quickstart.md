@@ -80,10 +80,10 @@ jexiaClient().init(credentials, dataModule);
 dataModule.dataset("posts")
   .select()
   .execute()
-  .then((data) => {
+  .then(data => {
     // you have been succesfully logged in!
     // you can start using the dataModule variable to operate on records here
-  }).catch((error) => {
+  }).catch(error => {
     // uh-oh, there was a problem logging in, check the error.message for more info
   });
 ```
@@ -96,9 +96,9 @@ The `Client` class exposes a method called `.terminate()`. Use this to clear up 
 [..]
 client
   .terminate()
-  .then((terminatedClient) => {
+  .then(terminatedClient => {
     // everything has been cleared
-  }).catch((error) => {
+  }).catch(error => {
     // something went wrong when cleaning up
   });
 [..]

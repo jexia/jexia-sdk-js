@@ -243,7 +243,7 @@ Or even using filter criterion (More details in [Filtering records](dataset-oper
 ```typescript
   // a callback that will receive "field" function
   dom.dataset("posts")
-    .attach("comments", (field) => field("id").isInArray(commentsIds));
+    .attach("comments", field => field("id").isInArray(commentsIds));
 
   // an exposed "field" function
   dom.dataset("posts")
@@ -258,8 +258,8 @@ Full example using a callback:
   const commentsIds = comments.map(comment => comment.id);
 
   await dom.dataset("posts")
-    .attach("comments", (field) => field("id").isInArray(commentsIds))
-    .where((field) => field("id").isEqualTo(firstPost.id)) // required for both attach/detach, otherwise an error will be thrown
+    .attach("comments", field => field("id").isInArray(commentsIds))
+    .where(field => field("id").isEqualTo(firstPost.id)) // required for both attach/detach, otherwise an error will be thrown
     .execute();
 
   // attach operation doesn't return any data, so we need to call .select()
@@ -288,8 +288,8 @@ similar to `.attach()`, call `.detach()`:
 
 ```typescript
   await dom.dataset("posts")
-    .detach("comments", (field) => field("like").isEqualTo(false)) // detach comments with unlike from the post
-    .where((field) => field("id").isEqualTo(firstPost.id))
+    .detach("comments", field => field("like").isEqualTo(false)) // detach comments with unlike from the post
+    .where(field => field("id").isEqualTo(firstPost.id))
     .execute();
 
   const postsWithNoUnlikeComments = await dom.dataset("posts")

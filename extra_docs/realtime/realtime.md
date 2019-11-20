@@ -30,9 +30,9 @@ Here is an example of usage:
 ``` javascript
 const subscription = dataModule.dataset("posts")
   .watch("created", "deleted")
-  .subscribe((messageObject) => {
-    console.log("Realtime message received:", messageObject.data.title);
-  }, (error) => {
+  .subscribe(messageObject => {
+    console.log("Realtime message received:", messageObject.data);
+  }, error => {
     console.log(error);
   });
 ```

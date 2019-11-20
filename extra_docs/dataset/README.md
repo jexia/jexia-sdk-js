@@ -41,9 +41,9 @@ const insertQuery = posts.insert({
 // Either way, the response will be an array
 insertQuery
   .execute()
-  .then((records) => {
+  .then(records => {
     // you will always get an array of created records, including their generated IDs (even when inserting a single record)
-  }).catch((error) => {
+  }).catch(error => {
     // you can see the error info here, if something goes wrong
   });
 [..]
