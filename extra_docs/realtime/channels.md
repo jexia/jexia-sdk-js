@@ -108,10 +108,10 @@ Some errors can happen during communications - channel might have not been creat
 In this example there is no such channel:
 ```javascript
 rtm.channel("my_camel").subscribe(
-  (message) => {
+  message => {
     console.log(message); // we've got a message from the channel
   },
-  (error) => {
+  error => {
     console.log(error); // Subscription Error: (1001): resource "my_camel" is unavailable
   },
   () => { // complete
@@ -123,10 +123,10 @@ rtm.channel("my_camel").subscribe(
 You tries to get channel history, but policy does not allow you to read from the channel:
 ```javascript
 rtm.channel("not_my_channel").getLog().subscribe(
-  (messages) => {
+  messages => {
     console.log(messages); 
   },
-  (error) => {
+  error => {
     console.log(error); // Subscription Error: (2): none of the given actions ["read"] for this resource are allowed
   }
 );

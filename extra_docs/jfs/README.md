@@ -202,7 +202,7 @@ Update fileset in the same way as dataset. Updating a fileset record with new fi
 ```typescript  
 await jfs.fileset("fileset_name")  
  .update({ "isDefaultImage": false })  
-.where(field => field("name").isEqualTo("companyLogo.png"))
+ .where(field => field("name").isEqualTo("companyLogo.png"))
  .execute();  
 ```  
 #### Delete query
