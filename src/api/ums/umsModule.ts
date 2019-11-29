@@ -29,6 +29,13 @@ export class UMSModule implements IModule {
 
   private projectId: string;
 
+  constructor() {
+    /* users tend to init module without a new operator, throw a hint error */
+    if (!(this instanceof UMSModule)) {
+      throw "UMS module initialized incorrectly, you need to include 'new'";
+    }
+  }
+
   public init(coreInjector: ReflectiveInjector) {
     this.tokenManager = coreInjector.get(TokenManager);
     this.requestAdapter = coreInjector.get(RequestAdapter);
