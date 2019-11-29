@@ -77,6 +77,10 @@ describe("UMS Module", () => {
       expect((subject as any).projectId).toEqual(projectID);
     });
 
+    it("should throw correct error if initialized incorrectly", () => {
+      expect(() => (UMSModule as any)()).toThrow("UMS module initialized incorrectly, you need to include 'new'");
+    });
+
   });
 
   describe("when gets a module config", () => {
