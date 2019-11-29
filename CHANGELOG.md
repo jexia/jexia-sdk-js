@@ -1,3 +1,10 @@
+## [4.2.4](https://github.com/jexia/jexia-sdk-js/compare/v4.2.3...v4.2.4) (2019-11-29)
+
+
+### Bug Fixes
+
+* **ums:** throw an error if module initialized incorrectly ([#133](https://github.com/jexia/jexia-sdk-js/issues/133)) ([0887731](https://github.com/jexia/jexia-sdk-js/commit/0887731))
+
 ## [4.2.3](https://github.com/jexia/jexia-sdk-js/compare/v4.2.2...v4.2.3) (2019-10-18)
 
 
