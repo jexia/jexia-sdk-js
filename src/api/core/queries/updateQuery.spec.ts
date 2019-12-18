@@ -42,7 +42,7 @@ describe("QueryRequest class", () => {
       requestExecuterMock: createRequestExecuterMock() as SpyObj<RequestExecuter>,
     });
     spyOn(requestExecuterMock, "executeRequest");
-    subject.execute();
+    subject.subscribe();
     expect(requestExecuterMock.executeRequest).toHaveBeenLastCalledWith(subject["compiledRequest"]);
   });
 });

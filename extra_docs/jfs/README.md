@@ -187,10 +187,10 @@ These fields, as well as any custom fields, can be used for select queries (but 
 
 #### Select query
 ```typescript  
-const files = await jfs.fileset("fileset_name")  
+jfs.fileset("fileset_name")  
  .select("name", "url")  
  .where(field => field("size").isGreaterThan(1024000))  
- .execute();  
+ .subscribe();  
   
 // array of files that fit to the condition will be returned  
 // files === [{ name: "file1.jpj", url: "https://..." }, {...}, ...]  
@@ -200,15 +200,15 @@ const files = await jfs.fileset("fileset_name")
 Update fileset in the same way as dataset. Updating a fileset record with new file is not supported.
   
 ```typescript  
-await jfs.fileset("fileset_name")  
+jfs.fileset("fileset_name")  
  .update({ "isDefaultImage": false })  
  .where(field => field("name").isEqualTo("companyLogo.png"))
- .execute();  
+ .subscribe();  
 ```  
 #### Delete query
 ```typescript  
-await jfs.fileset("fileset_name")  
+jfs.fileset("fileset_name")  
  .delete()  
  .where(field => field("size").isGreaterThan(1024000))  
- .execute();  
+ .subscribe();  
 ```

@@ -68,7 +68,7 @@ describe("ActionQuery class", () => {
       filter,
     );
 
-    subject.execute();
+    subject.subscribe();
 
     expect(requestExecuterMock.executeRequest).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -95,7 +95,7 @@ describe("ActionQuery class", () => {
       field("id").isInArray(fakeIdsList),
     );
 
-    subject.execute();
+    subject.subscribe();
 
     expect(requestExecuterMock.executeRequest).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -124,7 +124,7 @@ describe("ActionQuery class", () => {
       field("id").isInArray(ids),
     );
 
-    subject.execute();
+    subject.subscribe();
 
     expect(requestExecuterMock.executeRequest).toHaveBeenLastCalledWith(
       expect.objectContaining({

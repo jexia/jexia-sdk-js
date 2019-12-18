@@ -20,7 +20,7 @@ import { BaseQuery } from "./baseQuery";
  * @template T Generic type of your dataset, default to any
  * @template D Extended dataset type with default fields (i.e id, created_at, updated_at)
  */
-export class InsertQuery<T, D extends T> extends BaseQuery<T> {
+export class InsertQuery<T, D extends T> extends BaseQuery<D> {
   /**
    * @inheritdoc
    */
@@ -32,18 +32,5 @@ export class InsertQuery<T, D extends T> extends BaseQuery<T> {
   public constructor(queryExecuter: RequestExecuter, records: T[], resourceType: ResourceType, resourceName: string) {
     super(queryExecuter, RequestMethod.POST, resourceType, resourceName);
     this.body = records;
-  }
-
-  /**
-   * Overload parent execute request to call rest API
-   * @returns {Promise<D[]>}
-   */
-  public execute(): Promise<D[]> {
-    return this.queryExecuter.executeRequest({
-      resourceType: this.resourceType,
-      resourceName: this.resourceName,
-      method: this.method,
-      body: this.body,
-    });
   }
 }
