@@ -72,6 +72,23 @@ export class DataOperationsModule implements IModule {
     ]).get(Dataset);
   }
 
+  /* tslint:disable:max-line-length */
+  public datasets<A extends {}, B extends {}>(datasets: [string, string], auth?: string): [Dataset<A>, Dataset<B>];
+  public datasets<A extends {}, B extends {}, C extends {}>(datasets: [string, string, string], auth?: string): [Dataset<A>, Dataset<B>, Dataset<C>];
+  public datasets<A extends {}, B extends {}, C extends {}, D extends {}>(datasets: [string, string, string, string], auth?: string): [Dataset<A>, Dataset<B>, Dataset<C>, Dataset<D>];
+  public datasets<A extends {}, B extends {}, C extends {}, D extends {}, E extends {}>(datasets: [string, string, string, string, string], auth?: string): [Dataset<A>, Dataset<B>, Dataset<C>, Dataset<D>, Dataset<E>];
+  public datasets<A extends {}, B extends {}, C extends {}, D extends {}, E extends {}, F extends {}>(datasets: [string, string, string, string, string, string], auth?: string): [Dataset<A>, Dataset<B>, Dataset<C>, Dataset<D>, Dataset<E>, Dataset<F>];
+  public datasets(datasets: string[], auth?: string): Dataset[];
+
+  /**
+   * Generates a list of datasets by given array of dataset names
+   * @param datasets array of dataset names
+   * @param auth optional user authorization alias
+   */
+  public datasets(datasets: string[], auth?: string) {
+    return datasets.map((dataset) => this.dataset(dataset, auth));
+  }
+
   /**
    * @internal
    */

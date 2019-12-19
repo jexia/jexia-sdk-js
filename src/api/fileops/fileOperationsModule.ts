@@ -71,6 +71,28 @@ export class FileOperationsModule<FormDataType extends IFormData<F>, F> implemen
     return injector.get(Fileset);
   }
 
+  /* tslint:disable:max-line-length */
+  public filesets<A extends {}, B extends {}>(filesets: [string, string], auth?: string):
+    [Fileset<FormDataType, A, FilesetInterface<A>, F>, Fileset<FormDataType, B, FilesetInterface<B>, F>];
+  public filesets<A extends {}, B extends {}, C extends {}>(filesets: [string, string, string], auth?: string):
+    [Fileset<FormDataType, A, FilesetInterface<A>, F>, Fileset<FormDataType, B, FilesetInterface<B>, F>, Fileset<FormDataType, C, FilesetInterface<C>, F>];
+  public filesets<A extends {}, B extends {}, C extends {}, D extends {}>(filesets: [string, string, string, string], auth?: string):
+    [Fileset<FormDataType, A, FilesetInterface<A>, F>, Fileset<FormDataType, B, FilesetInterface<B>, F>, Fileset<FormDataType, C, FilesetInterface<C>, F>, Fileset<FormDataType, D, FilesetInterface<D>, F>];
+  public filesets<A extends {}, B extends {}, C extends {}, D extends {}, E extends {}>(filesets: [string, string, string, string, string], auth?: string):
+    [Fileset<FormDataType, A, FilesetInterface<A>, F>, Fileset<FormDataType, B, FilesetInterface<B>, F>, Fileset<FormDataType, C, FilesetInterface<C>, F>, Fileset<FormDataType, D, FilesetInterface<D>, F>, Fileset<FormDataType, E, FilesetInterface<E>, F>];
+  public filesets<A extends {}, B extends {}, C extends {}, D extends {}, E extends {}, G extends {}>(filesets: [string, string, string, string, string, string], auth?: string):
+    [Fileset<FormDataType, A, FilesetInterface<A>, F>, Fileset<FormDataType, B, FilesetInterface<B>, F>, Fileset<FormDataType, C, FilesetInterface<C>, F>, Fileset<FormDataType, D, FilesetInterface<D>, F>, Fileset<FormDataType, E, FilesetInterface<E>, F>, Fileset<FormDataType, G, FilesetInterface<G>, F>];
+  public filesets(filesets: string[], auth?: string): Array<Fileset<FormDataType, any, FilesetInterface<any>, F>>;
+
+  /**
+   * Generates a list of filesets by given array of Fileset names
+   * @param filesets array of Fileset names
+   * @param auth optional user authorization alias
+   */
+  public filesets(filesets: string[], auth?: string) {
+    return filesets.map((fileset) => this.fileset(fileset, auth));
+  }
+
   public terminate(): Promise<this> {
     return Promise.resolve(this);
   }

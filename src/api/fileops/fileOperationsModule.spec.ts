@@ -66,6 +66,21 @@ describe("File Operations Module", () => {
     });
   });
 
+  describe("when gets a list of filesets", () => {
+    it("should return correct fileset list", async () => {
+      const { subject, moduleInit } = createSubject();
+      await moduleInit();
+
+      const names = ["f1", "f2", "f3"];
+      const filesets = subject.filesets(names);
+
+      filesets.forEach((fileset, index) => {
+        expect(fileset).toBeInstanceOf(Fileset);
+        expect(fileset.name).toEqual(names[index]);
+      });
+    });
+  });
+
   describe("when terminating", () => {
     it("should resolve automatically", async () => {
       const { subject } = createSubject();
