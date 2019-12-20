@@ -157,7 +157,7 @@ describe("SelectQuery class", () => {
     const { subject } = createSubject();
     subject.fields("id");
     spyOn(subject["queryExecuter"], "executeRequest");
-    subject.execute();
+    subject.subscribe();
     expect(subject["queryExecuter"].executeRequest).toHaveBeenLastCalledWith((subject as any).compiledRequest);
   });
 

@@ -27,12 +27,13 @@ describe("InsertQuery class", () => {
 
   it("should execute the query with the correct parameters", () => {
     spyOn(qe, "executeRequest");
-    subject.execute();
+    subject.subscribe();
     expect(qe.executeRequest).toHaveBeenLastCalledWith({
       method: RequestMethod.POST,
       body: [fakeRecord],
       resourceType,
-      resourceName
+      resourceName,
+      queryParams: []
     });
   });
 });

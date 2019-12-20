@@ -1,3 +1,4 @@
+import { Observable } from "rxjs";
 import { RequestExecuter } from "../../../internal/executer";
 import { IRequestExecuterData } from "../../../internal/executer.interfaces";
 import { IAggField, Query } from "../../../internal/query";
@@ -12,8 +13,9 @@ import { ResourceType } from "../resource";
  * the all kinds of queries
  *
  * @template T Generic type of dataset, inherited from dataset object
+ * @template D Extended dataset type with default fields (i.e id, created_at, updated_at)
  */
-export abstract class BaseQuery<T> {
+export abstract class BaseQuery<T, D extends T = any> extends Observable<T[]> {
   /**
    * @internal
    */
@@ -22,7 +24,7 @@ export abstract class BaseQuery<T> {
    * Body of request
    * @returns T | T[]
    */
-  protected abstract get body(): T | T[] | null;
+  protected abstract get body(): T | T[] | D | D[] | null;
 
   protected constructor(
       protected queryExecuter: RequestExecuter,
@@ -30,6 +32,15 @@ export abstract class BaseQuery<T> {
       protected readonly resourceType: ResourceType,
       protected readonly resourceName: string,
   ) {
+    super((subscriber) => {
+      this.queryExecuter.executeRequest(this.compiledRequest)
+        .then((result: T[]) => {
+          subscriber.next(result);
+          subscriber.complete();
+        })
+        .catch((reason) => subscriber.error(reason));
+    });
+
     this.query = new Query<T>();
   }
 
@@ -64,8 +75,12 @@ export abstract class BaseQuery<T> {
   /**
    * Execute this query
    * @returns Result of this operation with the affected data
+   * @deprecated Use subscribe() instead
    */
   public execute(): Promise<T[]> {
+    console.warn("=============================================");
+    console.warn(" execute() method is DEPRECATED.\n Please, consider using .subscribe() instead");
+    console.warn("=============================================");
     return this.queryExecuter.executeRequest(this.compiledRequest);
   }
 }

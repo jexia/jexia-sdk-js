@@ -20,7 +20,15 @@ const createSubject = ({
   method = DEFAULT_REQUEST_METHOD,
   resourceName = RESOURCE_NAME,
   resourceType = RESOURCE_TYPE,
-  requestExecuterMock = createMockFor(RequestExecuter),
+  requestExecutorResult = [{ field: faker.random.word() }],
+  requestExecutorError = null,
+  requestExecuterMock = createMockFor(RequestExecuter, {
+    returnValue: new Promise((res, rej) => {
+      requestExecutorError
+        ? rej(requestExecutorError)
+        : res(requestExecutorResult);
+    }),
+  }),
 } = {}) => {
   // Declare child class as long as BaseQuery class is abstract
   class BaseQueryChild<T> extends BaseQuery<T> {
@@ -37,6 +45,8 @@ const createSubject = ({
     resourceType,
     subject,
     requestExecuterMock,
+    requestExecutorResult,
+    requestExecutorError,
   };
 };
 
@@ -167,10 +177,60 @@ describe("compiledRequest method", () => {
   });
 });
 
-describe("execute method", () => {
-  it("should call queryExecuter.executeRestRequest()", () => {
-    let { subject, requestExecuterMock } = createSubject();
-    subject.execute();
+describe("query as observable", () => {
+  it("should not execute request if there is no subscriber", () => {
+    const { requestExecuterMock } = createSubject();
+
+    expect(requestExecuterMock.executeRequest).not.toHaveBeenCalled();
+  });
+
+  it("should execute request once there is a subscriber", () => {
+    const { subject, requestExecuterMock } = createSubject();
+
+    subject.subscribe();
+
     expect(requestExecuterMock.executeRequest).toHaveBeenCalled();
+  });
+
+  it("should emit query execution result to the subscriber", (done) => {
+    const { subject, requestExecutorResult } = createSubject();
+
+    subject.subscribe((result) => {
+      expect(result).toEqual(requestExecutorResult);
+      done();
+    });
+  });
+
+  it("should complete an observable once result is obtained", (done) => {
+    const { subject } = createSubject();
+
+    const completeSpy = jasmine.createSpy("completeSpy");
+
+    subject.subscribe({ complete: () => {
+      completeSpy();
+      expect(completeSpy).toHaveBeenCalled();
+      done();
+    }});
+  });
+
+  it("should throw an error to the subscriber", (done) => {
+    const { subject, requestExecutorError } = createSubject({
+      requestExecutorError: new Error(faker.lorem.sentence()) as any });
+
+    subject.subscribe({ error: (error) => {
+      expect(error).toEqual(requestExecutorError);
+      done();
+    }});
+  });
+
+  it("should execute requests as many times as many subscribers are", () => {
+    const { subject, requestExecuterMock } = createSubject();
+    const times = faker.random.number({ min: 3, max: 10 });
+
+    for (let i = 0; i < times; i++) {
+      subject.subscribe();
+    }
+
+    expect(requestExecuterMock.executeRequest).toHaveBeenCalledTimes(times);
   });
 });
