@@ -1,5 +1,4 @@
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
-const webpack = require("webpack");
+const TerserPlugin = require('terser-webpack-plugin');
 const path = require("path");
 
 const SRC_PATH = "../src";
@@ -39,7 +38,7 @@ const minify = {
     filename: "[name].umd.min.js",
   },
   plugins: [
-    new UglifyJsPlugin({
+    new TerserPlugin({
       extractComments: true,
     }),
   ],
