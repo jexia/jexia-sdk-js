@@ -2,7 +2,7 @@ version: 2
 jobs:
   test:
     docker:
-      - image: circleci/node:8.9.0
+      - image: circleci/node:8.16.0
     steps:
       - checkout
       - run: DISABLE_OPENCOLLECTIVE=true
@@ -21,7 +21,7 @@ jobs:
       - run: npm run build
   deploy:
     docker:
-      - image: circleci/node:8.9.0
+      - image: circleci/node:8.16.0
     steps:
       - checkout
       - run: DISABLE_OPENCOLLECTIVE=true
