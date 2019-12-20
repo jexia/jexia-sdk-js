@@ -1,3 +1,10 @@
+# [4.3.0](https://github.com/jexia/jexia-sdk-js/compare/v4.2.4...v4.3.0) (2019-12-20)
+
+
+### Features
+
+* **queries:** migrate data queries to the observables ([#134](https://github.com/jexia/jexia-sdk-js/issues/134)) ([bd8143f](https://github.com/jexia/jexia-sdk-js/commit/bd8143f))
+
 ## [4.2.4](https://github.com/jexia/jexia-sdk-js/compare/v4.2.3...v4.2.4) (2019-11-29)
 
 
