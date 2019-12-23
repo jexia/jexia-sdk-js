@@ -1,3 +1,10 @@
+# [4.4.0](https://github.com/jexia/jexia-sdk-js/compare/v4.3.0...v4.4.0) (2019-12-23)
+
+
+### Features
+
+* **sets:** allow to initiate a list of resources at a time ([#135](https://github.com/jexia/jexia-sdk-js/issues/135)) ([556d9f9](https://github.com/jexia/jexia-sdk-js/commit/556d9f92a5037d537bede5ad1015b6fa556774dd))
+
 # [4.3.0](https://github.com/jexia/jexia-sdk-js/compare/v4.2.4...v4.3.0) (2019-12-20)
 
 
