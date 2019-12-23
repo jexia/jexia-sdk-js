@@ -49,6 +49,21 @@ describe("Real Time Module", () => {
 
   });
 
+  describe("when gets a list of datasets", () => {
+    it("should return correct dataset list", async () => {
+      const { subject, moduleInit } = createSubject();
+      await moduleInit();
+
+      const names = ["d1", "d2", "d3"];
+      const datasets = subject.datasets(names);
+
+      datasets.forEach((dataset, index) => {
+        expect(dataset).toBeInstanceOf(Dataset);
+        expect(dataset.name).toEqual(names[index]);
+      });
+    });
+  });
+
   describe("when gets a module config", () => {
 
     it("should return an empty config", () => {

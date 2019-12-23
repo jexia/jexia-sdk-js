@@ -20,6 +20,11 @@ Dataset object can be received from the `dataModule` just by its name:
 ```javascript
 const myDataset = dataModule.dataset("my_dataset");
 ```
+It is also possible to get a list of datasets at a time:
+```javascript
+const [posts, authors] = dataModule.datasets(["posts", "authors"]);
+```
+
 Obtained object has all the methods to manage its data - `insert`, `select`, `update` and `delete`: 
 ```javascript  
 const selectQuery = myDataset.select();  
