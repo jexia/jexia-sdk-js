@@ -45,7 +45,7 @@ dom.dataset("posts")
       author: { email: "hater@yahoo.com" }
     }]
   }])
-  .execute();
+  .subscribe();
 ```
 
 Notice that records should be inserted in appropriate order - the relation root must be insert root.
@@ -62,7 +62,7 @@ dom.dataset("comments")
       message: "A do like how Jexia SDK implements relations!"
     }
   }])
-  .execute();
+  .subscribe();
 ```
 
 If you want to create a comment in the existent post, you need to use `.attach()`, see how to use it in
@@ -75,12 +75,12 @@ for the **comments** -> **author** *one-2-one* relation.
 By default, `.select()` operation does not include related resources. To make it doing that we need to use `.related()`
 method:
 ```typescript
-const postsWithComments = await dom.dataset("posts")
+dom.dataset("posts")
   .select()
   .related("comments")
-  .execute();
-
-console.log(postsWithComments);
+  .subscribe(postsWithComments => {
+    console.log(postsWithComments);
+  });
 // [
 //   {
 //     id: ...
@@ -110,12 +110,12 @@ console.log(postsWithComments);
 
 We can also want to get not all fields but only few:
 ```typescript
-const postsWithCommentsText = await dom.dataset("posts")
+dom.dataset("posts")
   .select()
   .related("comments", comments => comments.fields("text"))
-  .execute();
-
-console.log(postsWithCommentsText);
+  .subscribe(postsWithCommentsText => {
+    console.log(postsWithCommentsText);
+  });
 // [
 //   {
 //     id: ...
@@ -145,7 +145,7 @@ What if we want to get an author of each comment? Simple, just use nested `.rela
 dom.dataset("posts")
   .select()
   .related("comments", comments => comments.related("author"))
-  .execute()
+  .subscribe()
 ```
 
 Of course, you can use as many nested relations as you want and select any fields from any resource:
@@ -158,7 +158,7 @@ dom.dataset("posts")
       .fields("email")
     )
   )
-  .execute()
+  .subscribe()
 ```
 
 ### [Attach and detach records](#attach-and-detach-records)
@@ -174,7 +174,7 @@ Let's say you have inserted a post:
       title: "A post with no comments",
       message: "Okay",
     })
-    .execute();
+    .toPromise();
 
   console.log(posts);
   // [
@@ -200,7 +200,7 @@ Then some comments...
         like: false,
       },
     ])
-    .execute();
+    .toPromise();
 
   console.log(comments);
   // [
@@ -227,14 +227,16 @@ Available ways to filter attach/detach operation:
         id: "e199d460-c88f-4ab9-8373-1d6ad0bd0acb",
         text: "Might've been waaaay better",
       },
-    ]);
+    ])
+    .subscribe();
 
   // an array of ids
   dom.dataset("posts")
     .attach("comments", [
       "b4961b6a-85a2-4ee8-b946-9001c978c801",
       "e199d460-c88f-4ab9-8373-1d6ad0bd0acb",
-    ]);
+    ])
+    .subscribe();
 ```
 <br/>
 
@@ -243,11 +245,13 @@ Or even using filter criterion (More details in [Filtering records](dataset-oper
 ```typescript
   // a callback that will receive "field" function
   dom.dataset("posts")
-    .attach("comments", field => field("id").isInArray(commentsIds));
+    .attach("comments", field => field("id").isInArray(commentsIds))
+    .subscribe();
 
   // an exposed "field" function
   dom.dataset("posts")
-    .attach("comments", field("id").isInArray(commentsIds));
+    .attach("comments", field("id").isInArray(commentsIds))
+    .subscribe();
 ```
 <br/>
 
@@ -260,13 +264,13 @@ Full example using a callback:
   await dom.dataset("posts")
     .attach("comments", field => field("id").isInArray(commentsIds))
     .where(field => field("id").isEqualTo(firstPost.id)) // required for both attach/detach, otherwise an error will be thrown
-    .execute();
+    .toPromise();
 
   // attach operation doesn't return any data, so we need to call .select()
   const postsWithComments = await dom.dataset("posts")
     .select()
     .related("comments")
-    .execute();
+    .toPromise();
 
   console.log(postsWithComments);
   // [
@@ -290,12 +294,12 @@ similar to `.attach()`, call `.detach()`:
   await dom.dataset("posts")
     .detach("comments", field => field("like").isEqualTo(false)) // detach comments with unlike from the post
     .where(field => field("id").isEqualTo(firstPost.id))
-    .execute();
+    .toPromise();
 
   const postsWithNoUnlikeComments = await dom.dataset("posts")
     .select()
     .related("comments")
-    .execute();
+    .toPromise();
 
   console.log(postsWithNoUnlikeComments);
   // [
