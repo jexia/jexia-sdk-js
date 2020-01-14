@@ -3,9 +3,14 @@ import * as faker from "faker";
 import { ReflectiveInjector } from "injection-js";
 import { createMockFor, SpyObj } from "../../../spec/testUtils";
 import { API } from "../../config";
+import { RequestExecuter } from "../../internal/executer";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { deferPromise } from "../../internal/utils";
 import { Client } from "../core/client";
+import { DeleteQuery } from "../core/queries/deleteQuery";
+import { InsertQuery } from "../core/queries/insertQuery";
+import { SelectQuery } from "../core/queries/selectQuery";
+import { UpdateQuery } from "../core/queries/updateQuery";
 import { AuthOptions, TokenManager } from "../core/tokenManager";
 import { UMSModule } from "./umsModule";
 
@@ -32,17 +37,20 @@ describe("UMS Module", () => {
     requestAdapterMock = createMockFor(RequestAdapter, {
       returnValue: Promise.resolve(signedInResult)
     }),
+    requestExecuterMock = createMockFor(RequestExecuter),
     // @ts-ignore
     systemDefer = deferPromise<Client>(),
-    injectorMock = createMockFor(["get"]) as SpyObj<ReflectiveInjector>,
+    injectorMock = createMockFor(["get", "resolveAndCreateChild"]) as SpyObj<ReflectiveInjector>,
   } = {}) {
     (tokenManagerMock as any)["token"] = () => tokenPromise;
     const injectorMap = new Map<any, any>([
       [TokenManager, tokenManagerMock],
       [RequestAdapter, requestAdapterMock],
       [AuthOptions, { projectID }],
+      [RequestExecuter, requestExecuterMock]
     ]);
     injectorMock.get.mockImplementation((key: any) => injectorMap.get(key));
+    injectorMock.resolveAndCreateChild.mockImplementation(() => injectorMock);
     const subject = new UMSModule();
 
     return {
@@ -81,6 +89,35 @@ describe("UMS Module", () => {
       expect(() => (UMSModule as any)()).toThrow("UMS module initialized incorrectly, you need to include 'new'");
     });
 
+    it("should be able start a select query", async () => {
+      const { subject, init } = createSubject();
+      await init();
+      expect(subject.select() instanceof SelectQuery).toBeTruthy();
+    });
+
+    it("should be able start a update query", async () => {
+      const { subject, init } = createSubject();
+      await init();
+      expect(subject.update({}) instanceof UpdateQuery).toBeTruthy();
+    });
+
+    it("should be able start a insert query with an array of records", async () => {
+      const { subject, init } = createSubject();
+      await init();
+      expect(subject.insert([{}]) instanceof InsertQuery).toBeTruthy();
+    });
+
+    it("should be able start a insert query with a single record", async () => {
+      const { subject, init } = createSubject();
+      await init();
+      expect(subject.insert({}) instanceof InsertQuery).toBeTruthy();
+    });
+
+    it("should be able start a delete query", async () => {
+      const { subject, init } = createSubject();
+      await init();
+      expect(subject.delete() instanceof DeleteQuery).toBeTruthy();
+    });
   });
 
   describe("when gets a module config", () => {

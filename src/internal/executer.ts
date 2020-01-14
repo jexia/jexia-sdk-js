@@ -10,7 +10,8 @@ import { IRequestOptions, RequestAdapter, RequestMethod } from "./requestAdapter
 const resourceEndpoints = {
   [ResourceType.Dataset]: API.DATA.ENDPOINT,
   [ResourceType.Fileset]: API.FILES.ENDPOINT,
-  [ResourceType.Channel]: API.CHANNEL.ENDPOINT
+  [ResourceType.Channel]: API.CHANNEL.ENDPOINT,
+  [ResourceType.Users]: API.UMS.ENDPOINT
 };
 
 @Injectable()

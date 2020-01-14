@@ -1,7 +1,13 @@
 import { ReflectiveInjector } from "injection-js";
 import { API } from "../../config";
+import { RequestExecuter } from "../../internal/executer";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { IModule, ModuleConfiguration } from "../core/module";
+import { DeleteQuery } from "../core/queries/deleteQuery";
+import { InsertQuery } from "../core/queries/insertQuery";
+import { SelectQuery } from "../core/queries/selectQuery";
+import { UpdateQuery } from "../core/queries/updateQuery";
+import { DefaultResourceInterface, ResourceType } from "../core/resource";
 import { AuthOptions, TokenManager, Tokens } from "../core/tokenManager";
 
 export interface IUMSSignInOptions {
@@ -13,19 +19,32 @@ export interface IUMSSignInOptions {
 
 export type IUMSCredentials = Pick<IUMSSignInOptions, "email" | "password">;
 
-export interface IUMSUser {
-  id: string;
+/**
+ * Default UMS interface type
+ */
+export type DefaultUsersInterface = {
   email: string;
   active: boolean;
-  created_at: string;
-  updated_at: string;
-}
+};
 
-export class UMSModule implements IModule {
+/**
+ * Merge customer's type with resource and UMS types
+ */
+export type UsersInterface<T> = T & DefaultResourceInterface & DefaultUsersInterface;
+
+export class UMSModule<
+  T extends object = any,
+  D extends UsersInterface<T> = UsersInterface<T>> implements IModule {
+
+  public readonly name = "users";
+
+  public readonly resourceType = ResourceType.Users;
 
   private tokenManager: TokenManager;
 
   private requestAdapter: RequestAdapter;
+
+  private requestExecuter: RequestExecuter;
 
   private projectId: string;
 
@@ -37,9 +56,12 @@ export class UMSModule implements IModule {
   }
 
   public init(coreInjector: ReflectiveInjector) {
-    this.tokenManager = coreInjector.get(TokenManager);
-    this.requestAdapter = coreInjector.get(RequestAdapter);
-    this.projectId = coreInjector.get(AuthOptions).projectID;
+    const injector = coreInjector.resolveAndCreateChild([RequestExecuter]);
+
+    this.tokenManager = injector.get(TokenManager);
+    this.requestAdapter = injector.get(RequestAdapter);
+    this.projectId = injector.get(AuthOptions).projectID;
+    this.requestExecuter = injector.get(RequestExecuter);
 
     return Promise.resolve(this);
   }
@@ -76,12 +98,12 @@ export class UMSModule implements IModule {
    * Create a new UMS user
    * @param credentials {IUMSCredentials} email and password of created user
    */
-  public signUp(credentials: IUMSCredentials): Promise<IUMSUser> {
+  public signUp(credentials: IUMSCredentials): Promise<D> {
     const body = {
       email: credentials.email,
       password: credentials.password
     };
-    return this.requestAdapter.execute<IUMSUser>(
+    return this.requestAdapter.execute<D>(
       this.getUrl(API.UMS.SIGNUP),
       { body, method: RequestMethod.POST },
     );
@@ -99,9 +121,9 @@ export class UMSModule implements IModule {
    * Fetch currently authorized user
    * @param alias {string} Authorization alias
    */
-  public getUser(alias: string): Promise<IUMSUser> {
+  public getUser(alias: string): Promise<D> {
     return this.tokenManager.token(alias)
-      .then((token) => this.requestAdapter.execute<IUMSUser>(
+      .then((token) => this.requestAdapter.execute<D>(
         this.getUrl(API.UMS.USER),
         { headers: { Authorization: `Bearer ${token}` }},
       ));
@@ -113,13 +135,13 @@ export class UMSModule implements IModule {
    * @param oldPassword {string}
    * @param newPassword {string}
    */
-  public changePassword(alias: string, oldPassword: string, newPassword: string): Promise<IUMSUser> {
+  public changePassword(alias: string, oldPassword: string, newPassword: string): Promise<D> {
     const body = {
       old_password: oldPassword,
       new_password: newPassword,
     };
     return this.tokenManager.token(alias)
-      .then((token) => this.requestAdapter.execute<IUMSUser>(
+      .then((token) => this.requestAdapter.execute<D>(
         this.getUrl(API.UMS.CHANGEPASSWORD),
         { body, headers: { Authorization: `Bearer ${token}` }, method: RequestMethod.POST },
       ));
@@ -137,6 +159,61 @@ export class UMSModule implements IModule {
         this.getUrl(API.UMS.USER),
         { body, headers: { Authorization: `Bearer ${token}` }, method: RequestMethod.DELETE },
       ));
+  }
+
+  /**
+   * Select users from UMS
+   *
+   * @example
+   * ums.select().where(
+   *   field => field("active").isEqualTo(true)
+   * ).subscribe();
+   */
+  public select(): SelectQuery<D> {
+    return new SelectQuery(this.requestExecuter, this.resourceType, this.name);
+  }
+
+  /**
+   * Insert new users into UMS
+   *
+   * @param records Either object or an array of new users
+   * @example
+   * ums.insert({
+   *   email: "ilon.mask@tesla.com"
+   * })
+   * .subscribe();
+   */
+  public insert(records: Partial<D> | Array<Partial<D>>): InsertQuery<D> {
+    return new InsertQuery(
+      this.requestExecuter,
+      Array.isArray(records) ? records : [records],
+      this.resourceType,
+      this.name
+    );
+  }
+
+  /**
+   * Update users in UMS
+   *
+   * @param record Object that represent user fields to be updated
+   * @example
+   *   ums.update({ active: false })
+   *     .where(field => field("email").isEqualTo("ilon.mask@tesla.com"))
+   *     .subscribe();
+   */
+  public update(record: Partial<D>): UpdateQuery<D> {
+    return new UpdateQuery(this.requestExecuter, record, this.resourceType, this.name);
+  }
+
+  /**
+   * Delete users from UMS
+   * @example
+   *   ums.delete()
+   *     .where(field => field("id).isEqualTo("d463d501-96c3-405c-aa13-4cc28acf26d5")
+   *     .subscribe()
+   */
+  public delete(): DeleteQuery<D> {
+    return new DeleteQuery(this.requestExecuter, this.resourceType, this.name);
   }
 
   /**

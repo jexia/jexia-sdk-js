@@ -17,7 +17,7 @@ export abstract class FilterableQuery<T> extends BaseQuery<T> {
   /**
    * @internal
    */
-  protected readonly body: T | null = null;
+  protected readonly body: Partial<T> | null = null;
 
   /**
    * Filter the dataset rows with some conditions where the operation will be applied
