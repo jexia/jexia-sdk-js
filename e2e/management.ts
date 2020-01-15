@@ -230,6 +230,15 @@ export class Management {
     });
   }
 
+  public getUMSSchemaId(): Promise<string> {
+    return this.fetch(api.ums.schema, {
+      method: "GET",
+      headers: this.headers,
+    })
+      .then((response: Response) => response.json())
+      .then(([{ id }]) => id);
+  }
+
   private fetch(url: string, init: any = {}): Promise<Response> {
     return fetch(url, init).then((res) => Management.checkStatus(res, init));
   }
