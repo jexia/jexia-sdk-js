@@ -1,8 +1,14 @@
 # Jexia User Management System Module (UMS)
-UMS provides an ability to create user accounts, sign-in to the Jexia project with these accounts and perform 
-data changes with permissions of any authorized user. Users can be created either 
-with [Web Management Application](https://docs.jexia.com/getting-started/user-management/) or 
-with `signup()` method of this module.  
+UMS provides an ability to manage user accounts, sign-in to the Jexia project with these accounts and perform 
+data changes with permissions of any authorized user. There are a few ways to create a new users: 
+
+1. You can use [Web Management Application](https://docs.jexia.com/getting-started/user-management/) and create
+users one by one with nice UI. 
+2. You can use `signup()` method of User Management Module
+3. It is also possible to insert users as a regular data into UMS (the same way as dataset).
+
+Notice that when you create a new user any of these ways, that user will be received an activation email 
+with a link to set a password and activate his/her account. 
 
 #### Return values
 Module methods that require backend operations always return `Promise` type. 
@@ -115,4 +121,40 @@ ums.changePassword('Elon@tesla.com', oldPassword, newPassword);
 You need to provide current user password to delete account:
 ```javascript  
 ums.deleteUser('Elon@tesla.com', password);  
+```
+
+### Manage user
+It is also possible to use CRUD methods `select()`, `insert()`, `update()` and `delete()`. They have the same syntax
+and return values as corresponding data operations methods.
+These methods are all return observables. 
+To get more information see [Dataset Module Documentation](https://jexia.github.io/jexia-sdk-js/additional-documentation/dataset-operations.html)
+
+Examples:
+```javascript
+// select all active users
+ums.select()
+  .where(field => field("active").isEqualTo(true))
+  .subscribe();
+```
+
+```javascript
+// insert a couple of new users
+ums.insert([
+  { email: "customer@tesla.com" },
+  { email: "support@tesla.com" }
+]).subscribe();
+```
+
+```javascript
+// suspend Elon!
+ums.update({ active: false })
+  .where(field => field("email").isEqualTo("Elon@tesla.com"))
+  .subscribe();
+```
+
+```javascript
+// delete all suspended users
+ums.delete()
+  .where(field => field("active").isEqualTo(false))
+  .subscribe();
 ```
