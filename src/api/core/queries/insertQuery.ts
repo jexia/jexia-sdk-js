@@ -18,19 +18,16 @@ import { BaseQuery } from "./baseQuery";
  * ```
  *
  * @template T Generic type of your dataset, default to any
- * @template D Extended dataset type with default fields (i.e id, created_at, updated_at)
  */
-export class InsertQuery<T, D extends T> extends BaseQuery<D> {
-  /**
-   * @inheritdoc
-   */
-  protected readonly body: T[];
-
+export class InsertQuery<T> extends BaseQuery<T> {
   /**
    * @internal
    */
-  public constructor(queryExecuter: RequestExecuter, records: T[], resourceType: ResourceType, resourceName: string) {
+  public constructor(
+    queryExecuter: RequestExecuter,
+    protected readonly body: Array<Partial<T>>,
+    resourceType: ResourceType,
+    resourceName: string) {
     super(queryExecuter, RequestMethod.POST, resourceType, resourceName);
-    this.body = records;
   }
 }

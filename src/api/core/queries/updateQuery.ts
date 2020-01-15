@@ -22,16 +22,14 @@ import { FilterableQuery } from "./filterableQuery";
  */
 export class UpdateQuery<T> extends FilterableQuery<T> {
   /**
-   * @inheritdoc
-   */
-  protected readonly body: T | null;
-
-  /**
    * @internal
    */
-  public constructor(queryExecuter: RequestExecuter, data: T, resourceType: ResourceType, resourceName: string) {
+  public constructor(
+    queryExecuter: RequestExecuter,
+    protected readonly body: Partial<T>,
+    resourceType: ResourceType,
+    resourceName: string) {
     super(queryExecuter, RequestMethod.PATCH, resourceType, resourceName);
-    this.body = data;
   }
 
 }

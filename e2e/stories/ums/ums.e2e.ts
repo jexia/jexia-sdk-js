@@ -2,7 +2,7 @@ import * as faker from "faker";
 import * as Joi from "joi";
 // @ts-ignore
 import * as joiAssert from "joi-assert";
-import { IUMSUser } from "../../../src/api/ums/umsModule";
+import { UsersInterface } from "../../../src/api/ums/umsModule";
 import { LoggerModule, LogLevel } from "../../../src/node";
 import { BackendErrorSchema } from "../../lib/common";
 import { DatasetRecordSchema } from "../../lib/dataset";
@@ -21,7 +21,7 @@ describe("User Management Service", () => {
     password: faker.internet.password(),
     alias: faker.name.firstName(),
   };
-  let user: IUMSUser;
+  let user: UsersInterface<{}>;
 
   describe("initialize without API key", () => {
 
