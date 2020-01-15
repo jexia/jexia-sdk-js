@@ -7,7 +7,7 @@ describe("InsertQuery class", () => {
   const resourceName = faker.random.word();
   const resourceType = getRandomResourceType();
   let qe: any;
-  let subject: InsertQuery<any, any>;
+  let subject: InsertQuery<any>;
 
   const fakeRecord = {
     title: faker.random.words(3),

@@ -86,8 +86,8 @@ export class Dataset<
    * If saving into a strict schema dataset, you need to provide values for the
    * required fields for that particular dataset.
    */
-  public insert(data: T[] | T): InsertQuery<T, D> {
-    return new InsertQuery<T, D>(
+  public insert(data: Array<Partial<D>> | Partial<D>): InsertQuery<D> {
+    return new InsertQuery<D>(
       this.requestExecuter,
       Array.isArray(data) ? data : [data],
       ResourceType.Dataset,
