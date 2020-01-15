@@ -55,8 +55,10 @@ export const init = async (
     }
   }
 
+  const umsSchemaId = await management.getUMSSchemaId();
+
   apiKey = await management.createApiKey();
-  policy = await management.createPolicy(datasets, [`apk:${apiKey.key}`]);
+  policy = await management.createPolicy([...datasets, { id: umsSchemaId }], [`apk:${apiKey.key}`]);
 
   client = await jexiaClient().init({
     projectID: process.env.E2E_PROJECT_ID as string,

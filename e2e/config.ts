@@ -29,5 +29,8 @@ export const api = {
   policy: {
     create: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/rakshak/`,
     delete: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/rakshak/{policy_id}`
+  },
+  ums: {
+    schema: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/midgard/schema`,
   }
 };
