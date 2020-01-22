@@ -2,8 +2,10 @@ import { API as DEFAULT_API, DELAY } from "./config";
 
 let API = DEFAULT_API;
 
-/* for development purpose */
-if (process && process.env && process.env.JEXIA_DEV_DOMAIN) {
+const isNodeJS = typeof process === "object";
+
+// for development purposes we override domain in order to run e2e tests in a given environment
+if (isNodeJS && process.env && process.env.JEXIA_DEV_DOMAIN) {
   API.DOMAIN = process.env.JEXIA_DEV_DOMAIN;
 }
 
