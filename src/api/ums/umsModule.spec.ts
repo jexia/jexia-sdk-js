@@ -14,7 +14,7 @@ import { AuthOptions, TokenManager } from "../core/tokenManager";
 import { UMSModule } from "./umsModule";
 
 describe("UMS Module", () => {
-  const projectID = "projectIDTest";
+  const projectID = faker.random.uuid();
   const tokenTest = "tokenTest";
   const testUser = {
     email: faker.internet.email(),
@@ -63,6 +63,13 @@ describe("UMS Module", () => {
       }
     };
   }
+
+  it("should get a base path based on project id", async () => {
+    const { subject, systemDefer, init } = createSubject();
+    systemDefer.resolve();
+    await init();
+    expect(subject.basePath).toEqual(`${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}`);
+  });
 
   describe("on initialize", () => {
 
@@ -278,6 +285,44 @@ describe("UMS Module", () => {
             body: { password: testUser.password },
             headers: { Authorization: `Bearer ${tokenTest}`},
             method: RequestMethod.DELETE,
+          },
+        );
+      });
+    });
+
+    describe("request user's password reset", () => {
+      it("should call API with correct parameters", async () => {
+        const { subject, requestAdapterMock, systemDefer, init } = createSubject();
+        const email = faker.internet.email();
+        systemDefer.resolve();
+        await init();
+        await subject.requestResetPassword(email);
+
+        expect(requestAdapterMock.execute).toHaveBeenCalledWith(
+          `${subject.basePath}/${API.UMS.ENDPOINT}/${API.UMS.RESETPASSWORD}`,
+          {
+            body: { email },
+            method: RequestMethod.POST,
+          },
+        );
+      });
+    });
+
+    describe("when request user's password reset", () => {
+      it("should call API with correct parameters", async () => {
+        const { subject, requestAdapterMock, systemDefer, init } = createSubject();
+        const token = faker.random.alphaNumeric(12);
+        const newPassword = faker.random.alphaNumeric(12);
+
+        systemDefer.resolve();
+        await init();
+        await subject.resetPassword(token, newPassword);
+
+        expect(requestAdapterMock.execute).toHaveBeenCalledWith(
+          `${subject.basePath}/${API.UMS.ENDPOINT}/${API.UMS.RESETPASSWORD}/${token}`,
+          {
+            body: { new_password: newPassword },
+            method: RequestMethod.POST,
           },
         );
       });

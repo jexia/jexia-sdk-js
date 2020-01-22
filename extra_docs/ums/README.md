@@ -165,3 +165,19 @@ ums.delete()
  .where(field => field("active").isEqualTo(false))  
  .subscribe();  
 ```
+
+### Change/reset user password
+User's password can be changed whether the current password is known by calling:
+```javascript
+ums.changePassword('Elon@tesla.com', currentPassword, newPassword);
+```
+\
+When the current password isn't known, you need to request a password reset:
+```javascript
+ums.requestResetPassword('Elon@tesla.com');
+```
+\
+If provided email is valid and exists the user will receive an e-mail with instructions to reset their password. This e-mail will include a reset token, that should be used to reset his password:
+```javascript
+ums.resetPassword(receivedResetToken, newPassword);
+```
