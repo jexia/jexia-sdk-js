@@ -1,3 +1,10 @@
+## [4.4.1](https://github.com/jexia/jexia-sdk-js/compare/v4.4.0...v4.4.1) (2020-01-22)
+
+
+### Bug Fixes
+
+* **browser:** when calling global "process" an error is being thrown ([#142](https://github.com/jexia/jexia-sdk-js/issues/142)) ([87bb417](https://github.com/jexia/jexia-sdk-js/commit/87bb41779b7d824f60389bcb248665b5885578ed))
+
 # [4.4.0](https://github.com/jexia/jexia-sdk-js/compare/v4.3.0...v4.4.0) (2019-12-23)
 
 
