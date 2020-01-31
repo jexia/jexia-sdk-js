@@ -4,7 +4,6 @@ import { RequestExecuter } from "../../internal/executer";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { IModule, ModuleConfiguration } from "../core/module";
 import { DeleteQuery } from "../core/queries/deleteQuery";
-import { InsertQuery } from "../core/queries/insertQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
 import { DefaultResourceInterface, ResourceType } from "../core/resource";
@@ -171,25 +170,6 @@ export class UMSModule<
    */
   public select(): SelectQuery<D> {
     return new SelectQuery(this.requestExecuter, this.resourceType, this.name);
-  }
-
-  /**
-   * Insert new users into UMS
-   *
-   * @param records Either object or an array of new users
-   * @example
-   * ums.insert({
-   *   email: "ilon.mask@tesla.com"
-   * })
-   * .subscribe();
-   */
-  public insert(records: Partial<D> | Array<Partial<D>>): InsertQuery<D> {
-    return new InsertQuery(
-      this.requestExecuter,
-      Array.isArray(records) ? records : [records],
-      this.resourceType,
-      this.name
-    );
   }
 
   /**
