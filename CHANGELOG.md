@@ -1,3 +1,15 @@
+# [4.5.0](https://github.com/jexia/jexia-sdk-js/compare/v4.4.1...v4.5.0) (2020-01-31)
+
+
+### Bug Fixes
+
+* **ums:** disable insert operation ([#144](https://github.com/jexia/jexia-sdk-js/issues/144)) ([ef98caf](https://github.com/jexia/jexia-sdk-js/commit/ef98caf0d65fdc5ed3122634bff0e1f932d258dc))
+
+
+### Features
+
+* **ums:** crud methods ([#139](https://github.com/jexia/jexia-sdk-js/issues/139)) ([3959295](https://github.com/jexia/jexia-sdk-js/commit/3959295ffb8e152f23a5a2b9ca44932d31a57ab7))
+
 ## [4.4.1](https://github.com/jexia/jexia-sdk-js/compare/v4.4.0...v4.4.1) (2020-01-22)
 
 
