@@ -8,7 +8,6 @@ import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { deferPromise } from "../../internal/utils";
 import { Client } from "../core/client";
 import { DeleteQuery } from "../core/queries/deleteQuery";
-import { InsertQuery } from "../core/queries/insertQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
 import { AuthOptions, TokenManager } from "../core/tokenManager";
@@ -99,18 +98,6 @@ describe("UMS Module", () => {
       const { subject, init } = createSubject();
       await init();
       expect(subject.update({}) instanceof UpdateQuery).toBeTruthy();
-    });
-
-    it("should be able start a insert query with an array of records", async () => {
-      const { subject, init } = createSubject();
-      await init();
-      expect(subject.insert([{}]) instanceof InsertQuery).toBeTruthy();
-    });
-
-    it("should be able start a insert query with a single record", async () => {
-      const { subject, init } = createSubject();
-      await init();
-      expect(subject.insert({}) instanceof InsertQuery).toBeTruthy();
     });
 
     it("should be able start a delete query", async () => {
