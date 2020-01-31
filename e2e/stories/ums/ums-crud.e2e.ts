@@ -3,6 +3,7 @@ import * as Joi from "joi";
 // @ts-ignore
 import * as joiAssert from "joi-assert";
 import { switchMap } from "rxjs/operators";
+import { IUMSCredentials } from "src/api/ums/umsModule";
 import { LoggerModule, LogLevel } from "../../../src/node";
 import { BackendErrorSchema } from "../../lib/common";
 import { UserSchema } from "../../lib/ums";
@@ -10,12 +11,12 @@ import { cleaning, DEFAULT_DATASET, init, ums } from "../../teardowns";
 
 jest.setTimeout(15000);
 
-let testUsers: Array<{ email: string; active: boolean }> = [];
+let testUsers: IUMSCredentials[] = [];
 
 const createUser = () => {
   const user = {
     email: faker.internet.email(),
-    active: faker.random.boolean()
+    password: faker.random.alphaNumeric()
   };
   testUsers.push(user);
   return user;
@@ -25,39 +26,13 @@ describe("User Management Service CRUD Operations", () => {
   beforeAll(async () => {
     await init(DEFAULT_DATASET.NAME, [],
       [ums, new LoggerModule(LogLevel.ERROR)]);
+
+    // create couple of user
+    await ums.signUp(createUser());
+    await ums.signUp(createUser());
   });
 
   afterAll(async () => await cleaning());
-
-  it("should insert a single user", (done) => {
-    const user = createUser();
-    ums.insert(user).subscribe(([createdUser]) => {
-      joiAssert(createdUser, UserSchema);
-      done();
-    }, done);
-  });
-
-  it("should insert an array of users", (done) => {
-    const users = [createUser(), createUser()];
-    ums.insert(users).subscribe((createdUsers) => {
-      joiAssert(createdUsers, Joi.array().items(UserSchema));
-      done();
-    }, done);
-  });
-
-  it("should insert user with schemaless field", (done) => {
-    const user = {
-      ...createUser(),
-      field: faker.random.word(),
-    };
-
-    ums.insert(user).subscribe(([createdUser]) => {
-      joiAssert(createdUser, UserSchema.append({
-        field: user.field,
-      }));
-      done();
-    }, done);
-  });
 
   it("should select users", (done) => {
     ums.select().subscribe((users) => {
