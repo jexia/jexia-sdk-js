@@ -18,6 +18,8 @@ export interface IUMSSignInOptions {
 
 export type IUMSCredentials = Pick<IUMSSignInOptions, "email" | "password">;
 
+export type IUMSExtraFields = Omit<{ [key: string]: any }, "email" | "password">;
+
 /**
  * Default UMS interface type
  */
@@ -96,11 +98,13 @@ export class UMSModule<
   /**
    * Create a new UMS user
    * @param credentials {IUMSCredentials} email and password of created user
+   * @param extra {IUMSExtraFields} optional list of the additional user fields
    */
-  public signUp(credentials: IUMSCredentials): Promise<D> {
+  public signUp(credentials: IUMSCredentials, extra: IUMSExtraFields = {}): Promise<D> {
     const body = {
       email: credentials.email,
-      password: credentials.password
+      password: credentials.password,
+      ...extra
     };
     return this.requestAdapter.execute<D>(
       this.getUrl(API.UMS.SIGNUP),
