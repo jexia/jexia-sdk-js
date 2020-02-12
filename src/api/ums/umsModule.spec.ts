@@ -141,6 +141,24 @@ describe("UMS Module", () => {
         }
       );
     });
+
+    it("should call correct API with correct data if there is extra field", async () => {
+      const { subject, systemDefer, requestAdapterMock, init } = createSubject();
+      systemDefer.resolve();
+      await init();
+      await subject.signUp(testCredentials, { extraField: true });
+      expect(requestAdapterMock.execute).toBeCalledWith(
+        `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.UMS.ENDPOINT}/${API.UMS.SIGNUP}`,
+        {
+          body: {
+            email: testCredentials.email,
+            password: testCredentials.password,
+            extraField: true,
+          },
+          method: "POST"
+        }
+      );
+    });
   });
 
   describe("user sign-in", () => {

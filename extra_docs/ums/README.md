@@ -83,7 +83,8 @@ You can sign up a new user to the project.
 ```javascript 
 const user = await ums.signUp({    
   email: "robert@company.com",    
-password: "qwert1234" });  
+  password: "qwert1234" 
+});  
   
 /* returned user: 
 {  
@@ -93,6 +94,35 @@ password: "qwert1234" });
  created_at: "2017-12-31T23:59:59.123456Z", 
  updated_at: "2017-12-31T23:59:59.123456Z"
 } */  
+```
+
+You can also pass an extra fields during sing-up. These fields will be saved in the UMS and you can receive them by
+"getUser()" method:
+```javascript
+const user = await ums.signUp(
+  { email: "john@company.com", password: "rewq4321" },
+  { 
+    age: 25, 
+    address: { 
+      city: "Apeldoorn",
+      country: "NL"
+    }
+  }
+);
+
+/* returned user:
+{
+    "active": true,
+    "address": {
+        "city": "Apeldoorn",
+        "country": "NL"
+    },
+    "age": 25,
+    "created_at": "2020-02-12T11:09:36.017824Z",
+    "email": "john@company.com",
+    "id": "736afb7d-fbc2-4ef2-9ffe-bbdc454e68a3",
+    "updated_at": "2020-02-12T11:09:36.017824Z"
+} */
 ```
 
 ### Fetch user by alias alias (or email) 

@@ -42,6 +42,37 @@ describe("User Management Service", () => {
       it("should have the same email", () => {
         expect(user.email).toEqual(credentials.email);
       });
+
+      describe("additional fields", () => {
+        let creds;
+        let extra: any;
+        let createdUser: any;
+
+        it("should create a user with extra fields", async () => {
+          creds = {
+            email: faker.internet.email(),
+            password: faker.internet.password(),
+          };
+          extra = {
+            bool: faker.random.boolean(),
+            num: faker.random.number(),
+            str: faker.random.alphaNumeric(),
+          };
+
+          createdUser = await ums.signUp(creds, extra);
+
+          joiAssert(createdUser, UserSchema.append({
+            bool: Joi.boolean().required(),
+            num: Joi.number().required(),
+            str: Joi.string().required()
+          }));
+        });
+
+        it("should return the same values of extra fields", () => {
+          const { bool, num, str } = createdUser;
+          expect({ bool, num, str }).toEqual(extra);
+        });
+      });
     });
 
     describe("when created user sign-in", () => {
