@@ -1,3 +1,10 @@
+# [4.6.0](https://github.com/jexia/jexia-sdk-js/compare/v4.5.0...v4.6.0) (2020-02-13)
+
+
+### Features
+
+* **ums:** pass extra fields to sign-up ([2b9aca5](https://github.com/jexia/jexia-sdk-js/commit/2b9aca5e5d82c8f5c472bf649588934225d35b2f))
+
 # [4.5.0](https://github.com/jexia/jexia-sdk-js/compare/v4.4.1...v4.5.0) (2020-01-31)
 
 
