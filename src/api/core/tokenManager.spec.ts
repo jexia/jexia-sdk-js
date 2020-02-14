@@ -84,14 +84,11 @@ describe("TokenManager", () => {
 
   describe("when authenticating", () => {
     it("should throw an error if authentication failed", async () => {
-      const { subject } = createSubject({
-        requestAdapterReturnValue: Promise.reject("Auth error"),
+      const { subject, validOptions } = createSubject({
+        requestAdapterReturnValue: Promise.reject(new Error("Auth error")),
       });
-      try {
-        await subject.init({projectID: "", key: "validKey", secret: "validSecret"});
-      } catch (error) {
-        expect(error).toBeDefined();
-      }
+      await subject.init(validOptions)
+        .catch((error) => expect(error.message).toEqual("Unable to get tokens: Auth error"));
     });
 
     it("should result promise of itself when authorization succeeded", async () => {

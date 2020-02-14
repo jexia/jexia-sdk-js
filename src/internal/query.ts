@@ -17,8 +17,12 @@ type KeyOfObject<T> = Extract<keyof T, string>;
  * <T> - generic resource object
  */
 export interface IAggField<T = any> {
-  fn: "COUNT" | "MIN" | "MAX" | "AVG" | "SUM" | "EVERY";
+  fn: "count" | "min" | "max" | "avg" | "sum";
   col: KeyOfObject<T> | "*";
+}
+
+export interface ICompiledAggField {
+  [key: string]: string;
 }
 
 /* Data sorting
@@ -39,7 +43,7 @@ export interface ICompiledQuery<T> {
   action_resource: string;
   action_cond: Array<object>;
   cond: Array<object>;
-  outputs: string[];
+  outputs: Array<string | ICompiledAggField>;
   order: SortedFields<T>;
   range: { limit?: number, offset?: number };
   relations: {[key: string]: Partial<ICompiledQuery<T>>};
@@ -158,14 +162,13 @@ export class Query<T = any> {
    * Compile aggregation object to the string
    * for COUNT function replace asterisk with i field
    * @param {IAggField} agg an aggregation object
-   * @returns {string} compiled aggregation function
    */
-  private compileAggregation(agg: IAggField): string {
-    if (agg.fn === "COUNT" && agg.col === "*") {
+  private compileAggregation(agg: IAggField): ICompiledAggField {
+    if (agg.fn === "count" && agg.col === "*") {
       agg.col = "id";
     } else if (agg.col === "*") {
-      throw new Error(`Field name should be provided with the ${agg.fn} function`);
+      throw new Error(`Field name should be provided with the ${agg.fn}() function`);
     }
-    return `${agg.fn}(${agg.col})`;
+    return { [agg.fn]: `${agg.fn}(${agg.col})` };
   }
 }

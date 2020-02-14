@@ -183,7 +183,49 @@ const posts = dataModule.dataset("posts");
 posts.select()
   .fields("title", "author") // you can also pass an array of field names 
   .subscribe(records => // you will get array of {id, title, author} records (id is always returned));
-```  
+``` 
+
+### [Aggregation functions](#aggregation-function)
+
+There are a few aggregation functions you are able to use in order to do some calculations before obtaining data:
+
+```javascript
+const posts = dataModule.dataset("posts");
+
+posts.select()
+  .fields({ fn: "count", field: "*" })
+  .subscribe(result => {
+    /* the result is an array with one record (let's say we have 5 posts):
+       [{
+          count: 5
+       }]
+     */
+  });
+``` 
+
+The full list of available aggregation functions:
+* max
+* min
+* sum
+* avg
+* count
+
+You can also use any sets of plain fields and functions. Let's calculate the maximum of likes each author has received:
+```javascript
+const posts = dataModule.dataset("posts");
+
+posts.select()
+  .fields("author", { fn: "max", field: "likes" })
+  .subscribe(result => {
+    /* the result is:
+       [
+         { author: "Tom", "max": 10 },
+         { author: "Harry", "max": 24 },
+       ]
+     */
+  });
+``` 
+
   
 ### [Filtering records](#filtering-records)  
   
