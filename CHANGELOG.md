@@ -1,3 +1,10 @@
+# [4.7.0](https://github.com/jexia/jexia-sdk-js/compare/v4.6.0...v4.7.0) (2020-02-17)
+
+
+### Features
+
+* **query:** add aggregation functions ([1a066f2](https://github.com/jexia/jexia-sdk-js/commit/1a066f2ba8bddad15a9da0f60a12d0cc9a85cc9c))
+
 # [4.6.0](https://github.com/jexia/jexia-sdk-js/compare/v4.5.0...v4.6.0) (2020-02-13)
 
 
