@@ -32,5 +32,13 @@ export const api = {
   },
   ums: {
     schema: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/midgard/schema`,
+  },
+  gateways: {
+    create: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/enigma/gateways`,
+    delete: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/enigma/gateways/{gateway_id}`,
+  },
+  flows: {
+    create: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/enigma/actions`,
+    delete: `${MANAGEMENT}/${process.env.E2E_PROJECT_ID}/enigma/actions/{flow_id}`,
   }
 };
