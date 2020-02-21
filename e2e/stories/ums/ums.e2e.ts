@@ -113,17 +113,20 @@ describe("User Management Service", () => {
         await management.deleteDataset(dataset.id);
       });
 
-      it("should have access to the dataset", async () => {
-        const records = await dom.dataset("testUms")
+      it("should have access to the dataset", (done) => {
+        dom.dataset("testUms")
           .insert([
             { name: "testRecord" },
           ])
-          .execute();
-        joiAssert(records, Joi.array()
-          .items(DatasetRecordSchema.append({
-            name: Joi.string().valid("testRecord").required()
-          }))
-          .length(1));
+          .subscribe((records) => {
+            joiAssert(records, Joi.array()
+              .items(DatasetRecordSchema.append({
+                name: Joi.string().valid("testRecord").required()
+              }))
+              .length(1));
+
+            done();
+          }, done.fail);
       });
 
       it("should fetch himself by alias", async () => {
@@ -181,36 +184,39 @@ describe("User Management Service", () => {
       it("should not have access to the dataset", (done) => {
         dom.dataset("umsTestDataset")
           .insert([{ name: "field" }])
-          .execute()
-          .then(() => done("should not have access to the dataset"))
-          .catch((err) => {
-            joiAssert(err, BackendErrorSchema);
-            done();
+          .subscribe({
+            next: () => done.fail("should not have access to the dataset"),
+            error: (err) => {
+              joiAssert(err, BackendErrorSchema);
+              done();
+            }
           });
       });
 
-      it("should be able to switch to the api key auth", async () => {
+      it("should be able to switch to the api key auth", (done) => {
         ums.resetDefault();
-        const records = await dom.dataset("umsTestDataset")
+        dom.dataset("umsTestDataset")
           .insert([
             { name: "testRecord" },
           ])
-          .execute();
-        joiAssert(records, Joi.array()
-          .items(DatasetRecordSchema.append({
-            name: Joi.string().valid("testRecord").required()
-          }))
-          .length(1));
+          .subscribe((records) => {
+            joiAssert(records, Joi.array()
+              .items(DatasetRecordSchema.append({
+                name: Joi.string().valid("testRecord").required()
+              })).length(1));
+            done();
+          }, done.fail);
       });
 
       it("should be able to use user authorization in dataset request", (done) => {
         dom.dataset("umsTestDataset", credentials.alias)
           .insert([{ name: "field" }])
-          .execute()
-          .then(() => done("should not have access to the dataset"))
-          .catch((err) => {
-            joiAssert(err, BackendErrorSchema);
-            done();
+          .subscribe({
+            next: () => done.fail("should not have access to the dataset"),
+            error: (err) => {
+              joiAssert(err, BackendErrorSchema);
+              done();
+            }
           });
       });
 
@@ -218,25 +224,29 @@ describe("User Management Service", () => {
         ums.setDefault(credentials.alias);
         dom.dataset("umsTestDataset")
           .insert([{ name: "field" }])
-          .execute()
-          .then(() => done("should not have access to the dataset"))
-          .catch((err) => {
-            joiAssert(err, BackendErrorSchema);
-            done();
+          .subscribe({
+            next: () => done.fail("should not have access to the dataset"),
+            error: (err) => {
+              joiAssert(err, BackendErrorSchema);
+              done();
+            }
           });
       });
 
-      it("should be able to use apikey auth in dataset request", async () => {
-        const records = await dom.dataset("umsTestDataset", "apikey")
+      it("should be able to use apikey auth in dataset request", (done) => {
+        dom.dataset("umsTestDataset", "apikey")
           .insert([
             { name: "testRecord" },
           ])
-          .execute();
-        joiAssert(records, Joi.array()
-          .items(DatasetRecordSchema.append({
-            name: Joi.string().valid("testRecord").required()
-          }))
-          .length(1));
+          .subscribe((records) => {
+            joiAssert(records, Joi.array()
+              .items(DatasetRecordSchema.append({
+                name: Joi.string().valid("testRecord").required()
+              }))
+              .length(1));
+
+            done();
+          }, done.fail);
       });
     });
   });
