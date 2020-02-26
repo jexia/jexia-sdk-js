@@ -3,7 +3,7 @@ import { combineLatest, from, Observable } from "rxjs";
 import { map, switchMap } from "rxjs/operators";
 import { ClientInit } from "../api/core/client";
 import { ResourceType } from "../api/core/resource";
-import { AuthOptions, IAuthOptions, TokenManager } from "../api/core/tokenManager";
+import { AuthOptions, DEFAULT_PROJECT_ZONE, IAuthOptions, TokenManager } from "../api/core/tokenManager";
 import { API } from "../config";
 import { QueryParam } from "../internal/utils";
 import { IRequestExecuterData } from "./executer.interfaces";
@@ -34,6 +34,14 @@ export class RequestExecuter {
     ]).pipe(
       switchMap(([, options]) => this.requestAdapter.execute(URI, options) as Observable<T>)
     );
+  }
+
+  /**
+   * The project's API URL
+   */
+  public get apiUrl(): string {
+    const { projectID, zone } = this.config;
+    return `${API.PROTOCOL}://${projectID}.${zone || DEFAULT_PROJECT_ZONE}.${API.HOST}.${API.DOMAIN}:${API.PORT}`;
   }
 
   private getRequestOptions(request: IRequestExecuterData): Observable<IRequestOptions> {
@@ -79,10 +87,9 @@ export class RequestExecuter {
   }
 
   private getUrl({ resourceType, resourceName }: IRequestExecuterData): string {
-    const endpoint = resourceEndpoints[resourceType];
     return [
-      `${API.PROTOCOL}://${this.config.projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}`,
-      endpoint,
+      this.apiUrl,
+      resourceEndpoints[resourceType],
       resourceName,
     ].join("/");
   }
