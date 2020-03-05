@@ -67,6 +67,10 @@ export class UMSModule<
     return Promise.resolve(this);
   }
 
+  public get basePath(): string {
+    return `${API.PROTOCOL}://${this.projectId}.${API.HOST}.${API.DOMAIN}:${API.PORT}`;
+  }
+
   /**
    * Return configuration
    */
@@ -201,12 +205,37 @@ export class UMSModule<
   }
 
   /**
+   * Requests a password reset for the given user e-mail.
+   * The user should receive an e-mail message with instructions.
+   * @param email The e-mail address of the user to be reset.
+   */
+  public requestResetPassword(email: string): Promise<D> {
+    return this.requestAdapter.execute<D>(
+      this.getUrl(API.UMS.RESETPASSWORD),
+      { body: { email }, method: RequestMethod.POST },
+    );
+  }
+
+  /**
+   * Resets user's password to a new one
+   * @param resetToken The reset token the user received
+   * @param newPassword the new password to be set
+   */
+  public resetPassword(resetToken: string, newPassword: string): Promise<D> {
+    const body = { new_password: newPassword };
+    return this.requestAdapter.execute<D>(
+      this.getUrl(API.UMS.RESETPASSWORD) + `/${resetToken}`,
+      { body, method: RequestMethod.POST },
+    );
+  }
+
+  /**
    * Generate API url
-   * @param api {string} API endpoint
-   * @param ums {boolean} Whether URL is a part of UMS API
+   * @param api API endpoint
+   * @param ums Whether URL is a part of UMS API
    */
   private getUrl(api: string, ums = true): string {
-    let url = `${API.PROTOCOL}://${this.projectId}.${API.HOST}.${API.DOMAIN}:${API.PORT}`;
+    let url = this.basePath;
     if (ums) {
       url += `/${API.UMS.ENDPOINT}`;
     }

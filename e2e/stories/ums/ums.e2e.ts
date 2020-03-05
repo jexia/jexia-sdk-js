@@ -162,6 +162,86 @@ describe("User Management Service", () => {
       });
     });
 
+    describe("reset password", () => {
+      let gateway: { id: string };
+      let flow: { id: string };
+
+      const resetCredentials = {
+        email: "test@jexia.com", // avoid sending external e-mails
+        password: faker.internet.password(),
+      };
+
+      beforeAll(async () => await ums.signUp(resetCredentials));
+      afterAll(async () => {
+        await management.deleteFlow(flow.id);
+        await management.deleteGateway(gateway.id);
+        await ums.deleteUser(resetCredentials.email, resetCredentials.password);
+      });
+
+      describe("when project has NO gateway nor flow setup", () => {
+        it("should throw error", async (done) => {
+          try {
+            await ums.requestResetPassword(resetCredentials.email);
+            done.fail("request password reset should not succeed without gateway/flow setup");
+          } catch (err) {
+            expect(err.httpStatus.code).toBe(500);
+          } finally {
+            done();
+          }
+        });
+      });
+
+      describe("when project has NO flow setup", () => {
+        beforeAll(async () => {
+          gateway = await management.createGateway(faker.random.word(), {
+            smtp_server: faker.internet.ip(),
+            username: resetCredentials.email,
+            password: resetCredentials.password,
+            smtp_port: faker.helpers.randomize([465, 587]),
+          });
+        });
+
+        it("should throw error", async (done) => {
+          try {
+            await ums.requestResetPassword(resetCredentials.email);
+            done.fail("request password reset should not succeed without flow setup");
+          } catch (err) {
+            expect(err.httpStatus.code).toBe(500);
+          } finally {
+            done();
+          }
+        });
+      });
+
+      describe("when project has both gateway and flow setup", () => {
+        beforeAll(async () => {
+          flow = await management.createFlow({
+            name: faker.random.word(),
+            gateway_id: gateway.id,
+            subject: faker.lorem.sentence(),
+            templates: [
+              {
+                type: "text/html",
+                body: "Hello {{.email}}, use the following code in order to reset your password: {{.token}}",
+              },
+            ],
+            event_type: "AfterPasswordResetRequest",
+          });
+        });
+
+        it("should request for reset password successfully", async (done) => {
+          try {
+            await ums.requestResetPassword(resetCredentials.email);
+            expect(true).toBeTruthy();
+          } catch (err) {
+            done.fail(err);
+          } finally {
+            done();
+          }
+        });
+      });
+    });
+
   });
 
   describe("initialize with API key", () => {

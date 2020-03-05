@@ -18,6 +18,7 @@ export const API = {
     SIGNUP: "signup",
     USER: "user",
     CHANGEPASSWORD: "changepassword",
+    RESETPASSWORD: "resetpassword",
   },
   CHANNEL: {
     ENDPOINT: "channel",

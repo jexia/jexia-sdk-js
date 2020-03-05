@@ -21,6 +21,14 @@ interface IResource {
   id: string;
 }
 
+interface IFlow {
+  name: string;
+  gateway_id: string;
+  subject: string;
+  templates: any[];
+  event_type: "AfterPasswordResetRequest";
+}
+
 /* Get AWS credentials for fileset */
 const { AWS_KEY, AWS_SECRET, AWS_BUCKET } = process.env;
 
@@ -237,6 +245,40 @@ export class Management {
     })
       .then((response: Response) => response.json())
       .then(([{ id }]) => id);
+  }
+
+  public createGateway(name: string, settings: any, type = "SMTP"): Promise<IResource> {
+    return this.fetch(api.gateways.create, {
+      method: "POST",
+      headers: this.headers,
+      body: JSON.stringify({ name, type, settings }),
+    })
+      .then((response: Response) => response.json());
+  }
+
+  public deleteGateway(id: string): Promise<void> {
+    return this.fetch(api.gateways.delete.replace("{gateway_id}", id), {
+      method: "DELETE",
+      headers: this.headers
+    })
+      .then((response: Response) => response.json());
+  }
+
+  public createFlow(action: IFlow): Promise<IResource> {
+    return this.fetch(api.flows.create, {
+      method: "POST",
+      headers: this.headers,
+      body: JSON.stringify(action),
+    })
+      .then((response: Response) => response.json());
+  }
+
+  public deleteFlow(id: string): Promise<void> {
+    return this.fetch(api.flows.delete.replace("{flow_id}", id), {
+      method: "DELETE",
+      headers: this.headers
+    })
+      .then((response: Response) => response.json());
   }
 
   private fetch(url: string, init: any = {}): Promise<Response> {
