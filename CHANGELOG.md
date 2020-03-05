@@ -1,3 +1,10 @@
+# [4.8.0](https://github.com/jexia/jexia-sdk-js/compare/v4.7.0...v4.8.0) (2020-03-05)
+
+
+### Features
+
+* **ums:** reset user's password ([#143](https://github.com/jexia/jexia-sdk-js/issues/143)) ([cf0e4a6](https://github.com/jexia/jexia-sdk-js/commit/cf0e4a6e73cb4e71d74cc6105877da388f927aea))
+
 # [4.7.0](https://github.com/jexia/jexia-sdk-js/compare/v4.6.0...v4.7.0) (2020-02-17)
 
 
