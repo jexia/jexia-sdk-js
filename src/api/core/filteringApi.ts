@@ -53,7 +53,7 @@ export class FieldFilter<U> {
   }
 
   public satisfiesRegexp(regexp: string): IFilteringCriterion {
-    return new FilteringCriterion(new FilteringCondition(this.fieldName, "regexp", regexp));
+    return new FilteringCriterion(new FilteringCondition(this.fieldName, "regex", regexp));
   }
 
   public isBetween(start: U, end: U): IFilteringCriterion {
