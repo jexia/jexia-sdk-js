@@ -153,11 +153,11 @@ describe("FieldFilter class", () => {
       });
     });
 
-    describe("with regexp operator", () => {
+    describe("with regex operator", () => {
       const value = faker.random.word();
       testParams({
         value,
-        operator: "regexp",
+        operator: "regex",
         getCriterion: (subject) => subject.satisfiesRegexp(value),
       });
     });
