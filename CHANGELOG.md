@@ -1,3 +1,10 @@
+## [4.8.1](https://github.com/jexia/jexia-sdk-js/compare/v4.8.0...v4.8.1) (2020-03-26)
+
+
+### Bug Fixes
+
+* **filtering:** fix regexp operator ([bcbfa93](https://github.com/jexia/jexia-sdk-js/commit/bcbfa93fbaff978c2e2cd9ba761221626ff6fa39))
+
 # [4.8.0](https://github.com/jexia/jexia-sdk-js/compare/v4.7.0...v4.8.0) (2020-03-05)
 
 
