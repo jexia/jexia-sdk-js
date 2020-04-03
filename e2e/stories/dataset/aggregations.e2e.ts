@@ -90,4 +90,17 @@ describe("Dataset aggregation functions", () => {
         error: done.fail,
       });
   });
+
+  it("should use alias if it is provided", (done) => {
+    dom.dataset(DEFAULT_DATASET.NAME)
+      .select()
+      .fields({ fn: "max", col: "age", alias: "max_age" })
+      .subscribe({
+        next: (result) => {
+          expect(result).toEqual([{ max_age: 42 }]);
+          done();
+        },
+        error: done.fail,
+      });
+  });
 });
