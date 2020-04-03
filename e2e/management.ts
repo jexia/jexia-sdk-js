@@ -149,8 +149,7 @@ export class Management {
       headers: this.headers,
       body: JSON.stringify({
         description: "test_policy",
-        actions: ["read", "create", "update", "delete"],
-        effect: "allow",
+        actions: { read: [], create: [], update: [], delete: [] },
         subjects: keys,
         resources: resources.map((resource) => resource.id),
       })
