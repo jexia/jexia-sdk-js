@@ -1,3 +1,10 @@
+# [4.9.0](https://github.com/jexia/jexia-sdk-js/compare/v4.8.1...v4.9.0) (2020-04-03)
+
+
+### Features
+
+* **query:** add alias support to query aggregation functions ([6229515](https://github.com/jexia/jexia-sdk-js/commit/6229515ed8b8aca539fc6b22e05c995f5d5faac9))
+
 ## [4.8.1](https://github.com/jexia/jexia-sdk-js/compare/v4.8.0...v4.8.1) (2020-03-26)
 
 
