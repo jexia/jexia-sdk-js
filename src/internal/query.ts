@@ -18,7 +18,7 @@ type KeyOfObject<T> = Extract<keyof T, string>;
  */
 export interface IAggField<T = any> {
   fn: "count" | "min" | "max" | "avg" | "sum";
-  col: KeyOfObject<T> | "*";
+  field: KeyOfObject<T> | "*";
   alias?: string;
 }
 
@@ -165,11 +165,11 @@ export class Query<T = any> {
    * @param {IAggField} agg an aggregation object
    */
   private compileAggregation(agg: IAggField): ICompiledAggField {
-    if (agg.fn === "count" && agg.col === "*") {
-      agg.col = "id";
-    } else if (agg.col === "*") {
+    if (agg.fn === "count" && agg.field === "*") {
+      agg.field = "id";
+    } else if (agg.field === "*") {
       throw new Error(`Field name should be provided with the ${agg.fn}() function`);
     }
-    return { [agg.alias || agg.fn]: `${agg.fn}(${agg.col})` };
+    return { [agg.alias || agg.fn]: `${agg.fn}(${agg.field})` };
   }
 }

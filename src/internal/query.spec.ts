@@ -121,28 +121,28 @@ describe("Query class", () => {
         });
       });
       it("aggregation method", () => {
-        const aggField: IAggField<any> = { fn: "max", col: "field1"};
+        const aggField: IAggField<any> = { fn: "max", field: "field1"};
         query.fields = [aggField];
         expect(query.compile()).toEqual({
           outputs: [{ max: "max(field1)" }],
         });
       });
       it("aggregation method with asterisk to id", () => {
-        const aggField: IAggField<any> = { fn: "count", col: "*"};
+        const aggField: IAggField<any> = { fn: "count", field: "*"};
         query.fields = [aggField];
         expect(query.compile()).toEqual({
           outputs: [{ count: "count(id)" }],
         });
       });
       it("mixed fields", () => {
-        const aggField: IAggField<any> = { fn: "max", col: "field3"};
+        const aggField: IAggField<any> = { fn: "max", field: "field3"};
         query.fields = ["field1", "field2", aggField, "field4"];
         expect(query.compile()).toEqual({
           outputs: ["field1", "field2", { max: "max(field3)" }, "field4"],
         });
       });
       it("wrong * usage to throwing an error", () => {
-        const aggField: IAggField<any> = { fn: "sum", col: "*"};
+        const aggField: IAggField<any> = { fn: "sum", field: "*"};
         query.fields = [aggField];
         expect(() => query.compile()).toThrow("Field name should be provided with the sum() function");
       });
@@ -157,7 +157,7 @@ describe("Query class", () => {
     });
 
     it("should compile all conditions together", () => {
-      const aggField: IAggField<any> = { fn: "count", col: "*"};
+      const aggField: IAggField<any> = { fn: "count", field: "*"};
       const queryActionType = getRandomQueryActionType();
       const actionResource = faker.random.alphaNumeric();
       const field1 = faker.random.alphaNumeric();
