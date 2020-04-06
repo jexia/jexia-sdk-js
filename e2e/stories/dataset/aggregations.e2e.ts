@@ -29,7 +29,7 @@ describe("Dataset aggregation functions", () => {
   it("should select max value", (done) => {
     dom.dataset(DEFAULT_DATASET.NAME)
       .select()
-      .fields({ fn: "max", col: "age"})
+      .fields({ fn: "max", field: "age"})
       .subscribe({
         next: (result) => {
           expect(result).toEqual([{ max: 42 }]);
@@ -42,7 +42,7 @@ describe("Dataset aggregation functions", () => {
   it("should select min value", (done) => {
     dom.dataset(DEFAULT_DATASET.NAME)
       .select()
-      .fields({ fn: "min", col: "age"})
+      .fields({ fn: "min", field: "age"})
       .subscribe({
         next: (result) => {
           expect(result).toEqual([{ min: 18 }]);
@@ -55,7 +55,7 @@ describe("Dataset aggregation functions", () => {
   it("should select count", (done) => {
     dom.dataset(DEFAULT_DATASET.NAME)
       .select()
-      .fields({ fn: "count", col: "*"})
+      .fields({ fn: "count", field: "*"})
       .subscribe({
         next: (result) => {
           expect(result).toEqual([{ count: 4 }]);
@@ -68,7 +68,7 @@ describe("Dataset aggregation functions", () => {
   it("should select average value", (done) => {
     dom.dataset(DEFAULT_DATASET.NAME)
       .select()
-      .fields({ fn: "avg", col: "age"})
+      .fields({ fn: "avg", field: "age"})
       .subscribe({
         next: (result) => {
           expect(result).toEqual([{ avg: 29.25 }]);
@@ -81,7 +81,7 @@ describe("Dataset aggregation functions", () => {
   it("should select sum value", (done) => {
     dom.dataset(DEFAULT_DATASET.NAME)
       .select()
-      .fields({ fn: "sum", col: "age"})
+      .fields({ fn: "sum", field: "age"})
       .subscribe({
         next: (result) => {
           expect(result).toEqual([{ sum: 117 }]);
@@ -94,7 +94,7 @@ describe("Dataset aggregation functions", () => {
   it("should use alias if it is provided", (done) => {
     dom.dataset(DEFAULT_DATASET.NAME)
       .select()
-      .fields({ fn: "max", col: "age", alias: "max_age" })
+      .fields({ fn: "max", field: "age", alias: "max_age" })
       .subscribe({
         next: (result) => {
           expect(result).toEqual([{ max_age: 42 }]);
