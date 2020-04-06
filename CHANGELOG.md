@@ -1,3 +1,10 @@
+## [4.9.1](https://github.com/jexia/jexia-sdk-js/compare/v4.9.0...v4.9.1) (2020-04-06)
+
+
+### Bug Fixes
+
+* **aggregation:** fix property name in aggregation object ([8a90d57](https://github.com/jexia/jexia-sdk-js/commit/8a90d5785ed2db0ad7912176a938f98fecab51c6))
+
 # [4.9.0](https://github.com/jexia/jexia-sdk-js/compare/v4.8.1...v4.9.0) (2020-04-03)
 
 
