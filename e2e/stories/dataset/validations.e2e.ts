@@ -116,7 +116,7 @@ describe("Dataset field validations", () => {
 
   });
 
-  for (let fieldName of Object.keys(tests)) {
+  for (const fieldName of Object.keys(tests)) {
 
     describe(`validation for ${fieldName}`, () => {
       let validationError: any;

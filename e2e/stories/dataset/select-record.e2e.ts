@@ -63,7 +63,7 @@ describe("filter records REST API", () => {
     afterAll(async () => {
       await dataset
         .delete()
-        .where((field) => field("id").isNotNull())
+        .where(field("id").isNotNull())
         .execute();
     });
   }

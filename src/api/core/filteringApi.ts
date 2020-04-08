@@ -149,6 +149,6 @@ export function toFilteringCriterion<T>(
   filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>
 ): IFilteringCriterion<T> {
   return typeof filter === "function"
-    ? filter((field) => new FieldFilter(field))
+    ? filter((f) => new FieldFilter(f))
     : filter;
 }

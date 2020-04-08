@@ -56,7 +56,7 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
    */
   public upload(files: Array<FilesetMultipart<T, F>>): Observable<FilesetInterface<T>> {
 
-    let fileUploadObservable = this.fileUploader.upload(files);
+    const fileUploadObservable = this.fileUploader.upload(files);
 
     if (this.clientConfig.fileOperations.uploadWaitForCompleted) {
       return this.getFileUpdates(fileUploadObservable, files.length);
@@ -111,6 +111,7 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
    */
   public attach(
     resourceName: string,
+    // tslint:disable-next-line:no-shadowed-variable
     filter: IFilteringCriterion<FilesetInterface<T>>
       | IFilteringCriterionCallback<FilesetInterface<T>>
       | IdentityCollection<FilesetInterface<T>>,
@@ -134,6 +135,7 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
    */
   public detach(
     resourceName: string,
+    // tslint:disable-next-line:no-shadowed-variable
     filter: IFilteringCriterion<FilesetInterface<T>>
       | IFilteringCriterionCallback<FilesetInterface<T>>
       | IdentityCollection<FilesetInterface<T>>,

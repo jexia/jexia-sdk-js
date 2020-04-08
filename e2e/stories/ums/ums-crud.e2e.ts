@@ -11,7 +11,7 @@ import { cleaning, DEFAULT_DATASET, init, ums } from "../../teardowns";
 
 jest.setTimeout(15000);
 
-let testUsers: IUMSCredentials[] = [];
+const testUsers: IUMSCredentials[] = [];
 
 const createUser = () => {
   const user = {

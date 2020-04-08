@@ -148,7 +148,7 @@ describe("ComponentStorage", ()  => {
 
     it("should create a storage when creating a new instance without one", () => {
       (TokenStorage as any).storage = null;
-      // tslint:disable-next-line:no-unused-new
+      // tslint:disable-next-line:no-unused-expression
       new TokenStorage();
       expect(TokenStorage["storage"]).toBeInstanceOf(MemoryStorageComponent);
     });

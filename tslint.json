@@ -12,10 +12,11 @@
         true,
         "double"
       ],
-      "linterOptions": {
-        "exclude": [
-          "./extra_docs/*"
-        ]
-      }
+      "array-type": [true, "array-simple"]
+    },
+    "linterOptions": {
+      "exclude": [
+        "./extra_docs/*"
+      ]
     }
 }

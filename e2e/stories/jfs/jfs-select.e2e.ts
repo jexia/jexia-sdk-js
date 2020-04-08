@@ -56,7 +56,7 @@ describe("filter records REST API", () => {
   function clearData() {
     return fileset
       .delete()
-      .where((field) => field("id").isNotNull())
+      .where(field("id").isNotNull())
       .execute();
   }
 

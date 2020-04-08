@@ -67,7 +67,7 @@ export class WebStorageComponent implements IStorageComponent {
   }
 
   public setTokens(auth: string, tokens: Tokens, defaults: boolean = false) {
-    let storedTokens = this.tokens;
+    const storedTokens = this.tokens;
     storedTokens[auth] = tokens;
 
     this.storage.setItem(this.storageKey, JSON.stringify(storedTokens));

@@ -44,7 +44,7 @@ export interface IAuthOptions {
   /**
    * Token refresh interval
    */
-  readonly refreshInterval?: Number;
+  readonly refreshInterval?: number;
   /**
    * Remember user flag
    */

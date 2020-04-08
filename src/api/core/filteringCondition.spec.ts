@@ -87,12 +87,12 @@ describe("FilteringCondition class", () => {
 
 function createCompositeSubject({
   filtering = createSubject(),
-  type = faker.helpers.randomize(["and", "or"]),
+  type = faker.helpers.randomize(["and", "or"]) as LogicalOperator,
 } = {}) {
   return {
     ...filtering,
     type,
-    compositeSubject: new CompositeFilteringCondition(filtering.subject, (<LogicalOperator> type)),
+    compositeSubject: new CompositeFilteringCondition(filtering.subject, type),
   };
 }
 
