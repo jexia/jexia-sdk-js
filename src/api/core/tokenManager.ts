@@ -238,7 +238,7 @@ export class TokenManager {
         return refreshedTokens;
       })
       .catch((err: Error) => {
-        defers.reject(err);
+        delete this.defers[auth];
         this.logger.error("tokenManager", err.message);
         throw new Error(`Unable to get tokens: ${err.message}`);
       });
