@@ -54,7 +54,7 @@ export class DataOperationsModule implements IModule {
    * @returns Dataset object used to fetch and modify data at your datasets.
    */
   public dataset<T extends object = any>(dataset: string, auth?: string): Dataset<T> {
-    let config = this.injector.get(AuthOptions);
+    const config = this.injector.get(AuthOptions);
     if (auth) {
       config.auth = auth;
     }

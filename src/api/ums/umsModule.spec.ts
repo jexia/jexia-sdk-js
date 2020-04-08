@@ -92,7 +92,7 @@ describe("UMS Module", () => {
     });
 
     it("should throw correct error if initialized incorrectly", () => {
-      expect(() => (UMSModule as any)()).toThrow("UMS module initialized incorrectly, you need to include 'new'");
+      expect(() => (UMSModule as any)()).toThrow(new Error("UMS module initialized incorrectly, you need to include 'new'"));
     });
 
     it("should be able start a select query", async () => {

@@ -78,6 +78,7 @@ export abstract class BaseQuery<T, D extends T = any> extends Observable<T[]> {
    * @deprecated Use subscribe() instead
    */
   public execute(): Promise<T[]> {
+    // tslint:disable:no-console
     console.warn("=============================================");
     console.warn(" execute() method is DEPRECATED.\n Please, consider using .subscribe() instead");
     console.warn("=============================================");

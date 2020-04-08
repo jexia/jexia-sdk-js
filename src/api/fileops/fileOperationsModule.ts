@@ -48,7 +48,7 @@ export class FileOperationsModule<FormDataType extends IFormData<F>, F> implemen
   public fileset<T extends object = any>(fileset: string, auth?: string):
     Fileset<FormDataType, T, FilesetInterface<T>, F> {
 
-    let config = this.injector.get(AuthOptions);
+    const config = this.injector.get(AuthOptions);
     if (auth) {
       config.auth = auth;
     }

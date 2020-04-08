@@ -12,7 +12,7 @@ interface IUser {
   name: string;
 }
 
-let createSubject = ({
+const createSubject = ({
   method = RequestMethod.GET,
   resourceName = faker.random.word(),
   resourceType = getRandomResourceType(),
@@ -27,7 +27,7 @@ let createSubject = ({
   }
 
   const subject = new FilterableQueryChild<IUser>(requestExecuterMock, method, resourceType, resourceName);
-  let queryMock = createMockForQuery ? createMockFor<Query>(Query) : new Query();
+  const queryMock = createMockForQuery ? createMockFor<Query>(Query) : new Query();
 
   // tslint:disable-next-line:no-string-literal
   subject["query"] = queryMock;

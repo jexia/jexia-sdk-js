@@ -28,7 +28,7 @@ export function requestAdapterMockFactory() {
   return new RequestAdapterMockFactory();
 }
 
-export function createResponseForSuccesfulRequest(fetchResponseMock: Object): Promise<any> {
+export function createResponseForSuccesfulRequest(fetchResponseMock: object): Promise<any> {
   return Promise.resolve(fetchResponseMock);
 }
 
@@ -48,13 +48,11 @@ export function createRequestExecuterMock(): RequestExecuter {
 
 export interface ISpyOptions {
   returnValue?: any;
-  callFake?: (...args: Function[]) => any;
+  callFake?: (...args: Array<() => any>) => any;
   callThrough?: boolean;
 }
 
-interface IConstructor<T> {
-  new(...args: any[]): T;
-}
+type IConstructor<T> = new(...args: any[]) => T;
 
 export type SpyObj<T> = T & {
   [k in keyof T]: jest.Mock<T>;
@@ -96,7 +94,7 @@ export function mockPrototypeOf(obj: any, spyOptions: ISpyOptions = {}, defaultP
     });
 }
 
-function getMethodNamesOf<T extends Function, K extends keyof T>(obj: T): K[] {
+function getMethodNamesOf<T extends IConstructor<any>, K extends keyof T>(obj: T): K[] {
   return Object.getOwnPropertyNames(obj.prototype).filter((i) => i !== "constructor") as K[];
 }
 

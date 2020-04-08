@@ -35,7 +35,7 @@ function createSubject({
   getToken = jasmine.createSpy().and.returnValue(tokenPromise),
 } = {}) {
 
-  let dataset = new Dataset(datasetName, requestExecuterMock);
+  const dataset = new Dataset(datasetName, requestExecuterMock);
 
   if (start) {
     /* this should be done in realTimeModule, not supposed to be tested here */
@@ -294,7 +294,7 @@ describe("Dataset Watch", () => {
       const { dataset, webSocketMock } = createSubject();
       const { data: request } = createSubscribeCommandMessage(["all"], dataset.name);
 
-      let sub = dataset.watch();
+      const sub = dataset.watch();
 
       setTimeout(async () => {
 

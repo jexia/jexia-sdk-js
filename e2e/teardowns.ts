@@ -21,11 +21,11 @@ export const rtm = realTime();
 
 export const management = new Management();
 let client: Client;
-let datasets: Array<{ name: string, id: string }> = [];
+const datasets: Array<{ name: string, id: string }> = [];
 let fileset: { name: string, id: string };
 let apiKey: { id: string, key: string, secret: string };
 let policy: { id: string };
-let relations: Array<{ id: string }> = [];
+const relations: Array<{ id: string }> = [];
 let channel: { id: string; name: string };
 
 export const DEFAULT_DATASET = { NAME: "test_dataset", FIELD: "test_field" };
@@ -50,7 +50,7 @@ export const init = async (
       ]
     });
   } else {
-    for (let field of fields) {
+    for (const field of fields) {
       await management.createDatasetField(dataset.id, field);
     }
   }
@@ -68,10 +68,10 @@ export const init = async (
 };
 
 export const cleaning = async () => {
-  for (let relation of relations) {
+  for (const relation of relations) {
     await management.deleteRelation(relation.id);
   }
-  for (let dataset of datasets) {
+  for (const dataset of datasets) {
     await management.deleteDataset(dataset.id);
   }
   if (fileset) {
@@ -116,7 +116,7 @@ export const initWithJFS = async (filesetName: string = "testFileset",
   fileset = await management.createFileset(filesetName);
 
   if (fields) {
-    for (let field of fields) {
+    for (const field of fields) {
       await management.createFilesetField(fileset.id, field);
     }
   }
@@ -134,15 +134,15 @@ export const initWithJFS = async (filesetName: string = "testFileset",
 export const initForRelations = async () => {
   await management.login();
 
-  let posts = await management.createDataset("posts");
+  const posts = await management.createDataset("posts");
   await management.createDatasetField(posts.id, { name: "title", type: "string" });
   await management.createDatasetField(posts.id, { name: "text", type: "string" });
 
-  let comments = await management.createDataset("comments");
+  const comments = await management.createDataset("comments");
   await management.createDatasetField(comments.id, { name: "message", type: "string" });
   await management.createDatasetField(comments.id, { name: "like", type: "boolean" });
 
-  let author = await management.createDataset("author");
+  const author = await management.createDataset("author");
   await management.createDatasetField(author.id, { name: "email", type: "string" });
 
   relations.push(

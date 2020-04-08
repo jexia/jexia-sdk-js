@@ -9,15 +9,15 @@ describe("Query class", () => {
   const filteringCondition = new FilteringCondition("field", "=", ["test"]);
   const filteringCriterion = new FilteringCriterion(filteringCondition);
   type ISort = { direction: "asc" | "desc", fields: string[]};
-  let sortWithoutFields: ISort = {
+  const sortWithoutFields: ISort = {
     direction: "asc",
     fields: [],
   };
-  let sort1: ISort = {
+  const sort1: ISort = {
     direction: "asc",
     fields: ["field1", "field2"],
   };
-  let sort2: ISort = {
+  const sort2: ISort = {
     direction: "desc",
     fields: ["field3"],
   };

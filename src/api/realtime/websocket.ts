@@ -40,9 +40,7 @@ export const allEvents: ReadonlyArray<EventSubscriptionType> =
 /**
  * @internal
  */
-interface IGetToken {
-  (): Promise<string>;
-}
+type IGetToken = () => Promise<string>;
 
 /**
  * @internal

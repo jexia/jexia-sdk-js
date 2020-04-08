@@ -43,7 +43,7 @@ describe("delete record REST API", async () => {
   });
 
   describe("deletes multiples records", () => {
-    let records: any[] = [];
+    const records: any[] = [];
     beforeAll((done) => {
       fileset
         .upload([

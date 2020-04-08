@@ -1,6 +1,6 @@
 import { API as DEFAULT_API, DELAY } from "./config";
 
-let API = DEFAULT_API;
+const API = DEFAULT_API;
 
 const isNodeJS = typeof process === "object";
 

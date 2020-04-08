@@ -42,8 +42,8 @@ type SortedFields<T> = Array<ISort<KeyOfObject<T>>>;
 export interface ICompiledQuery<T> {
   action: QueryActionType;
   action_resource: string;
-  action_cond: Array<object>;
-  cond: Array<object>;
+  action_cond: object[];
+  cond: object[];
   outputs: Array<string | ICompiledAggField>;
   order: SortedFields<T>;
   range: { limit?: number, offset?: number };

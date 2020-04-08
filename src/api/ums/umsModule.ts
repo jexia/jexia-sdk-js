@@ -52,7 +52,7 @@ export class UMSModule<
   constructor() {
     /* users tend to init module without a new operator, throw a hint error */
     if (!(this instanceof UMSModule)) {
-      throw "UMS module initialized incorrectly, you need to include 'new'";
+      throw new Error("UMS module initialized incorrectly, you need to include 'new'");
     }
   }
 

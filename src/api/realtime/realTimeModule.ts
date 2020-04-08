@@ -16,12 +16,12 @@ import * as websocket from "./websocket";
  * List of resources that will be extended by RTC module
  * by providing a watch() method to their prototypes
  */
-const RTCResources: Array<{ new(...args: any[]): IResource }> = [Dataset, Fileset];
+const RTCResources: Array<new(...args: any[]) => IResource> = [Dataset, Fileset];
 
 declare module "../dataops/dataset" {
   /**
    * @ignore
-   */ // tslint:disable-next-line:interface-name
+   */
   interface Dataset<T> {
     webSocket: IWebSocket;
     watch: typeof watch;
@@ -31,7 +31,7 @@ declare module "../dataops/dataset" {
 declare module "../fileops/fileset" {
   /**
    * @ignore
-   */ // tslint:disable-next-line:interface-name
+   */
   interface Fileset<FormDataType extends IFormData<F>, T, D, F> {
     webSocket: IWebSocket;
     watch: typeof watch;
@@ -140,7 +140,7 @@ export class RealTimeModule implements IModule {
     // complicated logic we can simply define them as empty string when they are not
     // needed and include : or / along with the actual values, when they are needed.
     // See /config/config.ts vs. /config/config.prod.ts for actual values.
-    let result = `${API.REAL_TIME.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}` +
+    const result = `${API.REAL_TIME.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}` +
       `${API.REAL_TIME.PORT || ""}${API.REAL_TIME.ENDPOINT}?access_token=${token}`;
     // temporary variable used for devenv debugging purposes
     return result;

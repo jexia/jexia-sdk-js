@@ -48,14 +48,10 @@ export interface IWebSocket {
 
 /**
  * Builder function for the WebSocket object
+ * @param appUrl Url of your Jexia project
+ * @returns Minimal required WebSocket interface to use the real time module
  */
-export interface IWebSocketBuilder {
-  /**
-   * @param appUrl Url of your Jexia project
-   * @returns Minimal required WebSocket interface to use the real time module
-   */
-  (appUrl: string): IWebSocket;
-}
+export type IWebSocketBuilder = (appUrl: string) => IWebSocket;
 
 /**
  * Real time message contract
