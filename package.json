@@ -130,6 +130,11 @@
     "webpack": "^4.42.1",
     "webpack-cli": "^3.3.11"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint"
+    }
+  },
   "release": {
     "branch": "master",
     "verifyConditions": [
