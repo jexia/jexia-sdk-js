@@ -30,9 +30,12 @@ describe("User Management Service", () => {
     afterAll(async () => await terminate());
 
     describe("when user sign-up", () => {
-      it("should create a new user", async () => {
-        user = await ums.signUp(credentials);
-        joiAssert(user, UserSchema);
+      it("should create a new user", (done) => {
+        ums.signUp(credentials).subscribe((signedUser) => {
+          user = signedUser;
+          joiAssert(user, UserSchema);
+          done();
+        })
       });
 
       it("should create an active user", () => {
@@ -48,7 +51,7 @@ describe("User Management Service", () => {
         let extra: any;
         let createdUser: any;
 
-        it("should create a user with extra fields", async () => {
+        it("should create a user with extra fields", (done) => {
           creds = {
             email: faker.internet.email(),
             password: faker.internet.password(),
@@ -59,13 +62,15 @@ describe("User Management Service", () => {
             str: faker.random.alphaNumeric(),
           };
 
-          createdUser = await ums.signUp(creds, extra);
-
-          joiAssert(createdUser, UserSchema.append({
-            bool: Joi.boolean().required(),
-            num: Joi.number().required(),
-            str: Joi.string().required()
-          }));
+          ums.signUp(creds, extra).subscribe((response) => {
+            createdUser = response;
+            joiAssert(createdUser, UserSchema.append({
+              bool: Joi.boolean().required(),
+              num: Joi.number().required(),
+              str: Joi.string().required()
+            }));
+            done();
+          });
         });
 
         it("should return the same values of extra fields", () => {
@@ -77,20 +82,20 @@ describe("User Management Service", () => {
 
     describe("when created user sign-in", () => {
 
-      it("should get a token", async () => {
-        const token = await ums.signIn({ ...credentials, default: true });
-        expect(token).toBeDefined();
+      it("should get a token", (done) => {
+        ums.signIn({ ...credentials, default: true }).subscribe((token) => {
+          expect(token).toBeDefined();
+          done();
+        })
       });
 
       it("should get an error if credentials are incorrect", (done) => {
         ums.signIn({
           email: "wrong@email.com",
           password: "wrongPassword",
-        })
-          .then(() => {
-            done("should not be able to sign in with wrong credentials");
-          })
-          .catch((error) => {
+        }).subscribe(
+          () => done("should not be able to sign in with wrong credentials"),
+          (error) => {
             joiAssert(error, BackendErrorSchema);
             done();
           });

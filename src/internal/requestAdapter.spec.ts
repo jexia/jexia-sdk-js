@@ -32,8 +32,8 @@ describe("Class: RequestAdapter", () => {
     });
   });
 
-  describe("when executing a succesful query", () => {
-    it("should return the data", async () => {
+  describe("when executing a successful query", () => {
+    it("should return the data", (done) => {
       expect.assertions(1);
 
       const { subject, data } = createSubject({
@@ -44,33 +44,29 @@ describe("Class: RequestAdapter", () => {
         ],
       });
 
-      try {
-        const responseData = await subject.execute(faker.random.uuid(), { headers: {} });
-
-        expect(responseData).toEqual(data);
-      } catch (err) {
-        expect(err).not.toBeDefined();
-      }
+      subject.execute(faker.random.uuid(), { headers: {} }).subscribe(
+        (response) => expect(response).toEqual(data),
+        done,
+        done,
+      );
     });
 
-    it("should return empty object when response body is empty", async () => {
+    it("should return empty object when response body is empty", (done) => {
       expect.assertions(1);
 
       const { subject } = createSubject({
         data: "",
       });
 
-      try {
-        const responseData = await subject.execute(faker.random.uuid(), { headers: {} });
-
-        expect(responseData).toEqual({});
-      } catch (err) {
-        expect(err).not.toBeDefined();
-      }
+      subject.execute(faker.random.uuid(), { headers: {} }).subscribe(
+        (response) => expect(response).toEqual({}),
+        done,
+        done,
+      );
     });
 
     describe("when calling fetch fails", () => {
-      it("should cause fetch error", async () => {
+      it("should cause fetch error", (done) => {
         expect.assertions(1);
 
         const { subject, status, statusText } = createSubject({
@@ -78,13 +74,13 @@ describe("Class: RequestAdapter", () => {
           statusText: faker.lorem.sentence(),
         });
 
-        try {
-          await subject.execute(faker.random.uuid(), { headers: {} });
-
-          expect(false).toBeTruthy();
-        } catch (err) {
-          expect(err.httpStatus).toEqual({ code: status, status: statusText });
-        }
+        subject.execute(faker.random.uuid(), { headers: {} }).subscribe(
+          () => done("do not cause fetch error"),
+          ({ httpStatus }) => {
+            expect(httpStatus).toEqual({code: status, status: statusText});
+            done();
+          },
+        );
       });
     });
   });

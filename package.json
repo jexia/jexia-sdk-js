@@ -13,7 +13,6 @@
     "cleanup:docs": "shx rm -rf docs",
     "cross-env": "cross-env",
     "commit": "git-cz",
-    "commitmsg": "commitlint -e",
     "lint": "tslint \"src/**/*.ts\" \"spec/**/*.ts\" \"e2e/**/*.ts\"",
     "test": "jest",
     "test:ci": "jest --no-cache --ci --reporters=jest-junit --runInBand",
@@ -130,7 +129,8 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "run-p commitmsg lint",
+      "pre-commit": "npm run lint",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
       "pre-docs": "npm run cleanup:docs",
       "pre-example": "npm run build:main"
     }

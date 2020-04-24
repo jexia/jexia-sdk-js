@@ -1,4 +1,5 @@
 import * as faker from "faker";
+import { of, throwError } from "rxjs";
 import { createMockFor, getRandomRequestMethod, getRandomResourceType } from "../../../../spec/testUtils";
 import { RequestExecuter } from "../../../internal/executer";
 import { IAggField } from "../../../internal/query";
@@ -22,12 +23,8 @@ const createSubject = ({
   resourceType = RESOURCE_TYPE,
   requestExecutorResult = [{ field: faker.random.word() }],
   requestExecutorError = null,
-  requestExecuterMock = createMockFor(RequestExecuter, {
-    returnValue: new Promise((res, rej) => {
-      requestExecutorError
-        ? rej(requestExecutorError)
-        : res(requestExecutorResult);
-    }),
+  requestExecuterMock = createMockFor(RequestExecuter, {}, {
+    executeRequest: () => requestExecutorError ? throwError(requestExecutorError) : of(requestExecutorResult),
   }),
 } = {}) => {
   // Declare child class as long as BaseQuery class is abstract
@@ -181,11 +178,15 @@ describe("query as observable", () => {
   it("should not execute request if there is no subscriber", () => {
     const { requestExecuterMock } = createSubject();
 
+    spyOn(requestExecuterMock, "executeRequest");
+
     expect(requestExecuterMock.executeRequest).not.toHaveBeenCalled();
   });
 
   it("should execute request once there is a subscriber", () => {
     const { subject, requestExecuterMock } = createSubject();
+
+    spyOn(requestExecuterMock, "executeRequest").and.returnValue(of({}));
 
     subject.subscribe();
 
@@ -215,7 +216,8 @@ describe("query as observable", () => {
 
   it("should throw an error to the subscriber", (done) => {
     const { subject, requestExecutorError } = createSubject({
-      requestExecutorError: new Error(faker.lorem.sentence()) as any });
+      requestExecutorError: new Error(faker.lorem.sentence()) as any,
+    });
 
     subject.subscribe({ error: (error) => {
       expect(error).toEqual(requestExecutorError);
@@ -225,6 +227,8 @@ describe("query as observable", () => {
 
   it("should execute requests as many times as many subscribers are", () => {
     const { subject, requestExecuterMock } = createSubject();
+    spyOn(requestExecuterMock, "executeRequest").and.returnValue(of({}));
+
     const times = faker.random.number({ min: 3, max: 10 });
 
     for (let i = 0; i < times; i++) {

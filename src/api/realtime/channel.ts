@@ -91,12 +91,12 @@ export class Channel<T = any> extends Observable<RealTimeEventMessage<T>> {
 
     const requestExecutor = this.injector.get(RequestExecuter);
 
-    return from(requestExecutor.executeRequest({
+    return requestExecutor.executeRequest({
       resourceType: ResourceType.Channel,
       resourceName: this.name,
       method: RequestMethod.GET,
       body: {},
       queryParams: query.compileToQueryParams()
-    }) as Promise<RealTimeStoredMessage[]>);
+    });
   }
 }

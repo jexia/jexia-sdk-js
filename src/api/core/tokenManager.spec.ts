@@ -1,4 +1,5 @@
 import * as faker from "faker";
+import { Observable, of, throwError } from "rxjs";
 import { createMockFor } from "../../../spec/testUtils";
 import { MESSAGE } from "../../config";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
@@ -10,14 +11,14 @@ let terminate: () => void;
 
 interface ISubjectOpts {
   tokens: Tokens;
-  requestAdapterReturnValue: Promise<Tokens>;
+  requestAdapterReturnValue: Observable<Tokens>;
   requestAdapterMock: RequestAdapter;
   loggerMock: Logger;
 }
 
 const createSubject = ({
   tokens = { access_token: faker.random.word(), refresh_token: faker.random.word() },
-  requestAdapterReturnValue = Promise.resolve(tokens),
+  requestAdapterReturnValue = of(tokens),
   requestAdapterMock = createMockFor(RequestAdapter, { returnValue: requestAdapterReturnValue }),
   loggerMock = createMockFor(Logger),
 }: Partial<ISubjectOpts> = {}) => {
@@ -85,7 +86,7 @@ describe("TokenManager", () => {
   describe("when authenticating", () => {
     it("should throw an error if authentication failed", async () => {
       const { subject, validOptions } = createSubject({
-        requestAdapterReturnValue: Promise.reject(new Error("Auth error")),
+        requestAdapterReturnValue: throwError(new Error("Auth error")),
       });
       await subject.init(validOptions)
         .catch((error) => expect(error.message).toEqual("Unable to get tokens: Auth error"));
@@ -114,20 +115,28 @@ describe("TokenManager", () => {
   });
 
   describe("when get a token", () => {
-    it("should return default token if authorization succeeded", async () => {
+    it("should return default token if authorization succeeded", async (done) => {
       const { subject, validOptions, tokens } = createSubject();
       await subject.init(validOptions);
-      expect(await subject.token()).toEqual(tokens.access_token);
+      subject.token().subscribe(
+        (token) => expect(token).toEqual(tokens.access_token),
+        done,
+        done,
+      );
     });
 
-    it("should return a token by auth alias if authorized with alias", async () => {
+    it("should return a token by auth alias if authorized with alias", async (done) => {
       const { subject, validOptions, tokens } = createSubject();
       const randomAlias = faker.random.word();
       await subject.init({ ...validOptions, auth: randomAlias });
-      expect(await subject.token(randomAlias)).toEqual(tokens.access_token);
+      subject.token(randomAlias).subscribe(
+        (token) => expect(token).toEqual(tokens.access_token),
+        done,
+        done,
+      );
     });
 
-    it("should return a token set by default", async () => {
+    it("should return a token set by default", async (done) => {
       const { subject, validOptions } = createSubject();
       const randomAlias = faker.random.word();
       const anotherTokens = {
@@ -137,10 +146,14 @@ describe("TokenManager", () => {
       await subject.init(validOptions);
       subject.addTokens([randomAlias], anotherTokens);
       subject.setDefault(randomAlias);
-      expect(await subject.token()).toEqual(anotherTokens.access_token);
+      subject.token().subscribe(
+        (token) => expect(token).toEqual(anotherTokens.access_token),
+        done,
+        done,
+      );
     });
 
-    it("should return a token by any of aliases if there are few", async () => {
+    it("should return a token by any of aliases if there are few", async (done) => {
       const { subject, validOptions } = createSubject();
       const randomAliases = [faker.random.word(), faker.random.word(), faker.random.word()];
       const randomAlias = faker.helpers.randomize(randomAliases);
@@ -150,10 +163,14 @@ describe("TokenManager", () => {
       };
       await subject.init(validOptions);
       subject.addTokens(randomAliases, anotherTokens);
-      expect(await subject.token(randomAlias)).toEqual(anotherTokens.access_token);
+      subject.token(randomAlias).subscribe(
+        (token) => expect(token).toEqual(anotherTokens.access_token),
+        done,
+        done,
+      );
     });
 
-    it("should return default token after reset to default", async () => {
+    it("should return default token after reset to default", async (done) => {
       const { subject, validOptions, tokens } = createSubject();
       const randomAlias = faker.random.word();
       const anotherTokens = {
@@ -164,34 +181,46 @@ describe("TokenManager", () => {
       subject.addTokens([randomAlias], anotherTokens);
       subject.setDefault(randomAlias);
       subject.resetDefault();
-      expect(await subject.token()).toEqual(tokens.access_token);
+      subject.token().subscribe(
+        (token) => expect(token).toEqual(tokens.access_token),
+        done,
+        done,
+      );
     });
 
-    it("should throw an error if the token is accessed before login", async () => {
+    it("should throw an error if the token is accessed before login", (done) => {
       const { subject } = createSubject();
-      try {
-        await subject.token();
-        throw new Error("token() should have failed!");
-      } catch (error) {
-        expect(error.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
-      }
+
+      subject.token().subscribe(
+        () => done("successfully received the token"),
+        (error) => {
+          expect(error.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
+          done();
+        },
+      );
     });
 
-    it("should throw an error if accessed nonexistent token", async () => {
+    it("should throw an error if accessed nonexistent token", async (done) => {
       const { subject, validOptions } = createSubject();
       await subject.init(validOptions);
-      try {
-        await subject.token("randomToken");
-        throw new Error("token() should have failed");
-      } catch (error) {
-        expect(error.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
-      }
+
+      subject.token("randomToken").subscribe(
+        () => done("successfully received the token"),
+        (error) => {
+          expect(error.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
+          done();
+        },
+      );
     });
 
-    it("should return a token if authorized by alias and get default token", async () => {
+    it("should return a token if authorized by alias and get default token", async (done) => {
       const { subject, validOptions, tokens } = createSubject();
       await subject.init({ ...validOptions, auth: faker.random.word() });
-      expect(await subject.token()).toEqual(tokens.access_token);
+      subject.token().subscribe(
+        (token) => expect(token).toEqual(tokens.access_token),
+        done,
+        done,
+      );
     });
   });
 
@@ -225,16 +254,18 @@ describe("TokenManager", () => {
       clearIntervalSpy.mockRestore();
     });
 
-    it("should throw an error if the token is accessed after terminate", async () => {
+    it("should throw an error if the token is accessed after terminate", async (done) => {
       const { subject, validOptions } = createSubject();
       await subject.init(validOptions);
       await subject.terminate();
-      try {
-        await subject.token();
-        throw new Error("token() should have failed!");
-      } catch (error) {
-        expect(error.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
-      }
+
+      subject.token().subscribe(
+        () => done("successfully received the token"),
+        (error) => {
+          expect(error.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
+          done();
+        },
+      );
     });
   });
 
@@ -259,7 +290,7 @@ describe("TokenManager", () => {
       it("should terminate itself if there is an error during refresh", async () => {
         const { subject, validOptions } = createSubject();
         await subject.init(validOptions);
-        jest.spyOn(subject as any, "refresh").mockRejectedValue("refresh error");
+        jest.spyOn(subject as any, "refresh").mockReturnValue(throwError("refresh error"));
         jest.spyOn(subject, "terminate");
         jest.runOnlyPendingTimers();
         return Promise.resolve().then(
@@ -291,17 +322,20 @@ describe("TokenManager", () => {
       }
     });
 
-    it("should throw an error if request failed", async () => {
+    it("should throw an error if request failed", async (done) => {
       const { subject } = createSubject({
-        requestAdapterReturnValue: Promise.reject(new Error("refresh error")),
+        requestAdapterReturnValue: throwError(new Error("refresh error")),
       });
       (subject as any).storage.setTokens("testRefresh",
         { access_token: "access_token", refresh_token: "refresh_token" });
-      try {
-        await (subject as any).refresh(["testRefresh"]);
-      } catch (error) {
-        expect(error.message).toEqual("Unable to get tokens: refresh error");
-      }
+
+      (subject as any).refresh(["testRefresh"]).subscribe(
+        () => done("successfully refreshed the token"),
+        (error: Error) => {
+          expect(error.message).toEqual("Unable to get tokens: refresh error");
+          done();
+        },
+      );
     });
   });
 });

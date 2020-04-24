@@ -82,7 +82,8 @@ export class RealTimeModule implements IModule {
 
     RTCResources.forEach((resource) => resource.prototype.watch = watch);
 
-    return tokenManager.token().then((token) => {
+    // TODO Get rid of promises
+    return tokenManager.token().toPromise().then((token) => {
       try {
         this.websocket = this.websocketBuilder(this.buildSocketOpenUri(projectID, token));
       } catch (error) {
@@ -100,7 +101,7 @@ export class RealTimeModule implements IModule {
         this.websocket.onerror = () => reject(new Error(MESSAGE.RTC.CONNECTION_FAILED));
       });
     })
-    .then(() => websocket.start(this.websocket, () => tokenManager.token()))
+    .then(() => websocket.start(this.websocket, () => tokenManager.token().toPromise()))
     .then(() => this);
   }
 

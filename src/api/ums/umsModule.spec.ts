@@ -1,6 +1,7 @@
 // tslint:disable:no-string-literal
 import * as faker from "faker";
 import { ReflectiveInjector } from "injection-js";
+import { of } from "rxjs";
 import { createMockFor, SpyObj } from "../../../spec/testUtils";
 import { API } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
@@ -31,17 +32,16 @@ describe("UMS Module", () => {
   };
 
   function createSubject({
-    tokenPromise = Promise.resolve(tokenTest),
     tokenManagerMock = createMockFor(TokenManager),
     requestAdapterMock = createMockFor(RequestAdapter, {
-      returnValue: Promise.resolve(signedInResult)
+      returnValue: of(signedInResult),
     }),
     requestExecuterMock = createMockFor(RequestExecuter),
     // @ts-ignore
     systemDefer = deferPromise<Client>(),
     injectorMock = createMockFor(["get", "resolveAndCreateChild"]) as SpyObj<ReflectiveInjector>,
   } = {}) {
-    (tokenManagerMock as any)["token"] = () => tokenPromise;
+    (tokenManagerMock as any)["token"] = () => of(tokenTest);
     const injectorMap = new Map<any, any>([
       [TokenManager, tokenManagerMock],
       [RequestAdapter, requestAdapterMock],
@@ -223,7 +223,7 @@ describe("UMS Module", () => {
         const { subject, requestAdapterMock, systemDefer, init } = createSubject();
         systemDefer.resolve();
         await init();
-        await subject.getUser(testUser.alias);
+        await subject.getUser(testUser.alias).subscribe();
         expect(requestAdapterMock.execute).toHaveBeenCalledWith(
           `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.UMS.ENDPOINT}/${API.UMS.USER}`,
           {
@@ -248,7 +248,7 @@ describe("UMS Module", () => {
         const newPassword = faker.internet.password();
         systemDefer.resolve();
         await init();
-        await subject.changePassword(testUser.alias, testUser.password, newPassword);
+        await subject.changePassword(testUser.alias, testUser.password, newPassword).subscribe();
         expect(requestAdapterMock.execute).toHaveBeenCalledWith(
           // tslint:disable-next-line
           `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.UMS.ENDPOINT}/${API.UMS.CHANGEPASSWORD}`,
@@ -278,7 +278,7 @@ describe("UMS Module", () => {
         const { subject, requestAdapterMock, systemDefer, init } = createSubject();
         systemDefer.resolve();
         await init();
-        await subject.deleteUser(testUser.alias, testUser.password);
+        await subject.deleteUser(testUser.alias, testUser.password).subscribe();
         expect(requestAdapterMock.execute).toHaveBeenCalledWith(
           `${API.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.UMS.ENDPOINT}/${API.UMS.USER}`,
           {
