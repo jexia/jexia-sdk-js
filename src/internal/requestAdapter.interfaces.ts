@@ -19,16 +19,7 @@ export interface IHTTPResponse {
   text(): Promise<string>;
 }
 
-export interface IRequestAdapter {
-  execute(uri: string, opt: IRequestOptions): Promise<any>;
-}
-
 export type Fetch = (url: string, init?: IRequestOptions) => Promise<IHTTPResponse>;
-
-export interface IBackendError {
-  message: string;
-  request_id: string;
-}
 
 /**
  * Error from the API

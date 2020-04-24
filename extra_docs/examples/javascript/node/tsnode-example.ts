@@ -1,4 +1,3 @@
-
 // Node application
 import { dataOperations, jexiaClient } from "jexia-sdk-js/node";
 
@@ -24,12 +23,10 @@ jexiaClient().init(credentials, dataModule);
 dataModule.dataset<Post>("posts")
   .select()
   .where((field) => field("title").isEqualTo("My first post"))
-  .execute()
-  .then((records) => {
+  .subscribe((records) => {
     console.log(records);
     process.exit();
-  })
-  .catch((error) => {
+  }, (error: any) => {
     // there was a problem retrieving the records
     console.log(error);
     process.exit();

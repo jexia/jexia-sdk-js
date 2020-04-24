@@ -1,5 +1,6 @@
 // tslint:disable:no-string-literal
 import * as faker from "faker";
+import { Observable, of, throwError } from "rxjs";
 import { ResourceType } from "../src/api/core/resource";
 import { FilesetInterface, FilesetMultipart, IFileStatus } from "../src/api/fileops/fileops.interfaces";
 import { EventSubscriptionType, RealTimeEventMessage } from "../src/api/realtime/realTime.interfaces";
@@ -28,18 +29,16 @@ export function requestAdapterMockFactory() {
   return new RequestAdapterMockFactory();
 }
 
-export function createResponseForSuccesfulRequest(fetchResponseMock: object): Promise<any> {
-  return Promise.resolve(fetchResponseMock);
+export function createResponseForSuccesfulRequest(fetchResponseMock: object): Observable<any> {
+  return of(fetchResponseMock);
 }
 
-export function createResponseForFailedRequest(errorMessage: string): Promise<any> {
-  return new Promise<any>( (resolve, reject) => {
-    throw new Error(errorMessage);
-  });
+export function createResponseForFailedRequest(errorMessage: string): Observable<any> {
+  return throwError(new Error(errorMessage));
 }
 
-export function createGenericSuccesfulResponse(): Promise<any> {
-  return Promise.resolve({ Status: "OK" });
+export function createGenericSuccesfulResponse(): Observable<any> {
+  return of({ Status: "OK" });
 }
 
 export function createRequestExecuterMock(): RequestExecuter {

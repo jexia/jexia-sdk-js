@@ -1,5 +1,5 @@
 import * as faker from "faker";
-import { Subject } from "rxjs";
+import { of, Subject } from "rxjs";
 import { createMockFor, mockFilesList } from "../../../spec/testUtils";
 import { RequestAdapter } from "../../internal/requestAdapter";
 import { TokenManager } from "../core/tokenManager";
@@ -36,8 +36,8 @@ describe("fileUploader", () => {
     filesetName = faker.random.word(),
     // @ts-ignore
     token = faker.random.word(),
-    tokenManagerMock = createMockFor(TokenManager, { returnValue: Promise.resolve(token) }),
-    requestAdapterMock = createMockFor(RequestAdapter, { returnValue: Promise.resolve([]) }),
+    tokenManagerMock = createMockFor(TokenManager, { returnValue: of(token) }),
+    requestAdapterMock = createMockFor(RequestAdapter, { returnValue: of([]) }),
     FormDataMock = TestFormData,
   } = {}) {
     const subject = new FileUploader(config, filesetName, tokenManagerMock, requestAdapterMock);

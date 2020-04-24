@@ -1,4 +1,6 @@
 import * as faker from "faker";
+import { of } from "rxjs";
+import { switchMap } from "rxjs/operators";
 import {
   getRandomRequestMethod,
   getRandomResourceType,
@@ -9,7 +11,7 @@ import { TokenManager } from "../api/core/tokenManager";
 import { API } from "../config/config";
 import { RequestExecuter } from "./executer";
 import { IRequestExecuterData } from "./executer.interfaces";
-import { RequestAdapter, RequestMethod } from "./requestAdapter";
+import { IRequestOptions, RequestAdapter, RequestMethod } from "./requestAdapter";
 import { deferPromise } from "./utils";
 
 describe("QueryExecuter class", () => {
@@ -24,8 +26,8 @@ describe("QueryExecuter class", () => {
     reqAdapterMock = requestAdapterMockFactory().genericSuccesfulExecution(),
     clientInit = Promise.resolve(),
     tokenManagerMock = {
-      token(): Promise<string> {
-        return Promise.resolve(validToken);
+      token() {
+        return of(validToken);
       },
     } as TokenManager,
   } = {}) => {
@@ -87,30 +89,56 @@ describe("QueryExecuter class", () => {
         };
       });
 
-      it("should get URL", async () => {
-        spyOn(subject, "getUrl");
-        await subject.executeRequest(requestData);
-        expect(subject.getUrl).toHaveBeenCalledWith(requestData);
-      });
-
-      it("should parse query params", async () => {
-        spyOn(subject, "parseQueryParams");
-        await subject.executeRequest(requestData);
-        expect(subject.parseQueryParams).toHaveBeenCalledWith(requestData);
-      });
-
-      it("should get request options", async () => {
-        spyOn(subject, "getRequestOptions");
-        await subject.executeRequest(requestData);
-        expect(subject.getRequestOptions).toHaveBeenCalledWith(requestData);
-      });
-
-      it("should make a request with proper URL, params and options", async () => {
-        await subject.executeRequest(requestData);
-        expect(reqAdapterMock.execute).toHaveBeenCalledWith(
-          subject.getUrl(requestData) + subject.parseQueryParams(requestData),
-          await subject.getRequestOptions(requestData),
+      it("should get URL", (done) => {
+        spyOn(subject, "getUrl").and.callThrough();
+        subject.executeRequest(requestData).subscribe(() => {
+          expect(subject.getUrl).toHaveBeenCalledWith(requestData);
+          done();
+        },
+          done,
+          done,
         );
+      });
+
+      it("should parse query params", (done) => {
+        spyOn(subject, "parseQueryParams").and.callThrough();
+        subject.executeRequest(requestData).subscribe(() => {
+          expect(subject.parseQueryParams).toHaveBeenCalledWith(requestData);
+          done();
+        },
+          done,
+          done,
+        );
+      });
+
+      it("should get request options", (done) => {
+        spyOn(subject, "getRequestOptions").and.callThrough();
+        subject.executeRequest(requestData).subscribe(() => {
+          expect(subject.getRequestOptions).toHaveBeenCalledWith(requestData);
+          done();
+        },
+          done,
+          done,
+        );
+      });
+
+      it("should make a request with proper URL, params and options", (done) => {
+        let requestOptions: IRequestOptions;
+
+        subject.getRequestOptions(requestData).pipe(
+          switchMap((options: IRequestOptions) => {
+            requestOptions = options;
+            return subject.executeRequest(requestData)
+          }),
+        ).subscribe({
+          complete: () => {
+            expect(reqAdapterMock.execute).toHaveBeenCalledWith(
+              subject.getUrl(requestData) + subject.parseQueryParams(requestData),
+              requestOptions,
+            );
+            done();
+          }
+        });
       });
     });
 
@@ -182,16 +210,20 @@ describe("QueryExecuter class", () => {
       method: getRandomRequestMethod(),
     };
 
-    it("should pass default params down to the request adapter", async () => {
+    it("should pass default params down to the request adapter", (done) => {
       const { subject, reqAdapterMock } = createSubject();
-      await subject.executeRequest(mockRequest);
-      expect(reqAdapterMock.execute).toHaveBeenCalledWith(
-        subject.getUrl(mockRequest) + subject.parseQueryParams(mockRequest),
-        {
-          headers: { Authorization: `Bearer ${validToken}` },
-          method: mockRequest.method,
+      subject.executeRequest(mockRequest).subscribe({
+        complete: () => {
+          expect(reqAdapterMock.execute).toHaveBeenCalledWith(
+            subject.getUrl(mockRequest) + subject.parseQueryParams(mockRequest),
+            {
+              headers: { Authorization: `Bearer ${validToken}` },
+              method: mockRequest.method,
+            },
+          );
+          done();
         },
-      );
+      });
     });
 
     const actions = [
@@ -205,29 +237,30 @@ describe("QueryExecuter class", () => {
     const withoutBody = actions.filter((action) => !action.hasBody);
 
     withoutBody.forEach(({ method }) => {
-      it(`should pass no body for ${method} requests`, async () => {
+      it(`should pass no body for ${method} requests`, (done) => {
         const { subject, reqAdapterMock } = createSubject();
         const request = {
           method,
           body: {},
         };
 
-        await subject.executeRequest(request);
-
-        expect(reqAdapterMock.execute).toHaveBeenCalledWith(
-          subject.getUrl(request) + subject.parseQueryParams(request),
-          {
-            headers: { Authorization: `Bearer ${validToken}` },
-            method,
-          },
-        );
+        subject.executeRequest(request).subscribe({ complete: () => {
+          expect(reqAdapterMock.execute).toHaveBeenCalledWith(
+            subject.getUrl(request) + subject.parseQueryParams(request),
+            {
+              headers: { Authorization: `Bearer ${validToken}` },
+              method,
+            },
+          );
+          done();
+        }});
       });
     });
 
     const withBody = actions.filter((action) => action.hasBody);
 
     withBody.forEach(({ method }) => {
-      it(`should pass body down to the request adapter for ${method} requests`, async () => {
+      it(`should pass body down to the request adapter for ${method} requests`,  (done) => {
         const { subject, reqAdapterMock } = createSubject();
         const fakeBody = {
           someObject: faker.random.number(),
@@ -236,58 +269,62 @@ describe("QueryExecuter class", () => {
           method,
           body: fakeBody,
         };
-        await subject.executeRequest(request);
 
-        expect(reqAdapterMock.execute).toHaveBeenCalledWith(
-          subject.getUrl(request) + subject.parseQueryParams(request),
-          {
-            headers: { Authorization: `Bearer ${validToken}` },
-            body: fakeBody,
-            method,
+        subject.executeRequest(request).subscribe({
+          complete: () => {
+            expect(reqAdapterMock.execute).toHaveBeenCalledWith(
+              subject.getUrl(request) + subject.parseQueryParams(request),
+              {
+                headers: {Authorization: `Bearer ${validToken}`},
+                body: fakeBody,
+                method,
+              }
+            );
+            done();
           }
-        );
+        });
       });
     });
 
-    it("should wait the system initialization before execute the query", async (done) => {
+    it("should wait the system initialization before execute the query", (done) => {
       const defer = deferPromise();
       const { subject, reqAdapterMock } = createSubject({
         clientInit: defer.promise,
       });
-      subject.executeRequest({ method: mockRequest.method });
+      subject.executeRequest({ method: mockRequest.method }).subscribe();
       setTimeout(() => {
         expect(reqAdapterMock.execute).not.toHaveBeenCalled();
         done();
       });
     });
 
-    it("should not execute the query if there is an error on system initialization", async () => {
+    it("should not execute the query if there is an error on system initialization", () => {
       const initError = "system initialization error";
       const { subject, reqAdapterMock } = createSubject({
         clientInit: Promise.reject(initError),
       });
 
-      try {
-        await subject.executeRequest({ method: mockRequest.method });
-        throw new Error("request execution should have throw an error");
-      } catch (error) {
-        expect(error).toBe(initError);
-      } finally {
-        expect(reqAdapterMock.execute).not.toHaveBeenCalled();
-      }
+      subject.executeRequest({ method: mockRequest.method }).subscribe({
+        error: ({ message }: Error) => expect(message).toEqual(initError),
+      });
+
+      expect(reqAdapterMock.execute).not.toHaveBeenCalled();
     });
 
-    it("should throw server errors back to the caller", async () => {
+    it("should throw server errors back to the caller",(done) => {
       const serverError = "Server error";
       const { subject } = createSubject({
         reqAdapterMock: requestAdapterMockFactory().failedExecution(serverError)
       });
       const mockBody = { method: mockRequest.method, body: {} };
-      try {
-        await subject.executeRequest(mockBody);
-      } catch (err) {
-        expect(err.message).toEqual(serverError);
-      }
+
+      subject.executeRequest(mockBody).subscribe(
+        () => done("request has been successfully executed"),
+        (err: any) => {
+          expect(err.message).toEqual(serverError);
+          done();
+        },
+      );
     });
   });
 });

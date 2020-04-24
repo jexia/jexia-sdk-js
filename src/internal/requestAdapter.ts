@@ -1,14 +1,18 @@
+import { from, Observable } from "rxjs";
+import { map, switchMap, tap } from "rxjs/operators";
 import { Logger } from "../api/logger/logger";
 import {
   Fetch,
   IHTTPResponse,
-  IRequestAdapter,
   IRequestError,
   IRequestOptions,
   RequestMethod
 } from "./requestAdapter.interfaces";
 
-export class RequestAdapter implements IRequestAdapter {
+/**
+ * @internal
+ */
+export class RequestAdapter {
 
   private logger: Logger = new Logger();
 
@@ -18,21 +22,20 @@ export class RequestAdapter implements IRequestAdapter {
     this.logger = logger;
   }
 
-  public execute<T = any>(uri: string, opt: IRequestOptions): Promise<T> {
+  public execute<T = any>(uri: string, opt: IRequestOptions): Observable<T> {
     let logMessage = `(REQUEST) ${opt.method} ${uri} ${JSON.stringify(opt)}\n`;
     const requestOptions: IRequestOptions = {
       body: JSON.stringify(opt.body),
       headers: opt.headers,
       method: opt.method
     };
-    return this.fetch(uri, requestOptions)
-      .then((response) => {
+    return from(this.fetch(uri, requestOptions)).pipe(
+      tap((response) => {
         logMessage += `(RESPONSE) ${response.status} ${response.statusText}`;
         this.logger.debug("RequestAdapter", logMessage);
-        return response;
-      })
-      /* check response status */
-      .then((response) => this.handleResponse(response, opt));
+      }),
+      switchMap((response: IHTTPResponse) => this.handleResponse(response, opt)),
+    );
   }
 
   /**
@@ -41,39 +44,38 @@ export class RequestAdapter implements IRequestAdapter {
    * @param headers
    * @param body
    */
-  public upload<T = any>(uri: string, headers: {[header: string]: string}, body: any): Promise<T> {
+  public upload<T = any>(uri: string, headers: {[header: string]: string}, body: any): Observable<T> {
     let logMessage = `(REQUEST) UPLOAD ${uri}\n`;
-    return this.fetch(uri, { body, headers, method: RequestMethod.POST })
-      .then((response) => {
+    return from(this.fetch(uri, { body, headers, method: RequestMethod.POST })).pipe(
+      tap((response) => {
         logMessage += `(RESPONSE) ${response.status} ${response.statusText}`;
         this.logger.debug("RequestAdapter", logMessage);
-        return response;
-      })
-      /* check response status */
-      .then((response) => this.handleResponse(response,
-        { body, headers, method: RequestMethod.POST }));
+      }),
+      switchMap((response: IHTTPResponse) => this.handleResponse(response,
+        { body, headers, method: RequestMethod.POST })),
+    );
   }
 
   /**
    * Analyze response and reject promise with IRequestError object if there is an error
    * @internal
    */
-  private handleResponse<T = any>(response: IHTTPResponse, request: IRequestOptions): Promise<T> {
-    return response.text().then((responseBody: string) => {
-      if (response.ok) {
-        return responseBody ? JSON.parse(responseBody) : {};
-      }
-      const error: IRequestError = {
-        ...this.fetchErrorMessage(responseBody),
-        request,
-        httpStatus: {
-          code: response.status,
-          status: response.statusText
+  private handleResponse<T = any>(response: IHTTPResponse, request: IRequestOptions): Observable<T> {
+    return from(response.text()).pipe(
+      map((responseBody: string) => {
+        if (response.ok) {
+          return responseBody ? JSON.parse(responseBody) : {};
         }
-      };
-
-      return Promise.reject(error);
-    });
+        throw {
+          ...this.fetchErrorMessage(responseBody),
+          request,
+          httpStatus: {
+            code: response.status,
+            status: response.statusText
+          }
+        } as IRequestError;
+      }),
+    );
   }
 
   /**

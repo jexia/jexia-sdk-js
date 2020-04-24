@@ -1,4 +1,6 @@
 import { Inject, Injectable } from "injection-js";
+import { combineLatest, from, Observable } from "rxjs";
+import { map, switchMap } from "rxjs/operators";
 import { ClientInit } from "../api/core/client";
 import { ResourceType } from "../api/core/resource";
 import { AuthOptions, IAuthOptions, TokenManager } from "../api/core/tokenManager";
@@ -23,28 +25,32 @@ export class RequestExecuter {
     private tokenManager: TokenManager,
   ) { }
 
-  public async executeRequest(request: IRequestExecuterData): Promise<any> {
-    await this.systemInit;
-
+  public executeRequest<T = any>(request: IRequestExecuterData): Observable<T> {
     const URI = this.getUrl(request) + this.parseQueryParams(request);
-    const options = await this.getRequestOptions(request);
 
-    return this.requestAdapter.execute(URI, options);
+    return combineLatest([
+      from(this.systemInit),
+      this.getRequestOptions(request),
+    ]).pipe(
+      switchMap(([, options]) => this.requestAdapter.execute(URI, options) as Observable<T>)
+    );
   }
 
-  private async getRequestOptions(request: IRequestExecuterData): Promise<IRequestOptions> {
-    const token = await this.tokenManager.token(this.config.auth);
+  private getRequestOptions(request: IRequestExecuterData): Observable<IRequestOptions> {
+    return this.tokenManager.token(this.config.auth).pipe(
+      map((token: string) => {
+        const options: IRequestOptions = {
+          headers: { Authorization: `Bearer ${token}` },
+          method: request.method,
+        };
 
-    const options: IRequestOptions = {
-      headers: { Authorization: `Bearer ${token}` },
-      method: request.method,
-    };
+        if (this.hasBody(request)) {
+          options.body = request.body;
+        }
 
-    if (this.hasBody(request)) {
-      options.body = request.body;
-    }
-
-    return options;
+        return options;
+      }),
+    );
   }
 
   private hasBody({ method }: IRequestExecuterData): boolean {

@@ -32,14 +32,9 @@ export abstract class BaseQuery<T, D extends T = any> extends Observable<T[]> {
       protected readonly resourceType: ResourceType,
       protected readonly resourceName: string,
   ) {
-    super((subscriber) => {
-      this.queryExecuter.executeRequest(this.compiledRequest)
-        .then((result: T[]) => {
-          subscriber.next(result);
-          subscriber.complete();
-        })
-        .catch((reason) => subscriber.error(reason));
-    });
+    super((subscriber) =>
+      this.queryExecuter.executeRequest(this.compiledRequest).subscribe(subscriber),
+    );
 
     this.query = new Query<T>();
   }
@@ -70,18 +65,5 @@ export abstract class BaseQuery<T, D extends T = any> extends Observable<T[]> {
       body: this.body || {},
       queryParams: this.query.compileToQueryParams() || [],
     };
-  }
-
-  /**
-   * Execute this query
-   * @returns Result of this operation with the affected data
-   * @deprecated Use subscribe() instead
-   */
-  public execute(): Promise<T[]> {
-    // tslint:disable:no-console
-    console.warn("=============================================");
-    console.warn(" execute() method is DEPRECATED.\n Please, consider using .subscribe() instead");
-    console.warn("=============================================");
-    return this.queryExecuter.executeRequest(this.compiledRequest);
   }
 }

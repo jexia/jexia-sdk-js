@@ -1,4 +1,6 @@
 import { ReflectiveInjector } from "injection-js";
+import { Observable } from "rxjs";
+import { map, switchMap } from "rxjs/operators";
 import { API } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
@@ -82,8 +84,7 @@ export class UMSModule<
     return Promise.resolve(this);
   }
 
-  public async signIn(user: IUMSSignInOptions): Promise<string> {
-
+  public signIn(user: IUMSSignInOptions): Observable<string> {
     const body = {
       method: "ums",
       email: user.email,
@@ -93,10 +94,12 @@ export class UMSModule<
     return this.requestAdapter.execute<Tokens>(
       this.getUrl(API.AUTH, false),
       { body, method: RequestMethod.POST }
-    ).then((tokens) => {
-      this.tokenManager.addTokens([user.email, user.alias], tokens, user.default);
-      return tokens.access_token;
-    });
+    ).pipe(
+      map((tokens: Tokens) => {
+        this.tokenManager.addTokens([user.email, user.alias], tokens, user.default);
+        return tokens.access_token;
+      }),
+    );
   }
 
   /**
@@ -104,7 +107,7 @@ export class UMSModule<
    * @param credentials {IUMSCredentials} email and password of created user
    * @param extra {IUMSExtraFields} optional list of the additional user fields
    */
-  public signUp(credentials: IUMSCredentials, extra: IUMSExtraFields = {}): Promise<D> {
+  public signUp(credentials: IUMSCredentials, extra: IUMSExtraFields = {}): Observable<D> {
     const body = {
       email: credentials.email,
       password: credentials.password,
@@ -128,12 +131,13 @@ export class UMSModule<
    * Fetch currently authorized user
    * @param alias {string} Authorization alias
    */
-  public getUser(alias: string): Promise<D> {
-    return this.tokenManager.token(alias)
-      .then((token) => this.requestAdapter.execute<D>(
+  public getUser(alias: string): Observable<D> {
+    return this.tokenManager.token(alias).pipe(
+      switchMap((token: string) => this.requestAdapter.execute<D>(
         this.getUrl(API.UMS.USER),
         { headers: { Authorization: `Bearer ${token}` }},
-      ));
+      )),
+    );
   }
 
   /**
@@ -142,16 +146,17 @@ export class UMSModule<
    * @param oldPassword {string}
    * @param newPassword {string}
    */
-  public changePassword(alias: string, oldPassword: string, newPassword: string): Promise<D> {
+  public changePassword(alias: string, oldPassword: string, newPassword: string): Observable<D> {
     const body = {
       old_password: oldPassword,
       new_password: newPassword,
     };
-    return this.tokenManager.token(alias)
-      .then((token) => this.requestAdapter.execute<D>(
+    return this.tokenManager.token(alias).pipe(
+      switchMap((token) => this.requestAdapter.execute<D>(
         this.getUrl(API.UMS.CHANGEPASSWORD),
         { body, headers: { Authorization: `Bearer ${token}` }, method: RequestMethod.POST },
-      ));
+      )),
+    );
   }
 
   /**
@@ -159,13 +164,14 @@ export class UMSModule<
    * @param alias
    * @param password
    */
-  public deleteUser(alias: string, password: string): Promise<any> {
+  public deleteUser(alias: string, password: string): Observable<void> {
     const body = { password };
-    return this.tokenManager.token(alias)
-      .then((token) => this.requestAdapter.execute(
+    return this.tokenManager.token(alias).pipe(
+      switchMap((token) => this.requestAdapter.execute(
         this.getUrl(API.UMS.USER),
         { body, headers: { Authorization: `Bearer ${token}` }, method: RequestMethod.DELETE },
-      ));
+      )),
+    );
   }
 
   /**
@@ -209,7 +215,7 @@ export class UMSModule<
    * The user should receive an e-mail message with instructions.
    * @param email The e-mail address of the user to be reset.
    */
-  public requestResetPassword(email: string): Promise<D> {
+  public requestResetPassword(email: string): Observable<D> {
     return this.requestAdapter.execute<D>(
       this.getUrl(API.UMS.RESETPASSWORD),
       { body: { email }, method: RequestMethod.POST },
@@ -221,7 +227,7 @@ export class UMSModule<
    * @param resetToken The reset token the user received
    * @param newPassword the new password to be set
    */
-  public resetPassword(resetToken: string, newPassword: string): Promise<D> {
+  public resetPassword(resetToken: string, newPassword: string): Observable<D> {
     const body = { new_password: newPassword };
     return this.requestAdapter.execute<D>(
       this.getUrl(API.UMS.RESETPASSWORD) + `/${resetToken}`,

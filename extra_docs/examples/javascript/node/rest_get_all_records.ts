@@ -22,12 +22,10 @@ jexiaClient().init(credentials, dataModule);
 // Use your data module with an optional generic type
 dataModule.dataset<Post>("posts")
   .select()
-  .execute()
-  .then((records) => {
+  .subscribe((records) => {
     console.log(records);
     process.exit();
-  })
-  .catch((error) => {
+  }, (error: any) => {
     // there was a problem retrieving records
     console.log(error);
     process.exit();

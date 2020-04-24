@@ -1,4 +1,6 @@
 import { Injectable, InjectionToken } from "injection-js";
+import { from, Observable } from "rxjs";
+import { catchError, map, tap } from "rxjs/operators";
 import { API, DELAY, MESSAGE } from "../../config";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { Logger } from "../logger/logger";
@@ -97,15 +99,16 @@ export class TokenManager {
    * Get access token for the specific authentication alias (APK by default)
    * @param {string} auth Authentication alias
    */
-  public token(auth?: string): Promise<string> {
-    return this.resolved
-      .then(() => {
+  public token(auth?: string): Observable<string> {
+    return from(this.resolved).pipe(
+      map(() => {
         const tokens = this.storage.getTokens(auth);
         if (!tokens) {
           throw new Error(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
         }
         return tokens.access_token;
-      });
+      }),
+    );
   }
 
   /**
@@ -127,7 +130,8 @@ export class TokenManager {
     /* if auth is provided */
     if (opts.key && opts.secret) {
       this.initPromise = this.initPromise
-        .then(() => this.login(opts));
+        .then(() => this.login(opts).toPromise())
+        .then(() => this);
     }
 
     return this.initPromise;
@@ -183,7 +187,7 @@ export class TokenManager {
       setInterval(() => {
         this.logger.debug("tokenManager", `refresh ${aliases[0]} token`);
         this.refresh(aliases)
-          .catch(() => this.terminate());
+          .subscribe({ error: () => this.terminate() });
       }, DELAY)
     );
   }
@@ -192,56 +196,51 @@ export class TokenManager {
    * Login to the project using APK method
    * @ignore
    */
-  private login({auth = APIKEY_DEFAULT_ALIAS, key, secret}: IAuthOptions): Promise<this> {
-    return this.obtainTokens(auth, this.authUrl, { method: "apk", key, secret })
-      .then((tokens) => {
-        this.addTokens([auth], tokens, true);
-        return this;
-      });
+  private login({auth = APIKEY_DEFAULT_ALIAS, key, secret}: IAuthOptions): Observable<Tokens> {
+    return this.obtainTokens(auth, this.authUrl, { method: "apk", key, secret }).pipe(
+      tap((tokens: Tokens) => this.addTokens([auth], tokens, true)),
+    );
   }
 
   /**
    * Refresh the token
    * @ignore
    */
-  private refresh([auth, ...restAliases]: string[] = []): Promise<this> {
+  private refresh([auth, ...restAliases]: string[] = []): Observable<Tokens> {
 
     const tokens = this.storage.getTokens(auth);
 
     if (!tokens || !tokens.refresh_token) {
-      return Promise.reject(new Error(`There is no refresh token for ${auth}`));
+      throw new Error(`There is no refresh token for ${auth}`);
     }
 
-    return this.obtainTokens(auth, this.refreshUrl, { refresh_token: tokens.refresh_token })
-      .then((refreshedTokens) => {
-        [auth, ...restAliases].forEach((alias) =>  this.storage.setTokens(alias, refreshedTokens));
-        return this;
-      });
+    return this.obtainTokens(auth, this.refreshUrl, { refresh_token: tokens.refresh_token }).pipe(
+      tap((refreshedTokens: Tokens) =>
+        [auth, ...restAliases].forEach((alias) =>  this.storage.setTokens(alias, refreshedTokens)),
+      ),
+    );
   }
 
   /**
    * Get tokens from the project
    * @ignore
    */
-  private obtainTokens(auth: string, url: string, body: object): Promise<Tokens> {
+  private obtainTokens(auth: string, url: string, body: object): Observable<Tokens> {
 
-    let defers: any;
-    this.defers[auth] = new Promise((resolve, reject) => defers = { resolve, reject });
+    let resolve: (value?: any) => void;
+    this.defers[auth] = new Promise((r) => resolve = r);
 
-    return this.requestAdapter
-      .execute(url, {
+    return this.requestAdapter.execute(url, {
         body,
         method: RequestMethod.POST,
-      })
-      .then((refreshedTokens: Tokens) => {
-        defers.resolve(refreshedTokens.access_token);
-        return refreshedTokens;
-      })
-      .catch((err: Error) => {
-        delete this.defers[auth];
-        this.logger.error("tokenManager", err.message);
-        throw new Error(`Unable to get tokens: ${err.message}`);
-      });
+      }).pipe(
+        tap((refreshedTokens: Tokens) => resolve(refreshedTokens.access_token)),
+        catchError((err: Error) => {
+          delete this.defers[auth];
+          this.logger.error("tokenManager", err.message);
+          throw new Error(`Unable to get tokens: ${err.message}`);
+        }),
+      );
   }
 
   /**

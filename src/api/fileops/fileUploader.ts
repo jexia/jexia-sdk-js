@@ -1,5 +1,6 @@
 import { Inject, Injectable } from "injection-js";
 import { merge, Observable } from "rxjs";
+import { map, switchMap } from "rxjs/operators";
 import { API } from "../../config";
 import { RequestAdapter } from "../../internal/requestAdapter";
 import { AuthOptions, IAuthOptions, TokenManager } from "../core/tokenManager";
@@ -50,16 +51,10 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
       formData.append("file", record.file);
     }
 
-    return new Observable((observer) => {
-      this.tokenManager
-        .token(this.config.auth)
-        .then((token) => this.execute(token, formData))
-        .then((res: Array<FilesetInterface<T>>) => {
-          observer.next(res[0]);
-          observer.complete();
-        })
-        .catch((error) => observer.error(error));
-    });
+    return this.tokenManager.token(this.config.auth).pipe(
+      switchMap((token) => this.execute(token, formData)),
+      map(([uploaded]: Array<FilesetInterface<T>>) => uploaded),
+    );
   }
 
   /**
@@ -67,7 +62,7 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
    * @param token Auth token
    * @param formData FormData
    */
-  private execute(token: string, formData: FormDataType): Promise<Array<FilesetInterface<T>>> {
+  private execute(token: string, formData: FormDataType): Observable<Array<FilesetInterface<T>>> {
 
     const headers = {
       Authorization: `Bearer ${token}`,
