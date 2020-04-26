@@ -1,3 +1,10 @@
+# [4.10.0](https://github.com/jexia/jexia-sdk-js/compare/v4.9.1...v4.10.0) (2020-04-26)
+
+
+### Features
+
+* **ums:** migrate UMS to rxJS ([b3b0374](https://github.com/jexia/jexia-sdk-js/commit/b3b0374200f2f00973303de134dea478af06b456))
+
 ## [4.9.1](https://github.com/jexia/jexia-sdk-js/compare/v4.9.0...v4.9.1) (2020-04-06)
 
 
