@@ -1,6 +1,7 @@
 # Jexia Javascript SDK
 
 [![CircleCI](https://circleci.com/gh/jexia/jexia-sdk-js.svg?style=svg)](https://circleci.com/gh/jexia/jexia-sdk-js)
+[![Chat on Discord](https://img.shields.io/badge/chat-on%20discord-7289da.svg?sanitize=true)](https://chat.jexia.com)
 
 This is the official JavaScript / TypeScript SDK for interacting with Jexia projects.
 
