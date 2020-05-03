@@ -33,7 +33,7 @@ describe("update record REST API", async () => {
     const updateResult = await fileset
       .update({ [DEFAULT_DATASET.FIELD]: newName })
       .where(field("id").isEqualTo(record.id))
-      .execute();
+      .toPromise();
 
     joiAssert(updateResult, Joi.array()
       .items(FilesetRecordSchema.append({
@@ -63,7 +63,7 @@ describe("update record REST API", async () => {
         [randomField]: newRandomValue,
       })
       .where(field(DEFAULT_DATASET.FIELD).isEqualTo(originalName))
-      .execute();
+      .toPromise();
 
     joiAssert(updateResult, Joi.array()
       .items(FilesetRecordSchema.append({
@@ -85,7 +85,7 @@ describe("update record REST API", async () => {
       await fileset
         .update({ [DEFAULT_DATASET.FIELD]: faker.lorem.sentence(4) })
         .where(field("id").isEqualTo("invalid"))
-        .execute();
+        .toPromise();
     } catch (e) {
       joiAssert(e, BackendErrorSchema);
     }

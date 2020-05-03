@@ -39,7 +39,7 @@ describe("Real Time Communication", () => {
 
       const records = await dom.dataset(datasetName)
         .insert([{test_field: "name"}])
-        .execute();
+        .toPromise();
       recordId = records[0].id;
     });
 
@@ -73,7 +73,7 @@ describe("Real Time Communication", () => {
           { test_field: "name2" },
           { test_field: "name3" }
         ])
-        .execute();
+        .toPromise();
       recordIds = records.map((record) => record.id);
     });
 
@@ -93,7 +93,7 @@ describe("Real Time Communication", () => {
     beforeAll(async () => {
       const records = await dom.dataset(datasetName)
         .insert([{test_field: "name"}])
-        .execute();
+        .toPromise();
       recordId = records[0].id;
     });
 
@@ -114,7 +114,7 @@ describe("Real Time Communication", () => {
       dom.dataset(datasetName)
         .update({test_field: "name_new"})
         .where((field) => field("id").isEqualTo(recordId))
-        .execute();
+        .toPromise();
     });
 
   });
@@ -125,7 +125,7 @@ describe("Real Time Communication", () => {
     beforeAll(async () => {
       const records = await dom.dataset(datasetName)
         .insert([{test_field: "name"}])
-        .execute();
+        .toPromise();
       recordId = records[0].id;
     });
 
@@ -146,7 +146,7 @@ describe("Real Time Communication", () => {
       dom.dataset(datasetName)
         .delete()
         .where((field) => field("id").isEqualTo(recordId))
-        .execute();
+        .toPromise();
     });
 
   });

@@ -97,10 +97,13 @@ describe("Dataset field validations", () => {
   describe("validation for required field", () => {
     let validationError: any;
 
-    beforeAll(async () => await dom.dataset(DEFAULT_DATASET.NAME)
+    beforeAll((done) => dom.dataset(DEFAULT_DATASET.NAME)
       .insert([{ field: "test" }, { field: "test" }])
-      .execute()
-      .catch((error: any) => validationError = error));
+      .subscribe({ error: (error) => {
+          validationError = error;
+          done();
+        }}),
+      );
 
     it("should reject promise with the correct error if value is not provided", () => {
       joiAssert(validationError, BackendErrorSchema);
@@ -121,10 +124,13 @@ describe("Dataset field validations", () => {
     describe(`validation for ${fieldName}`, () => {
       let validationError: any;
 
-      beforeAll(async () => await dom.dataset(DEFAULT_DATASET.NAME)
+      beforeAll((done) => dom.dataset(DEFAULT_DATASET.NAME)
         .insert([{ required_field: "data", [fieldName]: tests[fieldName].invalid_value } ])
-        .execute()
-        .catch((error: any) => validationError = error));
+        .subscribe({ error: (error) => {
+          validationError = error;
+          done();
+        }}),
+      );
 
       it("should reject promise with the correct error if value violates validation", () => {
         expect(validationError).toBeDefined();
@@ -140,5 +146,4 @@ describe("Dataset field validations", () => {
       });
     });
   }
-
 });

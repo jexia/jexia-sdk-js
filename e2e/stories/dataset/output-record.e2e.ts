@@ -51,66 +51,71 @@ describe("output record fields REST API", () => {
     dataset = dom.dataset(DEFAULT_DATASET.NAME);
     await dataset
       .insert(testData)
-      .execute();
+      .toPromise();
   });
 
   afterAll(async () => cleaning());
 
-  it("should return only id and the field passed", async () => {
+  it("should return only id and the field passed", (done) => {
     const fieldName = faker.random.arrayElement([FIELD.TITLE, FIELD.AUTHOR, FIELD.COMMENTS]);
-    const result = await dataset
+
+    dataset
       .select()
       .fields(fieldName)
-      .execute();
+      .subscribe((result) => {
+        const validValues = testData.map((r) => r[fieldName]);
 
-    const validValues = testData.map((r) => r[fieldName]);
+        const expectedSchema = Joi
+          .array()
+          .items({
+            id: Joi.string().uuid().required(),
+            [fieldName]: Joi.valid(validValues).required(),
+          })
+          .length(testData.length);
 
-    const expectedSchema = Joi
-      .array()
-      .items({
-        id: Joi.string().uuid().required(),
-        [fieldName]: Joi.valid(validValues).required(),
-      })
-      .length(testData.length);
+        joiAssert(result, expectedSchema);
 
-    joiAssert(result, expectedSchema);
+        done();
+      }, (error) => done.fail(error));
   });
 
-  it("should return id + all fields passed", async () => {
-    const result = await dataset
+  it("should return id + all fields passed", (done) => {
+    dataset
       .select()
       .fields([FIELD.TITLE, FIELD.AUTHOR])
-      .execute();
+      .subscribe((result) => {
+        const expectedSchema = Joi
+          .array()
+          .items({
+            id: Joi.string().uuid().required(),
+            [FIELD.TITLE]: Joi.string().required(),
+            [FIELD.AUTHOR]: Joi.object().required(),
+          });
 
-    const expectedSchema = Joi
-      .array()
-      .items({
-        id: Joi.string().uuid().required(),
-        [FIELD.TITLE]: Joi.string().required(),
-        [FIELD.AUTHOR]: Joi.object().required(),
-      });
+        joiAssert(result, expectedSchema);
 
-    joiAssert(result, expectedSchema);
+        done();
+      }, (error) => done.fail(error));
   });
 
-  it("should return id + nested fields passed", async () => {
+  it("should return id + nested fields passed", (done) => {
     const userName = `${FIELD.AUTHOR}.name`;
     const userEmail = `${FIELD.AUTHOR}.email`;
 
-    const result = await dataset
+    dataset
       .select()
       .fields(userName, userEmail)
-      .execute();
+      .subscribe((result) => {
+        const expectedSchema = Joi
+          .array()
+          .items({
+            id: Joi.string().uuid().required(),
+            [userName]: Joi.string().required(),
+            [userEmail]: Joi.string().email().required(),
+          });
 
-    const expectedSchema = Joi
-      .array()
-      .items({
-        id: Joi.string().uuid().required(),
-        [userName]: Joi.string().required(),
-        [userEmail]: Joi.string().email().required(),
+        joiAssert(result, expectedSchema);
+        done();
       });
-
-    joiAssert(result, expectedSchema);
   });
-
 });
