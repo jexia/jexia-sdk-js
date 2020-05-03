@@ -28,7 +28,7 @@ describe("filter records REST API", () => {
       const selectResult = await fileset
         .select()
         .where(condition)
-        .execute();
+        .toPromise();
 
       expect(selectResult.length).toEqual(expectedLength);
     });
@@ -40,7 +40,7 @@ describe("filter records REST API", () => {
         await fileset
           .select()
           .where(condition)
-          .execute();
+          .toPromise();
       } catch (e) {
         joiAssert(e, BackendErrorSchema);
       }
@@ -57,7 +57,7 @@ describe("filter records REST API", () => {
     return fileset
       .delete()
       .where(field("id").isNotNull())
-      .execute();
+      .toPromise();
   }
 
   function test(
@@ -418,7 +418,7 @@ describe("filter records REST API", () => {
       const result = await fileset
         .select()
         .limit(2)
-        .execute();
+        .toPromise();
 
       expect(result.length).toEqual(2);
     });
@@ -427,7 +427,7 @@ describe("filter records REST API", () => {
       const result = await fileset
         .select()
         .limit(10)
-        .execute();
+        .toPromise();
 
       expect(result.length).toEqual(testData.length);
     });
@@ -438,7 +438,7 @@ describe("filter records REST API", () => {
         .select()
         .limit(limit)
         .offset(1)
-        .execute();
+        .toPromise();
 
       const expectedSchema = Joi
         .array()
@@ -487,7 +487,7 @@ describe("filter records REST API", () => {
       const result = await fileset
         .select()
         [fn](sortField)
-        .execute();
+        .toPromise();
 
       const orderedSchemas = testData
         .slice(0) // copy array

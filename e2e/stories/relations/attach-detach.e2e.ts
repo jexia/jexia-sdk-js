@@ -32,7 +32,7 @@ describe("Attach/detach related resources", () => {
     return dom.dataset(name)
       .delete()
       .where((f) => f("id").isInArray(data.map((p) => p.id)))
-      .execute();
+      .toPromise();
   }
 
   beforeAll(async () => await initForRelations());
@@ -47,9 +47,9 @@ describe("Attach/detach related resources", () => {
     const authorsData = [ fakeAuthor(), fakeAuthor() ];
 
     beforeAll(async () => {
-      allPosts = await dom.dataset("posts").insert(postData).execute();
-      allComments = await dom.dataset("comments").insert(commentsData).execute();
-      allAuthors = await dom.dataset("author").insert(authorsData).execute();
+      allPosts = await dom.dataset("posts").insert(postData).toPromise();
+      allComments = await dom.dataset("comments").insert(commentsData).toPromise();
+      allAuthors = await dom.dataset("author").insert(authorsData).toPromise();
     });
 
     beforeAll(async () => {
@@ -69,7 +69,7 @@ describe("Attach/detach related resources", () => {
       const [{ comments }] = await dom.dataset("posts")
         .select()
         .related("comments")
-        .execute();
+        .toPromise();
 
       joiAssert(comments, Joi.empty());
 
@@ -77,18 +77,18 @@ describe("Attach/detach related resources", () => {
       await dom.dataset("posts")
         .attach("comments", isFirstComment)
         .where(isFirstPost)
-        .execute();
+        .toPromise();
 
       // Attach author to comment
       await dom.dataset("comments")
         .attach("author", (field: any) => field("email").isEqualTo(author.email))
         .where(isFirstComment)
-        .execute();
+        .toPromise();
 
       const [post] = await dom.dataset("posts")
         .select()
         .related("comments", (c) => c.related("author"))
-        .execute();
+        .toPromise();
 
       const expectedPostSchema = DatasetRecordSchema.append({
         text: Joi.string().required().valid(firstPost.text),
@@ -113,7 +113,7 @@ describe("Attach/detach related resources", () => {
           await dom.dataset("posts")
             .attach("comments", isFirstComment)
             // missing where condition
-            .execute();
+            .toPromise();
 
           joiAssert(true, false, "should not reach this line");
         } catch (e) {
@@ -131,7 +131,7 @@ describe("Attach/detach related resources", () => {
           await dom.dataset("posts")
             .attach("comments", isSecondComment)
             .where(isAnyPost)
-            .execute();
+            .toPromise();
 
           joiAssert(true, false, "should not reach this line");
         } catch (e) {
@@ -158,15 +158,15 @@ describe("Attach/detach related resources", () => {
     const isSecondPost = (f: any) => f("id").isEqualTo(secondPost.id);
 
     beforeAll(async () => {
-      [firstPost, secondPost] = await dom.dataset("posts").insert(postsWithComments).execute();
-      [firstComment] = await dom.dataset("comments").insert(commentsData).execute();
+      [firstPost, secondPost] = await dom.dataset("posts").insert(postsWithComments).toPromise();
+      [firstComment] = await dom.dataset("comments").insert(commentsData).toPromise();
     });
 
     it("should detach resources inserted with nested notation", async () => {
       const [{ comments }] = await dom.dataset("posts")
         .select()
         .related("comments")
-        .execute();
+        .toPromise();
 
       const { id: firstPostCommentId } = comments[0];
       const expectedCommentsSchema = Joi.array()
@@ -183,12 +183,12 @@ describe("Attach/detach related resources", () => {
       await dom.dataset("posts")
         .detach("comments", (f) => f("id").isEqualTo(firstPostCommentId))
         .where(isFirstPost)
-        .execute();
+        .toPromise();
 
       const [post] = await dom.dataset("posts")
         .select()
         .related("comments")
-        .execute();
+        .toPromise();
 
       const expectedPostSchema = DatasetRecordSchema.append({
         text: Joi.string().required().valid(firstPost.text),
@@ -204,18 +204,18 @@ describe("Attach/detach related resources", () => {
       await dom.dataset("posts")
         .attach("comments", isFirstComment)
         .where(isSecondPost)
-        .execute();
+        .toPromise();
 
       // Detach comments from second post
       await dom.dataset("posts")
         .detach("comments", isFirstComment)
         .where(isSecondPost)
-        .execute();
+        .toPromise();
 
       const [post] = await dom.dataset("posts")
         .select()
         .related("comments")
-        .execute();
+        .toPromise();
 
       const expectedPostSchema = DatasetRecordSchema.append({
         text: Joi.string().required().valid(firstPost.text),
@@ -233,7 +233,7 @@ describe("Attach/detach related resources", () => {
           await dom.dataset("posts")
             .detach("comments", isFirstComment)
             .where(isSecondPost)
-            .execute();
+            .toPromise();
 
           joiAssert(true, false, "should not reach this line");
         } catch (e) {

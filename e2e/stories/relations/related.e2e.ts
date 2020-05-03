@@ -22,7 +22,7 @@ const testData = [{
 describe("Populate related fields", () => {
   beforeAll(async () => {
     await initForRelations();
-    await dom.dataset("posts").insert(testData).execute();
+    await dom.dataset("posts").insert(testData).toPromise();
   });
   afterAll(async () => await cleaning());
 
@@ -30,7 +30,7 @@ describe("Populate related fields", () => {
     const [{ comments }] = await dom.dataset("posts")
       .select()
       .related("comments")
-      .execute();
+      .toPromise();
     joiAssert(comments[0], DatasetRecordSchema.append({
       message: Joi.string().required(),
       like: Joi.boolean().required()
@@ -41,7 +41,7 @@ describe("Populate related fields", () => {
     const [{ comments }] = await dom.dataset("posts")
       .select()
       .related("comments", (c) => c.fields("message"))
-      .execute();
+      .toPromise();
 
     joiAssert(comments[0], Joi.object({
       id: Joi.string().uuid().required(),
@@ -53,7 +53,7 @@ describe("Populate related fields", () => {
     const [{ comments }] = await dom.dataset("posts")
       .select()
       .related("comments", (c) => c.related("author"))
-      .execute();
+      .toPromise();
 
     joiAssert(comments[0].author, DatasetRecordSchema.append({
       email: Joi.string().required(),
@@ -67,7 +67,7 @@ describe("Populate related fields", () => {
         (c) => c.related("author",
           (author) => author.fields("email"))
       )
-      .execute();
+      .toPromise();
 
     joiAssert(comments[0].author, Joi.object({
       id: Joi.string().uuid().required(),
@@ -85,7 +85,7 @@ describe("Populate related fields", () => {
             (author) => author.fields("email")
           )
       )
-      .execute();
+      .toPromise();
 
     joiAssert(comments[0], Joi.object({
       id: Joi.string().uuid().required(),

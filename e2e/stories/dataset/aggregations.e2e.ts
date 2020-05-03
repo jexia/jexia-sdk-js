@@ -21,7 +21,7 @@ const data = [
 describe("Dataset aggregation functions", () => {
   beforeAll(async () => {
     await init(DEFAULT_DATASET.NAME, fields);
-    await dom.dataset(DEFAULT_DATASET.NAME).insert(data).execute();
+    await dom.dataset(DEFAULT_DATASET.NAME).insert(data).toPromise();
   });
 
   afterAll(async () => cleaning());

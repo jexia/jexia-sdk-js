@@ -32,12 +32,12 @@ describe("delete record REST API", async () => {
     await fileset
       .delete()
       .where(isRecord)
-      .execute();
+      .toPromise();
 
     const result = fileset
       .select()
       .where(isRecord)
-      .execute();
+      .toPromise();
 
     joiAssert(result, Joi.empty());
   });
@@ -59,12 +59,12 @@ describe("delete record REST API", async () => {
       await fileset
         .delete()
         .where(isInList)
-        .execute();
+        .toPromise();
 
       const result = fileset
         .select()
         .where(isInList)
-        .execute();
+        .toPromise();
 
       joiAssert(result, Joi.empty());
     });
@@ -75,7 +75,7 @@ describe("delete record REST API", async () => {
       await fileset
         .delete()
         .where(field("id").isEqualTo(faker.random.uuid()))
-        .execute();
+        .toPromise();
     } catch (e) {
       joiAssert(e, BackendErrorSchema);
     }
