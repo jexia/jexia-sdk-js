@@ -15,6 +15,20 @@ export const ClientInit = new InjectionToken<Promise<Client>>("SystemInit");
  */
 export const ClientConfiguration = new InjectionToken("ClientConfiguration");
 
+export function CollectConfigurationFactory(modules: IModule[]) {
+  // tslint:disable-next-line:only-arrow-functions
+  return function() {
+    return Client.collectConfiguration(modules);
+  }
+}
+
+export function RequestAdapterFactory(fetch: Fetch) {
+  // tslint:disable-next-line:only-arrow-functions
+  return function() {
+    return new RequestAdapter(fetch);
+  }
+}
+
 /**
  * Jexia main client fo the JavaScript SDK, used to initialize the necessary modules with your project information.
  * This object must be build from the helper functions, never to be instantiated directly.
@@ -29,7 +43,7 @@ export const ClientConfiguration = new InjectionToken("ClientConfiguration");
 export class Client {
   /* token manager (responsible for getting fresh and valid token), should be injected to plugins/modules (if needed) */
   private tokenManager: TokenManager;
-  /* modules to be initilized */
+  /* modules to be initialized */
   private modules: IModule[];
 
   /**
@@ -54,7 +68,7 @@ export class Client {
       },
       {
         provide: ClientConfiguration,
-        useFactory: () => this.collectConfiguration(modules),
+        useFactory: CollectConfigurationFactory(modules),
       },
       {
         provide: AuthOptions,
@@ -62,7 +76,7 @@ export class Client {
       },
       {
         provide: RequestAdapter,
-        useFactory: () => new RequestAdapter(this.fetch),
+        useFactory: RequestAdapterFactory(this.fetch),
       },
       Logger,
       TokenManager,
@@ -115,7 +129,7 @@ export class Client {
    * Collect all module configurations into one configuration object
    * @param modules
    */
-  private collectConfiguration(modules: IModule[]): { [moduleName: string]: ModuleConfiguration } {
+  static collectConfiguration(modules: IModule[]): { [moduleName: string]: ModuleConfiguration } {
     return Object.assign({}, ...modules.map((module) => module.getConfig()));
   }
 
