@@ -6,6 +6,16 @@ import { DataSetName } from "./dataops.tokens";
 import { Dataset } from "./dataset";
 
 /**
+ * @internal
+ */
+function datasetNameErrorFactory() {
+  // tslint:disable-next-line:only-arrow-functions
+  return function() {
+    throw new Error("Datasets requires valid names, please assure you provide a string value. \\ne.g. dataOperations.dataset('authors')");
+  }
+}
+
+/**
  * Data Operation Module used to retrieve the dataset objects.
  * This object must be build from the helper functions, never to be instantiated directly.
  *
@@ -30,7 +40,7 @@ export class DataOperationsModule implements IModule {
     this.injector = coreInjector.resolveAndCreateChild([
       {
         provide: DataSetName,
-        useFactory: () => { throw new Error("Please set the dataset name at the DI"); },
+        useFactory: datasetNameErrorFactory(),
       },
       RequestExecuter,
       Dataset,
