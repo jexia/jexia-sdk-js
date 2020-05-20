@@ -17,7 +17,6 @@ jobs:
           path: test-results
       - store_artifacts:
           path: test-results
-      - run: npm run docs
       - run: npm run build
   deploy:
     docker:
@@ -28,8 +27,6 @@ jobs:
       - run: npm install
       - run: npm run build
       - run: npm run semantic-release
-      - run: npm run docs
-      - run: npm run docs:deploy
 
 workflows:
   version: 2

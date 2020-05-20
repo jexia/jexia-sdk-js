@@ -32,28 +32,24 @@ const credentials = {
 };
 
 jexiaSDK.jexiaClient().init(credentials, dataModule);
+
 dataModule
   .dataset("posts")
   .select()
-  .execute()
-  .then(records => console.log("All the records:", records))
-  .catch(error => console.error("Something wrong happened:", error));
+  .subscribe(
+    records => console.log("All the records:", records),
+    error => console.error("Something wrong happened:", error)
+  );
 ```
 
-## Developer Guide
+### Documentation
 
-### Getting Started
-
-Check out the [Quick Start Guide](https://jexia.github.io/jexia-sdk-js/additional-documentation/quick-start-guide.html) for a quick guide on using the SDK in your application.
-
-### Api Docs
-
-Check out the [Api Docs](https://jexia.github.io/jexia-sdk-js/) for detailed view of the JavaScript SDK Api.
+Check out [documentation](https://docs.jexia.com/) on the official Jexia website.
 
 ### Contributing
 
-You can find all the steps at the [Contributing Guide](https://jexia.github.io/jexia-sdk-js/additional-documentation/code-of-conduct.html).
+You can find all the steps at the [Contributing Guide](https://github.com/jexia/jexia-sdk-js/blob/master/CONTRIBUTING.md).
 
 ## License
 
-[MIT](https://jexia.github.io/jexia-sdk-js/license.html)
+[MIT](https://github.com/jexia/jexia-sdk-js/blob/master/LICENSE)

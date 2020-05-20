@@ -10,7 +10,6 @@
   "scripts": {
     "cleanup": "run-p cleanup:*",
     "cleanup:dist": "shx rm -rf dist",
-    "cleanup:docs": "shx rm -rf docs .temp",
     "cleanup:tests": "shx rm -rf coverage test-results junit.xml",
     "cross-env": "cross-env",
     "commit": "git-cz",
@@ -21,9 +20,6 @@
     "tdd": "jest --no-cache --watch",
     "tsnode": "ts-node --project tsconfig.examples.json -r tsconfig-paths/register",
     "example": "node extra_docs/examples/javascript/node/node-example.js",
-    "docs": "compodoc src/api -p tsconfig.json --disableSourceCode --disablePrivate --disableProtected --disableInternal --name \"Jexia Javascript SDK\" --output docs --includes extra_docs --includesName Guides -a extra_docs/assets --theme material",
-    "docs:serve": "npm run docs -- --serve --watch",
-    "docs:deploy": "npm run tsnode -- build/api-docs-publish",
     "build": "npm-run-all -l cleanup:dist -p build:*",
     "build:main": "tsc -p ./build/tsconfig.main.json",
     "build:module": "tsc -p ./build/tsconfig.module.json",
@@ -89,7 +85,6 @@
   "devDependencies": {
     "@commitlint/cli": "^8.3.5",
     "@commitlint/config-conventional": "^6.1.3",
-    "@compodoc/compodoc": "^1.1.11",
     "@semantic-release/changelog": "5.0.1",
     "@semantic-release/git": "9.0.0",
     "@semantic-release/github": "7.0.5",
@@ -131,9 +126,7 @@
   "husky": {
     "hooks": {
       "pre-commit": "npm run lint",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-      "pre-docs": "npm run cleanup:docs",
-      "pre-example": "npm run build:main"
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
   "release": {
