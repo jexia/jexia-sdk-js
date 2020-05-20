@@ -1,3 +1,10 @@
+## [4.10.1](https://github.com/jexia/jexia-sdk-js/compare/v4.10.0...v4.10.1) (2020-05-20)
+
+
+### Bug Fixes
+
+* angular 9 compile issues ([2c6c2f3](https://github.com/jexia/jexia-sdk-js/commit/2c6c2f33944b3b2d9cc1017c0ed6d70e0a93fc63))
+
 # [4.10.0](https://github.com/jexia/jexia-sdk-js/compare/v4.9.1...v4.10.0) (2020-04-26)
 
 
