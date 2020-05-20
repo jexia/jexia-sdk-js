@@ -1,6 +1,6 @@
 # Contribution Guide
 
-[First please read and abide by the Code of Conduct](https://jexia.github.io/jexia-sdk-js/additional-documentation/code-of-conduct.html).
+[First please read and abide by the Code of Conduct](https://github.com/jexia/jexia-sdk-js/blob/master/CODE_OF_CONDUCT.md).
 
 ## Environment
 
