@@ -1,0 +1,539 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Jexia Javascript SDK</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	      <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/material.css">
+    </head>
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top visible-xs">
+            <a href="../" class="navbar-brand">Jexia Javascript SDK</a>
+            <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="hidden-xs menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content miscellaneous-typealiases">
+                   <div class="content-data">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   
+
+<ol class="breadcrumb">
+  <li>Miscellaneous</li>
+  <li>Type aliases</li>
+</ol>
+
+<section>
+    <h3 id="index">Index</h3>
+    <table class="table table-sm table-bordered index-table">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <ul class="index-list">
+                        <li>
+                            <a href="#DefaultFilesetFields" title="src/api/fileops/fileops.interfaces.ts"><b>DefaultFilesetFields</b>&nbsp;&nbsp;&nbsp;(src/.../fileops.interfaces.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#DefaultFilesetInterface" title="src/api/fileops/fileops.interfaces.ts"><b>DefaultFilesetInterface</b>&nbsp;&nbsp;&nbsp;(src/.../fileops.interfaces.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#DefaultResourceFields" title="src/api/core/resource.ts"><b>DefaultResourceFields</b>&nbsp;&nbsp;&nbsp;(src/.../resource.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#DefaultResourceInterface" title="src/api/core/resource.ts"><b>DefaultResourceInterface</b>&nbsp;&nbsp;&nbsp;(src/.../resource.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#DefaultUsersInterface" title="src/api/ums/umsModule.ts"><b>DefaultUsersInterface</b>&nbsp;&nbsp;&nbsp;(src/.../umsModule.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#EventSubscriptionType" title="src/api/realtime/realTime.interfaces.ts"><b>EventSubscriptionType</b>&nbsp;&nbsp;&nbsp;(src/.../realTime.interfaces.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#FileOperationsConfig" title="src/api/fileops/fileops.interfaces.ts"><b>FileOperationsConfig</b>&nbsp;&nbsp;&nbsp;(src/.../fileops.interfaces.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#FilesetInterface" title="src/api/fileops/fileops.interfaces.ts"><b>FilesetInterface</b>&nbsp;&nbsp;&nbsp;(src/.../fileops.interfaces.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#FilesetMultipart" title="src/api/fileops/fileops.interfaces.ts"><b>FilesetMultipart</b>&nbsp;&nbsp;&nbsp;(src/.../fileops.interfaces.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#FromRelated" title="src/api/core/resource.ts"><b>FromRelated</b>&nbsp;&nbsp;&nbsp;(src/.../resource.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#IdentityCollection" title="src/api/core/resource.ts"><b>IdentityCollection</b>&nbsp;&nbsp;&nbsp;(src/.../resource.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#IFilteringCriterionCallback" title="src/api/core/filteringApi.ts"><b>IFilteringCriterionCallback</b>&nbsp;&nbsp;&nbsp;(src/.../filteringApi.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#IUMSCredentials" title="src/api/ums/umsModule.ts"><b>IUMSCredentials</b>&nbsp;&nbsp;&nbsp;(src/.../umsModule.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#IUMSExtraFields" title="src/api/ums/umsModule.ts"><b>IUMSExtraFields</b>&nbsp;&nbsp;&nbsp;(src/.../umsModule.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#IWebSocketBuilder" title="src/api/realtime/realTime.interfaces.ts"><b>IWebSocketBuilder</b>&nbsp;&nbsp;&nbsp;(src/.../realTime.interfaces.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#ResourceInterface" title="src/api/core/resource.ts"><b>ResourceInterface</b>&nbsp;&nbsp;&nbsp;(src/.../resource.ts)</a>
+                        </li>
+                        <li>
+                            <a href="#UsersInterface" title="src/api/ums/umsModule.ts"><b>UsersInterface</b>&nbsp;&nbsp;&nbsp;(src/.../umsModule.ts)</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+    <h3>src/api/fileops/fileops.interfaces.ts</h3>
+    <section>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="DefaultFilesetFields"></a>
+                    <span class="name"><b>DefaultFilesetFields</b><a href="#DefaultFilesetFields"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Fields that each fileset has</p>
+</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code>&quot;id&quot; | &quot;size&quot; | &quot;name&quot; | &quot;created_at&quot; | &quot;updated_at&quot;</code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="DefaultFilesetInterface"></a>
+                    <span class="name"><b>DefaultFilesetInterface</b><a href="#DefaultFilesetInterface"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Fileset interface type</p>
+</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code></code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="FileOperationsConfig"></a>
+                    <span class="name"><b>FileOperationsConfig</b><a href="#FileOperationsConfig"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code></code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="FilesetInterface"></a>
+                    <span class="name"><b>FilesetInterface</b><a href="#FilesetInterface"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Extend user provided interface (T) with default fileset fields</p>
+</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code></code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="FilesetMultipart"></a>
+                    <span class="name"><b>FilesetMultipart</b><a href="#FilesetMultipart"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Represent one file for upload, file buffer alongside with user-defined fields</p>
+</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code>literal type</code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/api/core/resource.ts</h3>
+    <section>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="DefaultResourceFields"></a>
+                    <span class="name"><b>DefaultResourceFields</b><a href="#DefaultResourceFields"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Default fields that will always exist for any resource</p>
+</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code>&quot;id&quot; | &quot;created_at&quot; | &quot;updated_at&quot;</code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="DefaultResourceInterface"></a>
+                    <span class="name"><b>DefaultResourceInterface</b><a href="#DefaultResourceInterface"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Default resource interface type</p>
+</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code></code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="FromRelated"></a>
+                    <span class="name"><b>FromRelated</b><a href="#FromRelated"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Extract interface from the related resource either its array or a single type
+and expand it with the default resource fields</p>
+</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code></code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="IdentityCollection"></a>
+                    <span class="name"><b>IdentityCollection</b><a href="#IdentityCollection"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>An array of either ids or resources</p>
+</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>        <code><a href="../interfaces/Resource.html" target="_self" >string[] | Array&lt;ResourceInterface&lt;T&gt;&gt;</a></code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="ResourceInterface"></a>
+                    <span class="name"><b>ResourceInterface</b><a href="#ResourceInterface"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Extend user provided interface (T) with default resource fields</p>
+</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code></code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/api/ums/umsModule.ts</h3>
+    <section>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="DefaultUsersInterface"></a>
+                    <span class="name"><b>DefaultUsersInterface</b><a href="#DefaultUsersInterface"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Default UMS interface type</p>
+</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code>literal type</code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="IUMSCredentials"></a>
+                    <span class="name"><b>IUMSCredentials</b><a href="#IUMSCredentials"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>        <code><a href="../interfaces/IUMSSignInOptions.html" target="_self" >Pick&lt;IUMSSignInOptions | &quot;email&quot; | &quot;password&quot;&gt;</a></code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="IUMSExtraFields"></a>
+                    <span class="name"><b>IUMSExtraFields</b><a href="#IUMSExtraFields"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code>Omit&lt;literal type | &quot;email&quot; | &quot;password&quot;&gt;</code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="UsersInterface"></a>
+                    <span class="name"><b>UsersInterface</b><a href="#UsersInterface"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Merge customer&#39;s type with resource and UMS types</p>
+</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code></code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/api/realtime/realTime.interfaces.ts</h3>
+    <section>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="EventSubscriptionType"></a>
+                    <span class="name"><b>EventSubscriptionType</b><a href="#EventSubscriptionType"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Events types available to subscribe
+TODO Created different events for channels and sets</p>
+</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>    <code>&quot;created&quot; | &quot;updated&quot; | &quot;deleted&quot; | &quot;published&quot; | &quot;all&quot;</code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="IWebSocketBuilder"></a>
+                    <span class="name"><b>IWebSocketBuilder</b><a href="#IWebSocketBuilder"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Builder function for the WebSocket object</p>
+</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/function" target="_blank" >function</a></code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>    <h3>src/api/core/filteringApi.ts</h3>
+    <section>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="IFilteringCriterionCallback"></a>
+                    <span class="name"><b>IFilteringCriterionCallback</b><a href="#IFilteringCriterionCallback"><span class="icon ion-ios-link"></span></a></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Callback to generate a filtering criteria</p>
+</div>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                    <code>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/function" target="_blank" >function</a></code>
+</code>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> result-matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'miscellaneous-typealiases';
+            var COMPODOC_CURRENT_PAGE_URL = 'typealiases.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+       <!-- Required to polyfill modern browsers as code is ES5 for IE... -->
+       <script src="../js/libs/custom-elements-es5-adapter.js" charset="utf-8" defer></script>
+       <script src="../js/menu-wc.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+       <script src="../js/libs/zepto.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

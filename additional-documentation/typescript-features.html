@@ -1,0 +1,117 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Jexia Javascript SDK</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	      <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/material.css">
+    </head>
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top visible-xs">
+            <a href="../" class="navbar-brand">Jexia Javascript SDK</a>
+            <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="hidden-xs menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content additional-page">
+                   <div class="content-data">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   
+
+
+
+
+<h1 id="typescript-features">TypeScript Features</h1>
+<p>The JS SDK is written in TypeScript, even through it is transpiled to pure JavaScript, we also publish the Type Definitions, so TypeScript users can enjoy some extra features out of the box, without install or configure anything else.</p>
+<h2 id="typed-datasets">Typed Datasets</h2>
+<p>Datasets accepts your type/interface definition (otherwise defaults to <code>any</code>). See example below:</p>
+<div><pre class="line-numbers"><code class="language-typescript">interface Post {
+  title: string;
+  published: boolean;
+}
+
+const posts: Dataset&lt;Post&gt; = dom.dataset&lt;Post&gt;(&quot;posts&quot;);</code></pre></div><h3 id="fields-validation">Fields Validation</h3>
+<p>For each query method that receives field names, such as <code>.fields(&quot;title&quot;)</code> or <code>.sortAsc(&quot;title&quot;)</code>, typescript compiler will validate if they field exists at the given interface, or if it is a <a href="https://jexia.github.io/jexia-sdk-js/miscellaneous/typealiases.html#DefaultDatasetFields">default filed name</a>, resulting in a compilation error if any of the given field names were not found.</p>
+<p><img src="https://jexia.github.io/jexia-sdk-js/assets/typescript-fields-validation.gif" alt="typed result example" class="img-responsive"></p>
+<h3 id="typed-query-results">Typed Query Results</h3>
+<p>All the results of your queries will automatically use the given interface, without the need to manually type it.</p>
+<p><img src="https://jexia.github.io/jexia-sdk-js/assets/typescript-query-results-example.gif" alt="typed result example" class="img-responsive"></p>
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> result-matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'additional-page';
+            var COMPODOC_CURRENT_PAGE_URL = 'typescript-features.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+       <!-- Required to polyfill modern browsers as code is ES5 for IE... -->
+       <script src="../js/libs/custom-elements-es5-adapter.js" charset="utf-8" defer></script>
+       <script src="../js/menu-wc.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+       <script src="../js/libs/zepto.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

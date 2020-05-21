@@ -1,0 +1,363 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Jexia Javascript SDK</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	      <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/material.css">
+    </head>
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top visible-xs">
+            <a href="../" class="navbar-brand">Jexia Javascript SDK</a>
+            <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="hidden-xs menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content additional-page">
+                   <div class="content-data">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   
+
+
+
+
+<h1 id="relations">Relations</h1>
+<p>All project resources can be related to each other and SDK supports inserting, fetching and attaching/detaching related
+records.
+Let&#39;s create a simple schema which will be used for all further examples:</p>
+<p><img src="https://jexia.github.io/jexia-sdk-js/assets/relations-schema.png" alt="Relations schema" class="img-responsive"></p>
+<p>There are three datasets and two relations: <strong>posts</strong> has <em>one-2-many</em> relation to <strong>comments</strong> and <strong>comments</strong> has
+<em>one-2-one</em> relation to <strong>author</strong> (remember that all management opearations, such as creating datasets, fields and
+relations can be done with <a href="https://docs.jexia.com/getting-started/user-management/">Web Management Application</a> only).</p>
+<p>To make our datasets not so boring, we can also add a few fields:</p>
+<div><pre class="line-numbers"><code class="language-typescript">interface Author {
+  email: string;
+}
+interface Comment {
+  text: string;
+  like: boolean;
+  author: Author;
+}
+interface Post {
+  title: string;
+  message: string;
+  comments: Comment[];
+}</code></pre></div><p>Pay your attention - <strong>Post</strong> includes <strong>comments</strong> field as an array, but <strong>Comment</strong> has an <strong>author</strong>
+as a plain value. That&#39;s the difference between <em>one-2-many</em> and <em>one-2-one</em> relation types.</p>
+<h3 id="insert-data"><a href="#insert-data">Insert data</a></h3>
+<p>To insert related records just provide a nested array to the <code>.insert()</code> method:</p>
+<div><pre class="line-numbers"><code class="language-typescript">dom.dataset(&quot;posts&quot;)
+  .insert([{
+    title: &quot;Relations with Jexia SDK&quot;,
+    message: &quot;A do like how Jexia SDK implements relations!&quot;,
+    comments: [{
+      text: &quot;Me too!&quot;,
+      like: true,
+      author: { email: &quot;customer&#64;email.com&quot; }
+    }, {
+      text: &quot;Might&#39;ve been a bit better :(&quot;,
+      like: false,
+      author: { email: &quot;hater&#64;yahoo.com&quot; }
+    }]
+  }])
+  .subscribe();</code></pre></div><p>Notice that records should be inserted in appropriate order - the relation root must be insert root.
+It&#39;s impossible to insert into <strong>comment</strong> dataset with post related to that comment (tree cannot grow upside down).
+This example is not going to work:</p>
+<div><pre class="line-numbers"><code class="language-typescript">dom.dataset(&quot;comments&quot;)
+  .insert([{
+    text: &quot;Me too!&quot;,
+    like: true,
+    posts: {
+      title: &quot;Relations with Jexia SDK&quot;,
+      message: &quot;A do like how Jexia SDK implements relations!&quot;
+    }
+  }])
+  .subscribe();</code></pre></div><p>If you want to create a comment in the existent post, you need to use <code>.attach()</code>, see how to use it in
+<a href="#attach-and-detach-records">Attach and detach records</a>.</p>
+<p>Also look how we are using arrays for <em>one-2-many</em> <strong>posts</strong> -&gt; <strong>comments</strong> relation and just an object
+for the <strong>comments</strong> -&gt; <strong>author</strong> <em>one-2-one</em> relation.</p>
+<h3 id="fetching-related-records"><a href="#fetching-related-records">Fetching related records</a></h3>
+<p>By default, <code>.select()</code> operation does not include related resources. To make it doing that we need to use <code>.related()</code>
+method:</p>
+<div><pre class="line-numbers"><code class="language-typescript">dom.dataset(&quot;posts&quot;)
+  .select()
+  .related(&quot;comments&quot;)
+  .subscribe(postsWithComments =&gt; {
+    console.log(postsWithComments);
+  });
+// [
+//   {
+//     id: ...
+//     created_at: ...
+//     updated_at: ...
+//     title: &quot;Relations with Jexia SDK&quot;,
+//     message: &quot;A do like how Jexia SDK implements relations!&quot;,
+//     comments: [
+//       {
+//         id: ...
+//         created_at: ...
+//         updated_at: ...
+//         text: &quot;Me too!&quot;,
+//         like: true,
+//       },
+//       {
+//         id: ...
+//         created_at: ...
+//         updated_at: ...
+//         text: &quot;Might&#39;ve been a bit better :(&quot;,
+//         like: false,
+//       }
+//     ]
+//   }
+// ]</code></pre></div><p>We can also want to get not all fields but only few:</p>
+<div><pre class="line-numbers"><code class="language-typescript">dom.dataset(&quot;posts&quot;)
+  .select()
+  .related(&quot;comments&quot;, comments =&gt; comments.fields(&quot;text&quot;))
+  .subscribe(postsWithCommentsText =&gt; {
+    console.log(postsWithCommentsText);
+  });
+// [
+//   {
+//     id: ...
+//     created_at: ...
+//     updated_at: ...
+//     title: &quot;Relations with Jexia SDK&quot;,
+//     message: &quot;A do like how Jexia SDK implements relations!&quot;,
+//     comments: [
+//       {
+//         id: ...
+//         text: &quot;Me too!&quot;,
+//       },
+//       {
+//         id: ...
+//         text: &quot;Might&#39;ve been a bit better :(&quot;,
+//       }
+//     ]
+//   }
+// ]</code></pre></div><p>Notice that <code>id</code> field will be always there. Nothing will be working without <code>id</code>!</p>
+<p>What if we want to get an author of each comment? Simple, just use nested <code>.related()</code>:</p>
+<div><pre class="line-numbers"><code class="language-typescript">dom.dataset(&quot;posts&quot;)
+  .select()
+  .related(&quot;comments&quot;, comments =&gt; comments.related(&quot;author&quot;))
+  .subscribe()</code></pre></div><p>Of course, you can use as many nested relations as you want and select any fields from any resource:</p>
+<div><pre class="line-numbers"><code class="language-typescript">dom.dataset(&quot;posts&quot;)
+  .select()
+  .related(&quot;comments&quot;, comments =&gt; comments
+    .fields(&quot;text&quot;, &quot;like&quot;)
+    .related(&quot;author&quot;), author =&gt; author
+      .fields(&quot;email&quot;)
+    )
+  )
+  .subscribe()</code></pre></div><h3 id="attach-and-detach-records"><a href="#attach-and-detach-records">Attach and detach records</a></h3>
+<p>We have described how to insert parent and child records in one go, but eventually, we need to relate existent records
+to other ones. You can do it using <code>.attach()</code> and <code>.detach()</code>.</p>
+<p>Let&#39;s say you have inserted a post:</p>
+<div><pre class="line-numbers"><code class="language-typescript">  const posts = await dom.dataset(&quot;posts&quot;)
+    .insert({
+      title: &quot;A post with no comments&quot;,
+      message: &quot;Okay&quot;,
+    })
+    .toPromise();
+
+  console.log(posts);
+  // [
+  //   {
+  //     id: ...,
+  //     title: &quot;A post with no comments&quot;,
+  //     message: &quot;Okay&quot;,
+  //   }
+  // ]</code></pre></div><p>Then some comments...</p>
+<div><pre class="line-numbers"><code class="language-typescript">  const comments = await dom.dataset(&quot;comments&quot;)
+    .insert([
+      {
+        text: &quot;Very nice, congrats!&quot;,
+        like: true,
+      },
+      {
+        text: &quot;Might&#39;ve been waaaay better&quot;,
+        like: false,
+      },
+    ])
+    .toPromise();
+
+  console.log(comments);
+  // [
+  //   { id: ..., text: &quot;Very nice, congrats!&quot;, like: true },
+  //   { id: ..., text: &quot;Might&#39;ve been waaaay better&quot;, like: false }
+  // ]</code></pre></div><br/>
+
+<p>Finally, you want to relate these with your post, so you call <code>.attach()</code> passing the name of the <strong>resource</strong> (that can
+be either a <strong>dataset</strong> or a <strong>fileset</strong>) and a second argument, a filter that will restrict the operation.</p>
+<p>Available ways to filter attach/detach operation:</p>
+<div><pre class="line-numbers"><code class="language-typescript">  // an array of entities containing their id
+  dom.dataset(&quot;posts&quot;)
+    .attach(&quot;comments&quot;, [
+      {
+        id: &quot;b4961b6a-85a2-4ee8-b946-9001c978c801&quot;,
+        text: &quot;Very nice, congrats!&quot;,
+      },
+      {
+        id: &quot;e199d460-c88f-4ab9-8373-1d6ad0bd0acb&quot;,
+        text: &quot;Might&#39;ve been waaaay better&quot;,
+      },
+    ])
+    .subscribe();
+
+  // an array of ids
+  dom.dataset(&quot;posts&quot;)
+    .attach(&quot;comments&quot;, [
+      &quot;b4961b6a-85a2-4ee8-b946-9001c978c801&quot;,
+      &quot;e199d460-c88f-4ab9-8373-1d6ad0bd0acb&quot;,
+    ])
+    .subscribe();</code></pre></div><br/>
+
+<p>Or even using filter criterion (More details in <a href="dataset-operations.html#filtering-records">Filtering records</a>):</p>
+<div><pre class="line-numbers"><code class="language-typescript">  // a callback that will receive &quot;field&quot; function
+  dom.dataset(&quot;posts&quot;)
+    .attach(&quot;comments&quot;, field =&gt; field(&quot;id&quot;).isInArray(commentsIds))
+    .subscribe();
+
+  // an exposed &quot;field&quot; function
+  dom.dataset(&quot;posts&quot;)
+    .attach(&quot;comments&quot;, field(&quot;id&quot;).isInArray(commentsIds))
+    .subscribe();</code></pre></div><br/>
+
+<p>Full example using a callback:</p>
+<div><pre class="line-numbers"><code class="language-typescript">  const firstPost = posts[0];
+  const commentsIds = comments.map(comment =&gt; comment.id);
+
+  await dom.dataset(&quot;posts&quot;)
+    .attach(&quot;comments&quot;, field =&gt; field(&quot;id&quot;).isInArray(commentsIds))
+    .where(field =&gt; field(&quot;id&quot;).isEqualTo(firstPost.id)) // required for both attach/detach, otherwise an error will be thrown
+    .toPromise();
+
+  // attach operation doesn&#39;t return any data, so we need to call .select()
+  const postsWithComments = await dom.dataset(&quot;posts&quot;)
+    .select()
+    .related(&quot;comments&quot;)
+    .toPromise();
+
+  console.log(postsWithComments);
+  // [
+  //   {
+  //     id: ...,
+  //     title: &quot;A post with no comments&quot;,
+  //     message: &quot;Okay&quot;,
+  //     comments: [
+  //       { id: ..., text: &quot;Very nice, congrats!&quot;, like: true },
+  //       { id: ..., text: &quot;Might&#39;ve been waaaay better&quot;, like: false }
+  //     ]
+  //   }
+  // ]</code></pre></div><br/>
+
+<p>After attaching those comments, you feel regret, and you want to undo it. That&#39;s totally acceptable,
+similar to <code>.attach()</code>, call <code>.detach()</code>:</p>
+<div><pre class="line-numbers"><code class="language-typescript">  await dom.dataset(&quot;posts&quot;)
+    .detach(&quot;comments&quot;, field =&gt; field(&quot;like&quot;).isEqualTo(false)) // detach comments with unlike from the post
+    .where(field =&gt; field(&quot;id&quot;).isEqualTo(firstPost.id))
+    .toPromise();
+
+  const postsWithNoUnlikeComments = await dom.dataset(&quot;posts&quot;)
+    .select()
+    .related(&quot;comments&quot;)
+    .toPromise();
+
+  console.log(postsWithNoUnlikeComments);
+  // [
+  //   {
+  //     id: ...,
+  //     title: &quot;A post with no comments&quot;,
+  //     message: &quot;Okay&quot;,
+  //     comments: [
+  //       { id: ..., text: &quot;Very nice, congrats!&quot;, like: true }
+  //     ]
+  //   }
+  // ]</code></pre></div><h3 id="take-advantage-from-the-ts-interfaces"><a href="#take-advantage-from-the-ts-interfaces">Take advantage from the TS interfaces</a></h3>
+<p>We have created typescript interfaces for our datasets. Why? Well, it can give us some useful hints,
+especially when we are working on a big, complex query. Let&#39;s see how it works.</p>
+<p>All we need to do to turn on typescript magic it&#39;s just provide an interface when we are initializing a query:</p>
+<div><pre class="line-numbers"><code class="language-typescript">dom.dataset&lt;Post&gt;(&quot;posts&quot;)
+  select()
+  ...</code></pre></div><p>Now we&#39;ve got hint for the <code>.related()</code> method:
+<img src="https://jexia.github.io/jexia-sdk-js/assets/relations-hints-1.png" alt="Related hint" class="img-responsive"></p>
+<p>and hint for the nested fields:
+<img src="https://jexia.github.io/jexia-sdk-js/assets/relations-hints-2.png" alt="Related fields hint" class="img-responsive"></p>
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> result-matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'additional-page';
+            var COMPODOC_CURRENT_PAGE_URL = 'relations.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+       <!-- Required to polyfill modern browsers as code is ES5 for IE... -->
+       <script src="../js/libs/custom-elements-es5-adapter.js" charset="utf-8" defer></script>
+       <script src="../js/menu-wc.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+       <script src="../js/libs/zepto.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

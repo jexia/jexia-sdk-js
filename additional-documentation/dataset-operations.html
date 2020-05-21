@@ -1,0 +1,304 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Jexia Javascript SDK</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	      <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/material.css">
+    </head>
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top visible-xs">
+            <a href="../" class="navbar-brand">Jexia Javascript SDK</a>
+            <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="hidden-xs menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content additional-page">
+                   <div class="content-data">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   
+
+
+
+
+<h1 id="datasets-module">Datasets Module</h1>
+<p>A Dataset is a data storage where data is stored either using a strict schema or without it (schemaless). You are able to manipulate this data by creating, updating, fetching and deleting records and also to query over them by using conditions like <code>isEqualTo</code> and <code>isGreaterThen</code> (full list available in <a href="../classes/FieldFilter.html">FieldFilter API reference</a>).</p>
+<h3 id="initialize"><a href="#init">Initialize</a></h3>
+<p>To use dataset features, just add <code>dataOperations</code> module to the client initialization. Notice that when your application runs in NodeJS, you should import <code>dataOperations</code> from <code>jexia-sdk-js/node</code> and from <code>jexia-sdk-js/browser</code> when it runs in a browser.</p>
+<div><pre class="line-numbers"><code class="language-javascript">import { jexiaClient, dataOperations } from &quot;jexia-sdk-js/node&quot;; // &quot;jexia-sdk-js/browser&quot; for browser applications
+const dataModule = dataOperations();
+
+jexiaClient().init({
+  projectID: &quot;&lt;your-project-id&gt;&quot;,
+  key: &quot;&lt;your-project-api-key&gt;&quot;,
+  secret: &quot;&lt;your-project-api-secret&gt;&quot;,
+}, dataModule);</code></pre></div><h3 id="getting-a-dataset-object"><a href="#getting-dataset">Getting a dataset object</a></h3>
+<p>Dataset object can be received from the <code>dataModule</code> just by its name:</p>
+<div><pre class="line-numbers"><code class="language-javascript">const myDataset = dataModule.dataset(&quot;my_dataset&quot;);</code></pre></div><p>It is also possible to get a list of datasets at a time:</p>
+<div><pre class="line-numbers"><code class="language-javascript">const [posts, authors] = dataModule.datasets([&quot;posts&quot;, &quot;authors&quot;]);</code></pre></div><p>Obtained object has all the methods to manage its data - <code>insert</code>, <code>select</code>, <code>update</code> and <code>delete</code>:</p>
+<div><pre class="line-numbers"><code class="language-javascript">const selectQuery = myDataset.select();
+const insertQuery = myDataset.insert([post1, post2]);
+const updateQuery = myDataset.update([{ title: &quot;Updated title&quot; }]);
+const deleteQuery = myDataset.delete();</code></pre></div><p>These methods return an Observable and allow you to use all the power of RxJS library (<a href="https://rxjs.dev/guide/overview">RxJs documentation</a>).</p>
+<p>Let&#39;s write something interesting. For example, we want to select records older than 1 day and put them into archive:</p>
+<div><pre class="line-numbers"><code class="language-javascript">// datasets
+const posts = dataModule.dataset(&quot;posts&quot;);
+const archive = dataModule.dataset(&quot;archive&quot;);
+
+// Calculate yesterday&#39;s date
+const date = new Date();
+date.setDate(date.getDate() - 1);
+const yesterday = date.toISOString();
+
+posts.select()
+  // get all records that had been created earlier than yesterday
+  .where(field =&gt; field(&quot;created_at&quot;).isLessThan(yesterday))
+  .pipe(
+    // put them into archive!
+    switchMap(records =&gt; archive.insert(records)),
+  )
+  .subscribe();</code></pre></div><p>Pay attention that request to the dataset will not be sent until <code>subscribe()</code> method is called.</p>
+<p>Let&#39;s have a look at each method.</p>
+<h3 id="inserting-records"><a href="#inserting-records">Inserting records</a></h3>
+<p>Records can be inserted to a dataset either by sending an array or a single object. The response will always be an array though.</p>
+<div><pre class="line-numbers"><code class="language-Javascript">const posts = dataModule.dataset(&quot;posts&quot;);
+
+const insertQuery = posts.insert([
+ { title: &quot;New Post&quot;, content: &quot;content here&quot; },
+ { title: &quot;Another Post&quot;, content: &quot;some more content&quot; }
+]);
+
+// At this point nothing has happened yet
+// we need to call subscribe in order to run a query
+insertQuery.subscribe();
+
+// Single record
+const insertQuery = posts.insert({
+ title: &quot;New Post&quot;,
+ content: &quot;content here&quot;
+}).subscribe();
+
+// Either way, the response will be an array
+insertQuery.subscribe(records =&gt; {
+     // you will always get an array of created records, including their generated IDs (even when inserting a single record)
+  },
+  error =&gt; {
+     // you can see the error info here, if something goes wrong
+});</code></pre></div><h3 id="updating-records"><a href="#updating-records">Updating records</a></h3>
+<p>The <code>update</code> method is used to modify records, it always has to be used with the <code>.where</code> method and a filter criteria.</p>
+<div><pre class="line-numbers"><code class="language-javascript">const posts = dataModule.dataset(&quot;posts&quot;);
+
+posts
+  .update({ title: &quot;Same title for tom and harry posts&quot; })
+  .where(field =&gt; field(&quot;author_name&quot;).isInArray([&quot;Tom&quot;, &quot;Harry&quot;]))
+  .subscribe(affectedRecords =&gt; {
+   /* [{ title: &quot;Same title for tom and harry posts&quot;, author_name: &quot;Tom&quot; },
+       { title: &quot;Same title for tom and harry posts&quot;, author_name: &quot;Tom&quot; },
+       { title: &quot;Same title for tom and harry posts&quot;, author_name: &quot;Harry&quot; },
+       { title: &quot;Same title for tom and harry posts&quot;, author_name: &quot;Tom&quot; }]
+    */
+  });</code></pre></div><h3 id="deleting-records"><a href="#deleting-records">Deleting records</a></h3>
+<p> Deleting  also requires at least one condition:</p>
+<div><pre class="line-numbers"><code class="language-javascript">const posts = dataModule.dataset(&quot;posts&quot;);
+
+posts
+  .delete()
+  .where(field =&gt; field(&quot;title&quot;).isLike(&quot;%test%&quot;))
+  .subscribe(deletedFields =&gt; {
+    // you will be able to access the deleted posts here
+    // they are not stored in the DB anymore, but maybe you
+    // want to display a visual confirmation of what was deleted
+  });</code></pre></div><h3 id="query-records"><a href="#dataset-query-objects">Query records</a></h3>
+<p>Query object, returned by <code>select()</code> method, has an ability to filter, order, limit and offset records. These methods have to be called in chain before <code>subscribe()</code>.</p>
+<h3 id="our-first-query-selecting-all-records-in-a-dataset"><a href="#select-all-dataset-records">Our first query: selecting all records in a dataset</a></h3>
+<div><pre class="line-numbers"><code class="language-javascript">const posts = dataModule.dataset(&quot;posts&quot;);
+
+posts.select()
+  .subscribe(
+    records =&gt; {
+      // here are all your posts
+    },
+    error =&gt; {
+      // some error happened
+    }
+  );</code></pre></div><h3 id="sorting-records"><a href="#sorting-records">Sorting records</a></h3>
+<p>In order to sort records, you need to call <code>.sortAsc</code> or <code>.sortDesc</code> on a <code>Query</code> object and pass the name of the field you want to sort by.</p>
+<div><pre class="line-numbers"><code class="language-javascript">const posts = dataModule.dataset(&quot;posts&quot;);
+
+posts
+  .select()
+  .sortAsc(&quot;created_at&quot;)
+  .subscribe(records =&gt; {
+    // you&#39;ve got sorted records here
+  });</code></pre></div><h3 id="limit-and-offset"><a href="#limit-offset">Limit and offset</a></h3>
+<p>You can use <code>.limit</code> and <code>.offset</code> on a <code>Query</code> to paginate your records. They can be used separately or together. Only setting the limit (to a value X) will make the query operate on the first X records. Only setting the <code>offset</code> will make the query operate on the last Y records, starting from the <code>offset</code> value.</p>
+<div><pre class="line-numbers"><code class="language-javascript">const posts = dataModule.dataset(&quot;posts&quot;);
+
+posts.select()
+  .limit(2)
+  .offset(5)
+  .subscribe(records =&gt; // paginatedPosts will be an array of 2 records, starting from position 5);</code></pre></div><h3 id="only-retrieving-certain-fields"><a href="#retrieve-certain-fields">Only retrieving certain fields</a></h3>
+<p>You can use <code>.fields</code> method to restrict fields you want to retrieve.</p>
+<div><pre class="line-numbers"><code class="language-javascript">const posts = dataModule.dataset(&quot;posts&quot;);
+
+posts.select()
+  .fields(&quot;title&quot;, &quot;author&quot;) // you can also pass an array of field names
+  .subscribe(records =&gt; // you will get array of {id, title, author} records (id is always returned));</code></pre></div><h3 id="aggregation-functions"><a href="#aggregation-function">Aggregation functions</a></h3>
+<p>There are a few aggregation functions you are able to use in order to do some calculations before obtaining data:</p>
+<div><pre class="line-numbers"><code class="language-javascript">const posts = dataModule.dataset(&quot;posts&quot;);
+
+posts.select()
+  .fields({ fn: &quot;count&quot;, field: &quot;*&quot; })
+  .subscribe(result =&gt; {
+    /* the result is an array with one record (let&#39;s say we have 5 posts):
+       [{
+          count: 5
+       }]
+     */
+  });</code></pre></div><p>You can provide an alias to make result more readable (using aliases is the only way to get proper results if you want to query two or more the same aggregation functions in one query):</p>
+<div><pre class="line-numbers"><code class="language-javascript">const posts = dataModule.dataset(&quot;posts&quot;);
+
+posts.select()
+  .fields({ fn: &quot;max&quot;, field: &quot;likes&quot;: alias: &quot;likes&quot; })
+  .subscribe(result =&gt; {
+    /* the result is:
+       [
+         { &quot;likes&quot;: 24 },
+       ]
+     */
+  });</code></pre></div><p>You can also use any sets of plain fields and functions. Let&#39;s calculate the maximum of likes each author has received:</p>
+<div><pre class="line-numbers"><code class="language-javascript">const posts = dataModule.dataset(&quot;posts&quot;);
+
+posts.select()
+  .fields(&quot;author&quot;, { fn: &quot;max&quot;, field: &quot;likes&quot; })
+  .subscribe(result =&gt; {
+    /* the result is:
+       [
+         { author: &quot;Tom&quot;, &quot;max&quot;: 10 },
+         { author: &quot;Harry&quot;, &quot;max&quot;: 24 },
+       ]
+     */
+  });</code></pre></div><p>The full list of available aggregation functions:</p>
+<ul>
+<li>max</li>
+<li>min</li>
+<li>sum</li>
+<li>avg</li>
+<li>count</li>
+</ul>
+<h3 id="filtering-records"><a href="#filtering-records">Filtering records</a></h3>
+<p>You can use the filtering to select what records a certain query will operate on.</p>
+<p>In order to define a filter, you can use the exposed method <code>field</code>.</p>
+<div><pre class="line-numbers"><code class="language-javascript">import { field } from &quot;jexia-sdk-js/node&quot;;
+
+const isAuthorTom = field(&quot;author_name&quot;).isEqualTo(&quot;Tom&quot;);
+const isAuthorDick = field(&quot;author_name&quot;).isEqualTo(&quot;Dick&quot;);
+const isAuthorTomOrDick = isAuthorTom.or(isAuthorDick);
+
+// In order to use these conditions, they need to be added to a query through `.where` method
+
+dataModule.dataset(&quot;posts&quot;)
+ .select()
+ .where(isAuthorTomOrDick)
+ .subscribe(records =&gt; // posts of Tom and Dick);</code></pre></div><p>If you prefer, <code>.where</code> method also accepts a lazy callback, that receives the <code>field</code> method received as an argument:</p>
+<div><pre class="line-numbers"><code class="language-javascript">dataModule.dataset(&quot;posts&quot;)
+ .select()
+ .where(field =&gt; field(&quot;author_name&quot;).isEqualTo(&quot;Harry&quot;));</code></pre></div><p>Multiple <code>.where</code> calls can be chained, but only the last call will be taken into account. If a complex condition needs to be set for filtering, it has to be created in one go (in-line or not) and passed as an argument to the <code>.where</code> method.</p>
+<p>Filtering conditions can be nested at any level.</p>
+<div><pre class="line-numbers"><code class="language-javascript">// Filtering in a flat way
+const isPostedByTomAndIsAboutSports = field(&quot;author_name&quot;)
+ .isEqualTo(&quot;Tom&quot;).and(field(&quot;title&quot;).isLike(&quot;sports&quot;));
+
+// Filtering with one nested level
+const isPostedByDickAndIsAboutMusic = field(&quot;author_name&quot;)
+ .isEqualTo(&quot;Dick&quot;).and(field(&quot;title&quot;).isLike(&quot;music&quot;));
+
+const isTomOrIsDickHarry = field(&quot;author_name&quot;)
+ .isEqualTo(&quot;Tom&quot;).or( isPostedByDickAndIsAboutMusic // nested level );
+
+// Filtering with multiple nested levels
+const isAuthorDutch = field(&quot;author_country&quot;).isEqualTo(&quot;NL&quot;);
+const isKidOrSenior = field(&quot;author_age&quot;)
+ .isGreaterThan(64).or(field(&quot;author_age&quot;).isLessThan(16));
+const isTomAndIsDuthOrKidOrSenior = field(&quot;first_name&quot;)
+ .isEqualTo(&quot;Tom&quot;).and( isAuthorDutch.or(isKidOrSenior) );</code></pre></div><h3 id="filtering-operator-list-and-examples"><a href="#filtering-operator-list">Filtering operator list and examples</a></h3>
+<p>You can find a complete list of the operators supported for filtering in the <a href="../classes/FieldFilter.html">FieldFilter API reference</a>.</p>
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> result-matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'additional-page';
+            var COMPODOC_CURRENT_PAGE_URL = 'dataset-operations.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+       <!-- Required to polyfill modern browsers as code is ES5 for IE... -->
+       <script src="../js/libs/custom-elements-es5-adapter.js" charset="utf-8" defer></script>
+       <script src="../js/menu-wc.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+       <script src="../js/libs/zepto.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

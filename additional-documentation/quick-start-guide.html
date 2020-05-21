@@ -1,0 +1,178 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Jexia Javascript SDK</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	      <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/material.css">
+    </head>
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top visible-xs">
+            <a href="../" class="navbar-brand">Jexia Javascript SDK</a>
+            <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="hidden-xs menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content additional-page">
+                   <div class="content-data">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   
+
+
+
+
+<h1 id="quick-start-guide-for-jexia-javascript-sdk">Quick Start Guide for Jexia Javascript SDK</h1>
+<p>Jexia SDK currently exposes the following features:</p>
+<ul>
+<li>On-demand access to data stored in Datasets and Filesets (CRUD operations, file uploads)</li>
+<li>Authentication and authorization under the platform, you only need to provide your credentials.</li>
+</ul>
+<p>Currently SDK is focused on <em>consuming</em> data. In order to manage data schema (creating Datasets, adding fields to them, etc.) you need to use our <a href="https://app.jexia.com">web application</a>. We suggest you read the guide <a href="https://www.jexia.com/en/docs/getting-started/">Start your first project</a>.</p>
+<h3 id="on-demand-data-access">On-demand data access</h3>
+<p>The user can execute the following operations on records:</p>
+<ul>
+<li>CREATE</li>
+<li>READ</li>
+<li>UPDATE</li>
+<li>DELETE</li>
+</ul>
+<p>Executing an operation on a set of records is done through a Query. Depending on their type, Queries give the user access to some (or all) of the following options:</p>
+<ul>
+<li>Filtering (only records satisfying a certain condition will be retrieved/affected)</li>
+<li>Sorting (the records will be sorted by a rule and direction before the action is executed)</li>
+<li>Limiting/offsetting (only a certain number of records, starting from a certain position in the Dataset will be affected)</li>
+<li>Selecting the fields to be retrieved (when the user does not want the entire record to be retrieved, only certain columns)</li>
+</ul>
+<p>Important to notice that all these features are handled server-side.</p>
+<h2 id="code-samples">Code samples</h2>
+<p>Please keep in mind that this quick start guide uses ECMAScript 8 or sometimes TypeScript syntaxes.</p>
+<p>The examples are made with a simple data schema in mind: think a basic social media platform where <code>users</code> can write <code>posts</code> and/or <code>comments</code> to <code>posts</code>. A <code>post</code> can be related to any number of <code>comments</code>, while each <code>post</code> and each <code>comment</code> has a <code>user</code> as author.</p>
+<h3 id="importing-the-sdk-into-your-js-project"><a href="#importing-sdk">Importing the SDK into your JS project</a></h3>
+<h4 id="in-a-nodejs-application">In a NodeJS application:</h4>
+<div><pre class="line-numbers"><code class="language-Javascript">import { jexiaClient } from &quot;jexia-sdk-js/node&quot;;</code></pre></div><h4 id="in-the-browser">In the browser:</h4>
+<div><pre class="line-numbers"><code class="language-Javascript">import { jexiaClient } from &quot;jexia-sdk-js/browser&quot;;</code></pre></div><h3 id="initialization-and-authentication"><a href="#init-sdk">Initialization and Authentication</a></h3>
+<p>The <code>jexiaClient()</code> function will return a <code>Promise</code> of the <code>Client</code> class. You can provide a custom <code>fetch</code> standard compliant function as a parameter, as default we are using <code>node-fetch</code> package at NodeJS, and the native browser&#39;s <code>fetch</code> implementation.</p>
+<div><pre class="line-numbers"><code class="language-Typescript">import { Client } from &quot;jexia-sdk-js&quot;;
+import { jexiaClient } from &quot;jexia-sdk-js/node&quot;;
+
+const clientPromise: Promise&lt;Client&gt; = jexiaClient()
+  .init({
+    projectID: &quot;&lt;your-project-id&gt;&quot;,
+    key: &quot;&lt;your-project-api-key&gt;&quot;,
+    secret: &quot;&lt;your-project-api-secret&gt;&quot;,
+  });
+
+clientPromise.then((client: Client) =&gt; {
+  // you have been succesfully logged in!
+}).catch((error: Error) =&gt; {
+  // uh-oh, there was a problem logging in, check error.message for more info
+});</code></pre></div><h3 id="the-module-system"><a href="#the-module-system">The Module system</a></h3>
+<p>Jexia SDK is built as a set of modules structured around a core entity (the <code>Client</code> class used above).
+In order to use a module you need to:</p>
+<ol>
+<li>Initialize it</li>
+<li>Pass it to the <code>Client</code> when calling the <code>.init()</code> method</li>
+</ol>
+<p>The example below will show how to initialize SDK using Datasets Module. The modules await the client initialization before make any operations, so you don&#39;t need to manually await for client&#39;s initialization <code>Promise</code>.</p>
+<div><pre class="line-numbers"><code class="language-Javascript">import { jexiaClient, dataOperations } from &quot;jexia-sdk-js/node&quot;;
+
+const dataModule = dataOperations();
+jexiaClient().init(credentials, dataModule);
+
+dataModule.dataset(&quot;posts&quot;)
+  .select()
+  .execute()
+  .then(data =&gt; {
+    // you have been succesfully logged in!
+    // you can start using the dataModule variable to operate on records here
+  }).catch(error =&gt; {
+    // uh-oh, there was a problem logging in, check the error.message for more info
+  });</code></pre></div><h3 id="logging-off-and-cleanup"><a href="#logging-off">Logging off and cleanup</a></h3>
+<p>The <code>Client</code> class exposes a method called <code>.terminate()</code>. Use this to clear up resources used by the <code>Client</code> and any modules you initialized along with it (<code>Client</code> will terminate any modules you supplied on initialization, so you don&#39;t have to pass them.)</p>
+<div><pre class="line-numbers"><code class="language-Javascript">[..]
+client
+  .terminate()
+  .then(terminatedClient =&gt; {
+    // everything has been cleared
+  }).catch(error =&gt; {
+    // something went wrong when cleaning up
+  });
+[..]</code></pre></div>
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> result-matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'additional-page';
+            var COMPODOC_CURRENT_PAGE_URL = 'quick-start-guide.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+       <!-- Required to polyfill modern browsers as code is ES5 for IE... -->
+       <script src="../js/libs/custom-elements-es5-adapter.js" charset="utf-8" defer></script>
+       <script src="../js/menu-wc.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+       <script src="../js/libs/zepto.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>
