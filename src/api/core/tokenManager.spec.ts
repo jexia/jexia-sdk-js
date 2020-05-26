@@ -1,6 +1,6 @@
 import * as faker from "faker";
 import { Observable, of, throwError } from "rxjs";
-import { createMockFor } from "../../../spec/testUtils";
+import { createMockFor, mockRequestError } from "../../../spec/testUtils";
 import { MESSAGE } from "../../config";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { Logger } from "../logger/logger";
@@ -84,13 +84,26 @@ describe("TokenManager", () => {
   });
 
   describe("when authenticating", () => {
-    it("should throw an error if authentication failed", async () => {
+    it("should throw an error if project not found", async () => {
       const { subject, validOptions } = createSubject({
-        requestAdapterReturnValue: throwError(new Error("Auth error")),
+        requestAdapterReturnValue: throwError({
+          httpStatus: { code: 404 },
+        }),
       });
       await subject.init(validOptions)
-        .catch((error) => expect(error.message).toEqual("Unable to get tokens: Auth error"));
+        .catch((error) => expect(error.message).toEqual(`Authorization failed: project ${validOptions.projectID} not found.`));
     });
+
+    it("should throw an error if authorization failed", async () => {
+      const { subject, validOptions } = createSubject({
+        requestAdapterReturnValue: throwError({
+          httpStatus: { code: 500, status: "Server error" },
+        }),
+      });
+      await subject.init(validOptions)
+        .catch((error) => expect(error.message)
+          .toEqual(`Authorization failed: 500 Server error`));
+    })
 
     it("should result promise of itself when authorization succeeded", async () => {
       const { subject, validOptions } = createSubject();
@@ -111,6 +124,27 @@ describe("TokenManager", () => {
       jest.spyOn(subject as any, "startRefreshDigest");
       await subject.init({ ...validOptions, auth });
       expect((subject as any).startRefreshDigest).toHaveBeenCalledWith([auth]);
+    });
+
+    describe("get error message", () => {
+      it("should return not found error if received 404", () => {
+        const { subject,  } = createSubject();
+        const projectID = faker.random.uuid();
+
+        subject.init({ projectID });
+
+        expect(subject.getErrorMessage(mockRequestError({ code: 404 })))
+          .toEqual(`Authorization failed: project ${projectID} not found.`);
+      });
+
+      it("should return code and status for any not 404 error", () => {
+        const { subject,  } = createSubject();
+
+        const requestError = mockRequestError({ code: faker.helpers.randomize([401, 403, 407, 500]) });
+
+        expect(subject.getErrorMessage(requestError))
+          .toEqual(`Authorization failed: ${requestError.httpStatus.code} ${requestError.httpStatus.status}`);
+      });
     });
   });
 
@@ -311,30 +345,30 @@ describe("TokenManager", () => {
       );
     });
 
-    it("should reject promise if there is no token for specific auth", async () => {
+    it("should reject promise if there is no token for specific auth", () => {
       const { subject } = createSubject();
       (subject as any).storage.setTokens("testRefresh",
         { access_token: "access_token", refresh_token: "refresh_token" });
       try {
-        await (subject as any).refresh(["randomAuth"]);
+        (subject as any).refresh(["randomAuth"]);
       } catch (error) {
         expect(error.message).toEqual("There is no refresh token for randomAuth");
       }
     });
 
-    it("should throw an error if request failed", async (done) => {
-      const { subject } = createSubject({
-        requestAdapterReturnValue: throwError(new Error("refresh error")),
-      });
-      (subject as any).storage.setTokens("testRefresh",
-        { access_token: "access_token", refresh_token: "refresh_token" });
+    it("should throw an error if request failed", (done) => {
+      const { subject, tokens, requestAdapterMock } = createSubject();
+      (subject as any).storage.setTokens("testRefresh", tokens);
+
+      (requestAdapterMock.execute as jest.Mock).mockReturnValue(throwError({ httpStatus: { code: 500 }}));
 
       (subject as any).refresh(["testRefresh"]).subscribe(
-        () => done("successfully refreshed the token"),
+        () => done.fail("successfully refreshed the token"),
         (error: Error) => {
-          expect(error.message).toEqual("Unable to get tokens: refresh error");
+          expect(error.message).toEqual("Refreshing token failed");
           done();
         },
+        () => done.fail("completed without error"),
       );
     });
   });

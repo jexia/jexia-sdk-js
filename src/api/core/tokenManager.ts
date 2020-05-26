@@ -2,7 +2,7 @@ import { Injectable, InjectionToken } from "injection-js";
 import { from, Observable } from "rxjs";
 import { catchError, map, tap } from "rxjs/operators";
 import { API, DELAY, MESSAGE } from "../../config";
-import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
+import { IRequestError, RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { Logger } from "../logger/logger";
 import { TokenStorage } from "./componentStorage";
 
@@ -218,6 +218,9 @@ export class TokenManager {
       tap((refreshedTokens: Tokens) =>
         [auth, ...restAliases].forEach((alias) =>  this.storage.setTokens(alias, refreshedTokens)),
       ),
+      catchError(() => {
+        throw new Error("Refreshing token failed");
+      }),
     );
   }
 
@@ -231,16 +234,15 @@ export class TokenManager {
     this.defers[auth] = new Promise((r) => resolve = r);
 
     return this.requestAdapter.execute(url, {
-        body,
-        method: RequestMethod.POST,
-      }).pipe(
-        tap((refreshedTokens: Tokens) => resolve(refreshedTokens.access_token)),
-        catchError((err: Error) => {
-          delete this.defers[auth];
-          this.logger.error("tokenManager", err.message);
-          throw new Error(`Unable to get tokens: ${err.message}`);
-        }),
-      );
+      body,
+      method: RequestMethod.POST,
+    }).pipe(
+      tap((refreshedTokens: Tokens) => resolve(refreshedTokens.access_token)),
+      catchError((error: IRequestError) => {
+        delete this.defers[auth];
+        throw new Error(this.getErrorMessage(error));
+      }),
+    );
   }
 
   /**
@@ -265,5 +267,12 @@ export class TokenManager {
    */
   private get refreshUrl(): string {
     return `${this.url}/${API.REFRESH}`;
+  }
+
+  public getErrorMessage({ httpStatus: { code, status } }: IRequestError): string {
+    if (code === 404) {
+      return `Authorization failed: project ${this.projectId} not found.`;
+    }
+    return `Authorization failed: ${code} ${status}`;
   }
 }
