@@ -5,7 +5,7 @@ import { ResourceType } from "../src/api/core/resource";
 import { FilesetInterface, FilesetMultipart, IFileStatus } from "../src/api/fileops/fileops.interfaces";
 import { EventSubscriptionType, RealTimeEventMessage } from "../src/api/realtime/realTime.interfaces";
 import { RequestExecuter } from "../src/internal/executer";
-import { IHTTPResponse, IRequestOptions, RequestAdapter } from "../src/internal/requestAdapter";
+import { IHTTPResponse, IRequestError, IRequestOptions, RequestAdapter } from "../src/internal/requestAdapter";
 
 export class RequestAdapterMockFactory {
   public genericSuccesfulExecution(): RequestAdapter {
@@ -184,6 +184,16 @@ export const mockFileEvent = (id: string, action: EventSubscriptionType): RealTi
   modifier: { type: "", id: "" },
   timestamp: new Date().toDateString(),
   data: [ { id }],
+});
+
+export const mockRequestError = ({
+  id = faker.random.uuid(),
+  request = {},
+  code = faker.random.number({ min: 100, max: 599 }),
+  status = faker.random.words(),
+  message = faker.lorem.sentence(),
+}): IRequestError => ({
+  id, request, httpStatus: { code, status }, message,
 });
 
 export * from "./requestMethod";
