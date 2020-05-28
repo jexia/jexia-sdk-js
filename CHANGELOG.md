@@ -1,3 +1,10 @@
+## [4.10.2](https://github.com/jexia/jexia-sdk-js/compare/v4.10.1...v4.10.2) (2020-05-28)
+
+
+### Bug Fixes
+
+* **token manager:** change project init errors ([3adbd5a](https://github.com/jexia/jexia-sdk-js/commit/3adbd5a74e729af0c98d234ef6bb123f1fd687a1))
+
 ## [4.10.1](https://github.com/jexia/jexia-sdk-js/compare/v4.10.0...v4.10.1) (2020-05-20)
 
 
