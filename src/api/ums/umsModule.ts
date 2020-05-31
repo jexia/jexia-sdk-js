@@ -11,16 +11,19 @@ import { UpdateQuery } from "../core/queries/updateQuery";
 import { DefaultResourceInterface, ResourceType } from "../core/resource";
 import { AuthOptions, TokenManager, Tokens } from "../core/tokenManager";
 
-export interface IUMSSignInOptions {
+export interface IUMSCredentials {
   email: string;
   password: string;
+}
+
+export type IUMSExtraFields = Omit<{ [key: string]: any }, "email" | "password">;
+
+export type IUMSSignUpFields = IUMSCredentials & IUMSExtraFields;
+
+export interface IUMSSignInOptions {
   default?: boolean;
   alias?: string;
 }
-
-export type IUMSCredentials = Pick<IUMSSignInOptions, "email" | "password">;
-
-export type IUMSExtraFields = Omit<{ [key: string]: any }, "email" | "password">;
 
 /**
  * Default UMS interface type
@@ -84,19 +87,25 @@ export class UMSModule<
     return Promise.resolve(this);
   }
 
-  public signIn(user: IUMSSignInOptions): Observable<string> {
+  public signIn(user: IUMSCredentials & IUMSSignInOptions): Observable<string> {
     const body = {
       method: "ums",
       email: user.email,
       password: user.password
     };
 
+    const aliases = [user.email];
+
+    if (user.alias) {
+      aliases.push(user.alias);
+    }
+
     return this.requestAdapter.execute<Tokens>(
       this.getUrl(API.AUTH, false),
       { body, method: RequestMethod.POST }
     ).pipe(
       map((tokens: Tokens) => {
-        this.tokenManager.addTokens([user.email, user.alias], tokens, user.default);
+        this.tokenManager.addTokens(aliases, tokens, user.default);
         return tokens.access_token;
       }),
     );
@@ -104,18 +113,12 @@ export class UMSModule<
 
   /**
    * Create a new UMS user
-   * @param credentials {IUMSCredentials} email and password of created user
-   * @param extra {IUMSExtraFields} optional list of the additional user fields
+   * @param credentials {IUMSSignUpFields} email, password and possible extra fields of created user
    */
-  public signUp(credentials: IUMSCredentials, extra: IUMSExtraFields = {}): Observable<D> {
-    const body = {
-      email: credentials.email,
-      password: credentials.password,
-      ...extra
-    };
+  public signUp(credentials: IUMSSignUpFields): Observable<D> {
     return this.requestAdapter.execute<D>(
       this.getUrl(API.UMS.SIGNUP),
-      { body, method: RequestMethod.POST },
+      { body: credentials, method: RequestMethod.POST },
     );
   }
 
