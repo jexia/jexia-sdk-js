@@ -13,6 +13,7 @@
     "outDir": "./.temp",
     "alwaysStrict": true,
     "noImplicitReturns": true,
+    "noImplicitAny": false,
     "noUnusedLocals": true,
     "pretty": true,
     "declaration": false,

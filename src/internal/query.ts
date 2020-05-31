@@ -145,7 +145,7 @@ export class Query<T = any> {
    */
   public compileToQueryParams(): QueryParam[] {
     const compiled = this.compile();
-    const params = [];
+    const params: QueryParam[] = [];
 
     if (compiled.order) {
       // order should be multiple key/value entries instead of a single order=[]
