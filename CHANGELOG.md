@@ -1,3 +1,15 @@
+# [5.0.0](https://github.com/jexia/jexia-sdk-js/compare/v4.10.2...v5.0.0) (2020-06-08)
+
+
+### Bug Fixes
+
+* **ums:** merge user credentials and extra fields for signup ([647daaa](https://github.com/jexia/jexia-sdk-js/commit/647daaa9415a8cb35a29f4c319c8a1adfc95a4b5))
+
+
+### BREAKING CHANGES
+
+* **ums:** (UMS)
+
 ## [4.10.2](https://github.com/jexia/jexia-sdk-js/compare/v4.10.1...v4.10.2) (2020-05-28)
 
 
