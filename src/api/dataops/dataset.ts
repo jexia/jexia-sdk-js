@@ -1,4 +1,5 @@
 import { Inject, Injectable } from "injection-js";
+import { IAggField } from "../../internal/query";
 import { RequestExecuter } from "../../internal/executer";
 import { QueryActionType } from "../../internal/utils";
 import { IFilteringCriterion, IFilteringCriterionCallback } from "../core/filteringApi";
@@ -64,8 +65,9 @@ export class Dataset<
    * @returns Query object specialized for select statements.
    * With no filters set, returns all records in the selected dataset.
    */
-  public select(): SelectQuery<D> {
-    return new SelectQuery<D>(this.requestExecuter, ResourceType.Dataset, this.datasetName);
+  public select(...fields: Array<Extract<keyof T, string> | IAggField<T>>): SelectQuery<D> {
+    return new SelectQuery<D>(this.requestExecuter, this.resourceType, this.datasetName)
+      .fields(fields);
   }
 
   /**

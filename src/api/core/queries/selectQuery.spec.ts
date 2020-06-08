@@ -21,6 +21,7 @@ describe("SelectQuery class", () => {
 
     if (mockQuery) {
       queryMock = createMockFor(Query);
+      queryMock.fields = [];
       subject["query"] = queryMock;
     }
     return {

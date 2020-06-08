@@ -19,7 +19,7 @@ export abstract class BaseQuery<T, D extends T = any> extends Observable<T[]> {
   /**
    * @internal
    */
-  protected query: Query<T>;
+  protected query = new Query<T>();
   /**
    * Body of request
    * @returns T | T[]
@@ -35,8 +35,6 @@ export abstract class BaseQuery<T, D extends T = any> extends Observable<T[]> {
     super((subscriber) =>
       this.queryExecuter.executeRequest(this.compiledRequest).subscribe(subscriber),
     );
-
-    this.query = new Query<T>();
   }
 
   /**
@@ -49,7 +47,7 @@ export abstract class BaseQuery<T, D extends T = any> extends Observable<T[]> {
   public fields(...fields: Array<Extract<keyof T, string> | IAggField<T>>): this;
   public fields<K extends Extract<keyof T, string>>(field: K | IAggField<T>,
                                                     ...fields: Array<K | IAggField<T>>): this {
-    this.query.fields = Array.isArray(field) ? field : [field, ...fields];
+    this.query.fields = this.query.fields.concat(Array.isArray(field) ? field : [field, ...fields]);
     return this;
   }
 
