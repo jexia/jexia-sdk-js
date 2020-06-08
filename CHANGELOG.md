@@ -1,3 +1,10 @@
+# [5.1.0](https://github.com/jexia/jexia-sdk-js/compare/v5.0.0...v5.1.0) (2020-06-08)
+
+
+### Features
+
+* **select-query:** add fields as a select query argument ([75b6baf](https://github.com/jexia/jexia-sdk-js/commit/75b6baf1d7b018ba5eddda5c40332d393bafe6c8))
+
 # [5.0.0](https://github.com/jexia/jexia-sdk-js/compare/v4.10.2...v5.0.0) (2020-06-08)
 
 
