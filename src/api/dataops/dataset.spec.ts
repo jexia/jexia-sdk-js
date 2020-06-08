@@ -35,6 +35,12 @@ describe("Dataset class", () => {
     expect(dataset.select() instanceof SelectQuery).toBeTruthy();
   });
 
+  it("should start a select query with provided fields", () => {
+    const dataset = new Dataset("test", createMockFor(RequestExecuter));
+    const selectQuery = dataset.select("field1", "field2");
+    expect((selectQuery as any).query.fields).toEqual(["field1", "field2"]);
+  });
+
   it("should be able start a update query", () => {
     const dataset = new Dataset("test", createMockFor(RequestExecuter));
     expect(dataset.update({}) instanceof UpdateQuery).toBeTruthy();

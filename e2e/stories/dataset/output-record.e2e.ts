@@ -3,9 +3,6 @@ import * as Joi from "joi";
 import { Dataset } from "../../../src/api/dataops/dataset";
 import { cleaning, DEFAULT_DATASET, dom, init } from "../../teardowns";
 
-// tslint:disable-next-line:no-var-requires
-const joiAssert = require("joi-assert");
-
 jest.setTimeout(15000); // for unstable internet connection
 
 describe("output record fields REST API", () => {
@@ -15,6 +12,20 @@ describe("output record fields REST API", () => {
     TITLE: "title",
     AUTHOR: "author",
     COMMENTS: "comments",
+  };
+
+  const USER_SCHEMA = Joi.object({
+    name: Joi.string().required(),
+    email: Joi.string().email().required(),
+  });
+
+  const SCHEMAS = {
+    [FIELD.TITLE]: Joi.string(),
+    [FIELD.AUTHOR]: USER_SCHEMA,
+    [FIELD.COMMENTS]: Joi.array().items(Joi.object({
+      title: Joi.string().required(),
+      user: USER_SCHEMA,
+    })),
   };
 
   const fakeUser = () => ({
@@ -35,7 +46,7 @@ describe("output record fields REST API", () => {
     () => ({
       [FIELD.TITLE]: faker.name.findName(),
       [FIELD.AUTHOR]: fakeUser(),
-      [FIELD.COMMENTS]: JSON.stringify(fakeComments()),
+      [FIELD.COMMENTS]: fakeComments(),
     })
   );
 
@@ -63,17 +74,16 @@ describe("output record fields REST API", () => {
       .select()
       .fields(fieldName)
       .subscribe((result) => {
-        const validValues = testData.map((r) => r[fieldName]);
 
         const expectedSchema = Joi
           .array()
           .items({
             id: Joi.string().uuid().required(),
-            [fieldName]: Joi.valid(validValues).required(),
+            [fieldName]: SCHEMAS[fieldName],
           })
           .length(testData.length);
 
-        joiAssert(result, expectedSchema);
+        Joi.assert(result, expectedSchema);
 
         done();
       }, (error) => done.fail(error));
@@ -88,11 +98,11 @@ describe("output record fields REST API", () => {
           .array()
           .items({
             id: Joi.string().uuid().required(),
-            [FIELD.TITLE]: Joi.string().required(),
-            [FIELD.AUTHOR]: Joi.object().required(),
+            [FIELD.TITLE]: SCHEMAS[FIELD.TITLE],
+            [FIELD.AUTHOR]: SCHEMAS[FIELD.AUTHOR],
           });
 
-        joiAssert(result, expectedSchema);
+        Joi.assert(result, expectedSchema);
 
         done();
       }, (error) => done.fail(error));
@@ -114,7 +124,84 @@ describe("output record fields REST API", () => {
             [userEmail]: Joi.string().email().required(),
           });
 
-        joiAssert(result, expectedSchema);
+        Joi.assert(result, expectedSchema);
+        done();
+      });
+  });
+
+  it("should return field provided to the select method", (done) => {
+    const fieldName = faker.random.arrayElement(Object.values(FIELD));
+
+    dataset
+      .select(fieldName)
+      .subscribe((result) => {
+        const expectedSchema = Joi
+          .array()
+          .items({
+            id: Joi.string().uuid().required(),
+            [fieldName]: SCHEMAS[fieldName],
+          })
+          .length(testData.length);
+
+        Joi.assert(result, expectedSchema);
+
+        done();
+      }, (error) => done.fail(error));
+  });
+
+  it("should return id + all fields passed to the select method", (done) => {
+    dataset
+      .select(FIELD.TITLE, FIELD.AUTHOR)
+      .subscribe((result) => {
+        const expectedSchema = Joi
+          .array()
+          .items({
+            id: Joi.string().uuid().required(),
+            [FIELD.TITLE]: SCHEMAS[FIELD.TITLE],
+            [FIELD.AUTHOR]: SCHEMAS[FIELD.AUTHOR],
+          });
+
+        Joi.assert(result, expectedSchema);
+
+        done();
+      }, (error) => done.fail(error));
+  });
+
+  it("should return id + nested fields passed to the select method", (done) => {
+    const userName = `${FIELD.AUTHOR}.name`;
+    const userEmail = `${FIELD.AUTHOR}.email`;
+
+    dataset
+      .select(userName, userEmail)
+      .subscribe((result) => {
+        const expectedSchema = Joi
+          .array()
+          .items({
+            id: Joi.string().uuid().required(),
+            [userName]: Joi.string().required(),
+            [userEmail]: Joi.string().email().required(),
+          });
+
+        Joi.assert(result, expectedSchema);
+        done();
+      });
+  });
+
+  it("should return fields passed to the select and to the fields methods", (done) => {
+    dataset
+      .select(FIELD.AUTHOR, FIELD.TITLE)
+      .fields(FIELD.AUTHOR, FIELD.COMMENTS)
+      .subscribe((result) => {
+        const expectedSchema = Joi
+          .array()
+          .items({
+            id: Joi.string().uuid().required(),
+            [FIELD.AUTHOR]: SCHEMAS[FIELD.AUTHOR],
+            [FIELD.TITLE]: SCHEMAS[FIELD.TITLE],
+            [FIELD.COMMENTS]: SCHEMAS[FIELD.COMMENTS],
+          });
+
+        Joi.assert(result, expectedSchema);
         done();
       });
   });
