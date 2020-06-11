@@ -1,3 +1,10 @@
+# [5.2.0](https://github.com/jexia/jexia-sdk-js/compare/v5.1.0...v5.2.0) (2020-06-11)
+
+
+### Features
+
+* add project zone config to client initialization ([#150](https://github.com/jexia/jexia-sdk-js/issues/150)) ([2c85e9d](https://github.com/jexia/jexia-sdk-js/commit/2c85e9d866cd2953e769fe5dd61dd8e26ce68e20))
+
 # [5.1.0](https://github.com/jexia/jexia-sdk-js/compare/v5.0.0...v5.1.0) (2020-06-08)
 
 
