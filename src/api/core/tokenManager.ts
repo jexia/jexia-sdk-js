@@ -9,6 +9,11 @@ import { TokenStorage } from "./componentStorage";
 const APIKEY_DEFAULT_ALIAS = "apikey";
 
 /**
+ * The default project zone
+ */
+export const DEFAULT_PROJECT_ZONE = "NL00";
+
+/**
  * API interface of the authorization token
  */
 export type Tokens = {
@@ -30,6 +35,10 @@ export interface IAuthOptions {
    * Project ID
    */
   readonly projectID: string;
+  /**
+   * Project Zone
+   */
+  readonly zone?: string;
   /**
    * Authorization alias. Used for multiple authorization methods at the same time
    * by default used 'apikey'

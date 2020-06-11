@@ -1,4 +1,5 @@
 import { IModule } from "../src/api/core/module";
+import { DEFAULT_PROJECT_ZONE } from "../src/api/core/tokenManager";
 import {
   Client,
   dataOperations,
@@ -62,6 +63,7 @@ export const init = async (
 
   client = await jexiaClient().init({
     projectID: process.env.E2E_PROJECT_ID as string,
+    zone: (process.env.E2E_PROJECT_ZONE || DEFAULT_PROJECT_ZONE) as string,
     key: apiKey.key,
     secret: apiKey.secret,
   }, ...modules); // Change to LogLevel.DEBUG to have more logs
@@ -99,6 +101,7 @@ export const initWithChannel = async (channelName: string, history = false) => {
 
   client = await jexiaClient().init({
     projectID: process.env.E2E_PROJECT_ID as string,
+    zone: (process.env.E2E_PROJECT_ZONE || DEFAULT_PROJECT_ZONE) as string,
     key: apiKey.key,
     secret: apiKey.secret,
   }, rtm, new LoggerModule(LogLevel.ERROR));
@@ -107,6 +110,7 @@ export const initWithChannel = async (channelName: string, history = false) => {
 export const initWithUMS = async () => {
   client = await jexiaClient().init({
     projectID: process.env.E2E_PROJECT_ID as string,
+    zone: (process.env.E2E_PROJECT_ZONE || DEFAULT_PROJECT_ZONE) as string,
   }, ums, dom, new LoggerModule(LogLevel.ERROR)); // Change to LogLevel.DEBUG to have more logs
 };
 
@@ -126,6 +130,7 @@ export const initWithJFS = async (filesetName: string = "testFileset",
 
   client = await jexiaClient().init({
     projectID: process.env.E2E_PROJECT_ID as string,
+    zone: (process.env.E2E_PROJECT_ZONE || DEFAULT_PROJECT_ZONE) as string,
     key: apiKey.key,
     secret: apiKey.secret,
   }, jfs, realTime(), new LoggerModule(LogLevel.ERROR));
@@ -157,6 +162,7 @@ export const initForRelations = async () => {
 
   client = await jexiaClient().init({
     projectID: process.env.E2E_PROJECT_ID as string,
+    zone: (process.env.E2E_PROJECT_ZONE || DEFAULT_PROJECT_ZONE) as string,
     key: apiKey.key,
     secret: apiKey.secret,
   }, dom, new LoggerModule(LogLevel.DEBUG));
