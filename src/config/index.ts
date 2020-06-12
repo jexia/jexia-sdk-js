@@ -1,4 +1,4 @@
-import { API as DEFAULT_API, DELAY } from "./config";
+import { API as DEFAULT_API, DELAY, DEFAULT_PROJECT_ZONE, getApiUrl } from "./config";
 
 const API = DEFAULT_API;
 
@@ -10,7 +10,7 @@ if (isNodeJS && process.env && process.env.JEXIA_DEV_DOMAIN) {
 }
 
 /* Configuration */
-export { API, DELAY };
+export { API, DELAY, DEFAULT_PROJECT_ZONE, getApiUrl };
 
 /* Messages */
 export * from "./message";

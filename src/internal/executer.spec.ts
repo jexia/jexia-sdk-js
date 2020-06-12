@@ -6,9 +6,9 @@ import {
   getRandomResourceType,
   requestAdapterMockFactory,
 } from "../../spec/testUtils";
-import { ResourceType } from "../api/core/resource";
-import { DEFAULT_PROJECT_ZONE, TokenManager } from "../api/core/tokenManager";
-import { API } from "../config/config";
+import { ResourceEndpoint } from "../api/core/resource";
+import { TokenManager, IAuthOptions } from "../api/core/tokenManager";
+import { getApiUrl } from "../config/config";
 import { RequestExecuter } from "./executer";
 import { IRequestExecuterData } from "./executer.interfaces";
 import { IRequestOptions, RequestAdapter, RequestMethod } from "./requestAdapter";
@@ -18,18 +18,11 @@ describe("QueryExecuter class", () => {
   const validToken = faker.random.alphaNumeric();
   const projectID = faker.random.uuid();
 
-  const apiUrl = (zone = DEFAULT_PROJECT_ZONE) =>
-    `${API.PROTOCOL}://${projectID}.${zone}.${API.HOST}.${API.DOMAIN}:${API.PORT}`;
-  const datasetApiUrl = (resourceName: string, zone: string) =>
-    apiUrl(zone) + `/${API.DATA.ENDPOINT}/${resourceName}`;
-  const filesetApiUrl = (resourceName: string, zone: string) =>
-    apiUrl(zone) + `/${API.FILES.ENDPOINT}/${resourceName}`;
-
   const createSubject = ({
     reqAdapterMock = requestAdapterMockFactory().genericSuccesfulExecution(),
     clientInit = Promise.resolve(),
-    zone = faker.helpers.randomize(["NL00", "NL01", "NL03"]) as any,
-    config = { projectID, zone } as any,
+    zone = faker.helpers.randomize(["NL00", "NL01", "NL03"]) as string | null | undefined,
+    config = { projectID, zone } as IAuthOptions,
     tokenManagerMock = {
       token() {
         return of(validToken);
@@ -57,44 +50,21 @@ describe("QueryExecuter class", () => {
     });
   });
 
-  describe("getRequestUrl method", () => {
-    it("should use dataset api endpoint for the dataset request", () => {
+  describe("get url", () => {
+    it("should use resource endpoints", () => {
       const { subject, zone } = createSubject();
       const mockRequest = {
         resourceName: faker.random.word(),
-        resourceType: ResourceType.Dataset,
+        resourceType: faker.helpers.randomize(Object.keys(ResourceEndpoint)),
       };
       const url = subject.getUrl(mockRequest);
-      expect(url).toEqual(datasetApiUrl(mockRequest.resourceName, zone));
-    });
-
-    it("should use fileset api endpoint for the fileset request", () => {
-      const { subject, zone } = createSubject();
-      const mockRequest = {
-        resourceName: faker.random.word(),
-        resourceType: ResourceType.Fileset,
-      };
-      const url = subject.getUrl(mockRequest);
-      expect(url).toEqual(filesetApiUrl(mockRequest.resourceName, zone));
-    });
-  });
-
-  describe("api url", () => {
-    it("should return url with given zone", () => {
-      const { subject, zone } = createSubject();
-      expect(subject.apiUrl).toEqual(apiUrl(zone));
-    });
-
-    it(`should return url with default zone when given zone is undefined`, () => {
-      const { subject } = createSubject({ config: { projectID } });
-      expect(subject.apiUrl).toEqual(apiUrl(DEFAULT_PROJECT_ZONE));
-    });
-
-    ["", null].forEach((zone) => {
-      it(`should return url with default zone when given zone is "${zone}"`, () => {
-        const { subject } = createSubject({ zone });
-        expect(subject.apiUrl).toEqual(apiUrl(DEFAULT_PROJECT_ZONE));
-      });
+      expect(url).toEqual(
+        [
+          getApiUrl({ projectID, zone }),
+          ResourceEndpoint[mockRequest.resourceType],
+          mockRequest.resourceName
+        ].join("/"),
+      );
     });
   });
 

@@ -1,3 +1,5 @@
+import { API } from "../../config";
+
 /**
  * Resource types
  */
@@ -49,3 +51,13 @@ export type IdentityCollection<T> = string[] | Array<ResourceInterface<T>>;
  * and expand it with the default resource fields
  */
 export type FromRelated<T> = T extends any[] ? keyof ResourceInterface<T[number]> : keyof ResourceInterface<T>;
+
+/**
+ * A map of resources endpoints
+ */
+export const ResourceEndpoint: Readonly<Record<ResourceType, string>> = {
+  [ResourceType.Dataset]: API.DATA.ENDPOINT,
+  [ResourceType.Fileset]: API.FILES.ENDPOINT,
+  [ResourceType.Channel]: API.CHANNEL.ENDPOINT,
+  [ResourceType.Users]: API.UMS.ENDPOINT,
+};
