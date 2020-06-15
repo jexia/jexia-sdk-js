@@ -1,7 +1,7 @@
 import { Injectable, InjectionToken } from "injection-js";
 import { from, Observable } from "rxjs";
 import { catchError, map, tap } from "rxjs/operators";
-import { API, DELAY, MESSAGE } from "../../config";
+import { API, DELAY, MESSAGE, getApiUrl } from "../../config";
 import { IRequestError, RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { Logger } from "../logger/logger";
 import { TokenStorage } from "./componentStorage";
@@ -73,8 +73,8 @@ function notUndefined<T>(x: T | undefined): x is T {
  */
 @Injectable()
 export class TokenManager {
-  /* used for auth and refresh tokens */
-  private projectId: string;
+  /* used for getting the project url */
+  private config: IAuthOptions;
 
   /* store intervals to be able to end refresh loop from outside */
   private refreshes: any[] = [];
@@ -127,7 +127,7 @@ export class TokenManager {
       return Promise.reject(new Error("Please supply a valid Jexia project ID."));
     }
 
-    this.projectId = opts.projectID;
+    this.config = opts;
 
     this.initPromise = Promise.resolve(this);
 
@@ -254,7 +254,7 @@ export class TokenManager {
    * @ignore
    */
   private get url(): string {
-    return `${API.PROTOCOL}://${this.projectId}.${API.HOST}.${API.DOMAIN}:${API.PORT}`;
+    return getApiUrl(this.config || {});
   }
 
   /**
@@ -275,7 +275,7 @@ export class TokenManager {
 
   public getErrorMessage({ httpStatus: { code, status } }: IRequestError): string {
     if (code === 404) {
-      return `Authorization failed: project ${this.projectId} not found.`;
+      return `Authorization failed: project ${this.config.projectID} not found.`;
     }
     return `Authorization failed: ${code} ${status}`;
   }
