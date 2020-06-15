@@ -29,11 +29,15 @@ export interface IAuthOptions {
   /**
    * Project ID
    */
-  readonly projectID: string;
+  readonly projectID?: string | null;
   /**
    * Project Zone
    */
   readonly zone?: string | null;
+  /**
+   * Project URL (using this field overrides zone and projectID when composing the project url)
+   */
+  readonly projectURL?: string | null;
   /**
    * Authorization alias. Used for multiple authorization methods at the same time
    * by default used 'apikey'
@@ -73,6 +77,9 @@ function notUndefined<T>(x: T | undefined): x is T {
  */
 @Injectable()
 export class TokenManager {
+  /* Default error for auth options parameter validation */
+  public readonly authOptionsError = new Error(`You should provide either "projectID" or "projectURL" to initialize`);
+
   /* used for getting the project url */
   private config: IAuthOptions;
 
@@ -115,6 +122,12 @@ export class TokenManager {
     );
   }
 
+  private validateAuthOptions({ projectID, projectURL }: IAuthOptions): void {
+    if (!projectID && !projectURL) {
+      throw this.authOptionsError;
+    }
+  }
+
   /**
    * Initialize Token Manager
    * should be always initialized with projectID
@@ -122,10 +135,7 @@ export class TokenManager {
    * @param {IAuthOptions} opts Initialize options
    */
   public init(opts: IAuthOptions): Promise<TokenManager> {
-    /* check application URL */
-    if (!opts.projectID) {
-      return Promise.reject(new Error("Please supply a valid Jexia project ID."));
-    }
+    this.validateAuthOptions(opts);
 
     this.config = opts;
 

@@ -1,5 +1,4 @@
 // tslint:disable:no-string-literal
-// tslint:disable:no-empty
 import { ReflectiveInjector } from "injection-js";
 import { of, throwError } from "rxjs";
 import { createMockFor, SpyObj } from "../../../spec/testUtils";
