@@ -1,5 +1,5 @@
 import { IModule } from "../src/api/core/module";
-import { DEFAULT_PROJECT_ZONE } from "../src/api/core/tokenManager";
+import { DEFAULT_PROJECT_ZONE } from "../src/config";
 import {
   Client,
   dataOperations,
@@ -31,11 +31,12 @@ let channel: { id: string; name: string };
 
 export const DEFAULT_DATASET = { NAME: "test_dataset", FIELD: "test_field" };
 export const DEFAULT_FILESET = { NAME: "test_fileset", FIELD: "test_field" };
+export const ErrorLoggerModule = new LoggerModule(LogLevel.ERROR);
 
 export const init = async (
   datasetName = DEFAULT_DATASET.NAME,
   fields: ISetField[] = [],
-  modules: IModule[] = [dom, rtm, new LoggerModule(LogLevel.ERROR)]) => {
+  modules: IModule[] = [dom, rtm, ErrorLoggerModule]) => {
 
   await management.login();
 

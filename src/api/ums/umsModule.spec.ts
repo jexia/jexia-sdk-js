@@ -3,7 +3,7 @@ import * as faker from "faker";
 import { ReflectiveInjector } from "injection-js";
 import { of } from "rxjs";
 import { createMockFor, SpyObj } from "../../../spec/testUtils";
-import { API } from "../../config";
+import { API, getApiUrl } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { deferPromise } from "../../internal/utils";
@@ -37,10 +37,11 @@ describe("UMS Module", () => {
     systemDefer = deferPromise<Client>(),
     injectorMock = createMockFor(["get", "resolveAndCreateChild"]) as SpyObj<ReflectiveInjector>,
   } = {}) {
+    const authOptions = { projectID: projectId };
     const injectorMap = new Map<any, any>([
       [TokenManager, tokenManagerMock],
       [RequestAdapter, requestAdapterMock],
-      [AuthOptions, { projectID: projectId }],
+      [AuthOptions, authOptions],
       [RequestExecuter, requestExecuterMock]
     ]);
     injectorMock.get.mockImplementation((key: any) => injectorMap.get(key));
@@ -58,17 +59,34 @@ describe("UMS Module", () => {
       requestAdapterMock,
       systemDefer,
       injectorMock,
+      authOptions,
       init() {
         return subject.init(injectorMock);
       }
     };
   }
 
-  it("should get a base path based on project id", async () => {
-    const { subject, projectId, systemDefer, init } = createSubject();
-    systemDefer.resolve();
-    await init();
-    expect(subject.basePath).toEqual(`${API.PROTOCOL}://${projectId}.${API.HOST}.${API.DOMAIN}:${API.PORT}`);
+  describe("get url", () => {
+    it("should return base api url + endpoint", async () => {
+      const { subject, authOptions, systemDefer, init } = createSubject();
+      systemDefer.resolve();
+      await init();
+
+      const randomEndpoint = faker.random.word().toLowerCase();
+      const expectedUrl = `${getApiUrl(authOptions)}/${API.UMS.ENDPOINT}/${randomEndpoint}`;
+      expect(subject.getUrl(randomEndpoint)).toEqual(expectedUrl);
+    });
+
+    it("should NOT prepend UMS when flag is false", async () => {
+      const { subject, authOptions, systemDefer, init } = createSubject();
+      systemDefer.resolve();
+      await init();
+
+      const randomEndpoint = faker.random.word().toLowerCase();
+      const expectedUrl = `${getApiUrl(authOptions)}/${randomEndpoint}`;
+
+      expect(subject.getUrl(randomEndpoint, false)).toEqual(expectedUrl);
+    });
   });
 
   describe("on initialize", () => {
@@ -83,12 +101,6 @@ describe("UMS Module", () => {
       const { subject, requestAdapterMock, init } = createSubject();
       await init();
       expect((subject as any).requestAdapter).toEqual(requestAdapterMock);
-    });
-
-    it("should get project id from the injector", async () => {
-      const { subject, init, projectId } = createSubject();
-      await init();
-      expect((subject as any).projectId).toEqual(projectId);
     });
 
     it("should throw correct error if initialized incorrectly", () => {
@@ -133,12 +145,12 @@ describe("UMS Module", () => {
 
   describe("on user sign-up", () => {
     it("should call correct API with correct data", async () => {
-      const { subject, user, projectId, systemDefer, requestAdapterMock, init } = createSubject();
+      const { subject, user, systemDefer, requestAdapterMock, init } = createSubject();
       systemDefer.resolve();
       await init();
       await subject.signUp(user);
       expect(requestAdapterMock.execute).toBeCalledWith(
-        `${API.PROTOCOL}://${projectId}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.UMS.ENDPOINT}/${API.UMS.SIGNUP}`,
+        subject.getUrl(API.UMS.SIGNUP),
         {
           body: user,
           method: "POST"
@@ -147,12 +159,12 @@ describe("UMS Module", () => {
     });
 
     it("should call correct API with correct data if there is extra field", async () => {
-      const { subject, user, projectId, systemDefer, requestAdapterMock, init } = createSubject();
+      const { subject, user, systemDefer, requestAdapterMock, init } = createSubject();
       systemDefer.resolve();
       await init();
       await subject.signUp({...user, extraField: true });
       expect(requestAdapterMock.execute).toBeCalledWith(
-        `${API.PROTOCOL}://${projectId}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.UMS.ENDPOINT}/${API.UMS.SIGNUP}`,
+        subject.getUrl(API.UMS.SIGNUP),
         {
           body: {
             ...user,
@@ -167,12 +179,12 @@ describe("UMS Module", () => {
   describe("user sign-in", () => {
 
     it("should call correct API with correct data", async () => {
-      const { subject, user, projectId, systemDefer, requestAdapterMock, init } = createSubject();
+      const { subject, user, systemDefer, requestAdapterMock, init } = createSubject();
       systemDefer.resolve();
       await init();
       await subject.signIn(user);
       expect(requestAdapterMock.execute).toBeCalledWith(
-        `${API.PROTOCOL}://${projectId}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.AUTH}`,
+        subject.getUrl(API.AUTH, false),
         {
           body: {
             method: "ums",
@@ -247,12 +259,12 @@ describe("UMS Module", () => {
       });
 
       it("should call correct API to get current user", async () => {
-        const { subject, access_token, signInOptions, projectId, requestAdapterMock, systemDefer, init } = createSubject();
+        const { subject, access_token, signInOptions, requestAdapterMock, systemDefer, init } = createSubject();
         systemDefer.resolve();
         await init();
         await subject.getUser(signInOptions.alias).subscribe();
         expect(requestAdapterMock.execute).toHaveBeenCalledWith(
-          `${API.PROTOCOL}://${projectId}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.UMS.ENDPOINT}/${API.UMS.USER}`,
+          subject.getUrl(API.UMS.USER),
           {
             headers: { Authorization: `Bearer ${access_token}`},
           },
@@ -271,14 +283,13 @@ describe("UMS Module", () => {
       });
 
       it("should call correct API to update password", async () => {
-        const { subject, user, signInOptions, access_token, projectId, requestAdapterMock, systemDefer, init } = createSubject();
+        const { subject, user, signInOptions, access_token, requestAdapterMock, systemDefer, init } = createSubject();
         const newPassword = faker.internet.password();
         systemDefer.resolve();
         await init();
         await subject.changePassword(signInOptions.alias, user.password, newPassword).subscribe();
         expect(requestAdapterMock.execute).toHaveBeenCalledWith(
-          // tslint:disable-next-line
-          `${API.PROTOCOL}://${projectId}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.UMS.ENDPOINT}/${API.UMS.CHANGEPASSWORD}`,
+          subject.getUrl(API.UMS.CHANGEPASSWORD),
           {
             body: {
               old_password: user.password,
@@ -302,12 +313,12 @@ describe("UMS Module", () => {
       });
 
       it("should call correct API to delete current user", async () => {
-        const { subject, user, access_token, projectId, signInOptions, requestAdapterMock, systemDefer, init } = createSubject();
+        const { subject, user, access_token, signInOptions, requestAdapterMock, systemDefer, init } = createSubject();
         systemDefer.resolve();
         await init();
         await subject.deleteUser(signInOptions.alias, user.password).subscribe();
         expect(requestAdapterMock.execute).toHaveBeenCalledWith(
-          `${API.PROTOCOL}://${projectId}.${API.HOST}.${API.DOMAIN}:${API.PORT}/${API.UMS.ENDPOINT}/${API.UMS.USER}`,
+          subject.getUrl(API.UMS.USER),
           {
             body: { password: user.password },
             headers: { Authorization: `Bearer ${access_token}`},
@@ -326,7 +337,7 @@ describe("UMS Module", () => {
         await subject.requestResetPassword(email);
 
         expect(requestAdapterMock.execute).toHaveBeenCalledWith(
-          `${subject.basePath}/${API.UMS.ENDPOINT}/${API.UMS.RESETPASSWORD}`,
+          subject.getUrl(API.UMS.RESETPASSWORD),
           {
             body: { email },
             method: RequestMethod.POST,
@@ -346,7 +357,7 @@ describe("UMS Module", () => {
         await subject.resetPassword(token, newPassword);
 
         expect(requestAdapterMock.execute).toHaveBeenCalledWith(
-          `${subject.basePath}/${API.UMS.ENDPOINT}/${API.UMS.RESETPASSWORD}/${token}`,
+          subject.getUrl(API.UMS.RESETPASSWORD + `/${token}`),
           {
             body: { new_password: newPassword },
             method: RequestMethod.POST,

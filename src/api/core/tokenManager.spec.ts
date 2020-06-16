@@ -356,8 +356,9 @@ describe("TokenManager", () => {
       }
     });
 
-    it("should throw an error if request failed", (done) => {
-      const { subject, tokens, requestAdapterMock } = createSubject();
+    it("should throw an error if request failed", async (done) => {
+      const { subject, validOptions, tokens, requestAdapterMock } = createSubject();
+      await subject.init(validOptions);
       (subject as any).storage.setTokens("testRefresh", tokens);
 
       (requestAdapterMock.execute as jest.Mock).mockReturnValue(throwError({ httpStatus: { code: 500 }}));

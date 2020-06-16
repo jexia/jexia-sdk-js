@@ -1,7 +1,7 @@
 import { ReflectiveInjector } from "injection-js";
 import { Observable } from "rxjs";
 import { map, switchMap } from "rxjs/operators";
-import { API } from "../../config";
+import { API, getApiUrl } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { IModule, ModuleConfiguration } from "../core/module";
@@ -52,7 +52,7 @@ export class UMSModule<
 
   private requestExecuter: RequestExecuter;
 
-  private projectId: string;
+  private basePath: string;
 
   constructor() {
     /* users tend to init module without a new operator, throw a hint error */
@@ -66,14 +66,10 @@ export class UMSModule<
 
     this.tokenManager = injector.get(TokenManager);
     this.requestAdapter = injector.get(RequestAdapter);
-    this.projectId = injector.get(AuthOptions).projectID;
+    this.basePath = getApiUrl(injector.get(AuthOptions));
     this.requestExecuter = injector.get(RequestExecuter);
 
     return Promise.resolve(this);
-  }
-
-  public get basePath(): string {
-    return `${API.PROTOCOL}://${this.projectId}.${API.HOST}.${API.DOMAIN}:${API.PORT}`;
   }
 
   /**
@@ -243,7 +239,7 @@ export class UMSModule<
    * @param api API endpoint
    * @param ums Whether URL is a part of UMS API
    */
-  private getUrl(api: string, ums = true): string {
+  public getUrl(api: string, ums = true): string {
     let url = this.basePath;
     if (ums) {
       url += `/${API.UMS.ENDPOINT}`;

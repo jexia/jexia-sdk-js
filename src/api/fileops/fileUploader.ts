@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "injection-js";
 import { merge, Observable } from "rxjs";
 import { map, switchMap } from "rxjs/operators";
-import { API } from "../../config";
+import { API, getApiUrl } from "../../config";
 import { RequestAdapter } from "../../internal/requestAdapter";
 import { AuthOptions, IAuthOptions, TokenManager } from "../core/tokenManager";
 import { FilesetInterface, FilesetMultipart, FilesetName, IFormData } from "./fileops.interfaces";
@@ -81,7 +81,7 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
    */
   private getUrl() {
     return [
-      `${API.PROTOCOL}://${this.config.projectID}.${API.HOST}.${API.DOMAIN}:${API.PORT}`,
+      getApiUrl(this.config),
       API.FILES.ENDPOINT,
       this.filesetName,
     ].join("/");

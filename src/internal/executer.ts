@@ -2,19 +2,12 @@ import { Inject, Injectable } from "injection-js";
 import { combineLatest, from, Observable } from "rxjs";
 import { map, switchMap } from "rxjs/operators";
 import { ClientInit } from "../api/core/client";
-import { ResourceType } from "../api/core/resource";
-import { AuthOptions, DEFAULT_PROJECT_ZONE, IAuthOptions, TokenManager } from "../api/core/tokenManager";
-import { API } from "../config";
+import { ResourceEndpoint } from "../api/core/resource";
+import { AuthOptions, IAuthOptions, TokenManager } from "../api/core/tokenManager";
+import { getApiUrl } from "../config";
 import { QueryParam } from "../internal/utils";
 import { IRequestExecuterData } from "./executer.interfaces";
 import { IRequestOptions, RequestAdapter, RequestMethod } from "./requestAdapter";
-
-const resourceEndpoints = {
-  [ResourceType.Dataset]: API.DATA.ENDPOINT,
-  [ResourceType.Fileset]: API.FILES.ENDPOINT,
-  [ResourceType.Channel]: API.CHANNEL.ENDPOINT,
-  [ResourceType.Users]: API.UMS.ENDPOINT
-};
 
 @Injectable()
 export class RequestExecuter {
@@ -34,14 +27,6 @@ export class RequestExecuter {
     ]).pipe(
       switchMap(([, options]) => this.requestAdapter.execute(URI, options) as Observable<T>)
     );
-  }
-
-  /**
-   * The project's API URL
-   */
-  public get apiUrl(): string {
-    const { projectID, zone } = this.config;
-    return `${API.PROTOCOL}://${projectID}.${zone || DEFAULT_PROJECT_ZONE}.${API.HOST}.${API.DOMAIN}:${API.PORT}`;
   }
 
   private getRequestOptions(request: IRequestExecuterData): Observable<IRequestOptions> {
@@ -88,8 +73,8 @@ export class RequestExecuter {
 
   private getUrl({ resourceType, resourceName }: IRequestExecuterData): string {
     return [
-      this.apiUrl,
-      resourceEndpoints[resourceType],
+      getApiUrl(this.config),
+      ResourceEndpoint[resourceType],
       resourceName,
     ].join("/");
   }
