@@ -1,3 +1,10 @@
+## [5.2.1](https://github.com/jexia/jexia-sdk-js/compare/v5.2.0...v5.2.1) (2020-06-16)
+
+
+### Bug Fixes
+
+* **project-url:** enforce use of the new url throughout the modules ([#170](https://github.com/jexia/jexia-sdk-js/issues/170)) ([5091550](https://github.com/jexia/jexia-sdk-js/commit/5091550674b22444e24f5053d82acf9c65828cab))
+
 # [5.2.0](https://github.com/jexia/jexia-sdk-js/compare/v5.1.0...v5.2.0) (2020-06-11)
 
 
