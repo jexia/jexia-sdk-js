@@ -254,7 +254,7 @@ export class TokenManager {
    * @ignore
    */
   private get url(): string {
-    return getApiUrl(this.config || {});
+    return getApiUrl(this.config);
   }
 
   /**
