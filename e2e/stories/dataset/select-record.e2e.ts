@@ -5,7 +5,7 @@ import { IFilteringCriterion, IFilteringCriterionCallback } from "../../../src/a
 import { Dataset } from "../../../src/api/dataops/dataset";
 import { BackendErrorSchema } from "../../lib/common";
 import { DatasetRecordSchema } from "../../lib/dataset";
-import { cleaning, DEFAULT_DATASET, dom, init, ErrorLoggerModule } from "../../teardowns";
+import { cleaning, DEFAULT_DATASET, dom, init } from "../../teardowns";
 
 // tslint:disable-next-line:no-var-requires
 const joiAssert = require("joi-assert");
@@ -103,7 +103,6 @@ describe("filter records REST API", () => {
         { name: FIELD.DATE, type: "date" },
         { name: FIELD.DATETIME, type: "datetime" },
       ],
-      [dom, ErrorLoggerModule],
     );
     dataset = dom.dataset(DEFAULT_DATASET.NAME);
   });
