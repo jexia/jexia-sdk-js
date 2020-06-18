@@ -12,7 +12,7 @@ describe("Real Time Communication", () => {
   // Unique name because tests could be run in parallel
   const datasetName = "rtc_dataset";
 
-  beforeAll(async () => init(datasetName));
+  beforeAll(async () => init(datasetName, [], true));
 
   afterAll(async () => cleaning());
 

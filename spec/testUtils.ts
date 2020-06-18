@@ -2,7 +2,9 @@
 import * as faker from "faker";
 import { Observable, of, throwError } from "rxjs";
 import { ResourceType } from "../src/api/core/resource";
+import { IAuthOptions } from "../src/api/core/tokenManager";
 import { FilesetInterface, FilesetMultipart, IFileStatus } from "../src/api/fileops/fileops.interfaces";
+import { DEFAULT_PROJECT_ZONE } from "../src/config";
 import { EventSubscriptionType, RealTimeEventMessage } from "../src/api/realtime/realTime.interfaces";
 import { RequestExecuter } from "../src/internal/executer";
 import { IHTTPResponse, IRequestError, IRequestOptions, RequestAdapter } from "../src/internal/requestAdapter";
@@ -147,12 +149,13 @@ export function deepClone<T>(obj: T): T {
   return clone;
 }
 
-export const validClientOpts = {
-  key: "validKey",
-  projectID: "validProjectID",
-  zone: "validZone",
+export const validClientOpts: IAuthOptions = {
+  key: faker.random.alphaNumeric(36),
+  projectID: faker.random.uuid(),
+  projectURL: faker.internet.url(),
+  zone: DEFAULT_PROJECT_ZONE,
   refreshInterval: 500,
-  secret: "validSecret",
+  secret: faker.random.alphaNumeric(36),
 };
 
 export const fetchWithRequestMockOk = (uri: string, opts?: IRequestOptions): Promise<IHTTPResponse> => {

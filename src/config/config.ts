@@ -46,6 +46,6 @@ export const API_SUFFIX = `${API.HOST}.${API.DOMAIN}:${API.PORT}`;
 /**
  * Gets the composed API URL of a given project
  */
-export function getApiUrl({ projectID, zone }: IAuthOptions): string {
-  return `${API.PROTOCOL}://${projectID}.${zone || DEFAULT_PROJECT_ZONE}.${API_SUFFIX}`;
+export function getApiUrl({ projectID, zone, projectURL }: IAuthOptions): string {
+  return projectURL || `${API.PROTOCOL}://${projectID}.${zone || DEFAULT_PROJECT_ZONE}.${API_SUFFIX}`;
 }

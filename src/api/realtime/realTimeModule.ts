@@ -78,7 +78,7 @@ export class RealTimeModule implements IModule {
     ]);
 
     const tokenManager: TokenManager = coreInjector.get(TokenManager);
-    const { projectID }: IAuthOptions = coreInjector.get(AuthOptions);
+    const projectID = (coreInjector.get(AuthOptions) as IAuthOptions).projectID as string;
 
     RTCResources.forEach((resource) => resource.prototype.watch = watch);
 

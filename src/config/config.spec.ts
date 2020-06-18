@@ -6,7 +6,8 @@ describe("get api url", () => {
   const createAuthOptions = ({
     projectID = faker.random.uuid(),
     zone = faker.helpers.randomize(["NL00", "NL01", "NL03"]) as string | null,
-    config = { projectID, zone } as IAuthOptions,
+    projectURL = null as string | null,
+    config = { projectID, zone, projectURL } as IAuthOptions,
   } = {}) => {
     return config;
   };
@@ -23,6 +24,13 @@ describe("get api url", () => {
       + "."
       + API_SUFFIX,
     );
+  });
+
+  it("should return given project URL when provided", () => {
+    const projectURL = faker.internet.url();
+    const authOptions = createAuthOptions({ projectURL });
+
+    expect(getApiUrl(authOptions)).toEqual(projectURL);
   });
 
   it("should return url with given zone", () => {

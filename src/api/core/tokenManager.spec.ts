@@ -1,12 +1,11 @@
 import * as faker from "faker";
 import { Observable, of, throwError } from "rxjs";
-import { createMockFor, mockRequestError } from "../../../spec/testUtils";
+import { createMockFor, mockRequestError, validClientOpts } from "../../../spec/testUtils";
 import { MESSAGE } from "../../config";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { Logger } from "../logger/logger";
 import { TokenManager, Tokens } from "./tokenManager";
 
-const validProjectID = "validProjectID";
 let terminate: () => void;
 
 interface ISubjectOpts {
@@ -30,12 +29,7 @@ const createSubject = ({
     requestAdapterReturnValue,
     requestAdapterMock,
     loggerMock,
-    validOptions: {
-      projectID: validProjectID,
-      key: faker.random.word(),
-      refreshInterval: faker.random.number({ min: 100, max: 1000 }),
-      secret: faker.random.word(),
-    },
+    validOptions: validClientOpts,
   };
 };
 
@@ -48,13 +42,46 @@ describe("TokenManager", () => {
   });
 
   describe("when initialize", () => {
-    it("should throw an error if project id is not provided", async () => {
-      const { subject } = createSubject();
+
+    ["", null].forEach((value) => {
+      it(`should throw an error when project id and project url is "${value}"`, async () => {
+        const { subject } = createSubject();
+        try {
+          await subject.init({ projectID: value, projectURL: value });
+          throw new Error("should not reach this line");
+        } catch (error) {
+          expect(error).toEqual(subject.authOptionsError);
+        }
+      });
+    });
+
+    it(`should NOT throw an error when project id is provided when url don't`, async () => {
+      const { subject, validOptions: { projectURL } } = createSubject();
+      let hasError = false;
       try {
-        await subject.init({ projectID: "" });
-        throw new Error("should have throw app URL error");
+        await subject.init({
+          projectID: "",
+          projectURL,
+        });
       } catch (error) {
-        expect(error).toEqual(new Error("Please supply a valid Jexia project ID."));
+        hasError = true;
+      } finally {
+        expect(hasError).toBe(false);
+      }
+    });
+
+    it(`should NOT throw an error when project url is provided when id don't`, async () => {
+      const { subject, validOptions: { projectID } } = createSubject();
+      let hasError = false;
+      try {
+        await subject.init({
+          projectID,
+          projectURL: "",
+        });
+      } catch (error) {
+        hasError = true;
+      } finally {
+        expect(hasError).toBe(false);
       }
     });
 
@@ -72,13 +99,13 @@ describe("TokenManager", () => {
 
     it("should not authorize if there are neither key nor secret", async () => {
       const { subject, requestAdapterMock } = createSubject();
-      await subject.init({ projectID: validProjectID });
+      await subject.init({ projectID: faker.random.uuid() });
       expect(requestAdapterMock.execute).not.toHaveBeenCalled();
     });
 
     it("should return resolved promise of itself for init without authorization", async () => {
       const { subject } = createSubject();
-      const value = await subject.init({ projectID: validProjectID });
+      const value = await subject.init({ projectID: faker.random.uuid() });
       expect(value).toEqual(subject);
     });
   });
