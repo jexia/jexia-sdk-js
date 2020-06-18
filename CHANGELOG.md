@@ -1,3 +1,10 @@
+# [5.3.0](https://github.com/jexia/jexia-sdk-js/compare/v5.2.1...v5.3.0) (2020-06-18)
+
+
+### Features
+
+* **init:** add projectURL config parameter ([#171](https://github.com/jexia/jexia-sdk-js/issues/171)) ([27ee76f](https://github.com/jexia/jexia-sdk-js/commit/27ee76fe7f77a8a09af189f5d06b713258c5c38c))
+
 ## [5.2.1](https://github.com/jexia/jexia-sdk-js/compare/v5.2.0...v5.2.1) (2020-06-16)
 
 
