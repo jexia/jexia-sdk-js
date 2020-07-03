@@ -1,5 +1,5 @@
 import { ReflectiveInjector } from "injection-js";
-import { API, MESSAGE } from "../../config";
+import { MESSAGE, getRtcUrl } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
 import { IModule, ModuleConfiguration } from "../core/module";
 import { IResource } from "../core/resource";
@@ -78,14 +78,14 @@ export class RealTimeModule implements IModule {
     ]);
 
     const tokenManager: TokenManager = coreInjector.get(TokenManager);
-    const projectID = (coreInjector.get(AuthOptions) as IAuthOptions).projectID as string;
+    const config = coreInjector.get(AuthOptions) as IAuthOptions;
 
     RTCResources.forEach((resource) => resource.prototype.watch = watch);
 
     // TODO Get rid of promises
     return tokenManager.token().toPromise().then((token) => {
       try {
-        this.websocket = this.websocketBuilder(this.buildSocketOpenUri(projectID, token));
+        this.websocket = this.websocketBuilder(getRtcUrl(config, token));
       } catch (error) {
         throw new Error(`${MESSAGE.RTC.ERROR_CREATING_WEBSOCKET} Original error: ${error.message}`);
       }
@@ -133,17 +133,5 @@ export class RealTimeModule implements IModule {
       this.websocket.onerror = (err) => reject(err);
       this.websocket.close();
     });
-  }
-
-  private buildSocketOpenUri(projectID: string, token: string) {
-    // the realtime port and endpoint are not always needed in all environments
-    // where the SDK can run (local dev vs. cloud dev vs. production), so to avoid
-    // complicated logic we can simply define them as empty string when they are not
-    // needed and include : or / along with the actual values, when they are needed.
-    // See /config/config.ts vs. /config/config.prod.ts for actual values.
-    const result = `${API.REAL_TIME.PROTOCOL}://${projectID}.${API.HOST}.${API.DOMAIN}` +
-      `${API.REAL_TIME.PORT || ""}${API.REAL_TIME.ENDPOINT}?access_token=${token}`;
-    // temporary variable used for devenv debugging purposes
-    return result;
   }
 }
