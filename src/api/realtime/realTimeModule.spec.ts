@@ -1,37 +1,35 @@
-// tslint:disable:no-string-literal
+import * as faker from "faker";
 import { ReflectiveInjector } from "injection-js";
 import { of, throwError } from "rxjs";
-import { createMockFor, SpyObj } from "../../../spec/testUtils";
+import { createMockFor, SpyObj, validClientOpts } from "../../../spec/testUtils";
 import { RequestExecuter } from "../../../src/internal/executer";
-import { API, MESSAGE } from "../../config";
+import { MESSAGE, getRtcUrl } from "../../config";
 import { AuthOptions, TokenManager } from "../core/tokenManager";
 import { IWebSocket, WebSocketState } from "./realTime.interfaces";
 import { RealTimeModule } from "./realTimeModule";
 
 describe("Real Time Module", () => {
 
-  const projectID = "projectIDTest";
-  const tokenTest = "tokenTest";
   const shouldHaveFailed = "Should have failed!";
 
   function createSubject({
     webSocketMock = createMockFor(["send", "close"]) as SpyObj<IWebSocket>,
     websocketBuilder = jasmine.createSpy().and.returnValue(webSocketMock),
-    tokenManagerReturnValue = of(tokenTest),
-    tokenManagerMock = createMockFor(TokenManager),
+    token = faker.random.alphaNumeric(36),
+    tokenManagerReturnValue = of(token),
+    tokenManagerMock = createMockFor(TokenManager, {}, { token: () => tokenManagerReturnValue }),
     injectorMock = createMockFor(["get", "resolveAndCreateChild"]) as SpyObj<ReflectiveInjector>,
   } = {}) {
-    (tokenManagerMock as any)["token"] = () => tokenManagerReturnValue;
     const injectorMap = new Map<any, any>([
       [TokenManager, tokenManagerMock],
-      [AuthOptions, { projectID }],
+      [AuthOptions, validClientOpts],
       [RequestExecuter, createMockFor(RequestExecuter)]
     ]);
     injectorMock.get.mockImplementation((key: any) => injectorMap.get(key));
     injectorMock.resolveAndCreateChild.mockImplementation(() => injectorMock);
     const subject = new RealTimeModule(websocketBuilder);
     return {
-      projectID,
+      token,
       webSocketMock,
       websocketBuilder,
       injectorMock,
@@ -48,11 +46,9 @@ describe("Real Time Module", () => {
   describe("when initializing", () => {
 
     it("should start the websocket connection with the correct app url", async () => {
-      const { websocketBuilder, moduleInit } = createSubject();
+      const { websocketBuilder, moduleInit, token } = createSubject();
       await moduleInit();
-      expect(websocketBuilder).toHaveBeenCalledWith(
-        `${API.REAL_TIME.PROTOCOL}://projectIDTest.${API.HOST}.${API.DOMAIN}` +
-        `${API.REAL_TIME.PORT || ""}${API.REAL_TIME.ENDPOINT}?access_token=tokenTest`);
+      expect(websocketBuilder).toHaveBeenCalledWith(getRtcUrl(validClientOpts, token));
     });
 
     it("should start dataset watch functionality after initialized with correct parameters", async () => {

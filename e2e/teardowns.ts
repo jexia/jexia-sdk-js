@@ -52,7 +52,7 @@ export const init = async (
   loadRtc = false) => {
   const modules: IModule[] = [
     dom,
-    ...(loadRtc ? [rtm] : null),
+    ...(loadRtc ? [rtm] : []),
     ErrorLoggerModule,
   ];
 
@@ -115,7 +115,7 @@ export const initWithUMS = async () => {
   client = await jexiaClient().init({
     projectID: process.env.E2E_PROJECT_ID as string,
     zone: process.env.E2E_PROJECT_ZONE as string,
-  }, ums, dom, new LoggerModule(LogLevel.ERROR)); // Change to LogLevel.DEBUG to have more logs
+  }, ums, dom, ErrorLoggerModule); // Change to LogLevel.DEBUG to have more logs
 };
 
 export const initWithJFS = async (filesetName: string = "testFileset",
