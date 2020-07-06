@@ -1,3 +1,11 @@
+## [5.3.1](https://github.com/jexia/jexia-sdk-js/compare/v5.3.0...v5.3.1) (2020-07-06)
+
+
+### Bug Fixes
+
+* **node-ws:** warnings on versions of node higher than 10  ([#172](https://github.com/jexia/jexia-sdk-js/issues/172)) ([5409183](https://github.com/jexia/jexia-sdk-js/commit/5409183d7e56d9714840e34f688c85504bec632c))
+* **rtc:** wrong url when using projectURL config param ([#173](https://github.com/jexia/jexia-sdk-js/issues/173)) ([b2faf98](https://github.com/jexia/jexia-sdk-js/commit/b2faf98703a2698b752f7e95b9f611a339b11cd4))
+
 # [5.3.0](https://github.com/jexia/jexia-sdk-js/compare/v5.2.1...v5.3.0) (2020-06-18)
 
 
