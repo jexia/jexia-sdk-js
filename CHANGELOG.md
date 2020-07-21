@@ -1,3 +1,10 @@
+## [5.3.2](https://github.com/jexia/jexia-sdk-js/compare/v5.3.1...v5.3.2) (2020-07-21)
+
+
+### Bug Fixes
+
+* **side-effects:** enable flag to fix external webpack changes ([#174](https://github.com/jexia/jexia-sdk-js/issues/174)) ([28261a2](https://github.com/jexia/jexia-sdk-js/commit/28261a22b06564b4f1b5934eb2bf4ef9fb21e094))
+
 ## [5.3.1](https://github.com/jexia/jexia-sdk-js/compare/v5.3.0...v5.3.1) (2020-07-06)
 
 
