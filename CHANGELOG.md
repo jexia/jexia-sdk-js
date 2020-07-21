@@ -1,3 +1,10 @@
+## [5.3.3](https://github.com/jexia/jexia-sdk-js/compare/v5.3.2...v5.3.3) (2020-07-21)
+
+
+### Bug Fixes
+
+* **npm:** audit vulnerable packages ([#175](https://github.com/jexia/jexia-sdk-js/issues/175)) ([1cda1ea](https://github.com/jexia/jexia-sdk-js/commit/1cda1eaa0221219c6f533bac0821b7eea7b7b153))
+
 ## [5.3.2](https://github.com/jexia/jexia-sdk-js/compare/v5.3.1...v5.3.2) (2020-07-21)
 
 
