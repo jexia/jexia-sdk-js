@@ -5,7 +5,7 @@ import { ClientInit } from "../api/core/client";
 import { ResourceEndpoint } from "../api/core/resource";
 import { AuthOptions, IAuthOptions, TokenManager } from "../api/core/tokenManager";
 import { getApiUrl } from "../config";
-import { QueryParam } from "../internal/utils";
+import { parseQueryParams } from "../internal/utils";
 import { IRequestExecuterData } from "./executer.interfaces";
 import { IRequestOptions, RequestAdapter, RequestMethod } from "./requestAdapter";
 
@@ -19,7 +19,7 @@ export class RequestExecuter {
   ) { }
 
   public executeRequest<T = any>(request: IRequestExecuterData): Observable<T> {
-    const URI = this.getUrl(request) + this.parseQueryParams(request);
+    const URI = this.getUrl(request) + parseQueryParams(request.queryParams);
 
     return combineLatest([
       from(this.systemInit),
@@ -48,27 +48,6 @@ export class RequestExecuter {
 
   private hasBody({ method }: IRequestExecuterData): boolean {
     return ![RequestMethod.GET, RequestMethod.DELETE].includes(method);
-  }
-
-  /**
-   * Parses query params elements into query string format
-   *
-   * @param  queryParams
-   * @returns string
-   */
-  private parseQueryParams({ queryParams = [] }: IRequestExecuterData): string {
-    if (!queryParams.length) {
-      return "";
-    }
-
-    const encodeValue = (v: any) => encodeURIComponent(
-      typeof v === "string" ? v : JSON.stringify(v)
-    );
-    const toQueryParam = ({ key, value }: QueryParam) => `${key}=${encodeValue(value)}`;
-
-    return "?" + queryParams
-      .map(toQueryParam)
-      .join("&");
   }
 
   private getUrl({ resourceType, resourceName }: IRequestExecuterData): string {

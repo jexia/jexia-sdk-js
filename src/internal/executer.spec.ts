@@ -12,7 +12,7 @@ import { getApiUrl } from "../config/config";
 import { RequestExecuter } from "./executer";
 import { IRequestExecuterData } from "./executer.interfaces";
 import { IRequestOptions, RequestAdapter, RequestMethod } from "./requestAdapter";
-import { deferPromise } from "./utils";
+import { deferPromise, parseQueryParams } from "./utils";
 
 describe("QueryExecuter class", () => {
   const validToken = faker.random.alphaNumeric();
@@ -95,17 +95,6 @@ describe("QueryExecuter class", () => {
         );
       });
 
-      it("should parse query params", (done) => {
-        spyOn(subject, "parseQueryParams").and.callThrough();
-        subject.executeRequest(requestData).subscribe(() => {
-          expect(subject.parseQueryParams).toHaveBeenCalledWith(requestData);
-          done();
-        },
-          done,
-          done,
-        );
-      });
-
       it("should get request options", (done) => {
         spyOn(subject, "getRequestOptions").and.callThrough();
         subject.executeRequest(requestData).subscribe(() => {
@@ -128,72 +117,12 @@ describe("QueryExecuter class", () => {
         ).subscribe({
           complete: () => {
             expect(reqAdapterMock.execute).toHaveBeenCalledWith(
-              subject.getUrl(requestData) + subject.parseQueryParams(requestData),
+              subject.getUrl(requestData) + parseQueryParams(requestData.queryParams),
               requestOptions,
             );
             done();
           }
         });
-      });
-    });
-
-    describe("parseQueryParams method", () => {
-      beforeEach(() => {
-        ({ subject } = createSubject());
-      });
-
-      it("should return empty string when argument is empty", () => {
-        expect(subject.parseQueryParams({})).toBe("");
-      });
-
-      it("should parse to the correct format for non-string values", () => {
-        const key = faker.random.word();
-        const value = faker.helpers.randomize([
-          [],
-          faker.random.number(),
-          {},
-          faker.random.boolean(),
-        ]);
-
-        const queryParams = [
-          { key, value },
-        ];
-
-        const encodeValue = (v: any) => encodeURIComponent(JSON.stringify(v));
-        const expectedParams = `?${key}=${encodeValue(value)}`;
-
-        expect(subject.parseQueryParams({ queryParams })).toEqual(expectedParams);
-      });
-
-      it("should parse to the correct format for string values", () => {
-        const key = faker.random.word();
-        const value = faker.random.words();
-
-        const queryParams = [
-          { key, value },
-        ];
-
-        const encodeValue = (v: any) => encodeURIComponent(v);
-
-        const expectedParams = `?${key}=${encodeValue(value)}`;
-
-        expect(subject.parseQueryParams({ queryParams })).toEqual(expectedParams);
-      });
-
-      it("should separate params by ampersand", () => {
-        const key1 = faker.random.word();
-        const key2 = faker.random.word();
-        const key3 = faker.random.word();
-
-        const queryParams = [
-          { key: key1, value: faker.random.number() },
-          { key: key2, value: faker.random.number() },
-          { key: key3, value: faker.random.number() },
-        ];
-
-        const result: string = subject.parseQueryParams({ queryParams });
-
-        expect(result.split("&").length).toEqual(queryParams.length);
       });
     });
   });
@@ -210,7 +139,7 @@ describe("QueryExecuter class", () => {
       subject.executeRequest(mockRequest).subscribe({
         complete: () => {
           expect(reqAdapterMock.execute).toHaveBeenCalledWith(
-            subject.getUrl(mockRequest) + subject.parseQueryParams(mockRequest),
+            subject.getUrl(mockRequest) + parseQueryParams(mockRequest.queryParams),
             {
               headers: { Authorization: `Bearer ${validToken}` },
               method: mockRequest.method,
@@ -241,7 +170,7 @@ describe("QueryExecuter class", () => {
 
         subject.executeRequest(request).subscribe({ complete: () => {
           expect(reqAdapterMock.execute).toHaveBeenCalledWith(
-            subject.getUrl(request) + subject.parseQueryParams(request),
+            subject.getUrl(request) + parseQueryParams(),
             {
               headers: { Authorization: `Bearer ${validToken}` },
               method,
@@ -268,7 +197,7 @@ describe("QueryExecuter class", () => {
         subject.executeRequest(request).subscribe({
           complete: () => {
             expect(reqAdapterMock.execute).toHaveBeenCalledWith(
-              subject.getUrl(request) + subject.parseQueryParams(request),
+              subject.getUrl(request) + parseQueryParams(),
               {
                 headers: {Authorization: `Bearer ${validToken}`},
                 body: fakeBody,
