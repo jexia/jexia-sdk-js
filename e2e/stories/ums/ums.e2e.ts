@@ -2,7 +2,7 @@ import * as faker from "faker";
 import * as Joi from "joi";
 // @ts-ignore
 import * as joiAssert from "joi-assert";
-import { UsersInterface } from "../../../src/api/ums/umsModule";
+import { UsersInterface } from "../../../src/api/ums/ums.types";
 import { LoggerModule, LogLevel } from "../../../src/node";
 import { BackendErrorSchema } from "../../lib/common";
 import { DatasetRecordSchema } from "../../lib/dataset";
