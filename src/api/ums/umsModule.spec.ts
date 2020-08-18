@@ -6,15 +6,18 @@ import { createMockFor, SpyObj } from "../../../spec/testUtils";
 import { API, getApiUrl } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
-import { deferPromise } from "../../internal/utils";
+import { deferPromise, parseQueryParams, toQueryParams } from "../../internal/utils";
 import { Client } from "../core/client";
 import { DeleteQuery } from "../core/queries/deleteQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
 import { AuthOptions, TokenManager } from "../core/tokenManager";
 import { UMSModule } from "./umsModule";
+import { OAuthActionType, getSignInParams } from "./ums.types";
 
 describe("UMS Module", () => {
+  const fakeOAuthActionType = (): OAuthActionType => faker.helpers.randomize(["sign-in", "sign-up"]);
+
   function createSubject({
     projectId = faker.random.uuid(),
     access_token = faker.random.uuid(),
@@ -26,6 +29,15 @@ describe("UMS Module", () => {
     signInOptions = {
       default: false,
       alias: faker.random.word(),
+    },
+    oAuthOptions = {
+      code: faker.random.word(),
+      state: fakeOAuthActionType(),
+    },
+    oAuthInitOptions = {
+      action: fakeOAuthActionType(),
+      provider: faker.helpers.randomize(["google", "facebook", "twitter"]),
+      redirect: faker.internet.url(),
     },
     tokenManagerMock = createMockFor(TokenManager, {}, {
       token: () => of(access_token),
@@ -55,6 +67,8 @@ describe("UMS Module", () => {
       refresh_token,
       user,
       signInOptions,
+      oAuthOptions,
+      oAuthInitOptions,
       tokenManagerMock,
       requestAdapterMock,
       systemDefer,
@@ -126,6 +140,59 @@ describe("UMS Module", () => {
     });
   });
 
+  describe("init oauth", () => {
+    let assignSpy;
+
+    beforeEach(() => {
+      assignSpy = jest.fn();
+      jest.spyOn(global as any, "window", "get").mockReturnValue({
+        location: {
+          assign: assignSpy,
+        },
+      });
+    });
+
+  it("should return URL", () => {
+      const { subject, oAuthInitOptions } = createSubject();
+
+      const expectedURL = subject.getUrl(API.OAUTH, false) + parseQueryParams(toQueryParams(oAuthInitOptions));
+      const url = subject.initOAuth(oAuthInitOptions);
+
+      expect(url).toEqual(expectedURL);
+    });
+
+    describe("when redirect is true (default)", () => {
+      it("should navigate to url", () => {
+        const { subject, oAuthInitOptions } = createSubject();
+
+        subject.initOAuth(oAuthInitOptions);
+
+        const expectedURL = subject.getUrl(API.OAUTH, false) + parseQueryParams(toQueryParams(oAuthInitOptions));
+
+        expect(assignSpy).toHaveBeenCalledWith(expectedURL);
+      });
+
+      it("should NOT navigate when window is NOT an object (NodeJS)", () => {
+        const { subject, oAuthInitOptions } = createSubject();
+
+        jest.spyOn(global as any, "window", "get").mockReturnValue(undefined);
+        subject.initOAuth(oAuthInitOptions);
+
+        expect(assignSpy).not.toHaveBeenCalled();
+      });
+    });
+
+    describe("when redirect is false", () => {
+      it("should NOT navigate to url", () => {
+        const { subject, oAuthInitOptions } = createSubject();
+
+        subject.initOAuth(oAuthInitOptions, false);
+
+        expect(assignSpy).not.toHaveBeenCalled();
+      });
+    });
+  });
+
   describe("when gets a module config", () => {
     it("should return an empty config", () => {
       const { subject } = createSubject();
@@ -177,45 +244,74 @@ describe("UMS Module", () => {
   });
 
   describe("user sign-in", () => {
+    describe("with credentials", () => {
+      it("should call correct API with correct data", async () => {
+        const { subject, user, systemDefer, requestAdapterMock, init } = createSubject();
+        const signInParams = getSignInParams(user);
 
-    it("should call correct API with correct data", async () => {
-      const { subject, user, systemDefer, requestAdapterMock, init } = createSubject();
-      systemDefer.resolve();
-      await init();
-      await subject.signIn(user);
-      expect(requestAdapterMock.execute).toBeCalledWith(
-        subject.getUrl(API.AUTH, false),
-        {
-          body: {
-            method: "ums",
-            ...user,
-          },
-          method: "POST"
-        }
-      );
-    });
-
-    it("should use user's email as a default alias", async () => {
-      const { subject, user, tokenManagerMock, access_token, refresh_token, systemDefer, init } = createSubject();
-      systemDefer.resolve();
-      await init();
-      await subject.signIn(user).toPromise();
-
-      expect(tokenManagerMock.addTokens).toHaveBeenCalledWith(
-        [user.email], { access_token, refresh_token }, undefined);
-    });
-
-    describe("if alias has been provided", () => {
-      it("should add it to the token manager", async () => {
-        const { subject, tokenManagerMock, systemDefer, init, user } = createSubject();
-        const alias = faker.random.word();
         systemDefer.resolve();
         await init();
-        await subject.signIn({ ...user, alias }).toPromise();
+        await subject.signIn(user);
 
-        const { calls: [ [aliases] ] } = tokenManagerMock.addTokens.mock;
+        expect(requestAdapterMock.execute).toBeCalledWith(
+          subject.getUrl(API.AUTH, false),
+          {
+            body: signInParams.body,
+            method: RequestMethod.POST
+          }
+        );
+      });
 
-        expect(aliases).toEqual([user.email, alias]);
+      describe("if alias has been provided", () => {
+        it("should add it to the token manager", async () => {
+          const { subject, tokenManagerMock, systemDefer, init, user } = createSubject();
+          const alias = faker.random.word();
+
+          const { aliases } = getSignInParams({ ...user, alias });
+
+          systemDefer.resolve();
+          await init();
+          await subject.signIn({ ...user, alias }).toPromise();
+
+          const { calls: [ [tokenManagerAliases] ] } = tokenManagerMock.addTokens.mock;
+
+          expect(tokenManagerAliases).toEqual(aliases);
+        });
+      });
+    });
+
+    describe("OAuth", () => {
+      it("should call correct API with correct data", async () => {
+        const { subject, oAuthOptions, systemDefer, requestAdapterMock, init } = createSubject();
+        const signInParams = getSignInParams(oAuthOptions);
+
+        systemDefer.resolve();
+        await init();
+        await subject.signIn(oAuthOptions);
+
+        expect(requestAdapterMock.execute).toBeCalledWith(
+          subject.getUrl(API.AUTH, false),
+          {
+            body: signInParams.body,
+            method: RequestMethod.POST
+          }
+        );
+      });
+
+      describe("if alias has been provided", () => {
+        it("should add it to the token manager", async () => {
+          const { subject, tokenManagerMock, systemDefer, init, oAuthOptions } = createSubject();
+          const alias = faker.random.word();
+
+          const { aliases } = getSignInParams({ ...oAuthOptions, alias });
+
+          systemDefer.resolve();
+          await init();
+          await subject.signIn({ ...oAuthOptions, alias }).toPromise();
+
+          const { calls: [ [tokenManagerAliases] ] } = tokenManagerMock.addTokens.mock;
+          expect(tokenManagerAliases).toEqual(aliases);
+        });
       });
     });
 

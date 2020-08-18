@@ -4,13 +4,14 @@ import { map, switchMap } from "rxjs/operators";
 import { API, getApiUrl } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
+import { toQueryParams, parseQueryParams } from "../../internal/utils";
 import { IModule, ModuleConfiguration } from "../core/module";
 import { DeleteQuery } from "../core/queries/deleteQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
 import { ResourceType } from "../core/resource";
 import { AuthOptions, TokenManager, Tokens } from "../core/tokenManager";
-import { UsersInterface, IUMSSignInOptions, IUMSSignUpFields } from "./ums.types";
+import { UsersInterface, IUMSSignInOptions, IUMSSignUpFields, getSignInParams, IUMOAuthInitOptions } from "./ums.types";
 
 export class UMSModule<
   T extends object = any,
@@ -57,18 +58,33 @@ export class UMSModule<
     return Promise.resolve(this);
   }
 
-  public signIn(options: IUMSSignInOptions): Observable<string> {
-    const body = {
-      method: "ums",
-      email: options.email,
-      password: options.password
-    };
+  /**
+   * Starts the first step of the OAuth process.
+   *
+   * - When `redirect` is true and this code is running in a browser, it will redirect to the provider's
+   *   authentication page.
+   * - When in NodeJS the URL will be returned as a string.
+   *
+   * @param options The options object for the OAuth initialization
+   * @param redirect Whether to redirect to the proper provider's oauth page (default to true)
+   */
+  public initOAuth(options: IUMOAuthInitOptions, redirect = true): string {
+    const url = this.getUrl(API.OAUTH, false) + parseQueryParams(toQueryParams(options));
 
-    const aliases = [options.email];
-
-    if (options.alias) {
-      aliases.push(options.alias);
+    if (redirect && typeof window === "object") {
+      window.location.assign(url);
     }
+
+    return url;
+  }
+
+  /**
+   * Signs in a user either with credentials or through OAuth steps.
+   *
+   * @param options User credentials or oauth params + alias options
+   */
+  public signIn(options: IUMSSignInOptions): Observable<string> {
+    const { body, aliases } = getSignInParams(options);
 
     return this.requestAdapter.execute<Tokens>(
       this.getUrl(API.AUTH, false),
