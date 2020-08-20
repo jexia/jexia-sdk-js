@@ -9,6 +9,7 @@ import {
   getRtcUrl,
   REALTIME_SUFFIX,
   getZone,
+  getProjectId,
 } from "./config";
 
 const createAuthOptions = ({
@@ -121,5 +122,33 @@ describe("strip url slashes", () => {
     it(`should return empty string when url is "${url}"`, () => {
       expect(stripUrlSlashes(url)).toEqual("");
     });
+  });
+});
+
+describe("get project id", () => {
+  it("should return project id when config object has it", () => {
+    const config = {
+      projectID: faker.random.uuid(),
+      projectURL: faker.internet.url(),
+    };
+
+    expect(getProjectId(config)).toEqual(config.projectID);
+  });
+
+  it("should get id from URL when id is not provided", () => {
+    const projectID = faker.random.uuid();
+    const config = {
+      projectURL: `https://${projectID}.com`,
+    };
+
+    expect(getProjectId(config)).toEqual(projectID);
+  });
+
+  it("should return empty string when there is no id in URL", () => {
+    const config = {
+      projectURL: faker.internet.url(),
+    };
+
+    expect(getProjectId(config)).toEqual("");
   });
 });

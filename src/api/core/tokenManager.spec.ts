@@ -1,7 +1,7 @@
 import * as faker from "faker";
 import { Observable, of, throwError } from "rxjs";
 import { createMockFor, mockRequestError, validClientOpts } from "../../../spec/testUtils";
-import { MESSAGE } from "../../config";
+import { MESSAGE, getProjectId } from "../../config";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { Logger } from "../logger/logger";
 import { TokenManager, Tokens } from "./tokenManager";
@@ -118,7 +118,20 @@ describe("TokenManager", () => {
         }),
       });
       await subject.init(validOptions)
-        .catch((error) => expect(error.message).toEqual(`Authorization failed: project ${validOptions.projectID} not found.`));
+        .catch((error) => expect(error.message).toEqual(`Authorization failed: project ${getProjectId(validOptions)} not found.`));
+    });
+
+    it("should throw http status when an http error occurs", async () => {
+      const httpStatus = {
+        code: faker.helpers.randomize([404, 401, 500]),
+        status: faker.lorem.sentence(),
+      };
+      const { subject, validOptions } = createSubject({
+        requestAdapterReturnValue: throwError({ httpStatus }),
+      });
+
+      await subject.init(validOptions)
+        .catch((error) => expect(error.httpStatus).toEqual(httpStatus));
     });
 
     it("should throw an error if authorization failed", async () => {
