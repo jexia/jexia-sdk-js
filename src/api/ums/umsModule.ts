@@ -1,6 +1,6 @@
 import { ReflectiveInjector } from "injection-js";
 import { Observable } from "rxjs";
-import { map, switchMap } from "rxjs/operators";
+import { map, switchMap, pluck, tap } from "rxjs/operators";
 import { API, getApiUrl } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
@@ -64,19 +64,22 @@ export class UMSModule<
    *
    * - When `redirect` is true and this code is running in a browser, it will redirect to the provider's
    *   authentication page.
-   * - When in NodeJS the URL will be returned as a string.
    *
    * @param options The options object for the OAuth initialization
    * @param redirect Whether to redirect to the proper provider's oauth page (default to true)
    */
-  public initOAuth(options: IUMOAuthInitOptions, redirect = true): string {
-    const url = this.getUrl(API.OAUTH.INIT, false) + parseQueryParams(toQueryParams(options));
-
-    if (redirect && typeof window === "object") {
-      window.location.assign(url);
-    }
-
-    return url;
+  public initOAuth(options: IUMOAuthInitOptions, redirect = true): Observable<string> {
+    return this.requestAdapter.execute<{ oauth_url: string }>(
+      this.getUrl(API.OAUTH.INIT, false) + parseQueryParams(toQueryParams(options)),
+      { method: RequestMethod.GET }
+    ).pipe(
+      pluck("oauth_url"),
+      tap((url: string) => {
+        if (redirect && typeof window === "object") {
+          window.location.assign(url);
+        }
+      }),
+    );
   }
 
   /**

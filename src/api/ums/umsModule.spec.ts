@@ -43,8 +43,9 @@ describe("UMS Module", () => {
     tokenManagerMock = createMockFor(TokenManager, {}, {
       token: () => of(access_token),
     }),
+    requestAdapterReturnValue = { access_token, refresh_token } as any,
     requestAdapterMock = createMockFor(RequestAdapter, {
-      returnValue: of({ access_token, refresh_token }),
+      returnValue: of(requestAdapterReturnValue),
     }),
     requestExecuterMock = createMockFor(RequestExecuter),
     systemDefer = deferPromise<Client>(),
@@ -153,41 +154,69 @@ describe("UMS Module", () => {
       });
     });
 
-  it("should return URL", () => {
-      const { subject, oAuthInitOptions } = createSubject();
+    it("should call correct API with correct data", async () => {
+      const { subject, oAuthInitOptions, systemDefer, requestAdapterMock, init } = createSubject();
 
-      const expectedURL = subject.getUrl(API.OAUTH.INIT, false) + parseQueryParams(toQueryParams(oAuthInitOptions));
-      const url = subject.initOAuth(oAuthInitOptions);
+      systemDefer.resolve();
+      await init();
+      subject.initOAuth(oAuthInitOptions);
 
-      expect(url).toEqual(expectedURL);
+      expect(requestAdapterMock.execute).toBeCalledWith(
+        subject.getUrl(API.OAUTH.INIT, false) + parseQueryParams(toQueryParams(oAuthInitOptions)),
+        { method: RequestMethod.GET },
+      );
+    });
+
+  it("should resolve to URL", async () => {
+      const url = faker.internet.url();
+      const { subject, oAuthInitOptions, systemDefer, init } = createSubject({
+        requestAdapterReturnValue: { oauth_url: url },
+      });
+
+      systemDefer.resolve();
+      await init();
+
+      subject.initOAuth(oAuthInitOptions).subscribe((oAuthUrl) => {
+        expect(oAuthUrl).toEqual(url);
+      });
     });
 
     describe("when redirect is true (default)", () => {
-      it("should navigate to url", () => {
-        const { subject, oAuthInitOptions } = createSubject();
+      it("should navigate to url", async () => {
+        const url = faker.internet.url();
+        const { subject, oAuthInitOptions, systemDefer, init } = createSubject({
+          requestAdapterReturnValue: { oauth_url: url },
+        });
 
-        subject.initOAuth(oAuthInitOptions);
+        systemDefer.resolve();
+        await init();
 
-        const expectedURL = subject.getUrl(API.OAUTH.INIT, false) + parseQueryParams(toQueryParams(oAuthInitOptions));
+        subject.initOAuth(oAuthInitOptions).subscribe();
 
-        expect(assignSpy).toHaveBeenCalledWith(expectedURL);
+        expect(assignSpy).toHaveBeenCalledWith(url);
       });
 
-      it("should NOT navigate when window is NOT an object (NodeJS)", () => {
-        const { subject, oAuthInitOptions } = createSubject();
+      it("should NOT navigate when window is NOT an object (NodeJS)", async () => {
+        const { subject, oAuthInitOptions, systemDefer, init } = createSubject();
+
+        systemDefer.resolve();
+        await init();
 
         jest.spyOn(global as any, "window", "get").mockReturnValue(undefined);
-        subject.initOAuth(oAuthInitOptions);
+        subject.initOAuth(oAuthInitOptions).subscribe();
 
         expect(assignSpy).not.toHaveBeenCalled();
       });
     });
 
     describe("when redirect is false", () => {
-      it("should NOT navigate to url", () => {
-        const { subject, oAuthInitOptions } = createSubject();
+      it("should NOT navigate to url", async () => {
+        const { subject, oAuthInitOptions, systemDefer, init } = createSubject();
 
-        subject.initOAuth(oAuthInitOptions, false);
+        systemDefer.resolve();
+        await init();
+
+        subject.initOAuth(oAuthInitOptions, false).subscribe();
 
         expect(assignSpy).not.toHaveBeenCalled();
       });
