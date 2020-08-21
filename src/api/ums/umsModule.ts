@@ -70,7 +70,7 @@ export class UMSModule<
    * @param redirect Whether to redirect to the proper provider's oauth page (default to true)
    */
   public initOAuth(options: IUMOAuthInitOptions, redirect = true): string {
-    const url = this.getUrl(API.OAUTH, false) + parseQueryParams(toQueryParams(options));
+    const url = this.getUrl(API.OAUTH.INIT, false) + parseQueryParams(toQueryParams(options));
 
     if (redirect && typeof window === "object") {
       window.location.assign(url);
@@ -85,10 +85,10 @@ export class UMSModule<
    * @param options User credentials or oauth params + alias options
    */
   public signIn(options: IUMSSignInOptions): Observable<string> {
-    const { body, aliases } = getSignInParams(options);
+    const { body, aliases, endpoint } = getSignInParams(options);
 
     return this.requestAdapter.execute<Tokens>(
-      this.getUrl(API.AUTH, false),
+      this.getUrl(endpoint, false),
       { body, method: RequestMethod.POST }
     ).pipe(
       map((tokens: Tokens) => {

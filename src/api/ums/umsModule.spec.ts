@@ -156,7 +156,7 @@ describe("UMS Module", () => {
   it("should return URL", () => {
       const { subject, oAuthInitOptions } = createSubject();
 
-      const expectedURL = subject.getUrl(API.OAUTH, false) + parseQueryParams(toQueryParams(oAuthInitOptions));
+      const expectedURL = subject.getUrl(API.OAUTH.INIT, false) + parseQueryParams(toQueryParams(oAuthInitOptions));
       const url = subject.initOAuth(oAuthInitOptions);
 
       expect(url).toEqual(expectedURL);
@@ -168,7 +168,7 @@ describe("UMS Module", () => {
 
         subject.initOAuth(oAuthInitOptions);
 
-        const expectedURL = subject.getUrl(API.OAUTH, false) + parseQueryParams(toQueryParams(oAuthInitOptions));
+        const expectedURL = subject.getUrl(API.OAUTH.INIT, false) + parseQueryParams(toQueryParams(oAuthInitOptions));
 
         expect(assignSpy).toHaveBeenCalledWith(expectedURL);
       });
@@ -291,7 +291,7 @@ describe("UMS Module", () => {
         await subject.signIn(oAuthOptions);
 
         expect(requestAdapterMock.execute).toBeCalledWith(
-          subject.getUrl(API.AUTH, false),
+          subject.getUrl(signInParams.endpoint, false),
           {
             body: signInParams.body,
             method: RequestMethod.POST
