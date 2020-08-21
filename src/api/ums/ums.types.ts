@@ -39,7 +39,7 @@ export interface IUMOAuthInitOptions {
   /**
    * The URI that the oauth authorize operation will redirect to.
    */
-  redirect: string;
+  redirect?: string;
 }
 
 /**
