@@ -1,5 +1,5 @@
 import * as faker from "faker";
-import { getSignInParams, getSignInBody } from "./ums.types";
+import { getSignInParams, getSignInBody } from "./ums.functions";
 
 const user = () => ({
   email: faker.internet.email(),

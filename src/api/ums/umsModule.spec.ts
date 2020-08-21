@@ -13,7 +13,8 @@ import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
 import { AuthOptions, TokenManager } from "../core/tokenManager";
 import { UMSModule } from "./umsModule";
-import { OAuthActionType, getSignInParams } from "./ums.types";
+import { OAuthActionType } from "./ums.types";
+import { getSignInParams } from "./ums.functions";
 
 describe("UMS Module", () => {
   const fakeOAuthActionType = (): OAuthActionType => faker.helpers.randomize(["sign-in", "sign-up"]);

@@ -11,7 +11,8 @@ import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
 import { ResourceType } from "../core/resource";
 import { AuthOptions, TokenManager, Tokens } from "../core/tokenManager";
-import { UsersInterface, IUMSSignInOptions, IUMSSignUpFields, getSignInParams, IUMOAuthInitOptions } from "./ums.types";
+import { UsersInterface, IUMSSignInOptions, IUMSSignUpFields, IUMOAuthInitOptions } from "./ums.types";
+import { getSignInParams } from "./ums.functions";
 
 export class UMSModule<
   T extends object = any,
