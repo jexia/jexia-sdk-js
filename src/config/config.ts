@@ -95,3 +95,20 @@ export function getRtcUrl({ projectID, zone, projectURL }: IAuthOptions, token: 
     tokenParam,
   ].join("");
 }
+
+/**
+ * Gets the project id from the url or empty if it's not found
+ */
+function getProjectIdFromUrl(projectURL?: string | null): string {
+  const uuidRegex = /[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}/i;
+  const match = (projectURL || "").match(uuidRegex);
+
+  return match ? match[0] : "";
+}
+
+/**
+ * Gets the projectID from the config
+ */
+export function getProjectId({ projectID, projectURL }: Pick<IAuthOptions, "projectID" | "projectURL">): string {
+  return projectID || getProjectIdFromUrl(projectURL);
+}

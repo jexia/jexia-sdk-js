@@ -1,7 +1,7 @@
 import { Injectable, InjectionToken } from "injection-js";
 import { from, Observable } from "rxjs";
 import { catchError, map, tap } from "rxjs/operators";
-import { API, DELAY, MESSAGE, getApiUrl } from "../../config";
+import { API, DELAY, MESSAGE, getApiUrl, getProjectId } from "../../config";
 import { IRequestError, RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { Logger } from "../logger/logger";
 import { TokenStorage } from "./componentStorage";
@@ -254,7 +254,10 @@ export class TokenManager {
       tap((refreshedTokens: Tokens) => resolve(refreshedTokens.access_token)),
       catchError((error: IRequestError) => {
         delete this.defers[auth];
-        throw new Error(this.getErrorMessage(error));
+        throw {
+          httpStatus: error.httpStatus,
+          message: this.getErrorMessage(error),
+        };
       }),
     );
   }
@@ -285,7 +288,7 @@ export class TokenManager {
 
   public getErrorMessage({ httpStatus: { code, status } }: IRequestError): string {
     if (code === 404) {
-      return `Authorization failed: project ${this.config.projectID} not found.`;
+      return `Authorization failed: project ${getProjectId(this.config)} not found.`;
     }
     return `Authorization failed: ${code} ${status}`;
   }
