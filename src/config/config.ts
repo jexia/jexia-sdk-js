@@ -20,6 +20,10 @@ export const API = {
     CHANGEPASSWORD: "changepassword",
     RESETPASSWORD: "resetpassword",
   },
+  OAUTH: {
+    INIT: "oauth/init",
+    AUTH: "oauth/auth",
+  },
   CHANNEL: {
     ENDPOINT: "channel",
   },

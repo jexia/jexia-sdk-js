@@ -1,16 +1,18 @@
 import { ReflectiveInjector } from "injection-js";
 import { Observable } from "rxjs";
-import { map, switchMap } from "rxjs/operators";
+import { map, switchMap, pluck, tap } from "rxjs/operators";
 import { API, getApiUrl } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
+import { toQueryParams, parseQueryParams } from "../../internal/utils";
 import { IModule, ModuleConfiguration } from "../core/module";
 import { DeleteQuery } from "../core/queries/deleteQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
 import { ResourceType } from "../core/resource";
 import { AuthOptions, TokenManager, Tokens } from "../core/tokenManager";
-import { UsersInterface, IUMSSignInOptions, IUMSSignUpFields } from "./ums.types";
+import { UsersInterface, IUMSSignInOptions, IUMSSignUpFields, IUMOAuthInitOptions } from "./ums.types";
+import { getSignInParams } from "./ums.functions";
 
 export class UMSModule<
   T extends object = any,
@@ -57,21 +59,39 @@ export class UMSModule<
     return Promise.resolve(this);
   }
 
+  /**
+   * Starts the first step of the OAuth process.
+   *
+   * - When `redirect` is true and this code is running in a browser, it will redirect to the provider's
+   *   authentication page.
+   *
+   * @param options The options object for the OAuth initialization
+   * @param redirect Whether to redirect to the proper provider's oauth page (default to true)
+   */
+  public initOAuth(options: IUMOAuthInitOptions, redirect = true): Observable<string> {
+    return this.requestAdapter.execute<{ oauth_url: string }>(
+      this.getUrl(API.OAUTH.INIT, false) + parseQueryParams(toQueryParams(options)),
+      { method: RequestMethod.GET }
+    ).pipe(
+      pluck("oauth_url"),
+      tap((url: string) => {
+        if (redirect && typeof window === "object") {
+          window.location.assign(url);
+        }
+      }),
+    );
+  }
+
+  /**
+   * Signs in a user either with credentials or through OAuth steps.
+   *
+   * @param options User credentials or oauth params + alias options
+   */
   public signIn(options: IUMSSignInOptions): Observable<string> {
-    const body = {
-      method: "ums",
-      email: options.email,
-      password: options.password
-    };
-
-    const aliases = [options.email];
-
-    if (options.alias) {
-      aliases.push(options.alias);
-    }
+    const { body, aliases, endpoint } = getSignInParams(options);
 
     return this.requestAdapter.execute<Tokens>(
-      this.getUrl(API.AUTH, false),
+      this.getUrl(endpoint, false),
       { body, method: RequestMethod.POST }
     ).pipe(
       map((tokens: Tokens) => {
