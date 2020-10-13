@@ -1,3 +1,10 @@
+# [5.4.0](https://github.com/jexia/jexia-sdk-js/compare/v5.3.4...v5.4.0) (2020-10-13)
+
+
+### Features
+
+* **ums:** add oauth support ([#183](https://github.com/jexia/jexia-sdk-js/issues/183)) ([5f17969](https://github.com/jexia/jexia-sdk-js/commit/5f17969cd2b2b03aa29435ddb1a4f9297b77d240))
+
 ## [5.3.4](https://github.com/jexia/jexia-sdk-js/compare/v5.3.3...v5.3.4) (2020-10-13)
 
 
