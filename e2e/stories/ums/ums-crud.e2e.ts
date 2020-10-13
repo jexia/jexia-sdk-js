@@ -3,7 +3,7 @@ import * as Joi from "joi";
 // @ts-ignore
 import * as joiAssert from "joi-assert";
 import { switchMap } from "rxjs/operators";
-import { IUMSCredentials } from "src/api/ums/umsModule";
+import { IUMSCredentials } from "../../../src/api/ums/ums.types";
 import { LoggerModule, LogLevel } from "../../../src/node";
 import { BackendErrorSchema } from "../../lib/common";
 import { UserSchema } from "../../lib/ums";

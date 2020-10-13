@@ -8,35 +8,9 @@ import { IModule, ModuleConfiguration } from "../core/module";
 import { DeleteQuery } from "../core/queries/deleteQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
-import { DefaultResourceInterface, ResourceType } from "../core/resource";
+import { ResourceType } from "../core/resource";
 import { AuthOptions, TokenManager, Tokens } from "../core/tokenManager";
-
-export interface IUMSCredentials {
-  email: string;
-  password: string;
-}
-
-export type IUMSExtraFields = Omit<{ [key: string]: any }, "email" | "password">;
-
-export type IUMSSignUpFields = IUMSCredentials & IUMSExtraFields;
-
-export interface IUMSSignInOptions {
-  default?: boolean;
-  alias?: string;
-}
-
-/**
- * Default UMS interface type
- */
-export type DefaultUsersInterface = {
-  email: string;
-  active: boolean;
-};
-
-/**
- * Merge customer's type with resource and UMS types
- */
-export type UsersInterface<T> = T & DefaultResourceInterface & DefaultUsersInterface;
+import { UsersInterface, IUMSSignInOptions, IUMSSignUpFields } from "./ums.types";
 
 export class UMSModule<
   T extends object = any,
@@ -83,17 +57,17 @@ export class UMSModule<
     return Promise.resolve(this);
   }
 
-  public signIn(user: IUMSCredentials & IUMSSignInOptions): Observable<string> {
+  public signIn(options: IUMSSignInOptions): Observable<string> {
     const body = {
       method: "ums",
-      email: user.email,
-      password: user.password
+      email: options.email,
+      password: options.password
     };
 
-    const aliases = [user.email];
+    const aliases = [options.email];
 
-    if (user.alias) {
-      aliases.push(user.alias);
+    if (options.alias) {
+      aliases.push(options.alias);
     }
 
     return this.requestAdapter.execute<Tokens>(
@@ -101,7 +75,7 @@ export class UMSModule<
       { body, method: RequestMethod.POST }
     ).pipe(
       map((tokens: Tokens) => {
-        this.tokenManager.addTokens(aliases, tokens, user.default);
+        this.tokenManager.addTokens(aliases, tokens, options.default);
         return tokens.access_token;
       }),
     );
