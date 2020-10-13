@@ -1,3 +1,10 @@
+## [5.3.4](https://github.com/jexia/jexia-sdk-js/compare/v5.3.3...v5.3.4) (2020-10-13)
+
+
+### Bug Fixes
+
+* **token-manager:** throw http status when it occurs ([#182](https://github.com/jexia/jexia-sdk-js/issues/182)) ([65a0d25](https://github.com/jexia/jexia-sdk-js/commit/65a0d25a72a7d07822075eea6bdf811a94f9392f)), closes [#180](https://github.com/jexia/jexia-sdk-js/issues/180)
+
 ## [5.3.3](https://github.com/jexia/jexia-sdk-js/compare/v5.3.2...v5.3.3) (2020-07-21)
 
 
