@@ -21,7 +21,7 @@ const createSubject = ({
   };
 };
 
-describe("QueryRequest class", () => {
+describe("UpdateQuery class", () => {
   it("should be created", () => {
     const { subject } = createSubject();
     expect(subject).toBeDefined();

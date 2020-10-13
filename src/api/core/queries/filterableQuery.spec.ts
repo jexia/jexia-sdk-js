@@ -41,7 +41,7 @@ const createSubject = ({
   };
 };
 
-describe("QueryRequest class", () => {
+describe("FilterableQuery class", () => {
   const { subject } = createSubject();
 
   it("should be created", () => {

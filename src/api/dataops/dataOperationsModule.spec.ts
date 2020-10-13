@@ -1,10 +1,9 @@
 // tslint:disable:no-string-literal
-// tslint:disable:no-empty
 import { fetchWithRequestMockOk, validClientOpts } from "../../../spec/testUtils";
 import { Dataset, jexiaClient } from "../../node";
 import { DataOperationsModule } from "./dataOperationsModule";
 
-describe("Real Time Module", () => {
+describe("Data Operations Module", () => {
 
   function createSubject({
     client = jexiaClient(fetchWithRequestMockOk),
