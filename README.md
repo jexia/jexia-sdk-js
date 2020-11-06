@@ -10,6 +10,10 @@ This is the official JavaScript / TypeScript SDK for interacting with Jexia proj
 ```bash
 npm install jexia-sdk-js --save
 ```
+or
+```bash
+yarn add jexia-sdk-js
+```
 
 ## Example Use
 
