@@ -1,5 +1,9 @@
 import jwt_decode from "jwt-decode";
 
+/**
+ * Calculate the expiration time until a token expired
+ * @internal
+ */
 export function untilTokenExpired(accessToken: string): number {
   try {
     const { exp: expired } = jwt_decode<{ exp: number }>(accessToken);
@@ -18,4 +22,19 @@ export function untilTokenExpired(accessToken: string): number {
   } catch (e) {
     return 0;
   }
+}
+
+/**
+ * Calculate the delay when refreshing a token via a timer
+ * @internal
+ */
+export function delayTokenRefresh(accessToken: string): number {
+  const tokenExpired = untilTokenExpired(accessToken);
+  const threshold = 60 * 10000; // 10m in ms
+
+  // if the token is less then the threshold, divide it
+  // otherwise just subtract the threshold to get in the safe zone
+  return tokenExpired < threshold
+    ? tokenExpired / 2
+    : tokenExpired - threshold
 }

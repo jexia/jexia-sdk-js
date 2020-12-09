@@ -3,7 +3,7 @@ import { from, Observable } from "rxjs";
 import { catchError, map, tap } from "rxjs/operators";
 import { API, MESSAGE, getApiUrl, getProjectId } from "../../config";
 import { IRequestError, RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
-import { untilTokenExpired } from "../../internal/utils";
+import { delayTokenRefresh } from "../../internal/utils";
 import { Logger } from "../logger/logger";
 import { TokenStorage } from "./componentStorage";
 
@@ -198,14 +198,7 @@ export class TokenManager {
    * @ignore
    */
   private startRefreshDigest(aliases: string[], accessToken: string) {
-    const tokenExpired = untilTokenExpired(accessToken);
-    const subtractDelay = 60 * 10000; // subtract 10m in ms from the delay
-    let delay = tokenExpired - subtractDelay;
-
-    // make sure we have a positive delay
-    if (delay < 0) {
-      delay = 0
-    }
+    const delay = delayTokenRefresh(accessToken)
 
     this.refreshes.push(
       setTimeout(() => {
