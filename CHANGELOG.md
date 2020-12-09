@@ -1,3 +1,10 @@
+## [5.4.1](https://github.com/jexia/jexia-sdk-js/compare/v5.4.0...v5.4.1) (2020-12-09)
+
+
+### Bug Fixes
+
+* **token:** timeout for refreshing token based on expiration ([#187](https://github.com/jexia/jexia-sdk-js/issues/187)) ([ba6e23b](https://github.com/jexia/jexia-sdk-js/commit/ba6e23b908d02829ff71c6d384d67bd4f04a87a7))
+
 # [5.4.0](https://github.com/jexia/jexia-sdk-js/compare/v5.3.4...v5.4.0) (2020-10-13)
 
 
