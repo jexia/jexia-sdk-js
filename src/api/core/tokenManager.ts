@@ -1,8 +1,9 @@
 import { Injectable, InjectionToken } from "injection-js";
 import { from, Observable } from "rxjs";
 import { catchError, map, tap } from "rxjs/operators";
-import { API, DELAY, MESSAGE, getApiUrl, getProjectId } from "../../config";
+import { API, MESSAGE, getApiUrl, getProjectId } from "../../config";
 import { IRequestError, RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
+import { delayTokenRefresh } from "../../internal/utils";
 import { Logger } from "../logger/logger";
 import { TokenStorage } from "./componentStorage";
 
@@ -155,7 +156,7 @@ export class TokenManager {
    */
   public terminate(): void {
     this.storage.clear();
-    this.refreshes.forEach((interval) => clearInterval(interval));
+    this.refreshes.forEach(timeout => clearTimeout(timeout));
     this.refreshes = [];
   }
 
@@ -189,20 +190,22 @@ export class TokenManager {
       this.storage.setTokens(alias, tokens, !index && defaults);
     });
 
-    this.startRefreshDigest(definedAliases);
+    this.startRefreshDigest(definedAliases, tokens.access_token);
   }
 
   /**
-   * Start refreshing digest for the specific auth
+   * Start refreshing digest for the specific auth based on the exp value from the token
    * @ignore
    */
-  private startRefreshDigest(aliases: string[]) {
+  private startRefreshDigest(aliases: string[], accessToken: string) {
+    const delay = delayTokenRefresh(accessToken)
+
     this.refreshes.push(
-      setInterval(() => {
+      setTimeout(() => {
         this.logger.debug("tokenManager", `refresh ${aliases[0]} token`);
         this.refresh(aliases)
           .subscribe({ error: () => this.terminate() });
-      }, DELAY)
+      }, delay)
     );
   }
 

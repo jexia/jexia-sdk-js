@@ -152,18 +152,18 @@ describe("TokenManager", () => {
     });
 
     it("should schedule token refreshing when authorization is succeeded", async () => {
-      const { subject, validOptions } = createSubject();
+      const { subject, validOptions, tokens } = createSubject();
       jest.spyOn(subject as any, "startRefreshDigest");
       await subject.init(validOptions);
-      expect((subject as any).startRefreshDigest).toHaveBeenCalledWith(["apikey"]);
+      expect((subject as any).startRefreshDigest).toHaveBeenCalledWith(["apikey"], tokens.access_token);
     });
 
     it("should schedule token refreshing for the authentication by alias", async () => {
-      const { subject, validOptions } = createSubject();
+      const { subject, validOptions, tokens } = createSubject();
       const auth = faker.random.word();
       jest.spyOn(subject as any, "startRefreshDigest");
       await subject.init({ ...validOptions, auth });
-      expect((subject as any).startRefreshDigest).toHaveBeenCalledWith([auth]);
+      expect((subject as any).startRefreshDigest).toHaveBeenCalledWith([auth], tokens.access_token);
     });
 
     describe("get error message", () => {
@@ -310,22 +310,22 @@ describe("TokenManager", () => {
       clear();
     });
 
-    it("should clear all refreshing intervals", async () => {
+    it("should clear all refreshing timeouts", async () => {
       const { subject, validOptions } = createSubject();
-      const clearIntervalSpy = jest.spyOn(global, "clearInterval");
+      const clearTimeoutSpy = jest.spyOn(global, "clearTimeout");
       await subject.init(validOptions);
       await subject.addTokens([faker.random.word()], {
         access_token: faker.random.word(),
         refresh_token: faker.random.word(),
       });
-      const [ firstInterval, secondInterval ] = (subject as any).refreshes;
+      const [ firstTimeout, secondTimeout ] = (subject as any).refreshes;
       await subject.terminate();
       // @ts-ignore
-      expect(global.clearInterval).toHaveBeenNthCalledWith(1, firstInterval);
+      expect(global.clearTimeout).toHaveBeenNthCalledWith(1, firstTimeout);
       // @ts-ignore
-      expect(global.clearInterval).toHaveBeenNthCalledWith(2, secondInterval);
+      expect(global.clearTimeout).toHaveBeenNthCalledWith(2, secondTimeout);
       expect((subject as any).refreshes).toEqual([]);
-      clearIntervalSpy.mockRestore();
+      clearTimeoutSpy.mockRestore();
     });
 
     it("should throw an error if the token is accessed after terminate", async (done) => {

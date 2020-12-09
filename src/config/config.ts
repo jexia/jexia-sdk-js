@@ -33,9 +33,6 @@ export const API = {
   PROTOCOL: "https://",
 };
 
-/* default refresh token interval: 1 hour and 50 minutes; JEXIA tokens expire in 2 hours */
-export const DELAY = 1000 * 60 * 110;
-
 /**
  * The default project zone
  */
