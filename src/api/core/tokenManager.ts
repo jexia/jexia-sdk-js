@@ -84,8 +84,8 @@ export class TokenManager {
   /* used for getting the project url */
   private config: IAuthOptions;
 
-  /* store intervals to be able to end refresh loop from outside */
-  private refreshes: any[] = [];
+  /* store timeouts to be able to end refresh loop from outside */
+  private refreshes: Map<string, any> = new Map<string, any>();
 
   /* initialize promise */
   private initPromise: Promise<this>;
@@ -157,7 +157,7 @@ export class TokenManager {
   public terminate(): void {
     this.storage.clear();
     this.refreshes.forEach(timeout => clearTimeout(timeout));
-    this.refreshes = [];
+    this.refreshes.clear();
   }
 
   /**
@@ -199,14 +199,18 @@ export class TokenManager {
    */
   private startRefreshDigest(aliases: string[], accessToken: string) {
     const delay = delayTokenRefresh(accessToken)
+    const timer = setTimeout(() => {
+      this.logger.debug("tokenManager", `refresh ${aliases[0]} token`);
+      this.refreshes.delete(accessToken);
+      this.refresh(aliases)
+        .subscribe(
+          ({ access_token }: Tokens) => this.startRefreshDigest(aliases, access_token), // start a digest for the new token
+          () => this.terminate() // TODO: send an event out, so the user can act on that
+        );
+    }, delay)
 
-    this.refreshes.push(
-      setTimeout(() => {
-        this.logger.debug("tokenManager", `refresh ${aliases[0]} token`);
-        this.refresh(aliases)
-          .subscribe({ error: () => this.terminate() });
-      }, delay)
-    );
+    // save the timeout ref, and ref it to the accessToken key
+    this.refreshes.set(accessToken, timer)
   }
 
   /**
