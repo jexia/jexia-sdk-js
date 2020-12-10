@@ -2,7 +2,7 @@
 import { Tokens } from "./tokenManager";
 
 /**
- * fetch an arrau of all aliases for one access token
+ * fetch an array of all aliases for one access token
  * @internal
  */
 export const getAliases = (accessToken: string, tokens: tokenList): string[] => Object.entries(tokens)
