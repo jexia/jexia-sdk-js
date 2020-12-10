@@ -224,7 +224,7 @@ export class TokenManager {
         )
         .subscribe(
           ({ access_token }: Tokens) => this.startRefreshDigest(aliases, access_token), // start a digest for the new token
-          () => this.terminate(), // TODO: send an event out, so the user can act on that,
+          () => this.terminate(), // TODO: send an event out, so the user can act on that
         );
     }, delay)
 
