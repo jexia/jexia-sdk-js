@@ -2,7 +2,7 @@ import { IAuthOptions } from "../api/core/tokenManager";
 
 export const API = {
   AUTH: "auth",
-  REFRESH: "refresh",
+  REFRESH: "auth/refresh",
   DATA: {
     ENDPOINT: "ds",
   },
