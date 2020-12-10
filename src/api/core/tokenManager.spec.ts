@@ -318,13 +318,13 @@ describe("TokenManager", () => {
         access_token: faker.random.word(),
         refresh_token: faker.random.word(),
       });
-      const [ firstTimeout, secondTimeout ] = (subject as any).refreshes;
+      const [ firstTimeout, secondTimeout ] = Array.from((subject as any).refreshes.values());
       await subject.terminate();
       // @ts-ignore
       expect(global.clearTimeout).toHaveBeenNthCalledWith(1, firstTimeout);
       // @ts-ignore
       expect(global.clearTimeout).toHaveBeenNthCalledWith(2, secondTimeout);
-      expect((subject as any).refreshes).toEqual([]);
+      expect((subject as any).refreshes.size).toBe(0);
       clearTimeoutSpy.mockRestore();
     });
 
