@@ -1,3 +1,11 @@
+## [5.4.2](https://github.com/jexia/jexia-sdk-js/compare/v5.4.1...v5.4.2) (2020-12-10)
+
+
+### Bug Fixes
+
+* refresh url to be valid ([#189](https://github.com/jexia/jexia-sdk-js/issues/189)) ([8e4d075](https://github.com/jexia/jexia-sdk-js/commit/8e4d075024a335a95cca752c65dfdbca16b7ada4))
+* **token:** restart timeout after digest ends ([#188](https://github.com/jexia/jexia-sdk-js/issues/188)) ([5f90972](https://github.com/jexia/jexia-sdk-js/commit/5f90972271c480fef1b1be5010b77cd31fd74b7c))
+
 ## [5.4.1](https://github.com/jexia/jexia-sdk-js/compare/v5.4.0...v5.4.1) (2020-12-09)
 
 
