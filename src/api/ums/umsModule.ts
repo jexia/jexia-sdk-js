@@ -1,7 +1,7 @@
 import { ReflectiveInjector } from "injection-js";
 import { Observable } from "rxjs";
 import { map, switchMap, pluck, tap } from "rxjs/operators";
-import { API, getApiUrl } from "../../config";
+import { API, APIKEY_DEFAULT_ALIAS, getApiUrl } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { toQueryParams, parseQueryParams } from "../../internal/utils";
@@ -106,8 +106,13 @@ export class UMSModule<
    *
    * @param alias The alias/key that is assigned to the tokens
    */
-  public signOut(alias: string): void {
-    this.tokenManager.removeTokens(alias);
+  public signOut(alias?: string): void {
+    // if no alias is given, and the default auth key is equal to the API key, bail out
+    // TODO: show a notice if there is no token available?
+    if(!alias && this.tokenManager.defaultAuthAlias === APIKEY_DEFAULT_ALIAS) { return; }
+
+    const aliasKey = !alias ? this.tokenManager.defaultAuthAlias : alias;
+    this.tokenManager.removeTokens(aliasKey);
   }
 
   /**

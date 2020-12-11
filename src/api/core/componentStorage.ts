@@ -19,6 +19,11 @@ export type tokenList = {[auth: string]: Tokens}
  * @internal
  */
 export interface IStorageComponent {
+  /**
+   * Holds the default key/alias
+   */
+  defaultAuthAlias: string
+
   isEmpty(): boolean;
 
   /**
@@ -69,6 +74,10 @@ export class WebStorageComponent implements IStorageComponent {
 
   private storage: Storage;
 
+  public get defaultAuthAlias(): string {
+    return this.storage.getItem(this.defaultKey) || "";
+  }
+
   /* get all tokens from the storage */
   private get tokens(): tokenList {
     let tokens;
@@ -104,7 +113,7 @@ export class WebStorageComponent implements IStorageComponent {
   }
 
   public getTokens(auth?: string): Tokens {
-    auth = auth || this.storage.getItem(this.defaultKey) as string;
+    auth = auth || this.defaultAuthAlias;
     return this.tokens[auth];
   }
 
@@ -142,14 +151,14 @@ export class MemoryStorageComponent implements IStorageComponent {
 
   private tokens: tokenList = {};
 
-  private defaultTokens: string;
+  public defaultAuthAlias: string;
 
   public isEmpty(): boolean {
     return !Object.keys(this.tokens).length;
   }
 
   public setDefault(auth: string): void {
-    this.defaultTokens = auth;
+    this.defaultAuthAlias = auth;
   }
 
   public setTokens(auth: string, tokens: Tokens, defaults: boolean = false): void {
@@ -160,7 +169,7 @@ export class MemoryStorageComponent implements IStorageComponent {
   }
 
   public getTokens(auth?: string): Tokens {
-    auth = auth || this.defaultTokens;
+    auth = auth || this.defaultAuthAlias;
     return this.tokens[auth];
   }
 
@@ -173,7 +182,7 @@ export class MemoryStorageComponent implements IStorageComponent {
     aliases.forEach(key => delete this.tokens[key]);
 
     // reset to default if needed
-    if(alias === this.defaultTokens) {
+    if(alias === this.defaultAuthAlias) {
       this.setDefault(APIKEY_DEFAULT_ALIAS);
     }
   }

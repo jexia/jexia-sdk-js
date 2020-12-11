@@ -100,6 +100,10 @@ export class TokenManager {
 
   private storage = TokenStorage.getStorageAPI();
 
+  public get defaultAuthAlias(): string {
+    return this.storage.defaultAuthAlias || "";
+  }
+
   constructor(
     private requestAdapter: RequestAdapter,
     private logger: Logger,
@@ -211,7 +215,7 @@ export class TokenManager {
   /**
    * Remove a token based on the name of the key
    *
-   * @param {string} key The key to identify the token
+   * @param {string} alias The key to identify the token
    */
   public removeTokens(alias: string): void {
     this.storage.removeTokens(alias);

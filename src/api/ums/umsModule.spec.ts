@@ -3,7 +3,7 @@ import * as faker from "faker";
 import { ReflectiveInjector } from "injection-js";
 import { of } from "rxjs";
 import { createMockFor, SpyObj } from "../../../spec/testUtils";
-import { API, getApiUrl } from "../../config";
+import { API, APIKEY_DEFAULT_ALIAS, getApiUrl } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { deferPromise, parseQueryParams, toQueryParams } from "../../internal/utils";
@@ -40,8 +40,10 @@ describe("UMS Module", () => {
       provider: faker.helpers.randomize(["google", "facebook", "twitter"]),
       redirect: faker.internet.url(),
     },
+    defaultAuthAlias = APIKEY_DEFAULT_ALIAS,
     tokenManagerMock = createMockFor(TokenManager, {}, {
       token: () => of(access_token),
+      defaultAuthAlias,
     }),
     requestAdapterReturnValue = { access_token, refresh_token } as any,
     requestAdapterMock = createMockFor(RequestAdapter, {
@@ -364,6 +366,25 @@ describe("UMS Module", () => {
       subject.signOut(alias);
 
       expect(tokenManagerMock.removeTokens).toHaveBeenCalledWith(alias);
+    });
+
+    it("should sign out when no alias is given and an UMS token is marked as DEFAULT", async () => {
+      const alias = faker.random.word();
+      const { subject, tokenManagerMock, init } = createSubject({ defaultAuthAlias: alias});
+
+      await init();
+      subject.signOut();
+
+      expect(tokenManagerMock.removeTokens).toHaveBeenCalledWith(alias);
+    });
+
+    it("should do nothing when there is no DEFAULT set", async () => {
+      const { subject, tokenManagerMock, init } = createSubject();
+
+      await init();
+      subject.signOut();
+
+      expect(tokenManagerMock.removeTokens).not.toHaveBeenCalled();
     });
   });
 
