@@ -102,6 +102,15 @@ export class UMSModule<
   }
 
   /**
+   * Signs out an user by just removing the token that belongs to the user/alias
+   *
+   * @param email The email that functions as an alias for the tokenManager
+   */
+  public signOut(email: string): void {
+    this.tokenManager.removeTokens(email);
+  }
+
+  /**
    * Create a new UMS user
    * @param credentials {IUMSSignUpFields} email, password and possible extra fields of created user
    */

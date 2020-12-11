@@ -355,6 +355,18 @@ describe("UMS Module", () => {
     });
   });
 
+  describe("user sign-out", () => {
+    it("should call the right service to remove the tokens", async () => {
+      const { subject, tokenManagerMock, init } = createSubject();
+      const alias = faker.random.word();
+
+      await init();
+      subject.signOut(alias);
+
+      expect(tokenManagerMock.removeTokens).toHaveBeenCalledWith(alias);
+    });
+  });
+
   describe("token management", () => {
     it("should set default token by alias", () => {
       const { subject, init, tokenManagerMock } = createSubject();

@@ -298,6 +298,18 @@ describe("TokenManager", () => {
     });
   });
 
+  describe("when remove a token", () => {
+    it("should call the token storage Manager", () => {
+      const { subject } = createSubject();
+      const alias = faker.random.word();
+
+      jest.spyOn((subject as any).storage, "removeTokens");
+      subject.removeTokens(alias);
+
+      expect((subject as any).storage.removeTokens).toHaveBeenCalledWith(alias);
+    });
+  });
+
   describe("when the client is terminated", () => {
     it("should have clear the session storage", async () => {
       const { subject, validOptions } = createSubject();

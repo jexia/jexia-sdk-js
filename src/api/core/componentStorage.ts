@@ -1,5 +1,6 @@
 // tslint:disable:max-classes-per-file
 import { Tokens } from "./tokenManager";
+import { APIKEY_DEFAULT_ALIAS } from "../../config";
 
 /**
  * @internal
@@ -27,6 +28,13 @@ export interface IStorageComponent {
    * @param auth
    */
   setDefault(auth: string): void;
+
+  /**
+   * clear / Remove a token with a specific key
+   *
+   * @param key
+   */
+  removeTokens(key: string): void;
 
   /**
    * Remove
@@ -82,6 +90,22 @@ export class WebStorageComponent implements IStorageComponent {
     return this.tokens[auth];
   }
 
+  public removeTokens(key: string): void {
+    const storedTokens = this.tokens;
+
+    // no key found, bail out
+    if (!storedTokens[key]) { return; }
+
+    delete storedTokens[key];
+
+    this.storage.setItem(this.storageKey, JSON.stringify(storedTokens));
+
+    // reset to default if needed
+    if(key === this.storage.getItem(this.defaultKey)) {
+      this.setDefault(APIKEY_DEFAULT_ALIAS);
+    }
+  }
+
   public clear(): void {
     this.storage.removeItem(this.storageKey);
   }
@@ -114,6 +138,18 @@ export class MemoryStorageComponent implements IStorageComponent {
   public getTokens(auth?: string): Tokens {
     auth = auth || this.defaultTokens;
     return this.tokens[auth];
+  }
+
+  public removeTokens(key: string): void {
+    // no key found, bail out
+    if (!this.tokens[key]) { return; }
+
+    delete this.tokens[key];
+
+    // reset to default if needed
+    if(key === this.defaultTokens) {
+      this.setDefault(APIKEY_DEFAULT_ALIAS);
+    }
   }
 
   public clear(): void {

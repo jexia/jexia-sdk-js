@@ -6,6 +6,7 @@ import {
   WebStorageComponent,
 } from "./componentStorage";
 import { Tokens } from "./tokenManager";
+import { APIKEY_DEFAULT_ALIAS } from "../../config";
 
 class WebStorageApiMock {
   private dictionary: any = {};
@@ -73,6 +74,24 @@ describe("ComponentStorage", ()  => {
         const tokens = generateTokens();
         instanceComponent.setTokens("defaultTokens", tokens, true);
         expect(instanceComponent.getTokens()).toEqual(tokens);
+      });
+
+      describe("remove token by key", () => {
+        beforeEach(() => {
+          instanceComponent.setTokens("firstAlias", tokenOne, true);
+          instanceComponent.setTokens("secondAlias", tokenTwo);
+        });
+
+        it("should remove a token", () => {
+          instanceComponent.removeTokens("firstAlias");
+          expect(instanceComponent.getTokens("firstAlias")).toBeUndefined();
+        });
+
+        it("should set a new default", () => {
+          jest.spyOn(instanceComponent, "setDefault");
+          instanceComponent.removeTokens("firstAlias");
+          expect(instanceComponent.setDefault).toHaveBeenCalledWith(APIKEY_DEFAULT_ALIAS);
+        });
       });
 
       it("should clear the saved tokens", () => {

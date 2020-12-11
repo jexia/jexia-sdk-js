@@ -49,6 +49,11 @@ export const API_SUFFIX = `${API.HOST}.${API.DOMAIN}:${API.PORT}`;
 export const REALTIME_SUFFIX = `${API.HOST}.${API.DOMAIN}${API.REAL_TIME.ENDPOINT}`;
 
 /**
+ * Default API key alias
+ */
+export const APIKEY_DEFAULT_ALIAS = "apikey";
+
+/**
  * Strips trailling slashes at the end of an URL
  */
 export function stripUrlSlashes(url: string | null | undefined): string {

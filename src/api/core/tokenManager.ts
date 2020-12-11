@@ -1,13 +1,11 @@
 import { Injectable, InjectionToken } from "injection-js";
 import { from, Observable } from "rxjs";
 import { catchError, map, tap } from "rxjs/operators";
-import { API, MESSAGE, getApiUrl, getProjectId } from "../../config";
+import { API, MESSAGE, getApiUrl, getProjectId, APIKEY_DEFAULT_ALIAS } from "../../config";
 import { IRequestError, RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { delayTokenRefresh } from "../../internal/utils";
 import { Logger } from "../logger/logger";
 import { TokenStorage } from "./componentStorage";
-
-const APIKEY_DEFAULT_ALIAS = "apikey";
 
 /**
  * API interface of the authorization token
@@ -191,6 +189,15 @@ export class TokenManager {
     });
 
     this.startRefreshDigest(definedAliases, tokens.access_token);
+  }
+
+  /**
+   * Remove a token based on the name of the key
+   *
+   * @param {string} key The key to identify the token
+   */
+  public removeTokens(key: string): void {
+    this.storage.removeTokens(key);
   }
 
   /**
