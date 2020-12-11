@@ -1,3 +1,10 @@
+# [5.5.0](https://github.com/jexia/jexia-sdk-js/compare/v5.4.2...v5.5.0) (2020-12-11)
+
+
+### Features
+
+* **token:** refresh token before a request made if digest fails ([#190](https://github.com/jexia/jexia-sdk-js/issues/190)) ([ef7e469](https://github.com/jexia/jexia-sdk-js/commit/ef7e469fb9b0e65898247186a9353da6963ffc51))
+
 ## [5.4.2](https://github.com/jexia/jexia-sdk-js/compare/v5.4.1...v5.4.2) (2020-12-10)
 
 
