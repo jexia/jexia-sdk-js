@@ -226,10 +226,10 @@ export class TokenManager {
           ({ access_token }: Tokens) => this.startRefreshDigest(aliases, access_token), // start a digest for the new token
           () => this.terminate(), // TODO: send an event out, so the user can act on that,
         );
-    }, delay)
+    }, delay);
 
     // save the timeout ref, and ref it to the accessToken key
-    this.refreshes.set(accessToken, timer)
+    this.refreshes.set(accessToken, timer);
   }
 
   /**
@@ -240,7 +240,7 @@ export class TokenManager {
     if(this.refreshes.has(currentAccessToken)) {
       const timer = this.refreshes.get(currentAccessToken);
 
-      clearTimeout(timer)
+      clearTimeout(timer);
       this.refreshes.delete(currentAccessToken);
     }
   }
