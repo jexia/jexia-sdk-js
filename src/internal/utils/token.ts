@@ -38,3 +38,17 @@ export function delayTokenRefresh(accessToken: string): number {
     ? tokenExpired / 2
     : tokenExpired - threshold
 }
+
+/**
+ * Check if a token is expired or not
+ * @internal
+ */
+export function isTokenExpired(token: string): boolean {
+  try {
+    const { exp: expired } = jwt_decode<{ exp: number }>(token);
+    const now = Date.now() / 1000; // exp is represented in seconds since epoch
+    return now > expired;
+  } catch (e) {
+    return true;
+  }
+}

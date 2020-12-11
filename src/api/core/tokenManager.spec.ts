@@ -5,6 +5,7 @@ import { MESSAGE, getProjectId } from "../../config";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { Logger } from "../logger/logger";
 import { TokenManager, Tokens } from "./tokenManager";
+import { createTestToken } from "../../../spec/token";
 
 let terminate: () => void;
 
@@ -16,7 +17,7 @@ interface ISubjectOpts {
 }
 
 const createSubject = ({
-  tokens = { access_token: faker.random.word(), refresh_token: faker.random.word() },
+  tokens = { access_token: createTestToken(), refresh_token: faker.random.word() },
   requestAdapterReturnValue = of(tokens),
   requestAdapterMock = createMockFor(RequestAdapter, { returnValue: requestAdapterReturnValue }),
   loggerMock = createMockFor(Logger),
@@ -214,7 +215,7 @@ describe("TokenManager", () => {
       const { subject, validOptions } = createSubject();
       const randomAlias = faker.random.word();
       const anotherTokens = {
-        access_token: faker.random.word(),
+        access_token: createTestToken(),
         refresh_token: faker.random.word(),
       };
       await subject.init(validOptions);
@@ -232,7 +233,7 @@ describe("TokenManager", () => {
       const randomAliases = [faker.random.word(), faker.random.word(), faker.random.word()];
       const randomAlias = faker.helpers.randomize(randomAliases);
       const anotherTokens = {
-        access_token: faker.random.word(),
+        access_token: createTestToken(),
         refresh_token: faker.random.word(),
       };
       await subject.init(validOptions);
@@ -248,7 +249,7 @@ describe("TokenManager", () => {
       const { subject, validOptions, tokens } = createSubject();
       const randomAlias = faker.random.word();
       const anotherTokens = {
-        access_token: faker.random.word(),
+        access_token: createTestToken(),
         refresh_token: faker.random.word(),
       };
       await subject.init(validOptions);
@@ -260,6 +261,71 @@ describe("TokenManager", () => {
         done,
         done,
       );
+    });
+
+    describe("return a new token after refresh", () => {
+      it("should return the new token", async (done) => {
+        const { subject, validOptions } = createSubject();
+        const randomAlias = faker.random.word();
+        const tokens = {
+          access_token: createTestToken(true),
+          refresh_token: faker.random.word(),
+        };
+        const refreshedTokens = {
+          access_token: createTestToken(),
+          refresh_token: faker.random.word(),
+        };
+
+        jest.spyOn(subject as any, "refresh").mockReturnValue(of(refreshedTokens));
+        await subject.init(validOptions);
+        subject.addTokens([randomAlias], tokens);
+        subject.setDefault(randomAlias);
+        subject.token().subscribe(
+          (token) => expect(token).toEqual(refreshedTokens.access_token),
+          done,
+          done,
+        );
+      });
+
+      it("should remove the current digest", async (done) => {
+        const { subject, validOptions } = createSubject();
+        const randomAlias = faker.random.word();
+        const tokens = {
+          access_token: createTestToken(true),
+          refresh_token: faker.random.word(),
+        };
+
+        jest.spyOn(subject as any, "removeRefreshDigest");
+
+        await subject.init(validOptions);
+        subject.addTokens([randomAlias], tokens);
+        subject.setDefault(randomAlias);
+        subject.token().subscribe(
+          () => expect((subject as any).removeRefreshDigest).toHaveBeenCalled(),
+          done,
+          done,
+        );
+      });
+
+      it("should set a new digest", async (done) => {
+        const { subject, validOptions } = createSubject();
+        const randomAlias = faker.random.word();
+        const tokens = {
+          access_token: createTestToken(true),
+          refresh_token: faker.random.word(),
+        };
+
+        jest.spyOn(subject as any, "startRefreshDigest");
+
+        await subject.init(validOptions);
+        subject.addTokens([randomAlias], tokens);
+        subject.setDefault(randomAlias);
+        subject.token().subscribe(
+          () => expect((subject as any).startRefreshDigest).toHaveBeenCalled(),
+          done,
+          done,
+        );
+      });
     });
 
     it("should throw an error if the token is accessed before login", (done) => {
@@ -315,7 +381,7 @@ describe("TokenManager", () => {
       const clearTimeoutSpy = jest.spyOn(global, "clearTimeout");
       await subject.init(validOptions);
       await subject.addTokens([faker.random.word()], {
-        access_token: faker.random.word(),
+        access_token: createTestToken(),
         refresh_token: faker.random.word(),
       });
       const [ firstTimeout, secondTimeout ] = Array.from((subject as any).refreshes.values());
@@ -388,7 +454,7 @@ describe("TokenManager", () => {
     it("should reject promise if there is no token for specific auth", () => {
       const { subject } = createSubject();
       (subject as any).storage.setTokens("testRefresh",
-        { access_token: "access_token", refresh_token: "refresh_token" });
+        { access_token: createTestToken(), refresh_token: "refresh_token" });
       try {
         (subject as any).refresh(["randomAuth"]);
       } catch (error) {

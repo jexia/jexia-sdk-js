@@ -2,6 +2,19 @@
 import { Tokens } from "./tokenManager";
 
 /**
+ * fetch an array of all aliases for one access token
+ * @internal
+ */
+export const getAliases = (accessToken: string, tokens: tokenList): string[] => Object.entries(tokens)
+  .filter(([, token]) => token.access_token === accessToken)
+  .map(([alias]) => alias);
+
+/**
+ * @internal
+ */
+export type tokenList = {[auth: string]: Tokens}
+
+/**
  * @internal
  */
 export interface IStorageComponent {
@@ -32,6 +45,11 @@ export interface IStorageComponent {
    * Remove
    */
   clear(): void;
+
+  /**
+   * Get all aliases per accessToken
+   */
+  getTokenAliases(accessToken: string): string[];
 }
 
 /**
@@ -44,7 +62,7 @@ export class WebStorageComponent implements IStorageComponent {
   private storage: Storage;
 
   /* get all tokens from the storage */
-  private get tokens(): {[auth: string]: Tokens} {
+  private get tokens(): tokenList {
     let tokens;
     try {
       tokens = JSON.parse(this.storage.getItem(this.storageKey) as string);
@@ -85,6 +103,10 @@ export class WebStorageComponent implements IStorageComponent {
   public clear(): void {
     this.storage.removeItem(this.storageKey);
   }
+
+  public getTokenAliases(accessToken: string): string[] {
+    return getAliases(accessToken, this.tokens)
+  }
 }
 
 /**
@@ -92,7 +114,7 @@ export class WebStorageComponent implements IStorageComponent {
  */
 export class MemoryStorageComponent implements IStorageComponent {
 
-  private tokens: { [auth: string]: Tokens } = {};
+  private tokens: tokenList = {};
 
   private defaultTokens: string;
 
@@ -118,6 +140,10 @@ export class MemoryStorageComponent implements IStorageComponent {
 
   public clear(): void {
     this.tokens = {};
+  }
+
+  public getTokenAliases(accessToken: string): string[] {
+    return getAliases(accessToken, this.tokens)
   }
 }
 
