@@ -1,9 +1,9 @@
 import { Injectable, InjectionToken } from "injection-js";
-import { from, Observable } from "rxjs";
-import { catchError, map, tap } from "rxjs/operators";
+import { from, Observable, iif, of } from "rxjs";
+import { catchError, map, tap, switchMap, finalize } from "rxjs/operators";
 import { API, MESSAGE, getApiUrl, getProjectId, APIKEY_DEFAULT_ALIAS } from "../../config";
 import { IRequestError, RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
-import { delayTokenRefresh } from "../../internal/utils";
+import { delayTokenRefresh, isTokenExpired } from "../../internal/utils";
 import { Logger } from "../logger/logger";
 import { TokenStorage } from "./componentStorage";
 
@@ -107,9 +107,22 @@ export class TokenManager {
 
   /**
    * Get access token for the specific authentication alias (APK by default)
+   * When a token is expired, try to refresh the token
    * @param {string} auth Authentication alias
    */
   public token(auth?: string): Observable<string> {
+    // refreshing a token means: cancel current digest for expired token, fetch new token, start new digest with new token
+    // due the digest, we are sure that it will not come to this, but to be 100% sure, its required deal with this
+    const $refresh = (accessToken: string): Observable<string> => {
+      const aliases: string[] = this.storage.getTokenAliases(accessToken);
+      return of(accessToken).pipe(
+        tap(currentAccessToken => this.removeRefreshDigest(currentAccessToken)),
+        switchMap(() => this.refresh(aliases)),
+        map(({ access_token }: Tokens): string => access_token),
+        tap(newAccessToken => this.startRefreshDigest(aliases, newAccessToken)),
+      )
+    };
+
     return from(this.resolved).pipe(
       map(() => {
         const tokens = this.storage.getTokens(auth);
@@ -118,6 +131,10 @@ export class TokenManager {
         }
         return tokens.access_token;
       }),
+      // check if the token is expired, if so, refresh the token and assign it to the storage
+      switchMap((accessToken: string) => iif(
+        () => isTokenExpired(accessToken), $refresh(accessToken), of(accessToken)),
+      ),
     );
   }
 
@@ -208,16 +225,31 @@ export class TokenManager {
     const delay = delayTokenRefresh(accessToken)
     const timer = setTimeout(() => {
       this.logger.debug("tokenManager", `refresh ${aliases[0]} token`);
-      this.refreshes.delete(accessToken);
       this.refresh(aliases)
+        .pipe(
+          finalize(() => this.removeRefreshDigest(accessToken)),
+        )
         .subscribe(
           ({ access_token }: Tokens) => this.startRefreshDigest(aliases, access_token), // start a digest for the new token
-          () => this.terminate() // TODO: send an event out, so the user can act on that
+          () => this.terminate(), // TODO: send an event out, so the user can act on that
         );
-    }, delay)
+    }, delay);
 
     // save the timeout ref, and ref it to the accessToken key
-    this.refreshes.set(accessToken, timer)
+    this.refreshes.set(accessToken, timer);
+  }
+
+  /**
+   * Stop a refreshing digest
+   * @ignore
+   */
+  private removeRefreshDigest(currentAccessToken: string): void {
+    if(this.refreshes.has(currentAccessToken)) {
+      const timer = this.refreshes.get(currentAccessToken);
+
+      clearTimeout(timer);
+      this.refreshes.delete(currentAccessToken);
+    }
   }
 
   /**

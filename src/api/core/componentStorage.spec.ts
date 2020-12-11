@@ -7,6 +7,7 @@ import {
 } from "./componentStorage";
 import { Tokens } from "./tokenManager";
 import { APIKEY_DEFAULT_ALIAS } from "../../config";
+import { createTestToken } from "../../../spec/token";
 
 class WebStorageApiMock {
   private dictionary: any = {};
@@ -25,7 +26,7 @@ class WebStorageApiMock {
 }
 const generateTokens = (): Tokens => ({
   refresh_token: faker.random.uuid(),
-  access_token: faker.random.uuid(),
+  access_token: createTestToken(),
 });
 
 describe("ComponentStorage", ()  => {
@@ -97,6 +98,14 @@ describe("ComponentStorage", ()  => {
       it("should clear the saved tokens", () => {
         instanceComponent.clear();
         expect(instanceComponent.isEmpty()).toBeTruthy();
+      });
+
+      it("should get the aliases from the tokens", () => {
+        const tokens = generateTokens();
+        instanceComponent.setTokens("defaultTokens", tokens, true);
+
+        const aliases = instanceComponent.getTokenAliases(tokens.access_token);
+        expect(aliases).toEqual(["defaultTokens"]);
       });
     });
   });
