@@ -22,7 +22,7 @@ export interface IStorageComponent {
   /**
    * Holds the default key/alias
    */
-  defaultAuthAlias: string
+  defaultAuthAlias: string;
 
   isEmpty(): boolean;
 
