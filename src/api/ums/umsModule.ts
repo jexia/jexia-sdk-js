@@ -104,10 +104,10 @@ export class UMSModule<
   /**
    * Signs out an user by just removing the token that belongs to the user/alias
    *
-   * @param email The email that functions as an alias for the tokenManager
+   * @param alias The alias/key that is assigned to the tokens
    */
-  public signOut(email: string): void {
-    this.tokenManager.removeTokens(email);
+  public signOut(alias: string): void {
+    this.tokenManager.removeTokens(alias);
   }
 
   /**

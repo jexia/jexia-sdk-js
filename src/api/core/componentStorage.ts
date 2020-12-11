@@ -45,9 +45,9 @@ export interface IStorageComponent {
   /**
    * clear / Remove a token with a specific key
    *
-   * @param key
+   * @param alias
    */
-  removeTokens(key: string): void;
+  removeTokens(alias: string): void;
 
   /**
    * Remove
@@ -108,18 +108,20 @@ export class WebStorageComponent implements IStorageComponent {
     return this.tokens[auth];
   }
 
-  public removeTokens(key: string): void {
+  public removeTokens(alias: string): void {
     const storedTokens = this.tokens;
 
     // no key found, bail out
-    if (!storedTokens[key]) { return; }
+    if (!storedTokens[alias]) { return; }
 
-    delete storedTokens[key];
+    // fetch and delete all aliases
+    const aliases = this.getTokenAliases(storedTokens[alias].access_token);
+    aliases.forEach(key => delete storedTokens[key]);
 
     this.storage.setItem(this.storageKey, JSON.stringify(storedTokens));
 
     // reset to default if needed
-    if(key === this.storage.getItem(this.defaultKey)) {
+    if(alias === this.storage.getItem(this.defaultKey)) {
       this.setDefault(APIKEY_DEFAULT_ALIAS);
     }
   }
@@ -162,14 +164,16 @@ export class MemoryStorageComponent implements IStorageComponent {
     return this.tokens[auth];
   }
 
-  public removeTokens(key: string): void {
+  public removeTokens(alias: string): void {
     // no key found, bail out
-    if (!this.tokens[key]) { return; }
+    if (!this.tokens[alias]) { return; }
 
-    delete this.tokens[key];
+    // fetch and delete all aliases
+    const aliases = this.getTokenAliases(this.tokens[alias].access_token);
+    aliases.forEach(key => delete this.tokens[key]);
 
     // reset to default if needed
-    if(key === this.defaultTokens) {
+    if(alias === this.defaultTokens) {
       this.setDefault(APIKEY_DEFAULT_ALIAS);
     }
   }

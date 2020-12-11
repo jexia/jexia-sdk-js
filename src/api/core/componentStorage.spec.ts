@@ -77,20 +77,22 @@ describe("ComponentStorage", ()  => {
         expect(instanceComponent.getTokens()).toEqual(tokens);
       });
 
-      describe("remove token by key", () => {
+      describe("remove token by alias", () => {
         beforeEach(() => {
-          instanceComponent.setTokens("firstAlias", tokenOne, true);
-          instanceComponent.setTokens("secondAlias", tokenTwo);
+          instanceComponent.setTokens("tokenOne", tokenOne, true);
+          instanceComponent.setTokens("tokenOneAlias", tokenOne);
+          instanceComponent.setTokens("tokenTwo", tokenTwo);
         });
 
-        it("should remove a token", () => {
-          instanceComponent.removeTokens("firstAlias");
-          expect(instanceComponent.getTokens("firstAlias")).toBeUndefined();
+        it("should remove all tokens (and aliases)", () => {
+          instanceComponent.removeTokens("tokenOne");
+          expect(instanceComponent.getTokens("tokenOne")).toBeUndefined();
+          expect(instanceComponent.getTokens("tokenOneAlias")).toBeUndefined();
         });
 
         it("should set a new default", () => {
           jest.spyOn(instanceComponent, "setDefault");
-          instanceComponent.removeTokens("firstAlias");
+          instanceComponent.removeTokens("tokenOne");
           expect(instanceComponent.setDefault).toHaveBeenCalledWith(APIKEY_DEFAULT_ALIAS);
         });
       });

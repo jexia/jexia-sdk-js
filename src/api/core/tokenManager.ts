@@ -213,8 +213,8 @@ export class TokenManager {
    *
    * @param {string} key The key to identify the token
    */
-  public removeTokens(key: string): void {
-    this.storage.removeTokens(key);
+  public removeTokens(alias: string): void {
+    this.storage.removeTokens(alias);
   }
 
   /**
