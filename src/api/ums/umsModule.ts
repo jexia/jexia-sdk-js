@@ -1,7 +1,7 @@
 import { ReflectiveInjector } from "injection-js";
 import { Observable } from "rxjs";
 import { map, switchMap, pluck, tap } from "rxjs/operators";
-import { API, APIKEY_DEFAULT_ALIAS, getApiUrl } from "../../config";
+import { API, getApiUrl } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { toQueryParams, parseQueryParams } from "../../internal/utils";
@@ -103,16 +103,18 @@ export class UMSModule<
 
   /**
    * Signs out an user by just removing the token that belongs to the user/alias
+   * By default it checks on the token that is marked as DEFAULT otherwise it will use the given alias
    *
    * @param alias The alias/key that is assigned to the tokens
    */
   public signOut(alias?: string): void {
-    // if no alias is given, and the default auth key is equal to the API key, bail out
-    // TODO: show a notice if there is no token available?
-    if(!alias && this.tokenManager.defaultAuthAlias === APIKEY_DEFAULT_ALIAS) { return; }
+    const validatedAlias = this.tokenManager.validateTokenAlias(alias);
 
-    const aliasKey = !alias ? this.tokenManager.defaultAuthAlias : alias;
-    this.tokenManager.removeTokens(aliasKey);
+    if (!validatedAlias) {
+      return;
+    }
+
+    this.tokenManager.removeTokens(validatedAlias as string);
   }
 
   /**

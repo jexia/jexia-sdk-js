@@ -3,7 +3,7 @@ import * as faker from "faker";
 import { ReflectiveInjector } from "injection-js";
 import { of } from "rxjs";
 import { createMockFor, SpyObj } from "../../../spec/testUtils";
-import { API, APIKEY_DEFAULT_ALIAS, getApiUrl } from "../../config";
+import { API, getApiUrl } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { deferPromise, parseQueryParams, toQueryParams } from "../../internal/utils";
@@ -15,13 +15,14 @@ import { AuthOptions, TokenManager } from "../core/tokenManager";
 import { UMSModule } from "./umsModule";
 import { OAuthActionType } from "./ums.types";
 import { getSignInParams } from "./ums.functions";
+import { createTestToken } from "../../../spec/token";
 
 describe("UMS Module", () => {
   const fakeOAuthActionType = (): OAuthActionType => faker.helpers.randomize(["sign-in", "sign-up"]);
 
   function createSubject({
     projectId = faker.random.uuid(),
-    access_token = faker.random.uuid(),
+    access_token = createTestToken(),
     refresh_token = faker.random.uuid(),
     user = {
       email: faker.internet.email(),
@@ -40,10 +41,8 @@ describe("UMS Module", () => {
       provider: faker.helpers.randomize(["google", "facebook", "twitter"]),
       redirect: faker.internet.url(),
     },
-    defaultAuthAlias = APIKEY_DEFAULT_ALIAS,
     tokenManagerMock = createMockFor(TokenManager, {}, {
       token: () => of(access_token),
-      defaultAuthAlias,
     }),
     requestAdapterReturnValue = { access_token, refresh_token } as any,
     requestAdapterMock = createMockFor(RequestAdapter, {
@@ -358,9 +357,11 @@ describe("UMS Module", () => {
   });
 
   describe("user sign-out", () => {
-    it("should call the right service to remove the tokens", async () => {
+    it("should sign out when a valid alias is given", async () => {
       const { subject, tokenManagerMock, init } = createSubject();
       const alias = faker.random.word();
+
+      jest.spyOn((tokenManagerMock as any), "validateTokenAlias").mockReturnValue(alias);
 
       await init();
       subject.signOut(alias);
@@ -368,18 +369,10 @@ describe("UMS Module", () => {
       expect(tokenManagerMock.removeTokens).toHaveBeenCalledWith(alias);
     });
 
-    it("should sign out when no alias is given and an UMS token is marked as DEFAULT", async () => {
-      const alias = faker.random.word();
-      const { subject, tokenManagerMock, init } = createSubject({ defaultAuthAlias: alias});
-
-      await init();
-      subject.signOut();
-
-      expect(tokenManagerMock.removeTokens).toHaveBeenCalledWith(alias);
-    });
-
-    it("should do nothing when there is no DEFAULT set", async () => {
+    it("should NOT sign out when an invalid token is given or no default alias is set", async () => {
       const { subject, tokenManagerMock, init } = createSubject();
+
+      jest.spyOn((tokenManagerMock as any), "validateTokenAlias").mockReturnValue(false);
 
       await init();
       subject.signOut();

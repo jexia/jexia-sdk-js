@@ -342,4 +342,17 @@ export class TokenManager {
     }
     return `Authorization failed: ${code} ${status}`;
   }
+
+  /**
+   * Validate an alias by checking if the alias has been set.
+   * If not, fallback to the default alias if a custom one is set by the user, but ignore the system_default alias.
+   */
+  public validateTokenAlias(alias?: string): boolean | string {
+    // bail out if the alias is not set and the default is set to the SYSTEM DEFAULT
+    if (!alias && this.defaultAuthAlias === APIKEY_DEFAULT_ALIAS) {
+      return false;
+    }
+
+    return !alias ? this.defaultAuthAlias : alias;
+  }
 }
