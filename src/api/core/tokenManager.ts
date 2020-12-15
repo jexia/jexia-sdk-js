@@ -1,13 +1,11 @@
 import { Injectable, InjectionToken } from "injection-js";
 import { from, Observable, iif, of } from "rxjs";
-import {catchError, map, tap, switchMap, finalize} from "rxjs/operators";
-import { API, MESSAGE, getApiUrl, getProjectId } from "../../config";
+import { catchError, map, tap, switchMap, finalize } from "rxjs/operators";
+import { API, MESSAGE, getApiUrl, getProjectId, APIKEY_DEFAULT_ALIAS } from "../../config";
 import { IRequestError, RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { delayTokenRefresh, isTokenExpired } from "../../internal/utils";
 import { Logger } from "../logger/logger";
 import { TokenStorage } from "./componentStorage";
-
-const APIKEY_DEFAULT_ALIAS = "apikey";
 
 /**
  * API interface of the authorization token
@@ -101,6 +99,10 @@ export class TokenManager {
   }
 
   private storage = TokenStorage.getStorageAPI();
+
+  public get defaultAuthAlias(): string {
+    return this.storage.defaultAuthAlias || "";
+  }
 
   constructor(
     private requestAdapter: RequestAdapter,
@@ -208,6 +210,15 @@ export class TokenManager {
     });
 
     this.startRefreshDigest(definedAliases, tokens.access_token);
+  }
+
+  /**
+   * Remove a token based on the name of the key
+   *
+   * @param {string} alias The key to identify the token
+   */
+  public removeTokens(alias: string): void {
+    this.storage.removeTokens(alias);
   }
 
   /**
@@ -330,5 +341,18 @@ export class TokenManager {
       return `Authorization failed: project ${getProjectId(this.config)} not found.`;
     }
     return `Authorization failed: ${code} ${status}`;
+  }
+
+  /**
+   * Validate an alias by checking if the alias has been set.
+   * If not, fallback to the default alias if a custom one is set by the user, but ignore the system_default alias.
+   */
+  public validateTokenAlias(alias?: string): boolean | string {
+    // bail out if the alias is not set and the default is set to the SYSTEM DEFAULT
+    if (!alias && this.defaultAuthAlias === APIKEY_DEFAULT_ALIAS) {
+      return false;
+    }
+
+    return !alias ? this.defaultAuthAlias : alias;
   }
 }

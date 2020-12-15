@@ -102,6 +102,22 @@ export class UMSModule<
   }
 
   /**
+   * Signs out an user by just removing the token that belongs to the user/alias
+   * By default it checks on the token that is marked as DEFAULT otherwise it will use the given alias
+   *
+   * @param alias The alias/key that is assigned to the tokens
+   */
+  public signOut(alias?: string): void {
+    const validatedAlias = this.tokenManager.validateTokenAlias(alias);
+
+    if (!validatedAlias) {
+      return;
+    }
+
+    this.tokenManager.removeTokens(validatedAlias as string);
+  }
+
+  /**
    * Create a new UMS user
    * @param credentials {IUMSSignUpFields} email, password and possible extra fields of created user
    */

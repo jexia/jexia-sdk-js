@@ -15,13 +15,14 @@ import { AuthOptions, TokenManager } from "../core/tokenManager";
 import { UMSModule } from "./umsModule";
 import { OAuthActionType } from "./ums.types";
 import { getSignInParams } from "./ums.functions";
+import { createTestToken } from "../../../spec/token";
 
 describe("UMS Module", () => {
   const fakeOAuthActionType = (): OAuthActionType => faker.helpers.randomize(["sign-in", "sign-up"]);
 
   function createSubject({
     projectId = faker.random.uuid(),
-    access_token = faker.random.uuid(),
+    access_token = createTestToken(),
     refresh_token = faker.random.uuid(),
     user = {
       email: faker.internet.email(),
@@ -352,6 +353,31 @@ describe("UMS Module", () => {
       const token = await subject.signIn(user).toPromise();
 
       expect(token).toEqual(access_token);
+    });
+  });
+
+  describe("user sign-out", () => {
+    it("should sign out when a valid alias is given", async () => {
+      const { subject, tokenManagerMock, init } = createSubject();
+      const alias = faker.random.word();
+
+      jest.spyOn((tokenManagerMock as any), "validateTokenAlias").mockReturnValue(alias);
+
+      await init();
+      subject.signOut(alias);
+
+      expect(tokenManagerMock.removeTokens).toHaveBeenCalledWith(alias);
+    });
+
+    it("should NOT sign out when an invalid token is given or no default alias is set", async () => {
+      const { subject, tokenManagerMock, init } = createSubject();
+
+      jest.spyOn((tokenManagerMock as any), "validateTokenAlias").mockReturnValue(false);
+
+      await init();
+      subject.signOut();
+
+      expect(tokenManagerMock.removeTokens).not.toHaveBeenCalled();
     });
   });
 

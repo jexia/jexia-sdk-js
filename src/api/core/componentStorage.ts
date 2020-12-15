@@ -1,5 +1,6 @@
 // tslint:disable:max-classes-per-file
 import { Tokens } from "./tokenManager";
+import { APIKEY_DEFAULT_ALIAS } from "../../config";
 
 /**
  * fetch an array of all aliases for one access token
@@ -18,6 +19,11 @@ export type tokenList = {[auth: string]: Tokens}
  * @internal
  */
 export interface IStorageComponent {
+  /**
+   * Holds the default key/alias
+   */
+  defaultAuthAlias: string;
+
   isEmpty(): boolean;
 
   /**
@@ -42,6 +48,13 @@ export interface IStorageComponent {
   setDefault(auth: string): void;
 
   /**
+   * clear / Remove a token with a specific key
+   *
+   * @param alias
+   */
+  removeTokens(alias: string): void;
+
+  /**
    * Remove
    */
   clear(): void;
@@ -60,6 +73,10 @@ export class WebStorageComponent implements IStorageComponent {
   private readonly defaultKey = "__default_auth__";
 
   private storage: Storage;
+
+  public get defaultAuthAlias(): string {
+    return this.storage.getItem(this.defaultKey) || "";
+  }
 
   /* get all tokens from the storage */
   private get tokens(): tokenList {
@@ -96,8 +113,26 @@ export class WebStorageComponent implements IStorageComponent {
   }
 
   public getTokens(auth?: string): Tokens {
-    auth = auth || this.storage.getItem(this.defaultKey) as string;
+    auth = auth || this.defaultAuthAlias;
     return this.tokens[auth];
+  }
+
+  public removeTokens(alias: string): void {
+    const storedTokens = this.tokens;
+
+    // no key found, bail out
+    if (!storedTokens[alias]) { return; }
+
+    // fetch and delete all aliases
+    const aliases = this.getTokenAliases(storedTokens[alias].access_token);
+    aliases.forEach(key => delete storedTokens[key]);
+
+    this.storage.setItem(this.storageKey, JSON.stringify(storedTokens));
+
+    // reset to default if needed
+    if(alias === this.storage.getItem(this.defaultKey)) {
+      this.setDefault(APIKEY_DEFAULT_ALIAS);
+    }
   }
 
   public clear(): void {
@@ -116,14 +151,14 @@ export class MemoryStorageComponent implements IStorageComponent {
 
   private tokens: tokenList = {};
 
-  private defaultTokens: string;
+  public defaultAuthAlias: string;
 
   public isEmpty(): boolean {
     return !Object.keys(this.tokens).length;
   }
 
   public setDefault(auth: string): void {
-    this.defaultTokens = auth;
+    this.defaultAuthAlias = auth;
   }
 
   public setTokens(auth: string, tokens: Tokens, defaults: boolean = false): void {
@@ -134,8 +169,22 @@ export class MemoryStorageComponent implements IStorageComponent {
   }
 
   public getTokens(auth?: string): Tokens {
-    auth = auth || this.defaultTokens;
+    auth = auth || this.defaultAuthAlias;
     return this.tokens[auth];
+  }
+
+  public removeTokens(alias: string): void {
+    // no key found, bail out
+    if (!this.tokens[alias]) { return; }
+
+    // fetch and delete all aliases
+    const aliases = this.getTokenAliases(this.tokens[alias].access_token);
+    aliases.forEach(key => delete this.tokens[key]);
+
+    // reset to default if needed
+    if(alias === this.defaultAuthAlias) {
+      this.setDefault(APIKEY_DEFAULT_ALIAS);
+    }
   }
 
   public clear(): void {

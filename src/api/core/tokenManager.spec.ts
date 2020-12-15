@@ -1,7 +1,7 @@
 import * as faker from "faker";
 import { Observable, of, throwError } from "rxjs";
 import { createMockFor, mockRequestError, validClientOpts } from "../../../spec/testUtils";
-import { MESSAGE, getProjectId } from "../../config";
+import { MESSAGE, getProjectId, APIKEY_DEFAULT_ALIAS } from "../../config";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { Logger } from "../logger/logger";
 import { TokenManager, Tokens } from "./tokenManager";
@@ -364,6 +364,18 @@ describe("TokenManager", () => {
     });
   });
 
+  describe("when remove a token", () => {
+    it("should call the token storage Manager", () => {
+      const { subject } = createSubject();
+      const alias = faker.random.word();
+
+      jest.spyOn((subject as any).storage, "removeTokens");
+      subject.removeTokens(alias);
+
+      expect((subject as any).storage.removeTokens).toHaveBeenCalledWith(alias);
+    });
+  });
+
   describe("when the client is terminated", () => {
     it("should have clear the session storage", async () => {
       const { subject, validOptions } = createSubject();
@@ -477,6 +489,32 @@ describe("TokenManager", () => {
         },
         () => done.fail("completed without error"),
       );
+    });
+  });
+
+  describe("validation token alias", () => {
+    it("should return FALSE when no alias is given and its the SYSTEM DEFAULT", () => {
+      const { subject } = createSubject();
+
+      jest.spyOn(subject, "defaultAuthAlias", "get").mockReturnValue(APIKEY_DEFAULT_ALIAS);
+
+      expect(subject.validateTokenAlias()).toBe(false);
+    });
+
+    it("should return the DEFAULT alias if no alias is given and is not the SYSTEM DEFAULT", () => {
+      const { subject } = createSubject();
+      const defaultAlias = faker.random.word();
+
+      jest.spyOn(subject, "defaultAuthAlias", "get").mockReturnValue(defaultAlias);
+
+      expect(subject.validateTokenAlias()).toBe(defaultAlias);
+    });
+
+    it("should return the given alias if all conditions are met", () => {
+      const { subject } = createSubject();
+      const alias = faker.random.word();
+
+      expect(subject.validateTokenAlias(alias)).toBe(alias);
     });
   });
 });
