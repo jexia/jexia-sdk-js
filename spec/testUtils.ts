@@ -200,7 +200,7 @@ export const mockRequestError = ({
   id, request, httpStatus: { code, status }, message,
 });
 
-export const randomNumber = (min: number, max: number): number => Math.floor(Math.random() * (max - min + 1) ) + min
+export const randomNumber = (min: number, max: number): number => Math.floor(Math.random() * (max - min + 1) ) + min;
 
 export * from "./requestMethod";
 export * from "./resource";

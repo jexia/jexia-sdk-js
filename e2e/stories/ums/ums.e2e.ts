@@ -36,7 +36,7 @@ xdescribe("User Management Service", () => {
           user = signedUser;
           joiAssert(user, UserSchema);
           done();
-        })
+        });
       });
 
       it("should create an inactive user", () => {
@@ -86,7 +86,7 @@ xdescribe("User Management Service", () => {
         ums.signIn({ ...credentials, default: true }).subscribe((token) => {
           expect(token).toBeDefined();
           done();
-        })
+        });
       });
 
       it("should get an error if credentials are incorrect", (done) => {

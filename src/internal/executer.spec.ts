@@ -112,7 +112,7 @@ describe("QueryExecuter class", () => {
         subject.getRequestOptions(requestData).pipe(
           switchMap((options: IRequestOptions) => {
             requestOptions = options;
-            return subject.executeRequest(requestData)
+            return subject.executeRequest(requestData);
           }),
         ).subscribe({
           complete: () => {

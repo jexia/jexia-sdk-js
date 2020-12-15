@@ -74,7 +74,7 @@ export class FileUploader<FormDataType extends IFormData<F>, T, F> {
     }
 
     return this.requestAdapter.upload<Array<FilesetInterface<T>>>(this.getUrl(), headers, formData);
-  };
+  }
 
   /**
    * Provide fileset URL

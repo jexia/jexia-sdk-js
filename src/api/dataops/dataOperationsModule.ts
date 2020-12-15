@@ -12,7 +12,7 @@ function datasetNameErrorFactory() {
   // tslint:disable-next-line:only-arrow-functions
   return function() {
     throw new Error("Datasets requires valid names, please assure you provide a string value. \\ne.g. dataOperations.dataset('authors')");
-  }
+  };
 }
 
 /**

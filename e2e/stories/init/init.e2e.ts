@@ -21,7 +21,7 @@ describe("initialize client", () => {
       projectID: faker.random.uuid(),
       key: faker.random.uuid(),
       secret: faker.random.word(),
-    }
+    };
 
     jexiaClient().init(options)
       .then(() => done.fail("successfully initialized"))
@@ -36,7 +36,7 @@ describe("initialize client", () => {
       projectID: process.env.E2E_PROJECT_ID as string,
       key: faker.random.uuid(),
       secret: faker.random.word(),
-    }
+    };
 
     jexiaClient().init(options)
       .then(() => done.fail("successfully initialized"))
