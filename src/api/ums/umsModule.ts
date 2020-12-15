@@ -1,7 +1,7 @@
 import { ReflectiveInjector } from "injection-js";
 import { Observable } from "rxjs";
 import { map, switchMap, pluck, tap } from "rxjs/operators";
-import { API, getApiUrl } from "../../config";
+import { API, getApiUrl, MESSAGE } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { toQueryParams, parseQueryParams } from "../../internal/utils";
@@ -140,8 +140,14 @@ export class UMSModule<
    * Fetch currently authorized user
    * @param alias {string} Authorization alias
    */
-  public getUser(alias: string): Observable<D> {
-    return this.tokenManager.token(alias).pipe(
+  public getUser(alias?: string): Observable<D> {
+    const validatedAlias = this.tokenManager.validateTokenAlias(alias);
+
+    if (!validatedAlias) {
+      throw new Error(MESSAGE.TOKEN_MANAGER.ALIAS_NOT_FOUND);
+    }
+
+    return this.tokenManager.token(validatedAlias as string).pipe(
       switchMap((token: string) => this.requestAdapter.execute<D>(
         this.getUrl(API.UMS.USER),
         { headers: { Authorization: `Bearer ${token}` }},

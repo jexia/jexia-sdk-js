@@ -334,7 +334,7 @@ describe("TokenManager", () => {
       subject.token().subscribe(
         () => done("successfully received the token"),
         (error) => {
-          expect(error.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
+          expect(error.message).toEqual(MESSAGE.TOKEN_MANAGER.TOKEN_NOT_AVAILABLE);
           done();
         },
       );
@@ -347,7 +347,7 @@ describe("TokenManager", () => {
       subject.token("randomToken").subscribe(
         () => done("successfully received the token"),
         (error) => {
-          expect(error.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
+          expect(error.message).toEqual(MESSAGE.TOKEN_MANAGER.TOKEN_NOT_AVAILABLE);
           done();
         },
       );
@@ -414,7 +414,7 @@ describe("TokenManager", () => {
       subject.token().subscribe(
         () => done("successfully received the token"),
         (error) => {
-          expect(error.message).toEqual(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
+          expect(error.message).toEqual(MESSAGE.TOKEN_MANAGER.TOKEN_NOT_AVAILABLE);
           done();
         },
       );
@@ -501,6 +501,14 @@ describe("TokenManager", () => {
       expect(subject.validateTokenAlias()).toBe(false);
     });
 
+    it("should return FALSE when the given alias has never been set", () => {
+      const { subject } = createSubject();
+
+      jest.spyOn((subject as any).storage, "getAllTokenAliases").mockReturnValue([faker.random.word()]);
+
+      expect(subject.validateTokenAlias(faker.random.word())).toBe(false);
+    });
+
     it("should return the DEFAULT alias if no alias is given and is not the SYSTEM DEFAULT", () => {
       const { subject } = createSubject();
       const defaultAlias = faker.random.word();
@@ -513,6 +521,8 @@ describe("TokenManager", () => {
     it("should return the given alias if all conditions are met", () => {
       const { subject } = createSubject();
       const alias = faker.random.word();
+
+      jest.spyOn((subject as any).storage, "getAllTokenAliases").mockReturnValue([alias]);
 
       expect(subject.validateTokenAlias(alias)).toBe(alias);
     });

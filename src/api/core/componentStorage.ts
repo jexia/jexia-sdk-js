@@ -11,6 +11,13 @@ export const getAliases = (accessToken: string, tokens: tokenList): string[] => 
   .map(([alias]) => alias);
 
 /**
+ * fetch an array of all aliases currently used
+ * @internal
+ */
+export const getAllAliases = (tokens: tokenList): string[] => Object.entries(tokens)
+  .map(([alias]) => alias);
+
+/**
  * @internal
  */
 export type tokenList = {[auth: string]: Tokens};
@@ -63,6 +70,11 @@ export interface IStorageComponent {
    * Get all aliases per accessToken
    */
   getTokenAliases(accessToken: string): string[];
+
+  /**
+   * Get all aliases per accessToken
+   */
+  getAllTokenAliases(): string[];
 }
 
 /**
@@ -142,6 +154,10 @@ export class WebStorageComponent implements IStorageComponent {
   public getTokenAliases(accessToken: string): string[] {
     return getAliases(accessToken, this.tokens);
   }
+
+  public getAllTokenAliases(): string[] {
+    return getAllAliases(this.tokens);
+  }
 }
 
 /**
@@ -193,6 +209,10 @@ export class MemoryStorageComponent implements IStorageComponent {
 
   public getTokenAliases(accessToken: string): string[] {
     return getAliases(accessToken, this.tokens);
+  }
+
+  public getAllTokenAliases(): string[] {
+    return getAllAliases(this.tokens);
   }
 }
 
