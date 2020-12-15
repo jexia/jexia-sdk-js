@@ -1,7 +1,7 @@
 export type QueryParam = { key: string; value: any; };
 
 const encodeValue = (v: any) => encodeURIComponent(
-  typeof v === "string" ? v : JSON.stringify(v)
+  typeof v === "string" ? v : JSON.stringify(v),
 );
 const toQueryParam = ({ key, value }: QueryParam) => `${key}=${encodeValue(value)}`;
 

@@ -29,13 +29,13 @@ describe("update record REST API", () => {
       .pipe(
         switchMap(([record]) => dataset
           .update({ [DEFAULT_DATASET.FIELD]: newName })
-          .where(field("id").isEqualTo(record.id))
+          .where(field("id").isEqualTo(record.id)),
         ),
       )
       .subscribe((updateResult) => {
         joiAssert(updateResult, Joi.array()
           .items(DatasetRecordSchema.append({
-            [DEFAULT_DATASET.FIELD]: Joi.string().valid(newName).required()
+            [DEFAULT_DATASET.FIELD]: Joi.string().valid(newName).required(),
           }))
           .length(1),
         );

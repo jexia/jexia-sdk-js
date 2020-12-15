@@ -169,7 +169,7 @@ describe("TokenManager", () => {
 
     describe("get error message", () => {
       it("should return not found error if received 404", () => {
-        const { subject,  } = createSubject();
+        const { subject } = createSubject();
         const projectID = faker.random.uuid();
 
         subject.init({ projectID });
@@ -179,7 +179,7 @@ describe("TokenManager", () => {
       });
 
       it("should return code and status for any not 404 error", () => {
-        const { subject,  } = createSubject();
+        const { subject } = createSubject();
 
         const requestError = mockRequestError({ code: faker.helpers.randomize([401, 403, 407, 500]) });
 
@@ -458,7 +458,7 @@ describe("TokenManager", () => {
         (subject as any).refreshUrl,
         {
           body: { refresh_token: tokens.refresh_token },
-          method: RequestMethod.POST
+          method: RequestMethod.POST,
         },
       );
     });

@@ -14,9 +14,9 @@ const testData = [{
     message: faker.lorem.sentence(),
     like: faker.random.boolean(),
     author: {
-      email: faker.internet.email()
-    }
-  }]
+      email: faker.internet.email(),
+    },
+  }],
 }];
 
 describe("Populate related fields", () => {
@@ -33,7 +33,7 @@ describe("Populate related fields", () => {
       .toPromise();
     joiAssert(comments[0], DatasetRecordSchema.append({
       message: Joi.string().required(),
-      like: Joi.boolean().required()
+      like: Joi.boolean().required(),
     }));
   });
 
@@ -65,7 +65,7 @@ describe("Populate related fields", () => {
       .select()
       .related("comments",
         (c) => c.related("author",
-          (author) => author.fields("email"))
+          (author) => author.fields("email")),
       )
       .toPromise();
 
@@ -82,8 +82,8 @@ describe("Populate related fields", () => {
         (c) => c
           .fields("message")
           .related("author",
-            (author) => author.fields("email")
-          )
+            (author) => author.fields("email"),
+          ),
       )
       .toPromise();
 
@@ -93,7 +93,7 @@ describe("Populate related fields", () => {
       author: Joi.object({
         id: Joi.string().uuid().required(),
         email: Joi.string().required(),
-      })
+      }),
     }));
   });
 });

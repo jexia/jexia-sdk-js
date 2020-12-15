@@ -50,7 +50,7 @@ export class Dataset<
    */
   public constructor(
     @Inject(DataSetName) private datasetName: string,
-    private requestExecuter: RequestExecuter
+    private requestExecuter: RequestExecuter,
   ) {}
 
   /**

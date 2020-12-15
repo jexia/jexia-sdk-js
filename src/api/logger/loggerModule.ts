@@ -6,7 +6,7 @@ export class LoggerModule implements IModule {
 
   constructor(
     private level: LogLevel,
-    private module?: string[]
+    private module?: string[],
     ) {}
 
   public init(coreInjector: ReflectiveInjector) {
@@ -25,7 +25,7 @@ export class LoggerModule implements IModule {
       logger: {
         level: this.level,
         module: this.module,
-      }
+      },
     };
   }
 

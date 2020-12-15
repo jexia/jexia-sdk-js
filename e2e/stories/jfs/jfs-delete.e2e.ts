@@ -23,7 +23,7 @@ describe("delete record REST API", async () => {
   it("deletes single record by id", async () => {
     const record = await fileset
       .upload([{
-        data: { [DEFAULT_FILESET.FIELD]: faker.random.word() }
+        data: { [DEFAULT_FILESET.FIELD]: faker.random.word() },
       }])
       .toPromise();
 

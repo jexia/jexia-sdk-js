@@ -7,13 +7,13 @@ import {
   createEventMessageData, createJwtRefreshCommandMessage, createNotificationMessage,
   createResponseCommandMessage,
   createSubscribeCommandMessage, createUnsubscribeCommandMessage,
-  subscriptionErrors
+  subscriptionErrors,
 } from "../../../spec/rtcHelpers";
 import { createMockFor, deepFreeze, SpyObj } from "../../../spec/testUtils";
 import { MESSAGE } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
 import { Dataset } from "../dataops/dataset";
-import { CommandError, CommandErrorCodes, } from "./realTime.interfaces";
+import { CommandError, CommandErrorCodes } from "./realTime.interfaces";
 import * as datasetWatch from "./watch";
 import * as websocket from "./websocket";
 import { allEvents } from "./websocket";
@@ -77,7 +77,7 @@ describe("Dataset Watch", () => {
       return new Promise((resolve) => {
         setTimeout(() => {
           expect(webSocketMock.send).toHaveBeenCalledWith(
-            JSON.stringify(createSubscribeCommandMessage(["all"], dataset.name).data)
+            JSON.stringify(createSubscribeCommandMessage(["all"], dataset.name).data),
           );
           sub.unsubscribe();
           resolve();
@@ -105,7 +105,7 @@ describe("Dataset Watch", () => {
       return new Promise((resolve) => {
         setTimeout(() => {
           expect(webSocketMock.send).toHaveBeenCalledWith(
-            JSON.stringify(createSubscribeCommandMessage([events], dataset.name).data)
+            JSON.stringify(createSubscribeCommandMessage([events], dataset.name).data),
           );
           sub.unsubscribe();
           resolve();
@@ -122,7 +122,7 @@ describe("Dataset Watch", () => {
         setTimeout(() => {
           firstSub.unsubscribe();
           expect(webSocketMock.send).toHaveBeenCalledWith(
-            JSON.stringify(createSubscribeCommandMessage([events], dataset.name).data)
+            JSON.stringify(createSubscribeCommandMessage([events], dataset.name).data),
           );
           secondSub.unsubscribe();
           done();
@@ -135,7 +135,7 @@ describe("Dataset Watch", () => {
       subs.push(dataset.watch(...events).subscribe());
       setTimeout(() => {
         expect(webSocketMock.send).toHaveBeenCalledWith(
-          JSON.stringify(createSubscribeCommandMessage(events, dataset.name).data)
+          JSON.stringify(createSubscribeCommandMessage(events, dataset.name).data),
         );
         done();
       });
@@ -147,7 +147,7 @@ describe("Dataset Watch", () => {
       subs.push(dataset.watch(events).subscribe());
       setTimeout(() => {
         expect(webSocketMock.send).toHaveBeenCalledWith(
-          JSON.stringify(createSubscribeCommandMessage(events, dataset.name).data)
+          JSON.stringify(createSubscribeCommandMessage(events, dataset.name).data),
         );
         done();
       });
@@ -158,7 +158,7 @@ describe("Dataset Watch", () => {
       subs.push(dataset.watch(...allEvents).subscribe());
       setTimeout(() => {
         expect(webSocketMock.send).toHaveBeenCalledWith(
-          JSON.stringify(createSubscribeCommandMessage(["all"], dataset.name).data)
+          JSON.stringify(createSubscribeCommandMessage(["all"], dataset.name).data),
         );
         done();
       });
@@ -170,7 +170,7 @@ describe("Dataset Watch", () => {
       subs.push(dataset.watch([...events, ...events]).subscribe());
       setTimeout(() => {
         expect(webSocketMock.send).toHaveBeenCalledWith(
-          JSON.stringify(createSubscribeCommandMessage(events, dataset.name).data)
+          JSON.stringify(createSubscribeCommandMessage(events, dataset.name).data),
         );
         done();
       });
@@ -188,7 +188,7 @@ describe("Dataset Watch", () => {
 
         setTimeout(() => {
           expect(webSocketMock.send).not.toHaveBeenCalledWith(
-            JSON.stringify(createSubscribeCommandMessage([action], dataset.name).data)
+            JSON.stringify(createSubscribeCommandMessage([action], dataset.name).data),
           );
           done();
         });
@@ -218,10 +218,10 @@ describe("Dataset Watch", () => {
 
       setTimeout(() => {
         expect(webSocketMock.send).toHaveBeenCalledWith(
-          JSON.stringify(createSubscribeCommandMessage(["deleted"], dataset.name).data)
+          JSON.stringify(createSubscribeCommandMessage(["deleted"], dataset.name).data),
         );
         expect(webSocketMock.send).toHaveBeenCalledWith(
-          JSON.stringify(createSubscribeCommandMessage(["created"], dataset.name).data)
+          JSON.stringify(createSubscribeCommandMessage(["created"], dataset.name).data),
         );
         done();
       });
@@ -239,10 +239,10 @@ describe("Dataset Watch", () => {
         subs.push(dataset.watch("all").subscribe());
         setTimeout(() => {
           expect(webSocketMock.send).not.toHaveBeenCalledWith(
-            JSON.stringify(createSubscribeCommandMessage(["deleted"], dataset.name).data)
+            JSON.stringify(createSubscribeCommandMessage(["deleted"], dataset.name).data),
           );
           expect(webSocketMock.send).toHaveBeenCalledWith(
-            JSON.stringify(createSubscribeCommandMessage(allOtherEvents, dataset.name).data)
+            JSON.stringify(createSubscribeCommandMessage(allOtherEvents, dataset.name).data),
           );
           done();
         });
@@ -359,7 +359,7 @@ describe("Dataset Watch", () => {
 
       setTimeout(() => {
         expect(webSocketMock.send).toHaveBeenCalledWith(
-          JSON.stringify(createUnsubscribeCommandMessage(["all"], dataset.name).data)
+          JSON.stringify(createUnsubscribeCommandMessage(["all"], dataset.name).data),
         );
         done();
       });
@@ -371,7 +371,7 @@ describe("Dataset Watch", () => {
       dataset.watch(events).subscribe().unsubscribe();
       setTimeout(() => {
         expect(webSocketMock.send).toHaveBeenCalledWith(
-          JSON.stringify(createUnsubscribeCommandMessage([events], dataset.name).data)
+          JSON.stringify(createUnsubscribeCommandMessage([events], dataset.name).data),
         );
         done();
       });
@@ -385,7 +385,7 @@ describe("Dataset Watch", () => {
       firstSub.unsubscribe();
       setTimeout(() => {
         expect(webSocketMock.send).toHaveBeenCalledWith(
-          JSON.stringify(createUnsubscribeCommandMessage([events], dataset.name).data)
+          JSON.stringify(createUnsubscribeCommandMessage([events], dataset.name).data),
         );
         done();
       });
@@ -397,7 +397,7 @@ describe("Dataset Watch", () => {
       dataset.watch(...events).subscribe().unsubscribe();
       setTimeout(() => {
         expect(webSocketMock.send).toHaveBeenCalledWith(
-          JSON.stringify(createUnsubscribeCommandMessage(events, dataset.name).data)
+          JSON.stringify(createUnsubscribeCommandMessage(events, dataset.name).data),
         );
         done();
       });
@@ -409,7 +409,7 @@ describe("Dataset Watch", () => {
       dataset.watch(events).subscribe().unsubscribe();
       setTimeout(() => {
         expect(webSocketMock.send).toHaveBeenCalledWith(
-          JSON.stringify(createUnsubscribeCommandMessage(events, dataset.name).data)
+          JSON.stringify(createUnsubscribeCommandMessage(events, dataset.name).data),
         );
         done();
       });
@@ -420,7 +420,7 @@ describe("Dataset Watch", () => {
       dataset.watch(...allEvents).subscribe().unsubscribe();
       setTimeout(() => {
         expect(webSocketMock.send).toHaveBeenCalledWith(
-          JSON.stringify(createUnsubscribeCommandMessage(["all"], dataset.name).data)
+          JSON.stringify(createUnsubscribeCommandMessage(["all"], dataset.name).data),
         );
         done();
       });
@@ -432,7 +432,7 @@ describe("Dataset Watch", () => {
       dataset.watch([...events, ...events]).subscribe().unsubscribe();
       setTimeout(() => {
         expect(webSocketMock.send).toHaveBeenCalledWith(
-          JSON.stringify(createUnsubscribeCommandMessage(events, dataset.name).data)
+          JSON.stringify(createUnsubscribeCommandMessage(events, dataset.name).data),
         );
         done();
       });
@@ -448,7 +448,7 @@ describe("Dataset Watch", () => {
 
       setTimeout(() => {
         expect(webSocketMock.send).not.toHaveBeenCalledWith(
-          JSON.stringify(createUnsubscribeCommandMessage([action], dataset.name).data)
+          JSON.stringify(createUnsubscribeCommandMessage([action], dataset.name).data),
         );
         done();
       });
@@ -463,7 +463,7 @@ describe("Dataset Watch", () => {
 
       setTimeout(() => {
         expect(webSocketMock.send).not.toHaveBeenCalledWith(
-          JSON.stringify(createUnsubscribeCommandMessage(["all"], dataset.name).data)
+          JSON.stringify(createUnsubscribeCommandMessage(["all"], dataset.name).data),
         );
         done();
       });
@@ -479,7 +479,7 @@ describe("Dataset Watch", () => {
       setTimeout(() => {
         firstSub.unsubscribe();
         expect(webSocketMock.send).not.toHaveBeenCalledWith(
-          JSON.stringify(createUnsubscribeCommandMessage(["deleted"], dataset.name).data)
+          JSON.stringify(createUnsubscribeCommandMessage(["deleted"], dataset.name).data),
         );
         done();
       });
@@ -494,7 +494,7 @@ describe("Dataset Watch", () => {
 
       setTimeout(() => {
         expect(webSocketMock.send).toHaveBeenCalledWith(
-          JSON.stringify(createUnsubscribeCommandMessage(["created", "updated"], dataset.name).data)
+          JSON.stringify(createUnsubscribeCommandMessage(["created", "updated"], dataset.name).data),
         );
         done();
       });
@@ -508,7 +508,7 @@ describe("Dataset Watch", () => {
       const { webSocketMock } = createSubject();
       try {
         webSocketMock.onmessage({
-          data: "wrong data"
+          data: "wrong data",
         });
       } catch (error) {
         expect(error.message).toEqual(MESSAGE.RTC.BAD_MESSAGE);
@@ -619,7 +619,7 @@ describe("Dataset Watch", () => {
       const action: EventSubscriptionType = "deleted";
       webSocketMock.onmessage(createEventMessage({ action }, dataset.name));
       expect(webSocketMock.send).toHaveBeenCalledWith(
-        JSON.stringify(createUnsubscribeCommandMessage([action], dataset.name).data)
+        JSON.stringify(createUnsubscribeCommandMessage([action], dataset.name).data),
       );
     });
 

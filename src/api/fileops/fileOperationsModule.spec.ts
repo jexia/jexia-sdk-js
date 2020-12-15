@@ -13,8 +13,8 @@ describe("File Operations Module", () => {
     client = jexiaClient(fetchWithRequestMockOk),
     config = {
       subscribeForTheFileUploading: false,
-      uploadTimeout: 120000
-    }
+      uploadTimeout: 120000,
+    },
   } = {}) => {
     const subject = new FileOperationsModule(formDataMock, config);
     return {

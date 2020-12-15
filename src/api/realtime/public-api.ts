@@ -8,5 +8,5 @@ export {
   Modifier,
 } from "./realTime.interfaces";
 export {
-  Channel
+  Channel,
 } from "./channel";

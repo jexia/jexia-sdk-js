@@ -15,7 +15,7 @@ import {
   FilesetInterface,
   FilesetName,
   IFileStatus,
-  IFormData
+  IFormData,
 } from "../fileops/fileops.interfaces";
 import { FileUploader } from "../fileops/fileUploader";
 import { FilesetMultipart } from "./fileops.interfaces";
@@ -162,7 +162,7 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
     let filesCompleted = 0;
     const allFilesCompleted = new Subject();
     const sharedUploadingProcess = uploadingProcess.pipe(
-      shareReplay()
+      shareReplay(),
     );
     const watcher = this.watch().pipe(
       takeUntil(allFilesCompleted),
@@ -177,14 +177,14 @@ export class Fileset<FormDataType extends IFormData<F>, T, D, F> implements IRes
           fileRecord.status = IFileStatus.COMPLETED;
           filesCompleted++;
           return fileRecord;
-        })
+        }),
       )),
       tap(() => {
         if (filesCompleted === filesUploaded) {
           allFilesCompleted.next();
           allFilesCompleted.complete();
         }
-      })
+      }),
     );
 
     /* Subscribe to watcher before starting to upload files in order to not

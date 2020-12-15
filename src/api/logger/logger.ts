@@ -11,7 +11,11 @@ interface IConsole {
    ERROR - only errors
    NONE - keep silent */
 export enum LogLevel {
-  DEBUG, INFO, WARN, ERROR, NONE
+  DEBUG,
+  INFO,
+  WARN,
+  ERROR,
+  NONE,
 }
 
 /* default configuration for the logger

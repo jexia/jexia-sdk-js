@@ -94,7 +94,7 @@ export class TokenManager {
   private get resolved(): Promise<any[]> {
     return Promise.all([
       this.initPromise,
-      ...Object.values(this.defers)
+      ...Object.values(this.defers),
     ]);
   }
 

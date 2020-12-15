@@ -13,7 +13,7 @@ import {
   RealTimeEventMessage,
   RealTimeMessage,
   RealTimeMessageTypes,
-  SubscriptionArgument
+  SubscriptionArgument,
 } from "./realTime.interfaces";
 
 /**

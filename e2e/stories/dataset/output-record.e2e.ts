@@ -38,7 +38,7 @@ describe("output record fields REST API", () => {
     () => ({
       title: faker.lorem.sentence(5),
       user: fakeUser(),
-    })
+    }),
   );
 
   const testData = Array.from(
@@ -47,7 +47,7 @@ describe("output record fields REST API", () => {
       [FIELD.TITLE]: faker.name.findName(),
       [FIELD.AUTHOR]: fakeUser(),
       [FIELD.COMMENTS]: fakeComments(),
-    })
+    }),
   );
 
   beforeAll(async () => {

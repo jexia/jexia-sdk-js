@@ -1,6 +1,6 @@
 import { ReflectiveInjector } from "injection-js";
-import { Observable } from "rxjs";
-import { map, switchMap, pluck, tap } from "rxjs/operators";
+import { Observable, of } from "rxjs";
+import { map, switchMap, pluck, tap, catchError } from "rxjs/operators";
 import { API, getApiUrl, MESSAGE } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
@@ -71,7 +71,7 @@ export class UMSModule<
   public initOAuth(options: IUMOAuthInitOptions, redirect = true): Observable<string> {
     return this.requestAdapter.execute<{ oauth_url: string }>(
       this.getUrl(API.OAUTH.INIT, false) + parseQueryParams(toQueryParams(options)),
-      { method: RequestMethod.GET }
+      { method: RequestMethod.GET },
     ).pipe(
       pluck("oauth_url"),
       tap((url: string) => {
@@ -92,7 +92,7 @@ export class UMSModule<
 
     return this.requestAdapter.execute<Tokens>(
       this.getUrl(endpoint, false),
-      { body, method: RequestMethod.POST }
+      { body, method: RequestMethod.POST },
     ).pipe(
       map((tokens: Tokens) => {
         this.tokenManager.addTokens(aliases, tokens, options.default);
@@ -125,6 +125,27 @@ export class UMSModule<
     return this.requestAdapter.execute<D>(
       this.getUrl(API.UMS.SIGNUP),
       { body: credentials, method: RequestMethod.POST },
+    );
+  }
+
+  /**
+   * Check if the user is logged in
+   * By default it checks on the token that is marked as DEFAULT otherwise it will use the given alias
+   *
+   * @param alias {string}
+   */
+  public isLoggedIn(alias?: string): Observable<boolean> {
+    const validatedAlias = this.tokenManager.validateTokenAlias(alias);
+
+    if (!validatedAlias) {
+      return of(false);
+    }
+
+    // when the token has been expired, its running automatically the /refresh call to fetch a new one.
+    // So we test just on the error, i.e. when the alias does not exist at all.
+    return this.tokenManager.token(validatedAlias as string).pipe(
+      catchError(() => of(false)),
+      map(val => val !== false),
     );
   }
 

@@ -56,7 +56,7 @@ describe("FieldFilter class", () => {
       testParams({
         value,
         operator: ">",
-        getCriterion: (subject) => subject.isGreaterThan(value)
+        getCriterion: (subject) => subject.isGreaterThan(value),
       });
     });
 
@@ -66,7 +66,7 @@ describe("FieldFilter class", () => {
       testParams({
         value,
         operator: "<",
-        getCriterion: (subject) => subject.isLessThan(value)
+        getCriterion: (subject) => subject.isLessThan(value),
       });
     });
 
@@ -76,7 +76,7 @@ describe("FieldFilter class", () => {
       testParams({
         value,
         operator: "=",
-        getCriterion: (subject) => subject.isEqualTo(value)
+        getCriterion: (subject) => subject.isEqualTo(value),
       });
     });
 
@@ -86,7 +86,7 @@ describe("FieldFilter class", () => {
       testParams({
         value,
         operator: "!=",
-        getCriterion: (subject) => subject.isDifferentFrom(value)
+        getCriterion: (subject) => subject.isDifferentFrom(value),
       });
     });
 
@@ -96,7 +96,7 @@ describe("FieldFilter class", () => {
       testParams({
         value,
         operator: ">=",
-        getCriterion: (subject) => subject.isEqualOrGreaterThan(value)
+        getCriterion: (subject) => subject.isEqualOrGreaterThan(value),
       });
     });
 
@@ -106,7 +106,7 @@ describe("FieldFilter class", () => {
       testParams({
         value,
         operator: "<=",
-        getCriterion: (subject) => subject.isEqualOrLessThan(value)
+        getCriterion: (subject) => subject.isEqualOrLessThan(value),
       });
     });
 
@@ -114,7 +114,7 @@ describe("FieldFilter class", () => {
       testParams({
         value: true,
         operator: "null",
-        getCriterion: (subject) => subject.isNull()
+        getCriterion: (subject) => subject.isNull(),
       });
     });
 
@@ -122,7 +122,7 @@ describe("FieldFilter class", () => {
       testParams({
         value: false,
         operator: "null",
-        getCriterion: (subject) => subject.isNotNull()
+        getCriterion: (subject) => subject.isNotNull(),
       });
     });
 

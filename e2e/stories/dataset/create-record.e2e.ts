@@ -19,9 +19,9 @@ describe("create record REST API", () => {
       .subscribe((result) => {
         joiAssert(result, Joi.array()
           .items(DatasetRecordSchema.append({
-            test_field: Joi.string().valid("name").required()
+            test_field: Joi.string().valid("name").required(),
           }))
-          .length(1)
+          .length(1),
         );
 
         done();
@@ -33,14 +33,14 @@ describe("create record REST API", () => {
       .insert([
         {test_field: "name1"},
         {test_field: "name2"},
-        {test_field: "name3"}
+        {test_field: "name3"},
       ])
       .subscribe((result) => {
         joiAssert(result, Joi.array()
           .items(DatasetRecordSchema.append({
-            test_field: Joi.string().valid("name1", "name2", "name3").required()
+            test_field: Joi.string().valid("name1", "name2", "name3").required(),
           }))
-          .length(3)
+          .length(3),
         );
 
         done();
@@ -55,9 +55,9 @@ describe("create record REST API", () => {
       .subscribe((result) => {
         joiAssert(result, Joi.array()
           .items(DatasetRecordSchema.append({
-            test_field: Joi.string().valid("name").required()
+            test_field: Joi.string().valid("name").required(),
           }))
-          .length(1)
+          .length(1),
         );
 
         done();
