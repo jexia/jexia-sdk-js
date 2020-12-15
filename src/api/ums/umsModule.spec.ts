@@ -390,7 +390,7 @@ describe("UMS Module", () => {
       await init();
 
       subject.isLoggedIn().subscribe(
-        isLoggedIn => expect(isLoggedIn).toBe(false)
+        isLoggedIn => expect(isLoggedIn).toBe(false),
       );
     });
 
@@ -404,7 +404,7 @@ describe("UMS Module", () => {
       await init();
 
       subject.isLoggedIn().subscribe(
-        isLoggedIn => expect(isLoggedIn).toBe(false)
+        isLoggedIn => expect(isLoggedIn).toBe(false),
       );
     });
 
@@ -417,7 +417,7 @@ describe("UMS Module", () => {
       await init();
 
       subject.isLoggedIn().subscribe(
-        isLoggedIn => expect(isLoggedIn).toBe(true)
+        isLoggedIn => expect(isLoggedIn).toBe(true),
       );
     });
   });

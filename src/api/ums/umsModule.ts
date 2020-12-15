@@ -142,7 +142,7 @@ export class UMSModule<
     }
 
     // when the token has been expired, its running automatically the /refresh call to fetch a new one.
-    // So we test just on the error, ie when the alias does not exist at all.
+    // So we test just on the error, i.e. when the alias does not exist at all.
     return this.tokenManager.token(validatedAlias as string).pipe(
       catchError(() => of(false)),
       map(val => val !== false),
