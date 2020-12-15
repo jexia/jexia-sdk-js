@@ -12,7 +12,8 @@
         true,
         "double"
       ],
-      "array-type": [true, "array-simple"]
+      "array-type": [true, "array-simple"],
+      "semicolon": [true, "always"]
     },
     "linterOptions": {
       "exclude": [

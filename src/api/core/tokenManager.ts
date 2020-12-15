@@ -124,7 +124,7 @@ export class TokenManager {
         switchMap(() => this.refresh(aliases)),
         map(({ access_token }: Tokens): string => access_token),
         tap(newAccessToken => this.startRefreshDigest(aliases, newAccessToken)),
-      )
+      );
     };
 
     return from(this.resolved).pipe(
@@ -226,7 +226,7 @@ export class TokenManager {
    * @ignore
    */
   private startRefreshDigest(aliases: string[], accessToken: string) {
-    const delay = delayTokenRefresh(accessToken)
+    const delay = delayTokenRefresh(accessToken);
     const timer = setTimeout(() => {
       this.logger.debug("tokenManager", `refresh ${aliases[0]} token`);
       this.refresh(aliases)

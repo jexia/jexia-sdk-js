@@ -13,7 +13,7 @@ export const getAliases = (accessToken: string, tokens: tokenList): string[] => 
 /**
  * @internal
  */
-export type tokenList = {[auth: string]: Tokens}
+export type tokenList = {[auth: string]: Tokens};
 
 /**
  * @internal
@@ -140,7 +140,7 @@ export class WebStorageComponent implements IStorageComponent {
   }
 
   public getTokenAliases(accessToken: string): string[] {
-    return getAliases(accessToken, this.tokens)
+    return getAliases(accessToken, this.tokens);
   }
 }
 
@@ -192,7 +192,7 @@ export class MemoryStorageComponent implements IStorageComponent {
   }
 
   public getTokenAliases(accessToken: string): string[] {
-    return getAliases(accessToken, this.tokens)
+    return getAliases(accessToken, this.tokens);
   }
 }
 

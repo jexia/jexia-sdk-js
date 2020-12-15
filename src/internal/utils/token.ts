@@ -36,7 +36,7 @@ export function delayTokenRefresh(accessToken: string): number {
   // otherwise just subtract the threshold to get in the safe zone
   return tokenExpired < threshold
     ? tokenExpired / 2
-    : tokenExpired - threshold
+    : tokenExpired - threshold;
 }
 
 /**

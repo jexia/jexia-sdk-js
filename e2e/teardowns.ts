@@ -20,7 +20,7 @@ export const jfs = fileOperations();
 export const rtm = realTime();
 
 export const management = new Management();
-type TypeResource = { id: string }
+type TypeResource = { id: string };
 let client: Client;
 const datasets: Array<{ name: string, id: string }> = [];
 let fileset: { name: string, id: string };

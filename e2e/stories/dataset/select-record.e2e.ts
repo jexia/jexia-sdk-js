@@ -519,7 +519,7 @@ describe("filter records REST API", () => {
               joiAssert(result, expectedResult);
 
               done();
-            })
+            });
         });
       });
 

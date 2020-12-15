@@ -19,14 +19,14 @@ export function CollectConfigurationFactory(modules: IModule[]) {
   // tslint:disable-next-line:only-arrow-functions
   return function() {
     return Client.collectConfiguration(modules);
-  }
+  };
 }
 
 export function RequestAdapterFactory(fetch: Fetch) {
   // tslint:disable-next-line:only-arrow-functions
   return function() {
     return new RequestAdapter(fetch);
-  }
+  };
 }
 
 /**

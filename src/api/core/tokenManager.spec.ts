@@ -144,7 +144,7 @@ describe("TokenManager", () => {
       await subject.init(validOptions)
         .catch((error) => expect(error.message)
           .toEqual(`Authorization failed: 500 Server error`));
-    })
+    });
 
     it("should result promise of itself when authorization succeeded", async () => {
       const { subject, validOptions } = createSubject();

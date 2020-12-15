@@ -1,4 +1,4 @@
-import * as faker from "faker"
+import * as faker from "faker";
 import { untilTokenExpired, delayTokenRefresh, isTokenExpired } from "./token";
 import { createTestToken } from "../../../spec/token";
 
@@ -8,7 +8,7 @@ const futureToken = createTestToken();
 describe("Token utils", () => {
   describe("getting time until token expired", () => {
     it("should return '0' when the token got expired", () => {
-      const time = untilTokenExpired(expiredToken)
+      const time = untilTokenExpired(expiredToken);
       expect(time).toBe(0);
     });
 
@@ -20,7 +20,7 @@ describe("Token utils", () => {
 
   describe("calculating time for delay", () => {
     it("should return '0' when the token got expired", () => {
-      const time = delayTokenRefresh(expiredToken)
+      const time = delayTokenRefresh(expiredToken);
       expect(time).toBe(0);
     });
 
@@ -32,7 +32,7 @@ describe("Token utils", () => {
 
   describe.only("token expired", () => {
     it("should return 'false' when the token got expired", () => {
-      const expired = isTokenExpired(expiredToken)
+      const expired = isTokenExpired(expiredToken);
       expect(expired).toBe(true);
     });
 

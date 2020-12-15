@@ -18,14 +18,14 @@ function credentialsOptions() {
   return {
     ...user(),
     ...signInOptions(),
-  }
+  };
 }
 
 function oAuthOptions() {
   return {
     ...oauth(),
     ...signInOptions(),
-  }
+  };
 }
 
 describe("Sign in body", () => {
