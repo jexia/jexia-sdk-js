@@ -1,6 +1,6 @@
 import { ReflectiveInjector } from "injection-js";
-import { Observable } from "rxjs";
-import { map, switchMap, pluck, tap } from "rxjs/operators";
+import { Observable, of } from "rxjs";
+import { map, switchMap, pluck, tap, catchError } from "rxjs/operators";
 import { API, getApiUrl } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
@@ -125,6 +125,27 @@ export class UMSModule<
     return this.requestAdapter.execute<D>(
       this.getUrl(API.UMS.SIGNUP),
       { body: credentials, method: RequestMethod.POST },
+    );
+  }
+
+  /**
+   * Check if the user is logged in
+   * By default it checks on the token that is marked as DEFAULT otherwise it will use the given alias
+   *
+   * @param alias {string}
+   */
+  public isLoggedIn(alias?: string): Observable<boolean> {
+    const validatedAlias = this.tokenManager.validateTokenAlias(alias);
+
+    if (!validatedAlias) {
+      return of(false);
+    }
+
+    // when the token has been expired, its running automatically the /refresh call to fetch a new one.
+    // So we test just on the error, i.e. when the alias does not exist at all.
+    return this.tokenManager.token(validatedAlias as string).pipe(
+      catchError(() => of(false)),
+      map(val => val !== false),
     );
   }
 

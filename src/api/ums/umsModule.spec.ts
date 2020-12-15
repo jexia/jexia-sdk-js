@@ -381,6 +381,47 @@ describe("UMS Module", () => {
     });
   });
 
+  describe("user is-logged-in", () => {
+    it("should return FALSE when no valid alias has been found", async () => {
+      const { subject, tokenManagerMock, init } = createSubject();
+
+      jest.spyOn((tokenManagerMock as any), "validateTokenAlias").mockReturnValue(false);
+
+      await init();
+
+      subject.isLoggedIn().subscribe(
+        isLoggedIn => expect(isLoggedIn).toBe(false),
+      );
+    });
+
+    it("should return FALSE when the given token does not exists", async () => {
+      const { subject, tokenManagerMock, init } = createSubject();
+      const alias = faker.random.word();
+
+      jest.spyOn((tokenManagerMock as any), "validateTokenAlias").mockReturnValue(alias);
+      jest.spyOn((tokenManagerMock as any), "token").mockReturnValue(of(new Error("Token alias not found")));
+
+      await init();
+
+      subject.isLoggedIn().subscribe(
+        isLoggedIn => expect(isLoggedIn).toBe(false),
+      );
+    });
+
+    it("should return TRUE when the given token exists or a custom default has been set", async () => {
+      const { subject, tokenManagerMock, init } = createSubject();
+      const alias = faker.random.word();
+
+      jest.spyOn((tokenManagerMock as any), "validateTokenAlias").mockReturnValue(alias);
+
+      await init();
+
+      subject.isLoggedIn().subscribe(
+        isLoggedIn => expect(isLoggedIn).toBe(true),
+      );
+    });
+  });
+
   describe("token management", () => {
     it("should set default token by alias", () => {
       const { subject, init, tokenManagerMock } = createSubject();
