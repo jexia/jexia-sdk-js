@@ -60,8 +60,8 @@ describe("Fileset Module", () => {
       booleanField: faker.random.boolean(),
       numberField: faker.random.number(),
       objField: {
-        email: faker.internet.email()
-      }
+        email: faker.internet.email(),
+      },
     };
     const resultExpectation = expect.objectContaining(data);
     jfs.fileset(filesetName).upload([{
@@ -98,7 +98,7 @@ describe("Fileset Module", () => {
       (error) => {
         done(error);
       },
-      () => done("Unexpected RTC error")
+      () => done("Unexpected RTC error"),
     );
     const finishTest = (error?: string) => {
       subscription.unsubscribe();

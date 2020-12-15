@@ -50,7 +50,7 @@ describe("fileUploader", () => {
       tokenManagerMock,
       token,
       requestAdapterMock,
-      subject
+      subject,
     };
   }
 
@@ -79,7 +79,7 @@ describe("fileUploader", () => {
       const files = mockFilesList(faker.random.number({min: 1, max: 5}));
       const fileUploads = files.map(() => ({
         result: faker.random.word(),
-        subject: new Subject()
+        subject: new Subject(),
       }));
       spyOn(subject as any, "uploadFile").and.returnValues(...fileUploads.map((f) => f.subject));
 
@@ -103,7 +103,7 @@ describe("fileUploader", () => {
     it("should append all custom fields to the form data as `data` property", () => {
       const { subject } = createSubject();
       const data = {
-        customField: faker.lorem.sentence(5)
+        customField: faker.lorem.sentence(5),
       };
       (subject as any).uploadFile({ data });
       expect(formDataAppendSpy).toHaveBeenCalledWith("data", JSON.stringify(data));
@@ -124,14 +124,14 @@ describe("fileUploader", () => {
 
     it("should pick a token according to config auth options", (done) => {
       const { subject, tokenManagerMock } = createSubject({
-        config: { auth: "auth" } as any
+        config: { auth: "auth" } as any,
       });
       (subject as any).uploadFile({}).subscribe({
         error: done,
         complete: () => {
           expect(tokenManagerMock.token).toHaveBeenCalledWith("auth");
           done();
-        }
+        },
       });
     });
 
@@ -143,7 +143,7 @@ describe("fileUploader", () => {
         complete: () => {
           expect((subject as any).execute).toHaveBeenCalledWith(token, expect.anything());
           done();
-        }
+        },
       });
     });
 
@@ -161,10 +161,10 @@ describe("fileUploader", () => {
               Authorization: `Bearer ${token}`,
               testHeader,
             },
-            expect.anything()
+            expect.anything(),
           );
           done();
-        }
+        },
       });
     });
 
@@ -178,24 +178,24 @@ describe("fileUploader", () => {
             {
               Authorization: `Bearer ${token}`,
             },
-            expect.any(TestFormData)
+            expect.any(TestFormData),
           );
           done();
-        }
+        },
       });
     });
 
     it("should return an error in case of file upload error", (done) => {
       const uploadError = "Upload file error";
       const { subject } = createSubject({
-        requestAdapterMock: createMockFor(RequestAdapter, { returnValue: Promise.reject(uploadError) })
+        requestAdapterMock: createMockFor(RequestAdapter, { returnValue: Promise.reject(uploadError) }),
       });
       (subject as any).uploadFile({}).subscribe({
         error: (error: string) => {
           expect(error).toEqual(uploadError);
           done();
         },
-        complete: () => done("uploading file has completed without throwing an error")
+        complete: () => done("uploading file has completed without throwing an error"),
       });
     });
 

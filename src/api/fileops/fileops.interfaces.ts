@@ -10,7 +10,7 @@ export type FileOperationsConfig = ModuleConfiguration & {
   /* Timeout for uploading files
      default: 120000
    */
-  uploadTimeout: number
+  uploadTimeout: number,
 };
 
 export const FilesetName = new InjectionToken<string>("FilesetName");
@@ -31,7 +31,7 @@ export type DefaultFilesetFields = "id" | "size" | "name" | "created_at" | "upda
 export enum IFileStatus {
   IN_PROGRESS = "in_progress",
   COMPLETED = "completed",
-  ERROR = "error"
+  ERROR = "error",
 }
 
 /**

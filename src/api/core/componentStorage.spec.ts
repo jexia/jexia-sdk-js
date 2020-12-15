@@ -131,7 +131,7 @@ describe("ComponentStorage", ()  => {
       webStorageComponent.setTokens("alias", tokens);
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
         "__jexia_tokens__",
-        JSON.stringify({ alias: tokens })
+        JSON.stringify({ alias: tokens }),
       );
     });
   });

@@ -8,7 +8,7 @@ import {
   RealTimeCommandTypes,
   RealTimeEventMessage,
   RealTimeMessage,
-  RealTimeMessageTypes
+  RealTimeMessageTypes,
 } from "../src/api/realtime/realTime.interfaces";
 
 export function createSubscribeCommandMessage(action: EventSubscriptionType[],
@@ -27,8 +27,8 @@ export function createPublishMessage(channel: string, data: any, correlationId: 
     data: {
       command: RealTimeCommandTypes.Publish,
       correlation_id: correlationId,
-      arguments: { channel, data }
-    }
+      arguments: { channel, data },
+    },
   };
 }
 
@@ -46,8 +46,8 @@ export function createCommandMessage(command: RealTimeCommandTypes, action: Even
             name: resourceName,
           },
         },
-      }
-    }
+      },
+    },
   };
 }
 
@@ -66,8 +66,8 @@ export function createJwtRefreshCommandMessage(token: string): RealTimeMessage {
 export function createResponseCommandMessage(data: any) {
   return {
     data: JSON.stringify({
-        type: RealTimeMessageTypes.CommandResponse, data
-      }
+        type: RealTimeMessageTypes.CommandResponse, data,
+      },
     )};
 }
 
@@ -85,7 +85,7 @@ export function createEventMessage(messageOptions: Partial<RealTimeEventMessage>
     data: JSON.stringify({
         type: RealTimeMessageTypes.EventMessage,
         data: createEventMessageData(null, messageOptions, dataset),
-      }
+      },
     )};
 }
 

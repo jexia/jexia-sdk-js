@@ -10,39 +10,39 @@ jest.setTimeout(15000); // for the unstable internet connection
 const fields: ISetField[] = [{
   name: "required_field",
   type: "string",
-  constraints: [{ type: "required" }]
+  constraints: [{ type: "required" }],
 }, {
   name: "numeric_field",
   type: "string",
-  constraints: [{ type: "numeric" }]
+  constraints: [{ type: "numeric" }],
 }, {
   name: "alpha_field",
   type: "string",
-  constraints: [{ type: "alpha" }]
+  constraints: [{ type: "alpha" }],
 }, {
   name: "alphanumeric_field",
   type: "string",
-  constraints: [{ type: "alphanumeric" }]
+  constraints: [{ type: "alphanumeric" }],
 }, {
   name: "uppercase_field",
   type: "string",
-  constraints: [{ type: "uppercase" }]
+  constraints: [{ type: "uppercase" }],
 }, {
   name: "lowercase_field",
   type: "string",
-  constraints: [{ type: "lowercase" }]
+  constraints: [{ type: "lowercase" }],
 }, {
   name: "length_field",
   type: "string",
-  constraints: [{ type: "min_length", value: 10 }, { type: "max_length", value: 100 }]
+  constraints: [{ type: "min_length", value: 10 }, { type: "max_length", value: 100 }],
 }, {
   name: "range_field",
   type: "integer",
-  constraints: [{ type: "min", value: 10 }, { type: "max", value: 100 }]
+  constraints: [{ type: "min", value: 10 }, { type: "max", value: 100 }],
 }, {
   name: "regexp_field",
   type: "string",
-  constraints: [{ type: "regexp", value: "^[0-9]{2}-[A-Za-z]{5}$" }]
+  constraints: [{ type: "regexp", value: "^[0-9]{2}-[A-Za-z]{5}$" }],
 }];
 
 const tests: {[key: string]: any} = {
@@ -85,7 +85,7 @@ const tests: {[key: string]: any} = {
     valid_value: "01-Valid",
     invalid_value: "invalid value",
     message: "Validation error: field \"regexp_field\" violates \"regexp\" constraint",
-  }
+  },
 };
 
 describe("Dataset field validations", () => {

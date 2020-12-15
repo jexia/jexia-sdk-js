@@ -16,7 +16,7 @@ const testUsers: IUMSCredentials[] = [];
 const createUser = () => {
   const user = {
     email: faker.internet.email(),
-    password: faker.random.alphaNumeric()
+    password: faker.random.alphaNumeric(),
   };
   testUsers.push(user);
   return user;
@@ -90,7 +90,7 @@ describe("User Management Service CRUD Operations", () => {
     ums.update({ active: false })
       .where(condition)
       .pipe(
-        switchMap(() => ums.select().where(condition))
+        switchMap(() => ums.select().where(condition)),
       )
       .subscribe(([updatedUser]) => {
         expect(updatedUser.active).toBeFalsy();

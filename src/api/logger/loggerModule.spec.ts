@@ -28,8 +28,8 @@ describe("LoggerModule", () => {
       expect(loggerModule.getConfig()).toEqual({
         logger: {
           level: LogLevel.INFO,
-          module: ["TestModule"]
-        }
+          module: ["TestModule"],
+        },
       });
     });
   });

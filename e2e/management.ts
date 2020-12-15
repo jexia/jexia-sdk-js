@@ -72,7 +72,7 @@ export class Management {
   private get headers() {
     return {
       "Authorization": `Bearer ${this.token}`,
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     };
   }
 
@@ -80,13 +80,13 @@ export class Management {
     return this.fetch(api.login, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         email: process.env.E2E_EMAIL,
         password: process.env.E2E_PASSWORD,
         recaptchaToken: process.env.RECAPTCHA_TOKEN,
-      })
+      }),
     }).then((res: any) => res.json())
       .then((tokens: { access_token: string, refresh_token: string}) => {
         this.token = tokens.access_token;
@@ -97,7 +97,7 @@ export class Management {
     return this.fetch(api.dataset.create, {
       method: "POST",
       headers: this.headers,
-      body: JSON.stringify({ name })
+      body: JSON.stringify({ name }),
     })
       .then((response: Response) => response.json());
   }
@@ -105,7 +105,7 @@ export class Management {
   public deleteDataset(id: string): Promise<any> {
     return this.fetch(api.dataset.delete.replace("{dataset_id}", id), {
       method: "DELETE",
-      headers: this.headers
+      headers: this.headers,
     });
   }
 
@@ -113,7 +113,7 @@ export class Management {
     return this.fetch(api.dataset.field.create.replace("{dataset_id}", datasetId), {
       method: "POST",
       headers: this.headers,
-      body: JSON.stringify(field)
+      body: JSON.stringify(field),
     })
       .then((response: Response) => response.json());
   }
@@ -130,7 +130,7 @@ export class Management {
   public deleteChannel(id: string): Promise<void> {
     return this.fetch(api.channel.delete.replace("{channel_id}", id), {
       method: "DELETE",
-      headers: this.headers
+      headers: this.headers,
     })
       .then((response: Response) => response.json());
   }
@@ -139,7 +139,7 @@ export class Management {
     return this.fetch(api.apikey.create, {
       method: "POST",
       headers: this.headers,
-      body: JSON.stringify({ description: "test API key" })
+      body: JSON.stringify({ description: "test API key" }),
     })
       .then((response: Response) => response.json());
   }
@@ -147,7 +147,7 @@ export class Management {
   public deleteApiKey(key: string): Promise<any> {
     return this.fetch(api.apikey.delete.replace("{key}", key), {
       method: "DELETE",
-      headers: this.headers
+      headers: this.headers,
     });
   }
 
@@ -160,7 +160,7 @@ export class Management {
         actions: { read: [], create: [], update: [], delete: [] },
         subjects: keys,
         resources: resources.map((resource) => resource.id),
-      })
+      }),
     })
       .then((response: Response) => response.json());
   }
@@ -168,7 +168,7 @@ export class Management {
   public deletePolicy(id: string): Promise<any> {
     return this.fetch(api.policy.delete.replace("{policy_id}", id), {
       method: "DELETE",
-      headers: this.headers
+      headers: this.headers,
     });
   }
 
@@ -185,9 +185,9 @@ export class Management {
             { key: "key", value: AWS_KEY },
             { key: "secret", value: AWS_SECRET },
             { key: "bucket", value: AWS_BUCKET },
-          ]
-        }
-      })
+          ],
+        },
+      }),
     })
       .then((response: Response) => response.json());
   }
@@ -195,7 +195,7 @@ export class Management {
   public deleteFileset(id: string): Promise<any> {
     return this.fetch(api.fileset.delete.replace("{fileset_id}", id), {
       method: "DELETE",
-      headers: this.headers
+      headers: this.headers,
     });
   }
 
@@ -203,7 +203,7 @@ export class Management {
     return this.fetch(api.fileset.field.create.replace("{fileset_id}", filesetId), {
       method: "POST",
       headers: this.headers,
-      body: JSON.stringify(field)
+      body: JSON.stringify(field),
     })
       .then((response: Response) => response.json());
   }
@@ -215,17 +215,17 @@ export class Management {
       body: JSON.stringify({
         from_resource: {
           namespace: "mimir",
-          resource_id: from.id
+          resource_id: from.id,
         },
         to_resource: {
           namespace: "mimir",
-          resource_id: to.id
+          resource_id: to.id,
         },
         type: {
           from_cardinality: fromCardinality,
           to_cardinality: toCardinality,
-        }
-      })
+        },
+      }),
     })
       .then((response: Response) => response.json());
   }
@@ -258,7 +258,7 @@ export class Management {
   public deleteGateway(id: string): Promise<void> {
     return this.fetch(api.gateways.delete.replace("{gateway_id}", id), {
       method: "DELETE",
-      headers: this.headers
+      headers: this.headers,
     })
       .then((response: Response) => response.json());
   }
@@ -275,7 +275,7 @@ export class Management {
   public deleteFlow(id: string): Promise<void> {
     return this.fetch(api.flows.delete.replace("{flow_id}", id), {
       method: "DELETE",
-      headers: this.headers
+      headers: this.headers,
     })
       .then((response: Response) => response.json());
   }

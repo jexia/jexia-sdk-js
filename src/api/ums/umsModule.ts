@@ -71,7 +71,7 @@ export class UMSModule<
   public initOAuth(options: IUMOAuthInitOptions, redirect = true): Observable<string> {
     return this.requestAdapter.execute<{ oauth_url: string }>(
       this.getUrl(API.OAUTH.INIT, false) + parseQueryParams(toQueryParams(options)),
-      { method: RequestMethod.GET }
+      { method: RequestMethod.GET },
     ).pipe(
       pluck("oauth_url"),
       tap((url: string) => {
@@ -92,7 +92,7 @@ export class UMSModule<
 
     return this.requestAdapter.execute<Tokens>(
       this.getUrl(endpoint, false),
-      { body, method: RequestMethod.POST }
+      { body, method: RequestMethod.POST },
     ).pipe(
       map((tokens: Tokens) => {
         this.tokenManager.addTokens(aliases, tokens, options.default);

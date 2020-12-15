@@ -461,7 +461,7 @@ describe("filter records REST API", () => {
       (v, index) => ({
         [FIELD.STRING]: faker.name.findName(),
         [FIELD.INTEGER]: faker.random.number({ min: index }),
-      })
+      }),
     );
     let sortField: string;
 

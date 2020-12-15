@@ -25,7 +25,7 @@ export class RequestExecuter {
       from(this.systemInit),
       this.getRequestOptions(request),
     ]).pipe(
-      switchMap(([, options]) => this.requestAdapter.execute(URI, options) as Observable<T>)
+      switchMap(([, options]) => this.requestAdapter.execute(URI, options) as Observable<T>),
     );
   }
 

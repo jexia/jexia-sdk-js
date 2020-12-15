@@ -1,7 +1,7 @@
 import { ReflectiveInjector } from "injection-js";
 
 export type ModuleConfiguration = {
-  [key: string]: any
+  [key: string]: any,
 };
 
 /**

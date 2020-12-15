@@ -71,7 +71,7 @@ describe("Real Time Communication", () => {
         .insert([
           { test_field: "name1" },
           { test_field: "name2" },
-          { test_field: "name3" }
+          { test_field: "name3" },
         ])
         .toPromise();
       recordIds = records.map((record) => record.id);

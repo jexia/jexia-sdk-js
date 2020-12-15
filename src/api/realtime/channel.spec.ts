@@ -2,7 +2,7 @@ import * as faker from "faker";
 import {
   createPublishMessage,
   createSubscribeCommandMessage,
-  createUnsubscribeCommandMessage
+  createUnsubscribeCommandMessage,
 } from "../../../spec/rtcHelpers";
 import { createMockFor } from "../../../spec/testUtils";
 import { RequestExecuter } from "../../internal/executer";
@@ -16,7 +16,7 @@ function createSubject({
   injectorMock = createMockFor(["get"]) as any,
   websocketMock = createMockFor(WebSocket) as any,
   name = faker.random.word(),
-  requestExecuterMock = createMockFor(RequestExecuter, { returnValue: Promise.resolve() })
+  requestExecuterMock = createMockFor(RequestExecuter, { returnValue: Promise.resolve() }),
 } = {}) {
   injectorMock.get.mockImplementation(() => requestExecuterMock);
   websocket.start(websocketMock, () => Promise.resolve("token"));
@@ -28,7 +28,7 @@ function createSubject({
     injectorMock,
     websocketMock,
     name,
-    requestExecuterMock
+    requestExecuterMock,
   };
 }
 
@@ -49,7 +49,7 @@ describe("Channel", () => {
       subject.subscribe();
       setTimeout(() => {
         expect(websocketMock.send).toHaveBeenCalledWith(
-          JSON.stringify(createSubscribeCommandMessage(["published"], subject.name, ResourceType.Channel).data)
+          JSON.stringify(createSubscribeCommandMessage(["published"], subject.name, ResourceType.Channel).data),
         );
         done();
       });
@@ -68,7 +68,7 @@ describe("Channel", () => {
             expect(error).toEqual(new Error(socketError));
             done();
           },
-          complete: () => done.fail("should not complete")
+          complete: () => done.fail("should not complete"),
         });
       });
     });
@@ -81,7 +81,7 @@ describe("Channel", () => {
       subscription.unsubscribe();
       setTimeout(() => {
         expect(websocketMock.send).toHaveBeenCalledWith(
-          JSON.stringify(createUnsubscribeCommandMessage(["published"], subject.name, ResourceType.Channel).data)
+          JSON.stringify(createUnsubscribeCommandMessage(["published"], subject.name, ResourceType.Channel).data),
         );
         done();
       });
@@ -113,7 +113,7 @@ describe("Channel", () => {
       subject.publish(message);
       setTimeout(() => {
         expect(websocketMock.send).toHaveBeenCalledWith(
-          JSON.stringify(createPublishMessage(subject.name, message, correlationId))
+          JSON.stringify(createPublishMessage(subject.name, message, correlationId)),
         );
         done();
       });
@@ -129,7 +129,7 @@ describe("Channel", () => {
         resourceName: subject.name,
         method: RequestMethod.GET,
         body: {},
-        queryParams: []
+        queryParams: [],
       });
     });
 
@@ -144,7 +144,7 @@ describe("Channel", () => {
         resourceName: subject.name,
         method: RequestMethod.GET,
         body: {},
-        queryParams: query.compileToQueryParams()
+        queryParams: query.compileToQueryParams(),
       });
     });
   });
