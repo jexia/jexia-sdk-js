@@ -18,8 +18,9 @@ export const MESSAGE = {
     NOT_OPEN_MESSAGE: "The connection seems to be closed. Did you properly initialize the RTC Module by calling the init method? Or maybe you terminated the RTC Module early?",
     NO_WESBSOCKET_PRESENT: "The RTC Module seems to be missing a valid websocket object. Did you properly initialize the RTC Module by calling the init method?",
   },
-  TokenManager: {
+  TOKEN_MANAGER: {
     TOKEN_NOT_AVAILABLE: "You need to log in before you can access the token.",
+    ALIAS_NOT_FOUND: "No tokens found for this alias or DEFAULT alias.",
   },
   FILESET: {
     UPLOADING_FILE_ERROR: "Couldn't upload a file: ",

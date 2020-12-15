@@ -3,7 +3,7 @@ import * as faker from "faker";
 import { ReflectiveInjector } from "injection-js";
 import { of } from "rxjs";
 import { createMockFor, SpyObj } from "../../../spec/testUtils";
-import { API, getApiUrl } from "../../config";
+import { API, getApiUrl, MESSAGE } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { deferPromise, parseQueryParams, toQueryParams } from "../../internal/utils";
@@ -442,9 +442,18 @@ describe("UMS Module", () => {
   describe("user management", () => {
 
     describe("get current user", () => {
+      it("should return error if alias does not exists", async () => {
+        const { subject, signInOptions, tokenManagerMock, systemDefer, init } = createSubject();
+        jest.spyOn(tokenManagerMock, "token");
+        systemDefer.resolve();
+        await init();
+        expect(() => subject.getUser(signInOptions.alias)).toThrow(MESSAGE.TOKEN_MANAGER.ALIAS_NOT_FOUND);
+      });
+
       it("should get token from token manager by provided alias", async () => {
         const { subject, signInOptions, tokenManagerMock, systemDefer, init } = createSubject();
         jest.spyOn(tokenManagerMock, "token");
+        jest.spyOn((tokenManagerMock as any), "validateTokenAlias").mockReturnValue(signInOptions.alias);
         systemDefer.resolve();
         await init();
         await subject.getUser(signInOptions.alias);
@@ -452,7 +461,8 @@ describe("UMS Module", () => {
       });
 
       it("should call correct API to get current user", async () => {
-        const { subject, access_token, signInOptions, requestAdapterMock, systemDefer, init } = createSubject();
+        const { subject, access_token, signInOptions, requestAdapterMock, systemDefer, init, tokenManagerMock } = createSubject();
+        jest.spyOn((tokenManagerMock as any), "validateTokenAlias").mockReturnValue(signInOptions.alias);
         systemDefer.resolve();
         await init();
         await subject.getUser(signInOptions.alias).subscribe();

@@ -131,7 +131,7 @@ export class TokenManager {
       map(() => {
         const tokens = this.storage.getTokens(auth);
         if (!tokens) {
-          throw new Error(MESSAGE.TokenManager.TOKEN_NOT_AVAILABLE);
+          throw new Error(MESSAGE.TOKEN_MANAGER.TOKEN_NOT_AVAILABLE);
         }
         return tokens.access_token;
       }),
@@ -350,6 +350,11 @@ export class TokenManager {
   public validateTokenAlias(alias?: string): boolean | string {
     // bail out if the alias is not set and the default is set to the SYSTEM DEFAULT
     if (!alias && this.defaultAuthAlias === APIKEY_DEFAULT_ALIAS) {
+      return false;
+    }
+
+    // bail out if the alias has never been used
+    if (alias && !this.storage.getAllTokenAliases().includes(alias)) {
       return false;
     }
 
