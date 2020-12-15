@@ -1,3 +1,10 @@
+# [5.7.0](https://github.com/jexia/jexia-sdk-js/compare/v5.6.0...v5.7.0) (2020-12-15)
+
+
+### Features
+
+* **ums:** introduce isLoggedIn method ([#193](https://github.com/jexia/jexia-sdk-js/issues/193)) ([5b0a824](https://github.com/jexia/jexia-sdk-js/commit/5b0a824d782556b4d51199edcf2234233dbbc182))
+
 # [5.6.0](https://github.com/jexia/jexia-sdk-js/compare/v5.5.0...v5.6.0) (2020-12-15)
 
 
