@@ -1,3 +1,10 @@
+# [5.6.0](https://github.com/jexia/jexia-sdk-js/compare/v5.5.0...v5.6.0) (2020-12-15)
+
+
+### Features
+
+* **ums:** introduce sign-out ([#192](https://github.com/jexia/jexia-sdk-js/issues/192)) ([febe179](https://github.com/jexia/jexia-sdk-js/commit/febe1791f1e2f1014f0db4afcad47004d92e5418))
+
 # [5.5.0](https://github.com/jexia/jexia-sdk-js/compare/v5.4.2...v5.5.0) (2020-12-11)
 
 
