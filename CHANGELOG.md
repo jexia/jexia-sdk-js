@@ -1,3 +1,10 @@
+# [5.8.0](https://github.com/jexia/jexia-sdk-js/compare/v5.7.0...v5.8.0) (2020-12-15)
+
+
+### Features
+
+* **ums:** getUser can fallback on the default alias if set ([#196](https://github.com/jexia/jexia-sdk-js/issues/196)) ([650deec](https://github.com/jexia/jexia-sdk-js/commit/650deecf587de9d600595b1ad73ac92a4639b93d))
+
 # [5.7.0](https://github.com/jexia/jexia-sdk-js/compare/v5.6.0...v5.7.0) (2020-12-15)
 
 
