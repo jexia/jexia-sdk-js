@@ -6,5 +6,5 @@ export const UserSchema = Joi.object().keys({
   active: Joi.boolean().required(),
   confirmed_at: Joi.when("active", { is: true, then: Joi.string(), otherwise: null }).required(),
   created_at: Joi.string().required(),
-  updated_at: Joi.string().required()
+  updated_at: Joi.string().required(),
 });

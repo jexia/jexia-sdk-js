@@ -62,7 +62,7 @@ describe("delete record REST API", () => {
         (error) => {
           joiAssert(error, BAD_REQUEST_ERROR);
           done();
-        }
+        },
       );
   });
 });

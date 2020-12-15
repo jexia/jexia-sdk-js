@@ -6,7 +6,7 @@ import {
   IHTTPResponse,
   IRequestError,
   IRequestOptions,
-  RequestMethod
+  RequestMethod,
 } from "./requestAdapter.interfaces";
 
 /**
@@ -27,7 +27,7 @@ export class RequestAdapter {
     const requestOptions: IRequestOptions = {
       body: JSON.stringify(opt.body),
       headers: opt.headers,
-      method: opt.method
+      method: opt.method,
     };
     return from(this.fetch(uri, requestOptions)).pipe(
       tap((response) => {
@@ -71,8 +71,8 @@ export class RequestAdapter {
           request,
           httpStatus: {
             code: response.status,
-            status: response.statusText
-          }
+            status: response.statusText,
+          },
         } as IRequestError;
       }),
     );

@@ -101,7 +101,7 @@ describe("Attach/detach related resources", () => {
               email: Joi.string().email().required().valid(author.email),
             }),
           }),
-        ).length(1)
+        ).length(1),
       });
 
       joiAssert(post, expectedPostSchema);
@@ -174,7 +174,7 @@ describe("Attach/detach related resources", () => {
           DatasetRecordSchema.append({
             message: Joi.string().required().valid(firstPostComment.message),
             like: Joi.boolean().required().valid(firstPostComment.like),
-          })
+          }),
         ).length(1);
 
       joiAssert(comments, expectedCommentsSchema);

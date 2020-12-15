@@ -62,7 +62,7 @@ describe("QueryExecuter class", () => {
         [
           getApiUrl({ projectID, zone }),
           ResourceEndpoint[mockRequest.resourceType],
-          mockRequest.resourceName
+          mockRequest.resourceName,
         ].join("/"),
       );
     });
@@ -121,7 +121,7 @@ describe("QueryExecuter class", () => {
               requestOptions,
             );
             done();
-          }
+          },
         });
       });
     });
@@ -202,10 +202,10 @@ describe("QueryExecuter class", () => {
                 headers: {Authorization: `Bearer ${validToken}`},
                 body: fakeBody,
                 method,
-              }
+              },
             );
             done();
-          }
+          },
         });
       });
     });
@@ -238,7 +238,7 @@ describe("QueryExecuter class", () => {
     it("should throw server errors back to the caller",(done) => {
       const serverError = "Server error";
       const { subject } = createSubject({
-        reqAdapterMock: requestAdapterMockFactory().failedExecution(serverError)
+        reqAdapterMock: requestAdapterMockFactory().failedExecution(serverError),
       });
       const mockBody = { method: mockRequest.method, body: {} };
 

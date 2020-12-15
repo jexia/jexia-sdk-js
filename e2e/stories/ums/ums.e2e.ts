@@ -65,7 +65,7 @@ xdescribe("User Management Service", () => {
             joiAssert(createdUser, UserSchema.append({
               bool: Joi.boolean().required(),
               num: Joi.number().required(),
-              str: Joi.string().required()
+              str: Joi.string().required(),
             }));
             done();
           });
@@ -126,7 +126,7 @@ xdescribe("User Management Service", () => {
           .subscribe((records) => {
             joiAssert(records, Joi.array()
               .items(DatasetRecordSchema.append({
-                name: Joi.string().valid("testRecord").required()
+                name: Joi.string().valid("testRecord").required(),
               }))
               .length(1));
 
@@ -274,7 +274,7 @@ xdescribe("User Management Service", () => {
             error: (err) => {
               joiAssert(err, BackendErrorSchema);
               done();
-            }
+            },
           });
       });
 
@@ -287,7 +287,7 @@ xdescribe("User Management Service", () => {
           .subscribe((records) => {
             joiAssert(records, Joi.array()
               .items(DatasetRecordSchema.append({
-                name: Joi.string().valid("testRecord").required()
+                name: Joi.string().valid("testRecord").required(),
               })).length(1));
             done();
           }, done.fail);
@@ -301,7 +301,7 @@ xdescribe("User Management Service", () => {
             error: (err) => {
               joiAssert(err, BackendErrorSchema);
               done();
-            }
+            },
           });
       });
 
@@ -314,7 +314,7 @@ xdescribe("User Management Service", () => {
             error: (err) => {
               joiAssert(err, BackendErrorSchema);
               done();
-            }
+            },
           });
       });
 
@@ -326,7 +326,7 @@ xdescribe("User Management Service", () => {
           .subscribe((records) => {
             joiAssert(records, Joi.array()
               .items(DatasetRecordSchema.append({
-                name: Joi.string().valid("testRecord").required()
+                name: Joi.string().valid("testRecord").required(),
               }))
               .length(1));
 

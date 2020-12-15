@@ -146,7 +146,7 @@ export function combineCriteria(criteria: IFilteringCriterion): IFilteringCriter
  * @returns IFilteringCriterion The filtering criterion
  */
 export function toFilteringCriterion<T>(
-  filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>
+  filter: IFilteringCriterion<T> | IFilteringCriterionCallback<T>,
 ): IFilteringCriterion<T> {
   return typeof filter === "function"
     ? filter((f) => new FieldFilter(f))

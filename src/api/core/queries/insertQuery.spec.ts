@@ -33,7 +33,7 @@ describe("InsertQuery class", () => {
       body: [fakeRecord],
       resourceType,
       resourceName,
-      queryParams: []
+      queryParams: [],
     });
   });
 });

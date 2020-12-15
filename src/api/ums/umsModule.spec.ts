@@ -57,7 +57,7 @@ describe("UMS Module", () => {
       [TokenManager, tokenManagerMock],
       [RequestAdapter, requestAdapterMock],
       [AuthOptions, authOptions],
-      [RequestExecuter, requestExecuterMock]
+      [RequestExecuter, requestExecuterMock],
     ]);
     injectorMock.get.mockImplementation((key: any) => injectorMap.get(key));
     injectorMock.resolveAndCreateChild.mockImplementation(() => injectorMock);
@@ -79,7 +79,7 @@ describe("UMS Module", () => {
       authOptions,
       init() {
         return subject.init(injectorMock);
-      }
+      },
     };
   }
 
@@ -251,8 +251,8 @@ describe("UMS Module", () => {
         subject.getUrl(API.UMS.SIGNUP),
         {
           body: user,
-          method: "POST"
-        }
+          method: "POST",
+        },
       );
     });
 
@@ -268,8 +268,8 @@ describe("UMS Module", () => {
             ...user,
             extraField: true,
           },
-          method: "POST"
-        }
+          method: "POST",
+        },
       );
     });
   });
@@ -288,8 +288,8 @@ describe("UMS Module", () => {
           subject.getUrl(API.AUTH, false),
           {
             body: signInParams.body,
-            method: RequestMethod.POST
-          }
+            method: RequestMethod.POST,
+          },
         );
       });
 
@@ -324,8 +324,8 @@ describe("UMS Module", () => {
           subject.getUrl(signInParams.endpoint, false),
           {
             body: signInParams.body,
-            method: RequestMethod.POST
-          }
+            method: RequestMethod.POST,
+          },
         );
       });
 

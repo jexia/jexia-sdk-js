@@ -5,6 +5,8 @@
       "trailing-comma": [
         true,
         {
+          "multiline": "always",
+          "singleline": "never",
           "esSpecCompliant": true
         }
       ],

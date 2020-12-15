@@ -23,7 +23,7 @@ describe("Real Time Module", () => {
     const injectorMap = new Map<any, any>([
       [TokenManager, tokenManagerMock],
       [AuthOptions, validClientOpts],
-      [RequestExecuter, createMockFor(RequestExecuter)]
+      [RequestExecuter, createMockFor(RequestExecuter)],
     ]);
     injectorMock.get.mockImplementation((key: any) => injectorMap.get(key));
     injectorMock.resolveAndCreateChild.mockImplementation(() => injectorMock);

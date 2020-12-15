@@ -5,7 +5,7 @@ jest.setTimeout(15000);
 
 const fields: ISetField[] = [{
   name: "name",
-  type: "string"
+  type: "string",
 }, {
   name: "age",
   type: "integer",

@@ -10,7 +10,7 @@ import {
   RealTimeCommandResponse,
   RealTimeCommandTypes,
   RealTimeEventMessage,
-  RealTimeStoredMessage
+  RealTimeStoredMessage,
 } from "./realTime.interfaces";
 import { realTimeCommand, subscribeEventMessage, unsubscribeEventMessage, wsReadyDefer } from "./websocket";
 
@@ -38,20 +38,20 @@ export class Channel<T = any> extends Observable<RealTimeEventMessage<T>> {
   constructor(
     readonly injector: ReflectiveInjector,
     readonly websocketFactory: () => IWebSocket,
-    readonly name: string
+    readonly name: string,
   ) {
     super((observer) => {
       wsReadyDefer.promise
         .then(() => subscribeEventMessage(
-          this.websocketFactory(), ["published"], name, ResourceType.Channel, observer)
+          this.websocketFactory(), ["published"], name, ResourceType.Channel, observer),
         )
         .catch((error: any) => observer.error(error));
 
       return () => wsReadyDefer.promise
         .then(() => unsubscribeEventMessage(
-          this.websocketFactory(), ["published"], name, ResourceType.Channel, observer
+          this.websocketFactory(), ["published"], name, ResourceType.Channel, observer,
         )
-        .catch(() => undefined)
+        .catch(() => undefined),
       );
     });
   }
@@ -68,7 +68,7 @@ export class Channel<T = any> extends Observable<RealTimeEventMessage<T>> {
           correlation_id: Math.random().toString(),
           arguments: { channel: this.name, data },
         });
-      })
+      }),
     );
   }
 
@@ -96,7 +96,7 @@ export class Channel<T = any> extends Observable<RealTimeEventMessage<T>> {
       resourceName: this.name,
       method: RequestMethod.GET,
       body: {},
-      queryParams: query.compileToQueryParams()
+      queryParams: query.compileToQueryParams(),
     });
   }
 }

@@ -9,7 +9,7 @@ import { FileUploader } from "./fileUploader";
 
 const defaultConfiguration: FileOperationsConfig = {
   uploadWaitForCompleted: false,
-  uploadTimeout: 120000
+  uploadTimeout: 120000,
 };
 
 export class FileOperationsModule<FormDataType extends IFormData<F>, F> implements IModule {

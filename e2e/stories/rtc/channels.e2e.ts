@@ -25,7 +25,7 @@ describe("Real Time Channels Communication", () => {
     const payload = {
       n: faker.random.number(),
       b: faker.random.boolean(),
-      s: faker.random.word()
+      s: faker.random.word(),
     };
     beforeAll(() => channel = rtm.channel(channelName));
     afterAll(() => subscription && subscription.unsubscribe());
@@ -115,7 +115,7 @@ describe("Real Time Channels Communication", () => {
           expect(error).toEqual(expectedError);
           done();
         },
-        () => done("error has not been received")
+        () => done("error has not been received"),
       );
     });
 
@@ -128,7 +128,7 @@ describe("Real Time Channels Communication", () => {
           expect(error).toEqual(expectedError);
           done();
         },
-        () => done("error has not been received")
+        () => done("error has not been received"),
       );
     });
   });

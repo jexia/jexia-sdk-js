@@ -23,5 +23,5 @@ export const MESSAGE = {
   },
   FILESET: {
     UPLOADING_FILE_ERROR: "Couldn't upload a file: ",
-  }
+  },
 };

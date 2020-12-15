@@ -118,7 +118,7 @@ export class Query<T = any> {
      */
     if (this.fields.length) {
       compiledQueryOptions.outputs = this.fields.map(
-        (field) => typeof field === "object" ? this.compileAggregation(field) : field
+        (field) => typeof field === "object" ? this.compileAggregation(field) : field,
       );
     }
 
@@ -150,7 +150,7 @@ export class Query<T = any> {
     if (compiled.order) {
       // order should be multiple key/value entries instead of a single order=[]
       params.push(
-        ...compiled.order.map((value: any) => ({ key: "order", value }))
+        ...compiled.order.map((value: any) => ({ key: "order", value })),
       );
     }
 

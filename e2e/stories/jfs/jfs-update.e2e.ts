@@ -26,7 +26,7 @@ describe("update record REST API", async () => {
 
     const record = await fileset
       .upload([{
-        data: { [DEFAULT_DATASET.FIELD]: faker.name.findName() }
+        data: { [DEFAULT_DATASET.FIELD]: faker.name.findName() },
       }])
       .toPromise();
 
@@ -37,9 +37,9 @@ describe("update record REST API", async () => {
 
     joiAssert(updateResult, Joi.array()
       .items(FilesetRecordSchema.append({
-        [DEFAULT_DATASET.FIELD]: Joi.string().valid(newName).required()
+        [DEFAULT_DATASET.FIELD]: Joi.string().valid(newName).required(),
       }))
-      .length(1)
+      .length(1),
     );
   });
 
@@ -52,7 +52,7 @@ describe("update record REST API", async () => {
       .upload([ {
         data: {
           [DEFAULT_DATASET.FIELD]: originalName,
-          [randomField]: faker.lorem.sentence(4)
+          [randomField]: faker.lorem.sentence(4),
         },
       }])
       .toPromise();
@@ -70,7 +70,7 @@ describe("update record REST API", async () => {
         [DEFAULT_DATASET.FIELD]: originalName,
         [randomField]: newRandomValue,
       }))
-      .length(1)
+      .length(1),
     );
   });
 

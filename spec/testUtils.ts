@@ -162,7 +162,7 @@ export const fetchWithRequestMockOk = (uri: string, opts?: IRequestOptions): Pro
   return Promise.resolve({
     text: () => Promise.resolve(JSON.stringify({
       access_token: "access_token",
-      refresh_token: "refresh_token"
+      refresh_token: "refresh_token",
     })),
     ok: true,
     status: 200,

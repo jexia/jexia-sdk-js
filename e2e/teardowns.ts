@@ -7,7 +7,7 @@ import {
   LoggerModule,
   LogLevel,
   realTime,
-  UMSModule
+  UMSModule,
 } from "../src/node";
 import { FieldType, ISetField, Management } from "./management";
 
@@ -67,7 +67,7 @@ export const init = async (
       type: "string",
       constraints: [
         { type: "required" },
-      ]
+      ],
     });
   } else {
     for (const field of fields) {
@@ -148,7 +148,7 @@ export const initForRelations = async () => {
 
   relations.push(
     await management.createRelation(posts, comments),
-    await management.createRelation(comments, author, "ONE", "ONE")
+    await management.createRelation(comments, author, "ONE", "ONE"),
   );
 
   datasets.push(posts, comments, author);
