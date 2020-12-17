@@ -30,7 +30,11 @@ export class UMSModule<
 
   private basePath: string;
 
-  public currentUser: D | null = null;
+  private currentUserObject: D | null = null;
+
+  public get currentUser(): D | null {
+    return this.currentUserObject;
+  }
 
   constructor() {
     /* users tend to init module without a new operator, throw a hint error */
@@ -108,7 +112,7 @@ export class UMSModule<
   /**
    * Signs out a user
    * - by just removing the token that belongs to the user/alias
-   * - clear the currentUser object
+   * - clear the currentUserObject object
    *
    * By default it checks on the token that is marked as DEFAULT otherwise it will use the given alias
    *
@@ -123,7 +127,7 @@ export class UMSModule<
 
     this.tokenManager.removeTokens(validatedAlias as string);
 
-    this.currentUser = null;
+    this.currentUserObject = null;
   }
 
   /**
@@ -163,7 +167,7 @@ export class UMSModule<
       catchError(() => of(false)),
       map(val => val !== false),
       concatMap(isLoggedIn => iif(
-        () => isLoggedIn && this.currentUser === null,
+        () => isLoggedIn && this.currentUserObject === null,
         getUser(),
         of(isLoggedIn))),
     );
@@ -193,7 +197,7 @@ export class UMSModule<
         this.getUrl(API.UMS.USER),
         { headers: { Authorization: `Bearer ${token}` }},
       )),
-      tap(user => this.currentUser = user),
+      tap(user => this.currentUserObject = user),
     );
   }
 

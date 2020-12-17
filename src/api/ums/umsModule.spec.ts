@@ -381,7 +381,7 @@ describe("UMS Module", () => {
       const { subject, init, userResponse } = createSubject({ tokenAlias });
 
       await init();
-      subject.currentUser = userResponse;
+      (subject as any).currentUserObject = userResponse;
       subject.signOut(tokenAlias);
 
       expect(subject.currentUser).toBeNull();
@@ -434,7 +434,7 @@ describe("UMS Module", () => {
       const { subject, init, userResponse } = createSubject();
 
       await init();
-      subject.currentUser = null;
+      (subject as any).currentUserObject = null;
 
       await subject.isLoggedIn().subscribe();
 
@@ -447,7 +447,7 @@ describe("UMS Module", () => {
       const { subject, init, userResponse } = createSubject();
 
       await init();
-      subject.currentUser = {
+      (subject as any).currentUserObject = {
         email: faker.internet.email(),
         id: faker.random.uuid(),
       };
