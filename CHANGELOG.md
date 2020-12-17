@@ -1,3 +1,10 @@
+# [5.10.0](https://github.com/jexia/jexia-sdk-js/compare/v5.9.0...v5.10.0) (2020-12-17)
+
+
+### Features
+
+* **ums:** introduce switch user ([#198](https://github.com/jexia/jexia-sdk-js/issues/198)) ([0cb02d5](https://github.com/jexia/jexia-sdk-js/commit/0cb02d53562fc161abe3fba8b7d062b5954378b5))
+
 # [5.9.0](https://github.com/jexia/jexia-sdk-js/compare/v5.8.0...v5.9.0) (2020-12-17)
 
 
