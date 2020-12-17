@@ -366,7 +366,7 @@ describe("UMS Module", () => {
   });
 
   describe("user sign-out", () => {
-    it("should clear tokens when a valid alias is given", async () => {
+    it("should clear tokens", async () => {
       const tokenAlias = faker.random.word();
       const { subject, tokenManagerMock, init } = createSubject({ tokenAlias });
 
