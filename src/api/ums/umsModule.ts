@@ -112,7 +112,7 @@ export class UMSModule<
   /**
    * Signs out a user
    * - by just removing the token that belongs to the user/alias
-   * - clear the currentUserObject object
+   * - clear the currentUser object
    *
    * By default it checks on the token that is marked as DEFAULT otherwise it will use the given alias
    *
