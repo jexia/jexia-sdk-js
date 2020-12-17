@@ -460,15 +460,22 @@ describe("UMS Module", () => {
     });
   });
 
-  describe("token management", () => {
+  describe("switch user", () => {
     it("should set default token by alias", () => {
-      const { subject, init, tokenManagerMock } = createSubject();
-      const alias = faker.internet.email();
+      const { subject, init, tokenManagerMock, signInOptions } = createSubject({ tokenValidatedResult: true });
       init();
-      subject.setDefault(alias);
-      expect(tokenManagerMock.setDefault).toHaveBeenCalledWith(alias);
+      subject.switchUser(signInOptions.alias);
+      expect(tokenManagerMock.setDefault).toHaveBeenCalledWith(signInOptions.alias);
     });
 
+    it("should throw an error when the alias has not been found", () => {
+      const { subject, init, signInOptions } = createSubject({ tokenValidatedResult: false });
+      init();
+      expect(() => subject.switchUser(signInOptions.alias)).toThrow(MESSAGE.TOKEN_MANAGER.ALIAS_NOT_FOUND);
+    });
+  });
+
+  describe("token management", () => {
     it("should reset to default token", () => {
       const { subject, init, tokenManagerMock } = createSubject();
       init();
