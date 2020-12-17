@@ -173,8 +173,29 @@ export class UMSModule<
     );
   }
 
-  public setDefault(alias: string): void {
+  /**
+   * Switch a user based on the current logged in users
+   *
+   * @param alias {string}
+   */
+  public switchUser(alias: string): void {
+    const validatedAlias = this.tokenManager.validateTokenAlias(alias);
+
+    if (!validatedAlias) {
+      throw new Error(MESSAGE.TOKEN_MANAGER.ALIAS_NOT_FOUND);
+    }
+
     this.tokenManager.setDefault(alias);
+  }
+
+  /**
+   * Deprecated in favor of switchUser
+   *
+   * @deprecated
+   * @param alias {string}
+   */
+  public setDefault(alias: string): void {
+    this.switchUser(alias);
   }
 
   public resetDefault(): void {
