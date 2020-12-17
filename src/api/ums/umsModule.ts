@@ -1,6 +1,6 @@
 import { ReflectiveInjector } from "injection-js";
-import { Observable, of } from "rxjs";
-import { map, switchMap, pluck, tap, catchError } from "rxjs/operators";
+import { iif, Observable, of } from "rxjs";
+import { map, switchMap, pluck, tap, catchError, concatMap } from "rxjs/operators";
 import { API, getApiUrl, MESSAGE } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
@@ -29,6 +29,8 @@ export class UMSModule<
   private requestExecuter: RequestExecuter;
 
   private basePath: string;
+
+  public currentUser: D | null = null;
 
   constructor() {
     /* users tend to init module without a new operator, throw a hint error */
@@ -87,8 +89,9 @@ export class UMSModule<
    *
    * @param options User credentials or oauth params + alias options
    */
-  public signIn(options: IUMSSignInOptions): Observable<string> {
+  public signIn(options: IUMSSignInOptions): Observable<D> {
     const { body, aliases, endpoint } = getSignInParams(options);
+    const [alias] = aliases;
 
     return this.requestAdapter.execute<Tokens>(
       this.getUrl(endpoint, false),
@@ -98,11 +101,15 @@ export class UMSModule<
         this.tokenManager.addTokens(aliases, tokens, options.default);
         return tokens.access_token;
       }),
+      switchMap(() => this.getUser(alias)),
     );
   }
 
   /**
-   * Signs out an user by just removing the token that belongs to the user/alias
+   * Signs out a user
+   * - by just removing the token that belongs to the user/alias
+   * - clear the currentUser object
+   *
    * By default it checks on the token that is marked as DEFAULT otherwise it will use the given alias
    *
    * @param alias The alias/key that is assigned to the tokens
@@ -115,6 +122,8 @@ export class UMSModule<
     }
 
     this.tokenManager.removeTokens(validatedAlias as string);
+
+    this.currentUser = null;
   }
 
   /**
@@ -141,11 +150,22 @@ export class UMSModule<
       return of(false);
     }
 
-    // when the token has been expired, its running automatically the /refresh call to fetch a new one.
+    // this stream only get subscribed (its get called) when the user is loggedIn and the user object is empty
+    // this indicate that the user did a refresh while was logged in
+    const getUser = () => this.getUser(validatedAlias as string).pipe(
+      catchError(() => of(false)), // in case of an error, just return false
+      map(() => true), // return true, as the user is logged in if we get result
+    );
+
+    // when the token has been expired, its running automatically the "/refresh" call to fetch a new one.
     // So we test just on the error, i.e. when the alias does not exist at all.
     return this.tokenManager.token(validatedAlias as string).pipe(
       catchError(() => of(false)),
       map(val => val !== false),
+      concatMap(isLoggedIn => iif(
+        () => isLoggedIn && this.currentUser === null,
+        getUser(),
+        of(isLoggedIn))),
     );
   }
 
@@ -173,6 +193,7 @@ export class UMSModule<
         this.getUrl(API.UMS.USER),
         { headers: { Authorization: `Bearer ${token}` }},
       )),
+      tap(user => this.currentUser = user),
     );
   }
 
