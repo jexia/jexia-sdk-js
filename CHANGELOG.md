@@ -1,3 +1,10 @@
+# [5.9.0](https://github.com/jexia/jexia-sdk-js/compare/v5.8.0...v5.9.0) (2020-12-17)
+
+
+### Features
+
+* **ums:** introduce currentUser ([#197](https://github.com/jexia/jexia-sdk-js/issues/197)) ([db0d25d](https://github.com/jexia/jexia-sdk-js/commit/db0d25dac0f26c99e309db6e3e0f95edf3e5e084))
+
 # [5.8.0](https://github.com/jexia/jexia-sdk-js/compare/v5.7.0...v5.8.0) (2020-12-15)
 
 
