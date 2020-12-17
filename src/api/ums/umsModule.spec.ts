@@ -24,13 +24,19 @@ describe("UMS Module", () => {
     projectId = faker.random.uuid(),
     access_token = createTestToken(),
     refresh_token = faker.random.uuid(),
+    email = faker.internet.email(),
     user = {
-      email: faker.internet.email(),
+      email,
       password: faker.internet.password(),
     },
+    userResponse = {
+      email,
+      id: faker.random.uuid(),
+    },
+    tokenAlias = faker.random.word(),
     signInOptions = {
       default: false,
-      alias: faker.random.word(),
+      alias: tokenAlias,
     },
     oAuthOptions = {
       code: faker.random.word(),
@@ -41,10 +47,12 @@ describe("UMS Module", () => {
       provider: faker.helpers.randomize(["google", "facebook", "twitter"]),
       redirect: faker.internet.url(),
     },
+    tokenValidatedResult = tokenAlias,
     tokenManagerMock = createMockFor(TokenManager, {}, {
       token: () => of(access_token),
+      validateTokenAlias: () => tokenValidatedResult,
     }),
-    requestAdapterReturnValue = { access_token, refresh_token } as any,
+    requestAdapterReturnValue = userResponse,
     requestAdapterMock = createMockFor(RequestAdapter, {
       returnValue: of(requestAdapterReturnValue),
     }),
@@ -69,6 +77,7 @@ describe("UMS Module", () => {
       access_token,
       refresh_token,
       user,
+      userResponse,
       signInOptions,
       oAuthOptions,
       oAuthInitOptions,
@@ -346,33 +355,40 @@ describe("UMS Module", () => {
       });
     });
 
-    it("should return access token", async () => {
-      const { subject, user, access_token, systemDefer, init } = createSubject();
+    it("should return user object", async () => {
+      const { subject, user, systemDefer, init, userResponse } = createSubject();
       systemDefer.resolve();
       await init();
-      const token = await subject.signIn(user).toPromise();
+      const response = await subject.signIn(user).toPromise();
 
-      expect(token).toEqual(access_token);
+      expect(response).toEqual(userResponse);
     });
   });
 
   describe("user sign-out", () => {
-    it("should sign out when a valid alias is given", async () => {
-      const { subject, tokenManagerMock, init } = createSubject();
-      const alias = faker.random.word();
-
-      jest.spyOn((tokenManagerMock as any), "validateTokenAlias").mockReturnValue(alias);
+    it("should clear tokens", async () => {
+      const tokenAlias = faker.random.word();
+      const { subject, tokenManagerMock, init } = createSubject({ tokenAlias });
 
       await init();
-      subject.signOut(alias);
+      subject.signOut(tokenAlias);
 
-      expect(tokenManagerMock.removeTokens).toHaveBeenCalledWith(alias);
+      expect(tokenManagerMock.removeTokens).toHaveBeenCalledWith(tokenAlias);
+    });
+
+    it("should reset the currentUser object", async () => {
+      const tokenAlias = faker.random.word();
+      const { subject, init, userResponse } = createSubject({ tokenAlias });
+
+      await init();
+      (subject as any).currentUserObject = userResponse;
+      subject.signOut(tokenAlias);
+
+      expect(subject.currentUser).toBeNull();
     });
 
     it("should NOT sign out when an invalid token is given or no default alias is set", async () => {
-      const { subject, tokenManagerMock, init } = createSubject();
-
-      jest.spyOn((tokenManagerMock as any), "validateTokenAlias").mockReturnValue(false);
+      const { subject, tokenManagerMock, init } = createSubject({ tokenValidatedResult : false });
 
       await init();
       subject.signOut();
@@ -383,9 +399,7 @@ describe("UMS Module", () => {
 
   describe("user is-logged-in", () => {
     it("should return FALSE when no valid alias has been found", async () => {
-      const { subject, tokenManagerMock, init } = createSubject();
-
-      jest.spyOn((tokenManagerMock as any), "validateTokenAlias").mockReturnValue(false);
+      const { subject, init } = createSubject({ tokenValidatedResult : false });
 
       await init();
 
@@ -396,9 +410,7 @@ describe("UMS Module", () => {
 
     it("should return FALSE when the given token does not exists", async () => {
       const { subject, tokenManagerMock, init } = createSubject();
-      const alias = faker.random.word();
 
-      jest.spyOn((tokenManagerMock as any), "validateTokenAlias").mockReturnValue(alias);
       jest.spyOn((tokenManagerMock as any), "token").mockReturnValue(of(new Error("Token alias not found")));
 
       await init();
@@ -409,16 +421,42 @@ describe("UMS Module", () => {
     });
 
     it("should return TRUE when the given token exists or a custom default has been set", async () => {
-      const { subject, tokenManagerMock, init } = createSubject();
-      const alias = faker.random.word();
-
-      jest.spyOn((tokenManagerMock as any), "validateTokenAlias").mockReturnValue(alias);
+      const { subject, init } = createSubject();
 
       await init();
 
       subject.isLoggedIn().subscribe(
         isLoggedIn => expect(isLoggedIn).toBe(true),
       );
+    });
+
+    it("should fetch the User info when the user is loggedIn but the currentUser is NULL", async () => {
+      const { subject, init, userResponse } = createSubject();
+
+      await init();
+      (subject as any).currentUserObject = null;
+
+      await subject.isLoggedIn().subscribe();
+
+      // test that the currentUser object is updated, as we cannot test if subject.getUser has been called or not,
+      // because its always called due the nature of the iif()
+      expect(subject.currentUser).toEqual(userResponse);
+    });
+
+    it("should NOT fetch the User info when the user is loggedIn and the currentUser is valid", async () => {
+      const { subject, init, userResponse } = createSubject();
+
+      await init();
+      (subject as any).currentUserObject = {
+        email: faker.internet.email(),
+        id: faker.random.uuid(),
+      };
+
+      await subject.isLoggedIn().subscribe();
+
+      // test that the currentUser object is NOT updated, as we cannot test if subject.getUser has been called or not,
+      // because its always called due the nature of the iif()
+      expect(subject.currentUser).not.toEqual(userResponse);
     });
   });
 
@@ -443,7 +481,7 @@ describe("UMS Module", () => {
 
     describe("get current user", () => {
       it("should return error if alias does not exists", async () => {
-        const { subject, signInOptions, tokenManagerMock, systemDefer, init } = createSubject();
+        const { subject, signInOptions, tokenManagerMock, systemDefer, init } = createSubject({ tokenValidatedResult: false });
         jest.spyOn(tokenManagerMock, "token");
         systemDefer.resolve();
         await init();
@@ -453,7 +491,6 @@ describe("UMS Module", () => {
       it("should get token from token manager by provided alias", async () => {
         const { subject, signInOptions, tokenManagerMock, systemDefer, init } = createSubject();
         jest.spyOn(tokenManagerMock, "token");
-        jest.spyOn((tokenManagerMock as any), "validateTokenAlias").mockReturnValue(signInOptions.alias);
         systemDefer.resolve();
         await init();
         await subject.getUser(signInOptions.alias);
@@ -461,8 +498,7 @@ describe("UMS Module", () => {
       });
 
       it("should call correct API to get current user", async () => {
-        const { subject, access_token, signInOptions, requestAdapterMock, systemDefer, init, tokenManagerMock } = createSubject();
-        jest.spyOn((tokenManagerMock as any), "validateTokenAlias").mockReturnValue(signInOptions.alias);
+        const { subject, access_token, signInOptions, requestAdapterMock, systemDefer, init } = createSubject();
         systemDefer.resolve();
         await init();
         await subject.getUser(signInOptions.alias).subscribe();
@@ -472,6 +508,14 @@ describe("UMS Module", () => {
             headers: { Authorization: `Bearer ${access_token}`},
           },
         );
+      });
+
+      it("should save the current user", async () => {
+        const { subject, signInOptions, systemDefer, init, userResponse } = createSubject();
+        systemDefer.resolve();
+        await init();
+        await subject.getUser(signInOptions.alias).subscribe();
+        expect(subject.currentUser).toEqual(userResponse);
       });
     });
 
