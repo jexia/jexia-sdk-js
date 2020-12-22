@@ -158,7 +158,7 @@ describe("FieldFilter class", () => {
       testParams({
         value,
         operator: "regex",
-        getCriterion: (subject) => subject.satisfiesRegexp(value),
+        getCriterion: (subject) => subject.satisfiesRegex(value),
       });
     });
 
