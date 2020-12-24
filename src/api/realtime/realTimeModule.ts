@@ -3,6 +3,7 @@ import { MESSAGE, getRtcUrl } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
 import { IModule, ModuleConfiguration } from "../core/module";
 import { IResource } from "../core/resource";
+import { Dispatcher } from "../core/dispatcher";
 import { AuthOptions, IAuthOptions, TokenManager } from "../core/tokenManager";
 import { Dataset } from "../dataops/dataset";
 import { IFormData } from "../fileops/fileops.interfaces";
@@ -59,6 +60,11 @@ declare module "../fileops/fileset" {
 export class RealTimeModule implements IModule {
   private injector: ReflectiveInjector;
   private websocket: IWebSocket;
+  private dispatcher: Dispatcher;
+  private tokenManager: TokenManager;
+
+  /* marker for when the tokens are given in the jexiaClient().init() */
+  private tokensGivenOnInit = false;
 
   /**
    * @internal
@@ -77,32 +83,14 @@ export class RealTimeModule implements IModule {
       RequestExecuter,
     ]);
 
-    const tokenManager: TokenManager = coreInjector.get(TokenManager);
-    const config = coreInjector.get(AuthOptions) as IAuthOptions;
+    this.dispatcher = this.injector.get(Dispatcher);
+    this.tokenManager = this.injector.get(TokenManager);
 
     RTCResources.forEach((resource) => resource.prototype.watch = watch);
 
-    // TODO Get rid of promises
-    return tokenManager.token().toPromise().then((token) => {
-      try {
-        this.websocket = this.websocketBuilder(getRtcUrl(config, token));
-      } catch (error) {
-        throw new Error(`${MESSAGE.RTC.ERROR_CREATING_WEBSOCKET} Original error: ${error.message}`);
-      }
+    this.listenToEvents();
 
-      if (!this.websocket) {
-        throw new Error(MESSAGE.RTC.BAD_WEBSOCKET_CREATION_CALLBACK);
-      }
-
-      RTCResources.forEach((resource) => resource.prototype.webSocket = this.websocket);
-
-      return new Promise((resolve, reject) => {
-        this.websocket.onopen = resolve;
-        this.websocket.onerror = () => reject(new Error(MESSAGE.RTC.CONNECTION_FAILED));
-      });
-    })
-    .then(() => websocket.start(this.websocket, () => tokenManager.token().toPromise()))
-    .then(() => this);
+    return Promise.resolve(this);
   }
 
   /**
@@ -125,13 +113,124 @@ export class RealTimeModule implements IModule {
    * @internal
    */
   public terminate(): Promise<this> {
-    if (this.websocket.readyState === WebSocketState.CLOSED) {
+    if (!this.websocket || this.websocket.readyState === WebSocketState.CLOSED) {
       return Promise.resolve(this);
     }
+
+    // unsubscribe from the events
+    this.dispatcher.off("tokenLogin", "rtcConnect");
+    this.dispatcher.off("tokenRefresh", "rtcConnect");
+    this.dispatcher.off("umsLogin", "rtcConnect");
+    this.dispatcher.off("umsSwitchUser", "rtcConnect");
+    this.dispatcher.off("umsLogout", "rtcConnect");
+
+    // close the websocket connection
     return new Promise((resolve, reject) => {
       this.websocket.onclose = () => resolve(this);
       this.websocket.onerror = (err) => reject(err);
       this.websocket.close();
     });
+  }
+
+  /**
+   * listen to system events
+   *
+   * @internal
+   */
+  private listenToEvents(): void {
+    // Listing to the event when the tokenManger did login via jexiaClient().init() with the given keys
+    this.dispatcher.on("tokenLogin", "rtcConnect", async () => {
+      if(!this.websocket) {
+        this.tokensGivenOnInit = true;
+        await this.connect();
+      }
+    });
+
+    // Listing to the event when the TokenManager did a refresh
+    this.dispatcher.on("tokenRefresh", "rtcConnect", async () => {
+      if(this.websocket) {
+        this.refreshToken();
+      }
+    });
+
+    // Listing to the event when the UMS did a login
+    this.dispatcher.on("umsLogin", "rtcConnect", async () => {
+      this.throwUmsErrorIfNeeded();
+
+      if(this.websocket) {
+        this.refreshToken();
+      }
+
+      if(!this.websocket) {
+        await this.connect();
+      }
+    });
+
+    // Listing to the event when the UMS did a switch between users
+    this.dispatcher.on("umsSwitchUser", "rtcConnect", async () => {
+      this.throwUmsErrorIfNeeded();
+
+      if(this.websocket) {
+        this.refreshToken();
+      }
+    });
+
+    // Listing to the event when the UMS did a logout
+    this.dispatcher.on("umsLogout", "rtcConnect", async () => {
+      this.throwUmsErrorIfNeeded();
+
+      await this.terminate();
+    });
+  }
+
+  /**
+   * Refresh the token by sending a Refresh command
+   *
+   * @internal
+   */
+  private refreshToken(): void {
+    websocket.refreshToken(this.websocket, () => this.tokenManager.token().toPromise());
+  }
+
+  /**
+   * Throw an error about using key and secret in the jexiaClient().init() while preforming UMS actions
+   *
+   * @internal
+   */
+  private throwUmsErrorIfNeeded(): void {
+    if(this.tokensGivenOnInit) {
+      throw new Error(MESSAGE.RTC.UMS_ERROR);
+    }
+  }
+
+  /**
+   * Open a new connection to the websocket
+   *
+   * @internal
+   */
+  private connect(): Promise<this> {
+    const config = this.injector.get(AuthOptions) as IAuthOptions;
+
+    // TODO Get rid of promises
+    return this.tokenManager.token().toPromise().then((token) => {
+      try {
+        this.websocket = this.websocketBuilder(getRtcUrl(config, token));
+      } catch (error) {
+        throw new Error(`${MESSAGE.RTC.ERROR_CREATING_WEBSOCKET} Original error: ${error.message}`);
+      }
+
+      if (!this.websocket) {
+        throw new Error(MESSAGE.RTC.BAD_WEBSOCKET_CREATION_CALLBACK);
+      }
+
+      RTCResources.forEach((resource) => resource.prototype.webSocket = this.websocket);
+
+      return new Promise((resolve, reject) => {
+        this.websocket.onopen = resolve;
+        this.websocket.onerror = () => reject(new Error(MESSAGE.RTC.CONNECTION_FAILED));
+      });
+    })
+      .then(() => websocket.start(this.websocket, () => this.tokenManager.token().toPromise()))
+      .then(() => this);
   }
 }

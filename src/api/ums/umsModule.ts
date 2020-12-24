@@ -10,6 +10,7 @@ import { DeleteQuery } from "../core/queries/deleteQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
 import { ResourceType } from "../core/resource";
+import { Dispatcher } from "../core/dispatcher";
 import { AuthOptions, TokenManager, Tokens } from "../core/tokenManager";
 import { UsersInterface, IUMSSignInOptions, IUMSSignUpFields, IUMOAuthInitOptions } from "./ums.types";
 import { getSignInParams } from "./ums.functions";
@@ -27,6 +28,8 @@ export class UMSModule<
   private requestAdapter: RequestAdapter;
 
   private requestExecuter: RequestExecuter;
+
+  private dispatcher: Dispatcher;
 
   private basePath: string;
 
@@ -50,6 +53,7 @@ export class UMSModule<
     this.requestAdapter = injector.get(RequestAdapter);
     this.basePath = getApiUrl(injector.get(AuthOptions));
     this.requestExecuter = injector.get(RequestExecuter);
+    this.dispatcher = injector.get(Dispatcher);
 
     return Promise.resolve(this);
   }
@@ -106,6 +110,7 @@ export class UMSModule<
         return tokens.access_token;
       }),
       switchMap(() => this.getUser(alias)),
+      tap(() => this.dispatcher.emit("umsLogin")),
     );
   }
 
@@ -128,6 +133,8 @@ export class UMSModule<
     this.tokenManager.removeTokens(validatedAlias as string);
 
     this.currentUserObject = null;
+
+    this.dispatcher.emit("umsLogout");
   }
 
   /**
@@ -184,6 +191,8 @@ export class UMSModule<
     if (!validatedAlias) {
       throw new Error(MESSAGE.TOKEN_MANAGER.ALIAS_NOT_FOUND);
     }
+
+    this.dispatcher.emit("umsSwitchUser");
 
     this.tokenManager.setDefault(alias);
   }

@@ -5,6 +5,7 @@ import { MESSAGE, getProjectId, APIKEY_DEFAULT_ALIAS } from "../../config";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { Logger } from "../logger/logger";
 import { TokenManager, Tokens } from "./tokenManager";
+import { Dispatcher } from "./dispatcher";
 import { createTestToken } from "../../../spec/token";
 
 let terminate: () => void;
@@ -14,6 +15,7 @@ interface ISubjectOpts {
   requestAdapterReturnValue: Observable<Tokens>;
   requestAdapterMock: RequestAdapter;
   loggerMock: Logger;
+  dispatcherMock: Dispatcher;
 }
 
 const createSubject = ({
@@ -21,8 +23,9 @@ const createSubject = ({
   requestAdapterReturnValue = of(tokens),
   requestAdapterMock = createMockFor(RequestAdapter, { returnValue: requestAdapterReturnValue }),
   loggerMock = createMockFor(Logger),
+  dispatcherMock = createMockFor(Dispatcher),
 }: Partial<ISubjectOpts> = {}) => {
-  const subject = new TokenManager(requestAdapterMock, loggerMock);
+  const subject = new TokenManager(requestAdapterMock, loggerMock, dispatcherMock);
   terminate = () => subject.terminate();
   return {
     subject,
@@ -31,6 +34,7 @@ const createSubject = ({
     requestAdapterMock,
     loggerMock,
     validOptions: validClientOpts,
+    dispatcherMock,
   };
 };
 
@@ -108,6 +112,12 @@ describe("TokenManager", () => {
       const { subject } = createSubject();
       const value = await subject.init({ projectID: faker.random.uuid() });
       expect(value).toEqual(subject);
+    });
+
+    it("should dispatch an event", async () => {
+      const { subject, dispatcherMock, validOptions } = createSubject();
+      await subject.init(validOptions);
+      expect(dispatcherMock.emit).toHaveBeenCalledWith("tokenLogin");
     });
   });
 
@@ -461,6 +471,13 @@ describe("TokenManager", () => {
           method: RequestMethod.POST,
         },
       );
+    });
+
+    it("should dispatch an event when the token got refreshed", async () => {
+      const { subject, validOptions, dispatcherMock } = createSubject();
+      await subject.init(validOptions);
+      await (subject as any).refresh().toPromise();
+      expect(dispatcherMock.emit).toHaveBeenNthCalledWith(2, "tokenRefresh");
     });
 
     it("should reject promise if there is no token for specific auth", () => {

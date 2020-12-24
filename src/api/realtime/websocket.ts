@@ -76,15 +76,23 @@ export function start(webSocket: IWebSocket, getToken: IGetToken) {
         }
         break;
       default:
-        // JWT Refresh
-        getToken().then((token) => realTimeCommand(webSocket, {
-          command: RealTimeCommandTypes.JwtRefresh,
-          arguments: { token },
-        }));
+        refreshToken(webSocket, getToken);
     }
   };
 
   wsReadyDefer.resolve();
+}
+
+/**
+ * Send a JWT refresh call
+ *
+ * @internal
+ */
+export function refreshToken(webSocket: IWebSocket, getToken: IGetToken): void {
+  getToken().then((token) => realTimeCommand(webSocket, {
+    command: RealTimeCommandTypes.JwtRefresh,
+    arguments: { token },
+  }));
 }
 
 /**
