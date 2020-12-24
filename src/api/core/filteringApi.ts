@@ -52,8 +52,8 @@ export class FieldFilter<U> {
     return new FilteringCriterion(new FilteringCondition(this.fieldName, "like", value));
   }
 
-  public satisfiesRegexp(regexp: string): IFilteringCriterion {
-    return new FilteringCriterion(new FilteringCondition(this.fieldName, "regex", regexp));
+  public satisfiesRegex(regex: string): IFilteringCriterion {
+    return new FilteringCriterion(new FilteringCondition(this.fieldName, "regex", regex));
   }
 
   public isBetween(start: U, end: U): IFilteringCriterion {
