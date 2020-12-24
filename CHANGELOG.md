@@ -1,3 +1,10 @@
+## [5.10.1](https://github.com/jexia/jexia-sdk-js/compare/v5.10.0...v5.10.1) (2020-12-24)
+
+
+### Bug Fixes
+
+* **rtc:** when using the ums ([#200](https://github.com/jexia/jexia-sdk-js/issues/200)) ([a8d4812](https://github.com/jexia/jexia-sdk-js/commit/a8d4812c310a7b1597f4e598f3bbc50e9f7f6eae))
+
 # [5.10.0](https://github.com/jexia/jexia-sdk-js/compare/v5.9.0...v5.10.0) (2020-12-17)
 
 
