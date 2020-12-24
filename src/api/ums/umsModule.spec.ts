@@ -12,6 +12,7 @@ import { DeleteQuery } from "../core/queries/deleteQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
 import { AuthOptions, TokenManager } from "../core/tokenManager";
+import { Dispatcher } from "../core/dispatcher";
 import { UMSModule } from "./umsModule";
 import { OAuthActionType } from "./ums.types";
 import { getSignInParams } from "./ums.functions";
@@ -59,6 +60,7 @@ describe("UMS Module", () => {
     requestExecuterMock = createMockFor(RequestExecuter),
     systemDefer = deferPromise<Client>(),
     injectorMock = createMockFor(["get", "resolveAndCreateChild"]) as SpyObj<ReflectiveInjector>,
+    dispatcherMock = createMockFor(Dispatcher),
   } = {}) {
     const authOptions = { projectID: projectId };
     const injectorMap = new Map<any, any>([
@@ -66,6 +68,7 @@ describe("UMS Module", () => {
       [RequestAdapter, requestAdapterMock],
       [AuthOptions, authOptions],
       [RequestExecuter, requestExecuterMock],
+      [Dispatcher, dispatcherMock],
     ]);
     injectorMock.get.mockImplementation((key: any) => injectorMap.get(key));
     injectorMock.resolveAndCreateChild.mockImplementation(() => injectorMock);
@@ -86,6 +89,7 @@ describe("UMS Module", () => {
       systemDefer,
       injectorMock,
       authOptions,
+      dispatcherMock,
       init() {
         return subject.init(injectorMock);
       },
@@ -318,6 +322,16 @@ describe("UMS Module", () => {
           expect(tokenManagerAliases).toEqual(aliases);
         });
       });
+
+      it("should dispatch an event", async () => {
+        const { subject, user, systemDefer, init, dispatcherMock } = createSubject();
+
+        systemDefer.resolve();
+        await init();
+        await subject.signIn(user).toPromise();
+
+        expect(dispatcherMock.emit).toHaveBeenCalledWith("umsLogin");
+      });
     });
 
     describe("OAuth", () => {
@@ -394,6 +408,15 @@ describe("UMS Module", () => {
       subject.signOut();
 
       expect(tokenManagerMock.removeTokens).not.toHaveBeenCalled();
+    });
+
+    it("should dispatch an event", async () => {
+      const { subject, init, dispatcherMock } = createSubject();
+
+      await init();
+      subject.signOut();
+
+      expect(dispatcherMock.emit).toHaveBeenCalledWith("umsLogout");
     });
   });
 
@@ -472,6 +495,15 @@ describe("UMS Module", () => {
       const { subject, init, signInOptions } = createSubject({ tokenValidatedResult: false });
       init();
       expect(() => subject.switchUser(signInOptions.alias)).toThrow(MESSAGE.TOKEN_MANAGER.ALIAS_NOT_FOUND);
+    });
+
+    it("should dispatch an event", async () => {
+      const { subject, init, signInOptions, dispatcherMock } = createSubject();
+
+      await init();
+      subject.switchUser(signInOptions.alias);
+
+      expect(dispatcherMock.emit).toHaveBeenCalledWith("umsSwitchUser");
     });
   });
 

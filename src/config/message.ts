@@ -17,6 +17,7 @@ export const MESSAGE = {
     NOT_OPEN_ERROR: "not opened",
     NOT_OPEN_MESSAGE: "The connection seems to be closed. Did you properly initialize the RTC Module by calling the init method? Or maybe you terminated the RTC Module early?",
     NO_WESBSOCKET_PRESENT: "The RTC Module seems to be missing a valid websocket object. Did you properly initialize the RTC Module by calling the init method?",
+    UMS_ERROR: "You did set the 'key' & 'secret' via jexiaClient().init() while you are using ums. In this case you can omit those keys.",
   },
   TOKEN_MANAGER: {
     TOKEN_NOT_AVAILABLE: "You need to log in before you can access the token.",

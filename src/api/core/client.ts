@@ -4,6 +4,7 @@ import { deferPromise } from "../../internal/utils";
 import { Logger } from "../logger/logger";
 import { IModule, ModuleConfiguration } from "./module";
 import { AuthOptions, IAuthOptions, TokenManager } from "./tokenManager";
+import { Dispatcher } from "./dispatcher";
 
 /**
  * @internal
@@ -80,6 +81,7 @@ export class Client {
       },
       Logger,
       TokenManager,
+      Dispatcher,
     ]);
     this.tokenManager = injector.get(TokenManager);
 

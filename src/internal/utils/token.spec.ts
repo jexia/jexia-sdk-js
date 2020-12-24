@@ -30,7 +30,7 @@ describe("Token utils", () => {
     });
   });
 
-  describe.only("token expired", () => {
+  describe("token expired", () => {
     it("should return 'false' when the token got expired", () => {
       const expired = isTokenExpired(expiredToken);
       expect(expired).toBe(true);
