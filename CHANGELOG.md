@@ -1,3 +1,10 @@
+## [5.10.2](https://github.com/jexia/jexia-sdk-js/compare/v5.10.1...v5.10.2) (2021-01-06)
+
+
+### Bug Fixes
+
+* **rtc:** auto connect when there are tokens available ([#201](https://github.com/jexia/jexia-sdk-js/issues/201)) ([1d1a800](https://github.com/jexia/jexia-sdk-js/commit/1d1a8003b740bc290a8cda3eb1f5c7d23b192094))
+
 ## [5.10.1](https://github.com/jexia/jexia-sdk-js/compare/v5.10.0...v5.10.1) (2020-12-24)
 
 
