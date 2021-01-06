@@ -28,6 +28,7 @@ describe("Real Time Module", () => {
     tokenManagerMock = createMockFor(TokenManager, {}, { token: () => tokenManagerReturnValue }),
     injectorMock = createMockFor(["get", "resolveAndCreateChild"]) as SpyObj<ReflectiveInjector>,
     dispatcherMock = new Dispatcher(), // we need to call the emit function, so we pass the real class here
+    ignoreConnectWhenTokenIsAvailable = true,
   } = {}) {
     const injectorMap = new Map<any, any>([
       [TokenManager, tokenManagerMock],
@@ -38,6 +39,12 @@ describe("Real Time Module", () => {
     injectorMock.get.mockImplementation((key: any) => injectorMap.get(key));
     injectorMock.resolveAndCreateChild.mockImplementation(() => injectorMock);
     const subject = new RealTimeModule(websocketBuilder);
+
+    // ignore by default as it will naturally called when an user refresh and having tokens in the storage
+    if (ignoreConnectWhenTokenIsAvailable) {
+      jest.spyOn((subject as any), "connectWhenTokenIsAvailable").mockReturnValue(null);
+    }
+
     return {
       token,
       webSocketMock,
@@ -63,6 +70,39 @@ describe("Real Time Module", () => {
       await subject.init(injectorMock);
 
       expect((subject as any).listenToEvents).toHaveBeenCalled();
+    });
+
+    it("should call .connect() when there are tokens", async () => {
+      const { subject, injectorMock } = createSubject();
+
+      await subject.init(injectorMock);
+
+      expect((subject as any).connectWhenTokenIsAvailable).toHaveBeenCalled();
+    });
+  });
+
+  describe("connect when there are tokens", () => {
+    it("should call connect when having tokens in place", async () => {
+      const { subject, injectorMock } = createSubject({
+        ignoreConnectWhenTokenIsAvailable: false,
+      });
+
+      spyOn((subject as any), "connect");
+      await subject.init(injectorMock);
+
+      expect((subject as any).connect).toHaveBeenCalled();
+    });
+
+    it("should NOT call connect when having NO tokens in place", async () => {
+      const { subject, injectorMock } = createSubject({
+        ignoreConnectWhenTokenIsAvailable: false,
+        tokenManagerReturnValue: throwError(new Error()), // TokenManager throws an error when there are not tokens
+      });
+
+      spyOn((subject as any), "connect");
+      await subject.init(injectorMock);
+
+      expect((subject as any).connect).not.toHaveBeenCalled();
     });
   });
 
@@ -273,6 +313,16 @@ describe("Real Time Module", () => {
       } catch (error) {
         expect(error.message).toBe(MESSAGE.RTC.CONNECTION_FAILED);
       }
+    });
+
+    it("should return the object self when there is an open connection", async () => {
+      const { injectorMock, subject, websocketBuilder, tokenManagerMock } = createSubject();
+      await subject.init(injectorMock);
+      (subject as any).websocket = websocketBuilder;
+      (subject as any).connect();
+      spyOn(tokenManagerMock, "token");
+
+      expect(tokenManagerMock.token).not.toBeCalled();
     });
 
   });

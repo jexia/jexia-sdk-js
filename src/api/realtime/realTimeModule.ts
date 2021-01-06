@@ -1,4 +1,6 @@
 import { ReflectiveInjector } from "injection-js";
+import { catchError, filter, tap } from "rxjs/operators";
+import { of } from "rxjs";
 import { MESSAGE, getRtcUrl } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
 import { IModule, ModuleConfiguration } from "../core/module";
@@ -88,9 +90,29 @@ export class RealTimeModule implements IModule {
 
     RTCResources.forEach((resource) => resource.prototype.watch = watch);
 
+    // add the events listeners
     this.listenToEvents();
 
+    // when there is a token, e.g. when a user refresh, then connect with the current available token
+    this.connectWhenTokenIsAvailable();
+
     return Promise.resolve(this);
+  }
+
+  /**
+   * Connect when there is a token.
+   * Mostly this is the case when a user refresh the page and already got the tokens available.
+   *
+   * TODO move this part to the connect function after migrating the connect() function to RXJS and remove promises
+   *
+   * @internal
+   */
+  private connectWhenTokenIsAvailable(): void {
+    this.tokenManager.token().pipe(
+      catchError(() => of("")),
+      filter(token => token !== ""),
+      tap(async () => await this.connect()),
+    ).subscribe();
   }
 
   /**
@@ -210,6 +232,12 @@ export class RealTimeModule implements IModule {
    */
   private connect(): Promise<this> {
     const config = this.injector.get(AuthOptions) as IAuthOptions;
+
+    // avoid 2 open connections
+    // TODO add logging when not using production mode
+    if (this.websocket) {
+      return Promise.resolve(this);
+    }
 
     // TODO Get rid of promises
     return this.tokenManager.token().toPromise().then((token) => {
