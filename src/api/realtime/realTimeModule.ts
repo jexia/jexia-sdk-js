@@ -139,6 +139,8 @@ export class RealTimeModule implements IModule {
       return Promise.resolve(this);
     }
 
+    const closedConnectionPromise = this.closeConnection();
+
     // unsubscribe from the events
     this.dispatcher.off("tokenLogin", "rtcConnect");
     this.dispatcher.off("tokenRefresh", "rtcConnect");
@@ -146,12 +148,7 @@ export class RealTimeModule implements IModule {
     this.dispatcher.off("umsSwitchUser", "rtcConnect");
     this.dispatcher.off("umsLogout", "rtcConnect");
 
-    // close the websocket connection
-    return new Promise((resolve, reject) => {
-      this.websocket.onclose = () => resolve(this);
-      this.websocket.onerror = (err) => reject(err);
-      this.websocket.close();
-    });
+    return closedConnectionPromise;
   }
 
   /**
@@ -201,7 +198,7 @@ export class RealTimeModule implements IModule {
     this.dispatcher.on("umsLogout", "rtcConnect", async () => {
       this.throwUmsErrorIfNeeded();
 
-      await this.terminate();
+      await this.closeConnection();
     });
   }
 
@@ -260,5 +257,19 @@ export class RealTimeModule implements IModule {
     })
       .then(() => websocket.start(this.websocket, () => this.tokenManager.token().toPromise()))
       .then(() => this);
+  }
+
+  private closeConnection(): Promise<this> {
+    if (!this.websocket || this.websocket.readyState === WebSocketState.CLOSED) {
+      return Promise.resolve(this);
+    }
+
+    // close the websocket connection
+    return new Promise((resolve, reject) => {
+      this.websocket.onclose = () => resolve(this);
+      this.websocket.onerror = (err) => reject(err);
+      this.websocket.close();
+      this.websocket = undefined as unknown as IWebSocket;
+    });
   }
 }
