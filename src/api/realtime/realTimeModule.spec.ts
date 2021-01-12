@@ -222,11 +222,11 @@ describe("Real Time Module", () => {
       it("should terminate the connection", async () => {
         const { subject, dispatcherMock, injectorMock } = createSubject();
 
-        spyOn(subject, "terminate");
+        spyOn((subject as any), "closeConnection");
         await subject.init(injectorMock);
         dispatcherMock.emit("umsLogout");
 
-        expect((subject as any).terminate).toHaveBeenCalled();
+        expect((subject as any).closeConnection).toHaveBeenCalled();
       });
     });
   });
