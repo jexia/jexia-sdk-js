@@ -1,3 +1,10 @@
+## [5.10.3](https://github.com/jexia/jexia-sdk-js/compare/v5.10.2...v5.10.3) (2021-01-12)
+
+
+### Bug Fixes
+
+* close RTC connection only on ums.signOut ([#202](https://github.com/jexia/jexia-sdk-js/issues/202)) ([9f97e01](https://github.com/jexia/jexia-sdk-js/commit/9f97e0124daa453d2c259be2e9c06299f7c38de2))
+
 ## [5.10.2](https://github.com/jexia/jexia-sdk-js/compare/v5.10.1...v5.10.2) (2021-01-06)
 
 
