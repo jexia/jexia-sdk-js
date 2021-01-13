@@ -6,6 +6,8 @@ import { deferPromise } from "../../internal/utils";
 import { Client, ClientConfiguration, ClientInit } from "./client";
 import { IModule } from "./module";
 import { AuthOptions, TokenManager } from "./tokenManager";
+import { Dispatcher, DispatchEvents } from "./dispatcher";
+import * as faker from "faker";
 
 const errFailedToInitModule = new Error("failed to init module");
 
@@ -35,10 +37,12 @@ const moduleVoidTerminatingError: IModule = {
   }),
 };
 
+// TODO refactor test suite to make use of a createSubject where we mock the whole class
 describe("Class: Client", () => {
 
   beforeEach(() => {
     mockPrototypeOf(TokenManager);
+    mockPrototypeOf(Dispatcher);
     (TokenManager.prototype.init as jasmine.Spy).and.callFake(function (this: any) { return Promise.resolve(this); });
   });
 
@@ -173,6 +177,20 @@ describe("Class: Client", () => {
           .then(() => { throw new Error("init should not have done it well"); })
           .catch(() => {/* */}),
         );
+    });
+  });
+
+  describe("subscribe to an event", () => {
+    it("should call the correct method", async () => {
+      const client = await (new Client(fetchWithRequestMockOk)).init(validClientOpts, mockModuleSuccess);
+      const randomKey = faker.random.number();
+      const fn = () => {/* */};
+      const utils = require("./../../internal/utils");
+
+      spyOn(utils, "randomNumber").and.returnValue(randomKey);
+      client.on(DispatchEvents.TOKEN_LOGIN, fn);
+
+      expect(client["dispatcher"].on).toHaveBeenCalledWith(DispatchEvents.TOKEN_LOGIN, `client:${randomKey}`, fn);
     });
   });
 });

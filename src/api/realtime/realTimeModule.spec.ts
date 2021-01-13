@@ -5,20 +5,13 @@ import { createMockFor, SpyObj, validClientOpts } from "../../../spec/testUtils"
 import { RequestExecuter } from "../../../src/internal/executer";
 import { MESSAGE, getRtcUrl } from "../../config";
 import { AuthOptions, TokenManager } from "../core/tokenManager";
-import { Dispatcher } from "../core/dispatcher";
+import { Dispatcher, DispatchEvents } from "../core/dispatcher";
 import { IWebSocket, WebSocketState } from "./realTime.interfaces";
 import { RealTimeModule } from "./realTimeModule";
 
 describe("Real Time Module", () => {
 
   const shouldHaveFailed = "Should have failed!";
-  const dispatcherEvents =  [
-    "tokenLogin",
-    "tokenRefresh",
-    "umsLogin",
-    "umsSwitchUser",
-    "umsLogout",
-  ];
 
   function createSubject({
     webSocketMock = createMockFor(["send", "close"]) as SpyObj<IWebSocket>,
@@ -107,7 +100,7 @@ describe("Real Time Module", () => {
   });
 
   describe("listen to system events", () => {
-    dispatcherEvents.forEach(event => {
+    Object.values(DispatchEvents).forEach(event => {
       it(`should subscribe to the event ${event}`, async () => {
         const { subject, dispatcherMock, injectorMock } = createSubject();
 
@@ -124,7 +117,7 @@ describe("Real Time Module", () => {
 
         spyOn((subject as any), "connect");
         await subject.init(injectorMock);
-        dispatcherMock.emit("tokenLogin");
+        dispatcherMock.emit(DispatchEvents.TOKEN_LOGIN);
 
         expect((subject as any).connect).toHaveBeenCalled();
       });
@@ -133,7 +126,7 @@ describe("Real Time Module", () => {
         const { subject, dispatcherMock, injectorMock } = createSubject();
 
         await subject.init(injectorMock);
-        dispatcherMock.emit("tokenLogin");
+        dispatcherMock.emit(DispatchEvents.TOKEN_LOGIN);
 
         expect((subject as any).tokensGivenOnInit).toBe(true);
       });
@@ -146,7 +139,7 @@ describe("Real Time Module", () => {
         spyOn((subject as any), "refreshToken");
         await subject.init(injectorMock);
         (subject as any).websocket = websocketBuilder;
-        dispatcherMock.emit("tokenRefresh");
+        dispatcherMock.emit(DispatchEvents.TOKEN_REFRESH);
 
         expect((subject as any).refreshToken).toHaveBeenCalled();
       });
@@ -158,7 +151,7 @@ describe("Real Time Module", () => {
 
         spyOn((subject as any), "throwUmsErrorIfNeeded");
         await subject.init(injectorMock);
-        dispatcherMock.emit("umsLogin");
+        dispatcherMock.emit(DispatchEvents.UMS_LOGIN);
 
         expect((subject as any).throwUmsErrorIfNeeded).toHaveBeenCalled();
       });
@@ -168,7 +161,7 @@ describe("Real Time Module", () => {
 
         spyOn((subject as any), "connect");
         await subject.init(injectorMock);
-        dispatcherMock.emit("umsLogin");
+        dispatcherMock.emit(DispatchEvents.UMS_LOGIN);
 
         expect((subject as any).connect).toHaveBeenCalled();
       });
@@ -179,7 +172,7 @@ describe("Real Time Module", () => {
         spyOn((subject as any), "refreshToken");
         await subject.init(injectorMock);
         (subject as any).websocket = websocketBuilder;
-        dispatcherMock.emit("umsLogin");
+        dispatcherMock.emit(DispatchEvents.UMS_LOGIN);
 
         expect((subject as any).refreshToken).toHaveBeenCalled();
       });
@@ -191,7 +184,7 @@ describe("Real Time Module", () => {
 
         spyOn((subject as any), "throwUmsErrorIfNeeded");
         await subject.init(injectorMock);
-        dispatcherMock.emit("umsSwitchUser");
+        dispatcherMock.emit(DispatchEvents.UMS_SWITCH_USER);
 
         expect((subject as any).throwUmsErrorIfNeeded).toHaveBeenCalled();
       });
@@ -202,7 +195,7 @@ describe("Real Time Module", () => {
         spyOn((subject as any), "refreshToken");
         await subject.init(injectorMock);
         (subject as any).websocket = websocketBuilder;
-        dispatcherMock.emit("umsSwitchUser");
+        dispatcherMock.emit(DispatchEvents.UMS_SWITCH_USER);
 
         expect((subject as any).refreshToken).toHaveBeenCalled();
       });
@@ -214,7 +207,7 @@ describe("Real Time Module", () => {
 
         spyOn((subject as any), "throwUmsErrorIfNeeded");
         await subject.init(injectorMock);
-        dispatcherMock.emit("umsLogout");
+        dispatcherMock.emit(DispatchEvents.UMS_LOGOUT);
 
         expect((subject as any).throwUmsErrorIfNeeded).toHaveBeenCalled();
       });
@@ -224,7 +217,7 @@ describe("Real Time Module", () => {
 
         spyOn((subject as any), "closeConnection");
         await subject.init(injectorMock);
-        dispatcherMock.emit("umsLogout");
+        dispatcherMock.emit(DispatchEvents.UMS_LOGOUT);
 
         expect((subject as any).closeConnection).toHaveBeenCalled();
       });
@@ -385,7 +378,7 @@ describe("Real Time Module", () => {
         webSocketMock.onclose({});
       }, 100);
       await subject.terminate();
-      dispatcherEvents.forEach(
+      Object.values(DispatchEvents).forEach(
         (event, key) => expect(dispatcherMock.off).toHaveBeenNthCalledWith(key + 1, event, "rtcConnect"),
       );
     });

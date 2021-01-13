@@ -12,7 +12,7 @@ import { DeleteQuery } from "../core/queries/deleteQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
 import { AuthOptions, TokenManager } from "../core/tokenManager";
-import { Dispatcher } from "../core/dispatcher";
+import { Dispatcher, DispatchEvents } from "../core/dispatcher";
 import { UMSModule } from "./umsModule";
 import { OAuthActionType } from "./ums.types";
 import { getSignInParams } from "./ums.functions";
@@ -330,7 +330,7 @@ describe("UMS Module", () => {
         await init();
         await subject.signIn(user).toPromise();
 
-        expect(dispatcherMock.emit).toHaveBeenCalledWith("umsLogin");
+        expect(dispatcherMock.emit).toHaveBeenCalledWith(DispatchEvents.UMS_LOGIN);
       });
     });
 
@@ -416,7 +416,7 @@ describe("UMS Module", () => {
       await init();
       subject.signOut();
 
-      expect(dispatcherMock.emit).toHaveBeenCalledWith("umsLogout");
+      expect(dispatcherMock.emit).toHaveBeenCalledWith(DispatchEvents.UMS_LOGOUT);
     });
   });
 
@@ -503,7 +503,7 @@ describe("UMS Module", () => {
       await init();
       subject.switchUser(signInOptions.alias);
 
-      expect(dispatcherMock.emit).toHaveBeenCalledWith("umsSwitchUser");
+      expect(dispatcherMock.emit).toHaveBeenCalledWith(DispatchEvents.UMS_SWITCH_USER);
     });
   });
 

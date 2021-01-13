@@ -6,7 +6,7 @@ import { IRequestError, RequestAdapter, RequestMethod } from "../../internal/req
 import { delayTokenRefresh, isTokenExpired } from "../../internal/utils";
 import { Logger } from "../logger/logger";
 import { TokenStorage } from "./componentStorage";
-import { Dispatcher } from "../core/dispatcher";
+import { Dispatcher, DispatchEvents } from "../core/dispatcher";
 
 /**
  * API interface of the authorization token
@@ -265,7 +265,7 @@ export class TokenManager {
   private login({auth = APIKEY_DEFAULT_ALIAS, key, secret}: IAuthOptions): Observable<Tokens> {
     return this.obtainTokens(auth, this.authUrl, { method: "apk", key, secret }).pipe(
       tap((tokens: Tokens) => this.addTokens([auth], tokens, true)),
-      tap(() => this.dispatcher.emit("tokenLogin")),
+      tap(() => this.dispatcher.emit(DispatchEvents.TOKEN_LOGIN)),
     );
   }
 
@@ -285,7 +285,7 @@ export class TokenManager {
       tap((refreshedTokens: Tokens) =>
         [auth, ...restAliases].forEach((alias) =>  this.storage.setTokens(alias, refreshedTokens)),
       ),
-      tap(() => this.dispatcher.emit("tokenRefresh")),
+      tap(() => this.dispatcher.emit(DispatchEvents.TOKEN_REFRESH)),
       catchError(() => {
         throw new Error("Refreshing token failed");
       }),

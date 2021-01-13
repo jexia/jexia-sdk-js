@@ -1,10 +1,10 @@
 import { InjectionToken, ReflectiveInjector } from "injection-js";
 import { Fetch, RequestAdapter } from "../../internal/requestAdapter";
-import { deferPromise } from "../../internal/utils";
+import { deferPromise, randomNumber } from "../../internal/utils";
 import { Logger } from "../logger/logger";
 import { IModule, ModuleConfiguration } from "./module";
 import { AuthOptions, IAuthOptions, TokenManager } from "./tokenManager";
-import { Dispatcher } from "./dispatcher";
+import { Dispatcher, DispatchEventsType, FunctionEvents } from "./dispatcher";
 
 /**
  * @internal
@@ -46,6 +46,7 @@ export class Client {
   private tokenManager: TokenManager;
   /* modules to be initialized */
   private modules: IModule[];
+  private dispatcher: Dispatcher;
 
   /**
    * @internal
@@ -84,6 +85,7 @@ export class Client {
       Dispatcher,
     ]);
     this.tokenManager = injector.get(TokenManager);
+    this.dispatcher = injector.get(Dispatcher);
 
     /* provide logger for the request adapter */
     injector.get(RequestAdapter).provideLogger(injector.get(Logger));
@@ -135,4 +137,16 @@ export class Client {
     return Object.assign({}, ...modules.map((module) => module.getConfig()));
   }
 
+  /**
+   * Expose the On event so the user can listen to events and act on that.
+   *
+   * @param eventName
+   * @param listener
+   */
+  public on(eventName: DispatchEventsType, listener: FunctionEvents) {
+    // use a random key, as the user will not unsubscribe from those events
+    const randomKey = `client:${randomNumber()}`;
+
+    this.dispatcher.on(eventName, randomKey , listener);
+  }
 }
