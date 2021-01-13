@@ -477,7 +477,7 @@ describe("TokenManager", () => {
       const { subject, validOptions, dispatcherMock } = createSubject();
       await subject.init(validOptions);
       await (subject as any).refresh().toPromise();
-      expect(dispatcherMock.emit).toHaveBeenNthCalledWith(2, DispatchEvents.TOKEN_REFRESH);
+      expect(dispatcherMock.emit).toHaveBeenCalledWith(DispatchEvents.TOKEN_REFRESH);
     });
 
     it("should reject promise if there is no token for specific auth", () => {
@@ -502,6 +502,23 @@ describe("TokenManager", () => {
         () => done.fail("successfully refreshed the token"),
         (error: Error) => {
           expect(error.message).toEqual("Refreshing token failed");
+          done();
+        },
+        () => done.fail("completed without error"),
+      );
+    });
+
+    it("should emit an event when a request failed", async (done) => {
+      const { subject, validOptions, tokens, requestAdapterMock, dispatcherMock } = createSubject();
+      await subject.init(validOptions);
+      (subject as any).storage.setTokens("testRefresh", tokens);
+
+      (requestAdapterMock.execute as jest.Mock).mockReturnValue(throwError({ httpStatus: { code: 500 }}));
+
+      (subject as any).refresh(["testRefresh"]).subscribe(
+        () => done.fail("successfully refreshed the token"),
+        () => {
+          expect(dispatcherMock.emit).toHaveBeenCalledWith(DispatchEvents.TOKEN_REFRESH_FAILED);
           done();
         },
         () => done.fail("completed without error"),

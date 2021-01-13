@@ -287,6 +287,7 @@ export class TokenManager {
       ),
       tap(() => this.dispatcher.emit(DispatchEvents.TOKEN_REFRESH)),
       catchError(() => {
+        this.dispatcher.emit(DispatchEvents.TOKEN_REFRESH_FAILED);
         throw new Error("Refreshing token failed");
       }),
     );

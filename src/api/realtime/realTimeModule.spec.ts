@@ -12,6 +12,13 @@ import { RealTimeModule } from "./realTimeModule";
 describe("Real Time Module", () => {
 
   const shouldHaveFailed = "Should have failed!";
+  const dispatchEvents = [
+    DispatchEvents.TOKEN_LOGIN,
+    DispatchEvents.TOKEN_REFRESH,
+    DispatchEvents.UMS_LOGIN,
+    DispatchEvents.UMS_SWITCH_USER,
+    DispatchEvents.UMS_LOGOUT,
+  ];
 
   function createSubject({
     webSocketMock = createMockFor(["send", "close"]) as SpyObj<IWebSocket>,
@@ -100,7 +107,7 @@ describe("Real Time Module", () => {
   });
 
   describe("listen to system events", () => {
-    Object.values(DispatchEvents).forEach(event => {
+    dispatchEvents.forEach(event => {
       it(`should subscribe to the event ${event}`, async () => {
         const { subject, dispatcherMock, injectorMock } = createSubject();
 
@@ -378,7 +385,7 @@ describe("Real Time Module", () => {
         webSocketMock.onclose({});
       }, 100);
       await subject.terminate();
-      Object.values(DispatchEvents).forEach(
+      dispatchEvents.forEach(
         (event, key) => expect(dispatcherMock.off).toHaveBeenNthCalledWith(key + 1, event, "rtcConnect"),
       );
     });

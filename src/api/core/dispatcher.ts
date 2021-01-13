@@ -4,6 +4,7 @@ import { Injectable } from "injection-js";
 export const DispatchEvents = {
   TOKEN_LOGIN: "token:login",
   TOKEN_REFRESH: "token:refresh",
+  TOKEN_REFRESH_FAILED: "token:refreshFailed",
   UMS_LOGIN: "ums:login",
   UMS_SWITCH_USER: "ums:switchUser",
   UMS_LOGOUT: "ums:logout",
