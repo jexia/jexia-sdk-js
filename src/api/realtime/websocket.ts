@@ -16,10 +16,12 @@ import {
   SubscriptionArgument,
 } from "./realTime.interfaces";
 
+// TODO Refactor Websocket to make use of the WS from RXJS for better socket management
+
 /**
  * @internal
  */
-export const wsReadyDefer = deferPromise();
+export let wsReadyDefer = deferPromise();
 
 /**
  * @internal
@@ -93,6 +95,17 @@ export function refreshToken(webSocket: IWebSocket, getToken: IGetToken): void {
     command: RealTimeCommandTypes.JwtRefresh,
     arguments: { token },
   }));
+}
+
+/**
+ * Reset all values to initial value, so we support closing and open a new connection in one browser session
+ *
+ * @internal
+ */
+export function reset() {
+  wsReadyDefer = deferPromise();
+  responseStack.clear();
+  messageSubscriptions.clear();
 }
 
 /**
