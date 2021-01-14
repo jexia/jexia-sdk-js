@@ -28,7 +28,7 @@ export function clone<T>(o: T): T {
 }
 
 export function randomNumber(): number {
-  return Date.now() * Math.floor(Math.random() * 100);
+  return Date.now() * Math.floor(Math.random() * 10000);
 }
 
 export * from "./queryActionType";
