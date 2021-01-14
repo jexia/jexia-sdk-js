@@ -10,7 +10,7 @@ import { DeleteQuery } from "../core/queries/deleteQuery";
 import { SelectQuery } from "../core/queries/selectQuery";
 import { UpdateQuery } from "../core/queries/updateQuery";
 import { ResourceType } from "../core/resource";
-import { Dispatcher } from "../core/dispatcher";
+import { Dispatcher, DispatchEvents } from "../core/dispatcher";
 import { AuthOptions, TokenManager, Tokens } from "../core/tokenManager";
 import { UsersInterface, IUMSSignInOptions, IUMSSignUpFields, IUMOAuthInitOptions } from "./ums.types";
 import { getSignInParams } from "./ums.functions";
@@ -110,7 +110,7 @@ export class UMSModule<
         return tokens.access_token;
       }),
       switchMap(() => this.getUser(alias)),
-      tap(() => this.dispatcher.emit("umsLogin")),
+      tap(() => this.dispatcher.emit(DispatchEvents.UMS_LOGIN)),
     );
   }
 
@@ -134,7 +134,7 @@ export class UMSModule<
 
     this.currentUserObject = null;
 
-    this.dispatcher.emit("umsLogout");
+    this.dispatcher.emit(DispatchEvents.UMS_LOGOUT);
   }
 
   /**
@@ -192,7 +192,7 @@ export class UMSModule<
       throw new Error(MESSAGE.TOKEN_MANAGER.ALIAS_NOT_FOUND);
     }
 
-    this.dispatcher.emit("umsSwitchUser");
+    this.dispatcher.emit(DispatchEvents.UMS_SWITCH_USER);
 
     this.tokenManager.setDefault(alias);
   }

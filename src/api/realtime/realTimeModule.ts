@@ -5,7 +5,7 @@ import { MESSAGE, getRtcUrl } from "../../config";
 import { RequestExecuter } from "../../internal/executer";
 import { IModule, ModuleConfiguration } from "../core/module";
 import { IResource } from "../core/resource";
-import { Dispatcher } from "../core/dispatcher";
+import { Dispatcher, DispatchEvents } from "../core/dispatcher";
 import { AuthOptions, IAuthOptions, TokenManager } from "../core/tokenManager";
 import { Dataset } from "../dataops/dataset";
 import { IFormData } from "../fileops/fileops.interfaces";
@@ -142,11 +142,11 @@ export class RealTimeModule implements IModule {
     const closedConnectionPromise = this.closeConnection();
 
     // unsubscribe from the events
-    this.dispatcher.off("tokenLogin", "rtcConnect");
-    this.dispatcher.off("tokenRefresh", "rtcConnect");
-    this.dispatcher.off("umsLogin", "rtcConnect");
-    this.dispatcher.off("umsSwitchUser", "rtcConnect");
-    this.dispatcher.off("umsLogout", "rtcConnect");
+    this.dispatcher.off(DispatchEvents.TOKEN_LOGIN, "rtcConnect");
+    this.dispatcher.off(DispatchEvents.TOKEN_REFRESH, "rtcConnect");
+    this.dispatcher.off(DispatchEvents.UMS_LOGIN, "rtcConnect");
+    this.dispatcher.off(DispatchEvents.UMS_SWITCH_USER, "rtcConnect");
+    this.dispatcher.off(DispatchEvents.UMS_LOGOUT, "rtcConnect");
 
     return closedConnectionPromise;
   }
@@ -158,7 +158,7 @@ export class RealTimeModule implements IModule {
    */
   private listenToEvents(): void {
     // Listing to the event when the tokenManger did login via jexiaClient().init() with the given keys
-    this.dispatcher.on("tokenLogin", "rtcConnect", async () => {
+    this.dispatcher.on(DispatchEvents.TOKEN_LOGIN, "rtcConnect", async () => {
       if(!this.websocket) {
         this.tokensGivenOnInit = true;
         await this.connect();
@@ -166,14 +166,14 @@ export class RealTimeModule implements IModule {
     });
 
     // Listing to the event when the TokenManager did a refresh
-    this.dispatcher.on("tokenRefresh", "rtcConnect", async () => {
+    this.dispatcher.on(DispatchEvents.TOKEN_REFRESH, "rtcConnect", async () => {
       if(this.websocket) {
         this.refreshToken();
       }
     });
 
     // Listing to the event when the UMS did a login
-    this.dispatcher.on("umsLogin", "rtcConnect", async () => {
+    this.dispatcher.on(DispatchEvents.UMS_LOGIN, "rtcConnect", async () => {
       this.throwUmsErrorIfNeeded();
 
       if(this.websocket) {
@@ -186,7 +186,7 @@ export class RealTimeModule implements IModule {
     });
 
     // Listing to the event when the UMS did a switch between users
-    this.dispatcher.on("umsSwitchUser", "rtcConnect", async () => {
+    this.dispatcher.on(DispatchEvents.UMS_SWITCH_USER, "rtcConnect", async () => {
       this.throwUmsErrorIfNeeded();
 
       if(this.websocket) {
@@ -195,7 +195,7 @@ export class RealTimeModule implements IModule {
     });
 
     // Listing to the event when the UMS did a logout
-    this.dispatcher.on("umsLogout", "rtcConnect", async () => {
+    this.dispatcher.on(DispatchEvents.UMS_LOGOUT, "rtcConnect", async () => {
       this.throwUmsErrorIfNeeded();
 
       await this.closeConnection();

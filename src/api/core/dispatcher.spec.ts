@@ -1,10 +1,12 @@
 // tslint:disable:no-string-literal
 import * as faker from "faker";
-import { Dispatcher } from "./dispatcher";
+import { Dispatcher, DispatchEvents, DispatchEventsType } from "./dispatcher";
+
+const randomEvent = () => faker.random.arrayElement(Object.values(DispatchEvents));
 
 describe("Dispatcher", () => {
   function createSubject({
-    event = faker.random.word(),
+    event = randomEvent(),
     alias = faker.random.word(),
     // tslint:disable-next-line:no-empty
     listener = () => {},
@@ -44,7 +46,7 @@ describe("Dispatcher", () => {
 
     it("should do nothing when an invalid event is given", () => {
       const { subject, alias, event } = createSubject();
-      const invalidEvent = faker.random.word();
+      const invalidEvent = faker.random.word() as DispatchEventsType;
 
       subject.off(invalidEvent, alias);
 
@@ -65,7 +67,7 @@ describe("Dispatcher", () => {
     it("should NOT emit when an invalid event is given", () => {
       const listener = jest.fn();
       const { subject } = createSubject({ listener });
-      const event = faker.random.word();
+      const event = faker.random.word() as DispatchEventsType;
 
       subject.emit(event);
 

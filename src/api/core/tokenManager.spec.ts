@@ -5,7 +5,7 @@ import { MESSAGE, getProjectId, APIKEY_DEFAULT_ALIAS } from "../../config";
 import { RequestAdapter, RequestMethod } from "../../internal/requestAdapter";
 import { Logger } from "../logger/logger";
 import { TokenManager, Tokens } from "./tokenManager";
-import { Dispatcher } from "./dispatcher";
+import { Dispatcher, DispatchEvents } from "./dispatcher";
 import { createTestToken } from "../../../spec/token";
 
 let terminate: () => void;
@@ -117,7 +117,7 @@ describe("TokenManager", () => {
     it("should dispatch an event", async () => {
       const { subject, dispatcherMock, validOptions } = createSubject();
       await subject.init(validOptions);
-      expect(dispatcherMock.emit).toHaveBeenCalledWith("tokenLogin");
+      expect(dispatcherMock.emit).toHaveBeenCalledWith(DispatchEvents.TOKEN_LOGIN);
     });
   });
 
@@ -477,7 +477,7 @@ describe("TokenManager", () => {
       const { subject, validOptions, dispatcherMock } = createSubject();
       await subject.init(validOptions);
       await (subject as any).refresh().toPromise();
-      expect(dispatcherMock.emit).toHaveBeenNthCalledWith(2, "tokenRefresh");
+      expect(dispatcherMock.emit).toHaveBeenCalledWith(DispatchEvents.TOKEN_REFRESH);
     });
 
     it("should reject promise if there is no token for specific auth", () => {
@@ -502,6 +502,23 @@ describe("TokenManager", () => {
         () => done.fail("successfully refreshed the token"),
         (error: Error) => {
           expect(error.message).toEqual("Refreshing token failed");
+          done();
+        },
+        () => done.fail("completed without error"),
+      );
+    });
+
+    it("should emit an event when a request failed", async (done) => {
+      const { subject, validOptions, tokens, requestAdapterMock, dispatcherMock } = createSubject();
+      await subject.init(validOptions);
+      (subject as any).storage.setTokens("testRefresh", tokens);
+
+      (requestAdapterMock.execute as jest.Mock).mockReturnValue(throwError({ httpStatus: { code: 500 }}));
+
+      (subject as any).refresh(["testRefresh"]).subscribe(
+        () => done.fail("successfully refreshed the token"),
+        () => {
+          expect(dispatcherMock.emit).toHaveBeenCalledWith(DispatchEvents.TOKEN_REFRESH_FAILED);
           done();
         },
         () => done.fail("completed without error"),

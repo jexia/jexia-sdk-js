@@ -27,6 +27,10 @@ export function clone<T>(o: T): T {
   return Object.assign(Object.create(Object.getPrototypeOf(o)), o);
 }
 
+export function randomNumber(): number {
+  return Date.now() * Math.floor(Math.random() * 10000);
+}
+
 export * from "./queryActionType";
 export * from "./queryParam";
 export * from "./token";
