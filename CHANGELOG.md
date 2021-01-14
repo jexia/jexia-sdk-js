@@ -1,3 +1,15 @@
+# [5.11.0](https://github.com/jexia/jexia-sdk-js/compare/v5.10.3...v5.11.0) (2021-01-14)
+
+
+### Bug Fixes
+
+* **rtc:** open-close-open will fail to send new messages ([#204](https://github.com/jexia/jexia-sdk-js/issues/204)) ([7fedf94](https://github.com/jexia/jexia-sdk-js/commit/7fedf94b70e8b6e4f0c54d7d3174d209dff5b126))
+
+
+### Features
+
+* **dispatcher:** expose .on method to the client ([#203](https://github.com/jexia/jexia-sdk-js/issues/203)) ([d9a5c3e](https://github.com/jexia/jexia-sdk-js/commit/d9a5c3ee3a2a0b1791f4c99d83f2f5be7fe29fcd))
+
 ## [5.10.3](https://github.com/jexia/jexia-sdk-js/compare/v5.10.2...v5.10.3) (2021-01-12)
 
 
