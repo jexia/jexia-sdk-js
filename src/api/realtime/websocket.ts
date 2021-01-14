@@ -98,7 +98,7 @@ export function refreshToken(webSocket: IWebSocket, getToken: IGetToken): void {
 }
 
 /**
- * Reset all values to initial value, so we support closing and open a new connection in one browser session
+ * Reset all properties to their initial values, so we support closing and open a new connection in one browser session
  *
  * @internal
  */
