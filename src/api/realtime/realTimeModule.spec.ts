@@ -334,6 +334,65 @@ describe("Real Time Module", () => {
     });
   });
 
+  describe("when closing a connection", () => {
+    it("should resolve the promise immediately if the websocket object does not exists", async () => {
+      const { subject, webSocketMock } = createSubject();
+      await (subject as any).closeConnection();
+      expect(webSocketMock.close).not.toHaveBeenCalled();
+    });
+
+    it("should resolve the promise immediately if the websocket is closed already", async () => {
+      const { subject, webSocketMock, moduleConnect } = createSubject();
+      await moduleConnect();
+      (webSocketMock as any).readyState = WebSocketState.CLOSED;
+      await (subject as any).closeConnection();
+      expect(webSocketMock.close).not.toHaveBeenCalled();
+    });
+
+    it("should resolve the promise only after the websocket close event", async () => {
+      const { subject, webSocketMock, moduleConnect } = createSubject();
+      await moduleConnect();
+      let oncloseEvent = false;
+      setTimeout(() => {
+        webSocketMock.onclose({});
+        oncloseEvent = true;
+      }, 100);
+      await (subject as any).closeConnection().then(() => {
+        expect(oncloseEvent).toBeTruthy();
+        expect(webSocketMock.close).toHaveBeenCalled();
+      });
+    });
+
+    it("should reset the websocket to initial state", async () => {
+      const { subject, webSocketMock, moduleConnect } = createSubject();
+      const websocket = require("./websocket");
+      spyOn(websocket, "reset");
+
+      setTimeout(() => {
+        webSocketMock.onclose({});
+      }, 100);
+
+      await moduleConnect();
+      await (subject as any).closeConnection().then(() => {
+        expect(websocket.reset).toHaveBeenCalled();
+      });
+    });
+
+    it("should reject the promise when the websocket has an error event", async () => {
+      const { subject, webSocketMock, moduleConnect } = createSubject();
+      await moduleConnect();
+      const webSocketError = "webSocketError";
+      webSocketMock.close.mockImplementation(() => webSocketMock.onerror(webSocketError));
+      try {
+        await (subject as any).closeConnection();
+        throw new Error(shouldHaveFailed);
+      } catch (error) {
+        expect(error).toBe(webSocketError);
+      }
+    });
+
+  });
+
   describe("when terminating", () => {
     it("should resolve the terminating promise immediately if the websocket object does not exists", async () => {
       const { subject, webSocketMock } = createSubject();
@@ -349,31 +408,13 @@ describe("Real Time Module", () => {
       expect(webSocketMock.close).not.toHaveBeenCalled();
     });
 
-    it("should resolve the terminating promise only after the websocket close event", async () => {
-      const { subject, webSocketMock, moduleConnect } = createSubject();
-      await moduleConnect();
-      let oncloseEvent = false;
-      setTimeout(() => {
-        webSocketMock.onclose({});
-        oncloseEvent = true;
-      }, 100);
-      await subject.terminate().then(() => {
-        expect(oncloseEvent).toBeTruthy();
-        expect(webSocketMock.close).toHaveBeenCalledWith();
-      });
-    });
+    it("should close the connection", async () => {
+      const { subject, moduleConnect } = createSubject();
+      spyOn((subject as any), "closeConnection");
 
-    it("should reject the terminating promise when the websocket has an error event", async () => {
-      const { subject, webSocketMock, moduleConnect } = createSubject();
       await moduleConnect();
-      const webSocketError = "webSocketError";
-      webSocketMock.close.mockImplementation(() => webSocketMock.onerror(webSocketError));
-      try {
-        await subject.terminate();
-        throw new Error(shouldHaveFailed);
-      } catch (error) {
-        expect(error).toBe(webSocketError);
-      }
+      subject.terminate();
+      expect((subject as any).closeConnection).toHaveBeenCalled();
     });
 
     it("should unsubscribe from the Dispatcher events", async () => {

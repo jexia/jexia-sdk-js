@@ -266,7 +266,10 @@ export class RealTimeModule implements IModule {
 
     // close the websocket connection
     return new Promise((resolve, reject) => {
-      this.websocket.onclose = () => resolve(this);
+      this.websocket.onclose = () => {
+        websocket.reset();
+        return resolve(this);
+      };
       this.websocket.onerror = (err) => reject(err);
       this.websocket.close();
       this.websocket = undefined as unknown as IWebSocket;
