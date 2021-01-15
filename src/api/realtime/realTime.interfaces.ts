@@ -4,6 +4,7 @@
  * WebSocket states from `readyState`
  */
 import { ResourceType } from "../core/resource";
+import { Observer } from "rxjs";
 
 export enum WebSocketState {
   CONNECTING = 0,
@@ -39,7 +40,7 @@ export interface IWebSocket {
   /**
    * `close` from WebSocket
    */
-  close(): void;
+  close(code?: number): void;
   /**
    * `send` from WebSocket
    */
@@ -101,6 +102,16 @@ export interface RealTimeEventMessage<T = any> {
    * Event data, interface depends on configuration and resource
    */
   data: T;
+}
+
+/**
+ * Real time command stack
+ */
+export interface RealTimeCommandStack {
+  events: EventSubscriptionType[];
+  setName: string;
+  setType: ResourceType;
+  observer: Observer<RealTimeEventMessage>;
 }
 
 /**

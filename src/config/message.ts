@@ -11,7 +11,7 @@ export const MESSAGE = {
     BAD_EVENT_SUBSCRIPTION_TYPE: "One or more of the given event subscription types are invalid",
     BAD_WEBSOCKET_CREATION_CALLBACK: "The websocket creation function you supplied did not return a valid websocket object.",
     CONNECTION_CLOSED: "The connection to the Jexia real-time service was closed. Message code:",
-    CONNECTION_FAILED: "We could not establish a connection to the Jexia real-time service.",
+    CONNECTION_FAILED: "We could not establish a connection to the Jexia real-time service. We'll try again in 10 seconds",
     ERROR_CREATING_WEBSOCKET: "The callback you supplied for websocket creation threw an error. You might want to call it yourself and debug it to see what's wrong.",
     EXCEPTION_IN_CLIENT_CALLBACK: "There was an exception thrown in the callback you defined for real-time messages. The original error is: ",
     NOT_OPEN_ERROR: "not opened",

@@ -9,6 +9,7 @@ import {
   PublishArgument,
   RealTimeCommand,
   RealTimeCommandResponse,
+  RealTimeCommandStack,
   RealTimeCommandTypes,
   RealTimeEventMessage,
   RealTimeMessage,
@@ -34,6 +35,12 @@ const responseStack = new Map<string, (response: RealTimeCommandResponse) => voi
 const messageSubscriptions = new Map<string, Array<Observer<RealTimeEventMessage>>>();
 
 /**
+ * Cache commands that where send to the socket
+ * @internal
+ */
+export const commandStack = new Set<RealTimeCommandStack>();
+
+/**
  * @internal
  */
 export const allEvents: ReadonlyArray<EventSubscriptionType> =
@@ -47,7 +54,12 @@ type IGetToken = () => Promise<string>;
 /**
  * @internal
  */
-export function start(webSocket: IWebSocket, getToken: IGetToken) {
+export function start(webSocket: IWebSocket, getToken: IGetToken, reconnection = false) {
+
+  // If reconnection, reset the websocket to initial state
+  if(reconnection) {
+    reset();
+  }
 
   webSocket.onmessage = (message: { data: string }): void => {
     let realTimeMessage: RealTimeMessage;
@@ -81,6 +93,13 @@ export function start(webSocket: IWebSocket, getToken: IGetToken) {
         refreshToken(webSocket, getToken);
     }
   };
+
+  // if reconnection, send the commands that where cached before
+  if(reconnection) {
+    commandStack.forEach(({events, setName, setType, observer}) => {
+      subscribeEventMessage(webSocket, events, setName, setType, observer, false);
+    });
+  }
 
   wsReadyDefer.resolve();
 }
@@ -117,7 +136,17 @@ export function subscribeEventMessage(
   setName: string,
   setType: ResourceType,
   observer: Observer<RealTimeEventMessage>,
+  saveCommand = true,
 ): Promise<RealTimeCommandResponse | void> {
+  if(saveCommand) {
+    commandStack.add({
+      events,
+      setName,
+      setType,
+      observer,
+    });
+  }
+
   let subscriptionEvents = events.includes("all") ? [...allEvents] : events;
   subscriptionEvents = subscriptionEvents.filter((action) => {
     const subscriptionKey = JSON.stringify(buildSubscriptionArgument([action], setName, setType));
