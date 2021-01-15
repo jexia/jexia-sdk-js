@@ -253,7 +253,7 @@ export class RealTimeModule implements IModule {
 
       RTCResources.forEach((resource) => resource.prototype.webSocket = this.websocket);
 
-      // listen to onclose event en check if if we need to reconnect
+      // listen to onclose event and check it's needed to reconnect
       this.websocket.onclose = (error) => this.reconnect(error);
 
       return new Promise((resolve, reject) => {
