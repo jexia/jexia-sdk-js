@@ -16,6 +16,11 @@ import { watch } from "./watch";
 import * as websocket from "./websocket";
 
 /**
+ * Custom even code that got send when we close the connection
+ */
+export const customEventCode = 4999;
+
+/**
  * List of resources that will be extended by RTC module
  * by providing a watch() method to their prototypes
  */
@@ -270,7 +275,7 @@ export class RealTimeModule implements IModule {
    * @internal
    */
   private reconnect(event: CloseEvent) {
-    if (event instanceof CloseEvent && event.code !== 4999) {
+    if (event instanceof CloseEvent && event.code !== customEventCode) {
       this.websocket = undefined as unknown as IWebSocket;
       setTimeout(() => this.connect(true), this.reconnectTimeout);
     }
@@ -295,7 +300,7 @@ export class RealTimeModule implements IModule {
       };
       this.websocket.onerror = (err) => reject(err);
       // send custom status code to avoid reconnecting on this close event
-      this.websocket.close(4999);
+      this.websocket.close(customEventCode);
       this.websocket = undefined as unknown as IWebSocket;
     });
   }

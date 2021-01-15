@@ -7,7 +7,7 @@ import { MESSAGE, getRtcUrl } from "../../config";
 import { AuthOptions, TokenManager } from "../core/tokenManager";
 import { Dispatcher, DispatchEvents } from "../core/dispatcher";
 import { IWebSocket, WebSocketState } from "./realTime.interfaces";
-import { RealTimeModule } from "./realTimeModule";
+import {customEventCode, RealTimeModule} from "./realTimeModule";
 
 describe("Real Time Module", () => {
 
@@ -358,9 +358,9 @@ describe("Real Time Module", () => {
       }, 0);
     });
 
-    it("should do nothing when having custom status code 4999", () => {
+    it("should do nothing when having custom status code", () => {
       const { subject } = createSubject();
-      const closeEvent = new CloseEvent("error", { code: 4999 });
+      const closeEvent = new CloseEvent("error", { code: customEventCode });
       spyOn((subject as any), "connect");
 
       (subject as any).reconnect(closeEvent);
