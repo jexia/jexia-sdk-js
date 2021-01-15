@@ -265,7 +265,7 @@ export class RealTimeModule implements IModule {
   }
 
   /**
-   * Reconnect the websocket if it got closed unexpected
+   * Reconnect the websocket when it got unexpectedly closed
    *
    * @internal
    */
