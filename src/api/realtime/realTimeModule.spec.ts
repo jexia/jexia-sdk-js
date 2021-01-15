@@ -7,7 +7,7 @@ import { MESSAGE, getRtcUrl } from "../../config";
 import { AuthOptions, TokenManager } from "../core/tokenManager";
 import { Dispatcher, DispatchEvents } from "../core/dispatcher";
 import { IWebSocket, WebSocketState } from "./realTime.interfaces";
-import {customEventCode, RealTimeModule} from "./realTimeModule";
+import { customEventCode, RealTimeModule } from "./realTimeModule";
 
 describe("Real Time Module", () => {
 
