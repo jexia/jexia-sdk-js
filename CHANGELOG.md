@@ -1,3 +1,10 @@
+# [5.12.0](https://github.com/jexia/jexia-sdk-js/compare/v5.11.0...v5.12.0) (2021-03-05)
+
+
+### Features
+
+* **rtc:** reconnect when connection got closed ([#205](https://github.com/jexia/jexia-sdk-js/issues/205)) ([1773ff5](https://github.com/jexia/jexia-sdk-js/commit/1773ff5a1fac2d04dc1a96783613eff956a44e1c))
+
 # [5.11.0](https://github.com/jexia/jexia-sdk-js/compare/v5.10.3...v5.11.0) (2021-01-14)
 
 
