@@ -16,6 +16,11 @@ import { watch } from "./watch";
 import * as websocket from "./websocket";
 
 /**
+ * Custom even code that got send when we close the connection
+ */
+export const customEventCode = 4999;
+
+/**
  * List of resources that will be extended by RTC module
  * by providing a watch() method to their prototypes
  */
@@ -67,6 +72,9 @@ export class RealTimeModule implements IModule {
 
   /* marker for when the tokens are given in the jexiaClient().init() */
   private tokensGivenOnInit = false;
+
+  /* reconnect timer, 10 sec */
+  private reconnectTimeout = 1000 * 10;
 
   /**
    * @internal
@@ -227,13 +235,13 @@ export class RealTimeModule implements IModule {
    *
    * @internal
    */
-  private connect(): Promise<this> {
+  private connect(reconnection = false): Promise<void> {
     const config = this.injector.get(AuthOptions) as IAuthOptions;
 
     // avoid 2 open connections
     // TODO add logging when not using production mode
     if (this.websocket) {
-      return Promise.resolve(this);
+      return Promise.resolve();
     }
 
     // TODO Get rid of promises
@@ -250,15 +258,35 @@ export class RealTimeModule implements IModule {
 
       RTCResources.forEach((resource) => resource.prototype.webSocket = this.websocket);
 
+      // listen to onclose event and check it's needed to reconnect
+      this.websocket.onclose = (error) => this.reconnect(error);
+
       return new Promise((resolve, reject) => {
         this.websocket.onopen = resolve;
         this.websocket.onerror = () => reject(new Error(MESSAGE.RTC.CONNECTION_FAILED));
       });
     })
-      .then(() => websocket.start(this.websocket, () => this.tokenManager.token().toPromise()))
-      .then(() => this);
+      .then(() => websocket.start(this.websocket, () => this.tokenManager.token().toPromise(), reconnection));
   }
 
+  /**
+   * Reconnect the websocket when it got unexpectedly closed
+   *
+   * @internal
+   */
+  private reconnect(event: CloseEvent) {
+    if (event instanceof CloseEvent && event.code !== customEventCode) {
+      this.websocket = undefined as unknown as IWebSocket;
+      setTimeout(() => this.connect(true), this.reconnectTimeout);
+    }
+  }
+
+  /**
+   * Close only the websocket connection and send a custom status code
+   * so we can identify that this close is intended
+   *
+   * @internal
+   */
   private closeConnection(): Promise<this> {
     if (!this.websocket || this.websocket.readyState === WebSocketState.CLOSED) {
       return Promise.resolve(this);
@@ -271,7 +299,8 @@ export class RealTimeModule implements IModule {
         return resolve(this);
       };
       this.websocket.onerror = (err) => reject(err);
-      this.websocket.close();
+      // send custom status code to avoid reconnecting on this close event
+      this.websocket.close(customEventCode);
       this.websocket = undefined as unknown as IWebSocket;
     });
   }

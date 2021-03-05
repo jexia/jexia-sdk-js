@@ -7,7 +7,7 @@ import { MESSAGE, getRtcUrl } from "../../config";
 import { AuthOptions, TokenManager } from "../core/tokenManager";
 import { Dispatcher, DispatchEvents } from "../core/dispatcher";
 import { IWebSocket, WebSocketState } from "./realTime.interfaces";
-import { RealTimeModule } from "./realTimeModule";
+import { customEventCode, RealTimeModule } from "./realTimeModule";
 
 describe("Real Time Module", () => {
 
@@ -245,7 +245,7 @@ describe("Real Time Module", () => {
       const websocket = require("./websocket");
       spyOn(websocket, "start");
       await moduleConnect();
-      expect(websocket.start).toHaveBeenCalledWith(webSocketMock, jasmine.any(Function));
+      expect(websocket.start).toHaveBeenCalledWith(webSocketMock, jasmine.any(Function), false);
       const token = (websocket.start as jasmine.Spy).calls.mostRecent().args[1]();
       expect(token).toStrictEqual(tokenManagerMock.token().toPromise());
     });
@@ -331,6 +331,40 @@ describe("Real Time Module", () => {
     it("should return an empty config", () => {
       const { subject } = createSubject();
       expect(subject.getConfig()).toEqual({ rtc: {} });
+    });
+  });
+
+  describe("reconnection", () => {
+    it("should reset the websocket",  () => {
+      const { subject } = createSubject();
+      const closeEvent = new CloseEvent("error");
+      (subject as any).reconnect(closeEvent);
+      expect((subject as any).websocket).toBeUndefined();
+    });
+
+    it("should call .connect() to reconnect", async (done) => {
+      const { injectorMock, subject } = createSubject();
+      await subject.init(injectorMock);
+      const closeEvent = new CloseEvent("error", { code: 1006 });
+      spyOn((subject as any), "connect");
+
+      (subject as any).reconnectTimeout = 0; // set timeout to zero
+      (subject as any).reconnect(closeEvent);
+
+      // set the test at the end of the JS queue
+      setTimeout(() => {
+        expect((subject as any).connect).toHaveBeenCalledWith(true);
+        done();
+      }, 0);
+    });
+
+    it("should do nothing when having custom status code", () => {
+      const { subject } = createSubject();
+      const closeEvent = new CloseEvent("error", { code: customEventCode });
+      spyOn((subject as any), "connect");
+
+      (subject as any).reconnect(closeEvent);
+      expect((subject as any).connect).not.toHaveBeenCalled();
     });
   });
 
